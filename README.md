@@ -1,7 +1,7 @@
 # PARI
-Privacy Preserving Payment Anonymous Regulatory Insights(PARI)
-https://nlnet.nl/taler/
-2025 Copyright Beta ORI Canada Inc. Awase Khirni Syed All Rights Reserved.
+#Privacy Preserving Payment Anonymous Regulatory Insights(PARI)
+#https://nlnet.nl/taler/
+#2025 Copyright Beta ORI Canada Inc. Awase Khirni Syed All Rights Reserved.
 
 Introduction
 
