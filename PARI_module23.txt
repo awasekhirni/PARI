@@ -1,0 +1,458 @@
+
+
+23.	Module M23	Community Governance & FOSS Contribution Hub
+a.	Summary
+the Community Governance & FOSS Contribution Hub, serves as the critical enterprise-grade interface between the open-source ecosystem and the rigorous, highly regulated core of the PARI payment infrastructure. As PARI is built on Free and Open Source Software (FOSS) principles—specifically AGPLv3+—it relies heavily on community innovation to drive feature expansion, bug fixes, and adaptability. However, unlike typical open-source projects where contributions can be merged with relative liberty, PARI operates within a high-stakes financial environment demanding CMMI Level 5 maturity, banking-grade security, and strict regulatory compliance (GDPR, PSD3, ISO 20022). Module M23 acts as the "CMMI-gated intake" mechanism, a sophisticated workflow engine that bridges the gap between the chaotic creativity of the crowd and the disciplined precision required for a financial transaction system.
+
+At its core, Module M23 implements a comprehensive, automated, and transparent contribution lifecycle. It is not merely a GitHub repository wrapper; it is a comprehensive governance platform that integrates deeply with PARI’s CI/CD pipelines, threat modeling frameworks, and database governance layers. When a contributor submits code, M23 triggers a cascade of quantitative validation gates. These include static application security testing (SAST), dynamic analysis (DAST), software composition analysis (SCA) for license compliance and vulnerabilities (SBOM generation), and rigorous schema validation checks to ensure any database modifications (e.g., to the 63 core tables) adhere to PARI’s strict ANSI-SQL and partitioning standards.
+
+A key differentiator of Module M23 is its integration of CMMI Level 5 optimizing processes. The module utilizes AI-driven code review assistants to perform preliminary architectural alignment checks, ensuring that a new feature does not violate the "Privacy-by-Design" tenets or inadvertently introduce coupling between the anonymous Wallet layer and the identifiable Merchant layer. It enforces "Defect Prevention" by requiring contributors to generate and update relevant documentation, test cases, and threat models before the code is even considered for human review. The module incorporates a sophisticated "Contributor Reputation" system, gamifying the adherence to quality standards while identifying trusted committers who can fast-track non-critical patches.
+
+Furthermore, M23 manages the legal and licensing intricacies of the FOSS model. It automates the Developer Certificate of Origin (DCO) verification and manages Contributor License Agreements (CLAs), ensuring that the intellectual property remains legally defensible for enterprise adoption by banks and governments. The module provides real-time feedback to contributors, offering a transparent view of where their submission sits in the queue—whether it is failing unit tests, violating ISO 20022 schema rules, or awaiting manual security sign-off.
+
+By automating the "compliance friction," M23 allows the PARI foundation to scale its open-source community without sacrificing the stability required for production financial infrastructures. It transforms the contribution process from a manual, error-prone bottleneck into a streamlined, quantitatively managed pipeline. This ensures that every line of code merged into the main branch—whether from a hobbyist developer or a core engineer—meets the exacting standards of security, auditability, and performance required to power the world's most advanced privacy-preserving payment system. Ultimately, Module M23 safeguards the integrity of the PARI ecosystem, ensuring that open collaboration remains the engine of innovation rather than a source of liability or technical debt.
+b.	Scope
+
+Module M23 encompasses the entire software development lifecycle (SDLC) governance for external contributions to the PARI ecosystem.
+
+     Ingestion & Triaging: Automated reception of Pull Requests (PRs), issue tracking, and initial sanity checks.
+     Automated Quality Gates: Integration with CI/CD pipelines for unit testing, integration testing, code coverage (target >95%), and static analysis.
+     Security & Compliance: Automated threat modeling updates, SCA (Software Composition Analysis), SBOM generation, and secret scanning.
+     Database Governance: Validation of SQL migration scripts, ensuring idempotency and adherence to the Data Dictionary.
+     Architecture Enforcement: Verification that changes align with the modular microservices architecture and do not violate regulatory privacy constraints.
+     Community Management: Contributor identity verification (eIDAS integration optional), reputation scoring, and governance voting mechanisms.
+     Documentation & Knowledge: Synchronization of code changes with technical documentation and API specs (OpenAPI).
+
+c.	Business Case
+The primary business driver for Module M23 is the reduction of Total Cost of Ownership (TCO) and acceleration of innovation through "Safe Open Source." Financial institutions are often wary of adopting FOSS due to the perceived risks of unvetted code, lack of liability, and potential security vulnerabilities (e.g., supply chain attacks). By implementing an enterprise-grade, CMMI Level 5 governed contribution hub, PARI mitigates these risks. This allows banks and governments to adopt PARI with the confidence that every external contribution has undergone rigorous validation equivalent to internal proprietary development. Additionally, by automating the vetting process, PARI can tap into a global talent pool of developers without proportionally increasing the internal QA overhead, thus speeding up feature delivery (e.g., new regulatory adapters) while maintaining the highest quality standards.
+d.	KPIs
+     Contribution Merge Rate: Percentage of submitted PRs successfully merged (Target: Balanced for quality).
+     Mean Time to Merge (MTTM): Average time from PR submission to merge for approved contributions.
+     Defect Escape Rate: Percentage of bugs found in production originating from community contributions (Target: <0.05%).
+     False Positive Rejection Rate: Percentage of valid contributions incorrectly rejected by automated gates.
+     Community Velocity: Number of active contributors and commits per month.
+     Security Remediation Time: Time taken to address critical vulnerabilities identified in dependencies.
+     Test Coverage Retention: Maintenance of >95% code coverage post-merge.
+
+e.	Stakeholder Insights
+
+Stakeholder	Concern	Implications
+FOSS Developers	High friction and complex bureaucracy prevent contributions.	M23 must provide automated, fast feedback loops and clear documentation to prevent abandonment.
+PARI Core Engineers	Low-quality code increases maintenance burden and technical debt.	Strict automated gates and architectural reviews are mandatory before human review.
+CISO / Security Team	Supply chain attacks and malicious code injection via PRs.	Mandatory SCA, SBOM verification, and automated secret scanning on every PR.
+Regulatory Auditors	Inability to trace who changed what and why in the financial ledger.	Immutable audit trails of all code changes, linked to specific verified identities (DCO).
+Product Management	Community builds features that deviate from the product roadmap.	Feature proposal boards and architectural alignment checks to prevent scope creep.
+Legal / Compliance	IP contamination through incompatible open-source licenses.	Automated license scanning and CLA/DCO enforcement.
+
+f.	Knowledge Representation Graph (mermaid.js)
+
+graph TD
+    subgraph "External Inputs"
+        Dev[FOSS Developer]
+        Org[Partner Organization]
+    end
+
+    subgraph "Module M23: Governance Hub"
+        Portal[Contribution Portal]
+        CI[CI/CD Pipeline Orchestrator]
+        QA[Quality Gates Engine]
+        Sec[Security & Threat Scanning]
+        Arch[Architecture & DB Validator]
+        Vote[Community Voting]
+        Core[Core Maintainer Dashboard]
+    end
+
+    subgraph "PARI Core System"
+        Repo[Source Code Repository]
+        Docs[API Documentation]
+        DB[(PostgreSQL Schema Registry)]
+        Prod[Production Environment]
+    end
+
+    Dev -->|Submit PR| Portal
+    Portal -->|Trigger| CI
+    CI -->|Run Tests| QA
+    QA -->|Static Analysis| Sec
+    CI -->|Schema Diff| Arch
+
+    Sec -->|SBOM Check| Repo
+    Arch -->|Validate vs Dict| DB
+
+    QA -->|Auto-Approve| Vote
+    Vote -->|Review| Core
+    Core -->|Merge| Repo
+
+    Repo -->|Update| Docs
+    Repo -->|Deploy| Prod
+
+    style Portal fill:#f9f,stroke:#333,stroke-width:2px
+    style Sec fill:#bbf,stroke:#333,stroke-width:2px
+    style Arch fill:#bfb,stroke:#333,stroke-width:2px
+
+g.	Comprehensive List of Features
+
+id	Feature	Description	Business Case	AI/ML Algorithms	KPIs	Primary Users
+1	Automated PR Triage Bot	Automatically labels incoming Pull Requests based on file paths and content type.	Reduces manual sorting effort by maintainers.	Naive Bayes Text Classification	Triage Accuracy > 95%	Maintainers
+2	DCO Enforcement Bot	Ensures every commit is signed-off using git commit -s, verifying legal provenance.	Protects against IP litigation.	N/A	Compliance Rate 100%	Legal, Maintainers
+3	CLA Management System	Integrates with CLA assistants to ensure contributors have signed agreements.	Corporate participation requires legal coverage.	N/A	CLA Coverage 100%	Legal Managers
+4	Static Application Security Testing (SAST)	Runs tools like SonarQube/Semgrep on every PR to detect code smells/vulnerabilities.	Catches bugs early (Shift Left).	Pattern Matching	Defect Density < 0.1/KLOC	Developers
+5	Software Composition Analysis (SCA)	Scans dependencies for known CVEs and license incompatibilities.	Prevents supply chain attacks (e.g., Log4j).	Vulnerability DB Matching	Zero Critical CVEs	Security Teams
+6	Idempotent SQL Script Checker	Validates that DB migration scripts can run multiple times without error.	Prevents deployment failures.	SQL Parsing AST	Script Pass Rate > 99%	DBAs
+7	ISO 20022 Schema Validator	Ensures any XML/JSON message changes adhere to ISO 20022 XSD/JSON schemas.	Guarantees banking interoperability.	Schema Validation Engine	Interoperability Score 100%	Integration Specialists
+8	Automated Unit Test Execution	Runs full unit test suite on every commit.	Ensures new code doesn't break existing logic.	N/A	Test Pass Rate > 99%	Developers
+9	Code Coverage Gatekeeper	Blocks PRs that drop global code coverage below 95%.	Maintains high software quality.	Dynamic Instrumentation	Coverage Maintenance > 95%	QA Leads
+10	Architecture Decision Record (ADR) Linker	Requires linking to an ADR for significant design changes.	Maintains architectural traceability.	N/A	ADR Linkage Rate 100%	Architects
+11	Secret Scanning Engine	Scans code for accidentally committed API keys or passwords.	Prevents security leaks.	Regex & Entropy Analysis	Leak Rate 0	DevSecOps
+12	Dependency Pinning Enforcer	Ensures package.json/pom.xml uses exact versions or locked ranges.	Ensures reproducible builds.	Semantic Versioning Analysis	Reproducibility Score 100%	Release Engineers
+13	Blind Signature Integration Tester	Automated tests specifically for Chaumian blind signature protocols.	Critical core functionality validation.	N/A	Crypto Test Success 100%	Cryptographers
+14	Privacy Impact Assessment (PIA) Checklist	Interactive checklist for contributors dealing with PII data.	Ensures GDPR compliance.	N/A	PIA Completion 100%	DPOs, Developers
+15	Contributor Reputation Scoring	Algorithmic score based on accepted PRs and code quality.	Identifies trusted contributors for fast-tracking.	Weighted Moving Average	Score Correlation with Quality	Community Managers
+16	Smart Contract Linter	If applicable, validates any smart contract code for security patterns.	Secures blockchain bridge components.	Static Analysis	Linter Warnings = 0	Solidity Developers
+17	Microservices API Compatibility Check	Detects breaking changes in OpenAPI specs between versions.	Prevents runtime integration errors.	Diff Algorithm	Breaking Change Detection 100%	API Owners
+18	Docker Image Layer Analyzer	Optimizes Dockerfiles for size and security in PRs.	Reduces attack surface and deployment cost.	Layer Heuristics	Image Size Reduction	DevOps
+19	Markdown Linter	Enforces consistent documentation style (README, docs).	Improves readability and maintenance.	N/A	Style Violations < 5	Tech Writers
+20	License Header Injector	Automatically inserts AGPLv3+ headers to new source files.	Ensures legal compliance.	N/A	Header Compliance 100%	Legal
+21	Kubernetes Manifest Validator	Validates K8s YAML specs against cluster schema.	Prevents deployment infrastructure errors.	Schema Validation	Manifest Validity 100%	Platform Engineers
+22	Merge Queue Automation	Serializes merges to prevent test flakes in trunk-based development.	Stabilizes main branch.	Queueing Theory	Merge Conflict Rate < 1%	Maintainers
+23	Comment Sentiment Analysis	Monitors PR comments for toxicity.	Maintains a healthy community environment.	NLP Sentiment Analysis	Toxicity Score < 0.05	Community Managers
+24	Auto-Squash Commits Feature	Cleans up git history before merging.	Maintains a readable commit history.	N/A	History Cleanliness	Maintainers
+25	Database Row-Level Security (RLS) Verifier	Checks that new DB tables utilize PostgreSQL RLS policies.	Enforces tenant isolation.	SQL AST Analysis	RLS Coverage 100%	Security Engineers
+26	Fuzz Testing Orchestrator	Runs fuzz tests on parsing libraries submitted in PRs.	Finds obscure memory corruption bugs.	Coverage-guided Fuzzing (AFL)	Crash-Free Runtime	QA Engineers
+27	Dead Code Elimination Detector	Flags code that is never called or imported.	Reduces maintenance burden.	Call Graph Analysis	Dead Code Reduction	Developers
+28	Performance Regression Detector	Benchmarks critical paths before and after the PR.	Prevents performance degradation.	T-Test Statistical Analysis	Performance Variance < 5%	Performance Engineers
+29	Circular Dependency Detector	Analyzes import graphs for cycles.	Ensures clean modular architecture.	Graph Theory (DFS)	Cycle Count = 0	Architects
+30	Cyclomatic Complexity Analyzer	Flags functions that are too complex.	Improves maintainability.	Control Flow Graph	Complexity Threshold < 15	QA Leads
+31	Spelling and Grammar Checker	Scans code comments and UI strings.	Professionalism in UI and docs.	N-gram Language Model	Spelling Error Rate = 0	Developers
+32	Branch Naming Convention Enforcer	Requires branches to follow pattern (e.g., feature/ticket-id).	Organizes workflow and tooling integration.	Regex	Naming Compliance 100%	DevOps
+33	Commit Message Convention Linter	Enforces Conventional Commits spec (feat:, fix:).	Automates changelog generation.	NLP Classification	Message Compliance 100%	Release Managers
+34	Test Impact Analysis	Selects and runs only tests affected by the PR code changes.	Speeds up CI feedback.	Change Impact Analysis	Test Execution Time Reduction	Developers
+35	Git Large File Storage (LFS) Checker	Prevents committing large binary files directly to git.	Keeps repo size manageable.	File Size Check	Repo Bloat Rate 0	DevOps
+36	OpenAPI Fragment Validator	Validates partial updates to large API specs.	Ensures integrity of API definitions.	JSON Schema Validation	Spec Integrity 100%	API Architects
+37	Access Control Policy Verifier	Checks that policy-as-code (e.g., OPA/Rego) is tested.	Ensures security policies are enforceable.	Policy Testing Engine	Policy Test Coverage 100%	Security
+38	Code Duplication Detector	Flags copy-pasted code blocks.	Promotes Don't-Repeat-Yourself (DRY).	Token-based Comparison	Duplication < 3%	Tech Leads
+39	Technical Debt Badge Assigner	Automatically labels PRs that increase debt metrics.	Makes debt visible and manageable.	Heuristics	Debt Visibility 100%	Engineering Managers
+40	Internationalization (i18n) Checker	Ensures new UI strings use translation keys, not hardcoded text.	Supports multi-language deployment.	Source Code Parsing	Hardcoded String Rate 0	Localization Teams
+41	Accessibility (a11y) Linter	Checks JSX/HTML for ARIA roles and alt text.	Ensures WCAG compliance.	AXE Core Integration	a11y Violations = 0	Accessibility Specialists
+42	Timezone Handling Validator	Flags usage of naive datetime objects.	Prevents time-related transaction errors.	Static Analysis	Naive Time Usage 0	Backend Developers
+43	Float Currency Validator	Prevents use of float for financial amounts (enforces integers/decimal).	Prevents rounding errors.	AST Type Checking	Precision Error Risk 0	Core Engineers
+44	PGSQL Strict Type Checker	Enforces explicit casting in SQL queries.	Prevents implicit conversion errors.	SQL Parser	SQL Warnings = 0	DBAs
+45	Anonymous/Pseudonymized Data Checker	Warns if logs might contain PII in clear text.	Enforces privacy-by-design.	Pattern Matching	PII Leak Potential = 0	Privacy Engineers
+46	Threat Model Update Trigger	Prompts for threat model updates if auth/crypto code changes.	Maintains security posture.	N/A	Threat Model Currency 100%	Security Architects
+47	Zero-Knowledge Proof (ZKP) Circuit Verifier	Compiles and checks validity of ZK circuits in PRs.	Ensures cryptographic components work.	circom/arkworks compilation	Compilation Success 100%	Cryptographers
+48	SBOM (Software Bill of Materials) Generator	Automatically generates SPDX SBOM for the build artifact.	Compliance with upcoming EU regulations.	Dependency Tree Traversal	SBOM Generation Rate 100%	Compliance Officers
+49	Vulnerability Database Updater	Keeps local CVE database synced hourly for fast scans.	Ensures scan relevance.	N/A	DB Freshness < 1hr	Security Ops
+50	Pull Request Template Enforcer	Forces use of a PR template with checkboxes.	Standardizes submission metadata.	N/A	Template Usage 100%	Community Managers
+51	Reviewer Randomizer	Assigns reviewers randomly from a pool to prevent bias.	Distributes review load fairly.	Random Selection Algorithm	Review Distribution Variance < 20%	Maintainers
+52	Must-Have Assignee Rule	Blocks PRs without a self-assigned assignee.	Prevents "orphaned" work.	N/A	Assignment Rate 100%	Project Managers
+53	Changelog Entry Checker	Verifies that the CHANGELOG.md file was updated.	Ensures release notes are accurate.	File Diff Analysis	Changelog Update Rate 100%	Release Managers
+54	Major Version Gate	Adds extra checks for PRs modifying major version numbers.	Prevents accidental breaking releases.	Semver Analysis	Breaking Change Awareness 100%	Release Engineers
+55	End-to-End Test Linker	Requires link to a passing E2E test for UI changes.	Validates user workflows.	N/A	E2E Coverage for UI > 80%	QA Engineers
+56	Code Formatter (Prettier/Black)	Automatically formats code to style guide.	Eliminates style debates in reviews.	AST Printer	Style Consistency 100%	Developers
+57	Git Hook Installer	Automates setup of pre-commit hooks for contributors.	Shifts validation left to the developer machine.	N/A	Hook Adoption Rate > 80%	Developers
+58	Artifact Signature Verifier	Verifies signatures of build artifacts.	Ensures build integrity.	Sigstore/Cosign	Verification Success 100%	DevSecOps
+59	Container Vulnerability Scanner	Scans Docker images for OS-level CVEs.	Hardens runtime environment.	Trivy/Grype integration	Critical CVEs = 0	Platform Engineers
+60	Infrastructure as Code (IaC) Linter	Lints Terraform/Ansible configs.	Prevents cloud misconfigurations.	Static Analysis	IaC Security Score = A	DevOps
+61	Deprecated API Usage Warning	Warns if PR uses functions marked for deprecation.	Facilitates tech debt cleanup.	AST Metadata	Deprecation Adoption Rate 0%	Architects
+62	Thread Sanitizer Integration	Runs race condition detectors on concurrent code.	Prevents hard-to-debug concurrency bugs.	Dynamic Instrumentation	Race Conditions = 0	Backend Developers
+63	Memory Leak Detector (Valgrind)	Runs memory checks on critical C++/Rust components.	Ensures long-term stability.	Dynamic Analysis	Memory Leak Rate 0	Systems Engineers
+64	Code Owners File Resolver	Enforces CODEOWNERS file rules for approval.	Ensures domain experts review code.	Git Path Matching	Code Owner Approval 100%	Tech Leads
+65	Minimum Age Gate	Prevents merging PRs younger than X hours.	Allows for "cooling off" and review.	N/A	Merge Delay Adherence 100%	Maintainers
+66	Approval Count Verifier	Requires N distinct approvals before merge.	Ensures consensus.	Counter Logic	Approval Rule Compliance 100%	Project Managers
+67	Dismissal of Stale Reviews	Flags approvals from commits that have since changed.	Ensures current code is reviewed.	Commit SHA Comparison	Stale Review Rate 0	Developers
+68	External Contributor Dashboard	Public view of contribution status and impact.	Increases community engagement.	N/A	Dashboard Uptime 99.9%	FOSS Contributors
+69	Gamification Badge System	Awards badges (e.g., "Bug Hunter", "Quick Fixer").	Encourages contribution.	N/A	Contributor Retention Rate	Community Managers
+70	Bounty Management Linker	Links PRs to specific issue bounties on platforms like Bounties Network.	Incentivizes critical fixes.	N/A	Bounty Payout Accuracy	Program Managers
+71	Sandbox Environment Deployer	Spins up temporary preview environments for PRs.	Facilitates UX testing before merge.	K8s Namespace orchestration	Env Availability 99%	QA, Product
+72	Load Test Scenario Runner	Triggers specific k6/Gatling tests for performance-sensitive PRs.	Validates scalability of changes.	Performance Thresholding	SLA Adherence 100%	SREs
+73	Database Migration Rollback Checker	Ensures every UP migration has a corresponding DOWN migration.	Guarantees safe rollbacks.	SQL Pairs Logic	Rollback Coverage 100%	DBAs
+74	Index Usage Analyzer	Warns if new queries ignore existing indexes.	Prevents performance degradation.	Query Plan Analysis	Index Hit Ratio > 99%	DBAs
+75	Lock Wait Analyzer	Checks SQL changes for potential locking issues.	Prevents deadlocks under high load.	SQL Heuristics	Lock Risk Score Low	DBAs
+76	Feature Flag Enforcer	Requires new features to be gated behind flags.	Enables safe continuous deployment.	Static Analysis	Feature Flag Usage 100%	Release Engineers
+77	Observability Instrumentation Checker	Enforces OpenTelemetry tracing in new services.	Maintains system observability.	API Usage Check	Trace Coverage > 90%	SREs
+78	Error Handling Standardization	Checks that errors follow standard JSON-RPC/OpenAPI error formats.	Ensures consistent client error handling.	Response Validation	Error Format Consistency 100%	API Engineers
+79	Rate Limiting Logic Verifier	Ensures new endpoints implement rate limiting headers/middleware.	Prevents abuse.	AST Analysis	Endpoint Protection 100%	Security Engineers
+80	Input Sanitization Validator	Checks for use of parameterized queries (no SQL injection).	Critical security check.	Taint Analysis	Injection Risk 0	Security Engineers
+81	Output Encoding Checker	Ensures data is encoded before rendering to UI (XSS prevention).	Web security standard.	AST Analysis	XSS Risk 0	Security Engineers
+82	CORS Policy Validator	Validates that cross-origin policies are not overly permissive.	Restricts browser access.	Config Analysis	CORS Security Score A	Security Engineers
+83	Hardcoded Secret Rotation	Automates rotation of secrets found in commits (if in test env).	Immediate remediation.	Secret Rotation Logic	Remediation Time < 5m	Security Ops
+84	Compliance Tagging System	Tags issues/PRs with relevant regulations (GDPR, PSD2).	Tracks regulatory compliance development.	NLP Classification	Tag Accuracy > 90%	Compliance Managers
+85	Multi-Language Linter Matrix	Runs specific linters for Go, Python, JS, Rust, SQL.	Language-specific best practices.	Matrix CI	Linter Execution Rate 100%	Developers
+86	Binary Whitelist Check	Ensures no binary executables are committed (except LFS).	Prevents supply chain risk.	File Magic Check	Binary Commit Rate 0	DevOps
+87	Symlink Safety Checker	Prevents unsafe symlinks that could escape the repo.	Repo security.	Filesystem Check	Unsafe Symlink Count 0	DevOps
+88	Submodule Update Checker	Verifies git submodules are pinned to a specific commit.	Ensures reproducibility.	Git Config Analysis	Submodule Pinning 100%	DevOps
+89	Worktree Validation	Checks that git worktrees are correctly managed.	Developer workflow support.	Git FS Check	Sync Error Rate 0	DevOps
+90	Editorconfig Enforcer	Ensures .editorconfig settings are respected by formatters.	IDE consistency.	Config Parser	Consistency Score 100%	Developers
+91	Visual Regression Detector	Compares screenshots of UI changes.	Prevents accidental UI breakage.	Image Diff Algorithm	Visual Diff Rate Low	Frontend Devs
+92	Bundle Size Analyzer	Checks JS bundle size impact of the PR.	Ensures fast wallet loading times.	Webpack Analysis	Bundle Size Limit Adherence	Frontend Devs
+93	SEO/Metadata Checker	Ensures web pages have proper meta tags.	Discoverability of public docs.	HTML Parser	Meta Tag Completeness 100%	Marketing/Docs
+94	JavaScript Dependency Auditor	Checks for minimal required dependencies in package.json.	Reduces attack surface.	Dependency Graph	Dependency Bloat Rate Low	Frontend Devs
+95	Rust unsafe Block Reviewer	Flags usage of unsafe Rust code for manual review.	Memory safety assurance.	AST Parser	Unsafe Code Review Rate 100%	Systems Engineers
+96	Go Race Condition Scanner	Runs go test -race automatically.	Concurrency safety in Go microservices.	Go Tooling	Race Condition Count 0	Backend Devs
+97	Python Type Hint Enforcer	Enforces PEP 484 type hints using mypy.	Reduces runtime errors in Python.	Mypy Analysis	Type Hint Coverage > 90%	Backend Devs
+98	Java Null Pointer Analysis	Uses SpotBugs/NullAway to find NPEs.	Stability of Java integrations.	Static Analysis	NPE Risk Low	Backend Devs
+99	C++ Memory Sanitizer	Runs ASan/UBSan on C++ components.	Low-level crypto safety.	Clang Sanitizers	Memory Error Count 0	Cryptographers
+100	GraphQL Query Depth Limiter	Validates GraphQL schema for query depth limits.	Prevents DoS via complex queries.	Schema Analysis	DoS Risk Score Low	API Engineers
+101	gRPC Reflection Service Checker	Ensures gRPC reflection is disabled in prod builds.	Information leakage prevention.	Proto Analysis	Security Config Compliance 100%	Security Engineers
+102	Protobuf Breaking Change Detector	Checks .proto files for breaking changes.	Ensures backward compatibility of RPCs.	Buf Schema Analysis	Breaking Change Count 0	API Engineers
+103	Thrift IDL Validator	Validates Thrift interface definitions.	Legacy integration support.	IDL Parser	Validation Success 100%	Integration Engineers
+104	OpenAPI 3.0 Spec Validator	Ensures API specs adhere to OpenAPI 3.0 standard.	Tooling compatibility.	Swagger Parser	Spec Validity 100%	API Architects
+105	AsyncAPI Spec Validator	Validates event-driven API specs (Kafka topics).	Messaging architecture integrity.	AsyncAPI Parser	Spec Validity 100%	Architects
+106	JSON Schema Validator for Configs	Validates JSON/YAML config files against schemas.	Configuration integrity.	JSON Schema	Config Validity 100%	DevOps
+107	TOML Config Validator	Validates Rust/Go TOML configs.	Configuration correctness.	TOML Parser	Config Validity 100%	Developers
+108	YAML Anchor/Alias Checker	Checks for complex/unsafe YAML anchors.	Config readability/safety.	YAML Parser	Complexity Score Low	DevOps
+109	Environment Variable Export Checker	Ensures no .env files are committed.	Secret leak prevention.	Git Ignore Check	Env Commit Rate 0	Security Ops
+110	Docker Ignore Validator	Checks .dockerignore effectiveness.	Image size optimization.	File Path Analysis	Context Size Reduction	DevOps
+111	Helm Chart Linter	Validates Kubernetes Helm charts.	Deployment integrity.	Helm Lint	Lint Score = 0	Platform Engineers
+112	Kustomize Build Validator	Validates Kustomize overlays.	Deployment configuration.	Kustomize Build	Build Success 100%	Platform Engineers
+113	Terraform Plan Security Scanner	Scans terraform plan output for security issues.	Infrastructure as Code security.	tfsec integration	Security Findings = 0	DevSecOps
+114	Ansible Task Idempotency Tester	Runs Ansible playbooks in check mode.	Configuration management safety.	Ansible Check Mode	Drift Risk Low	DevOps
+115	CloudFormation Linter	Validates AWS CloudFormation templates.	Cloud deployment safety.	cfn-lint	Lint Error Count 0	Cloud Engineers
+116	ARM Template Validator	Validates Azure Resource Manager templates.	Cloud deployment safety.	ARM Toolkit	Validation Success 100%	Cloud Engineers
+117	Service Mesh Policy Validator	Checks Istio/Linkerd policies in PRs.	Network traffic governance.	K8s CRD Validation	Policy Compliance 100%	Platform Engineers
+118	OAuth2 Scope Validator	Checks for overly permissive OAuth2 scopes.	API access control.	Scope Analysis	Least Privilege Adherence	Security Engineers
+119	JWT Algorithm Validator	Enforces strong algorithms (RS256) for JWTs.	Token security.	AST/String Analysis	Weak Algorithm Usage 0	Security Engineers
+120	X.509 Certificate Expiry Checker	Checks embedded certificates for expiry.	Operational uptime.	Date Parser	Expired Cert Rate 0	SREs
+121	PGP Key Validation	Validates PGP keys used for signing releases.	Release authenticity.	GPG Keyring	Key Validity 100%	Release Engineers
+122	SSH Key Strength Checker	Checks for weak SSH keys in configs.	Access security.	SSH Key Parser	Weak Key Rate 0	Security Ops
+123	Hash Algorithm Deprecation	Flags use of MD5/SHA1.	Cryptographic agility.	AST/String Analysis	Weak Hash Usage 0	Cryptographers
+124	Random Number Generator Check	Flags use of rand() vs crypto.rand().	Critical security for crypto.	AST Analysis	Weak RNG Usage 0	Cryptographers
+125	Constant Time Comparison Checker	Flags non-constant-time crypto comparisons.	Timing attack prevention.	AST Analysis	Timing Vulnerability Risk 0	Cryptographers
+126	Side-Channel Analysis Scanner	Heuristics for potential side-channel leaks.	Advanced crypto security.	Code Pattern Matching	Side-Channel Risk Low	Cryptographers
+127	Replay Attack Prevention Checker	Ensures API endpoints check nonces/timestamps.	Transaction security.	Request Header Analysis	Replay Protection 100%	API Engineers
+128	Request Smuggling Detector	Checks HTTP parsing configurations.	Web server security.	Config Analysis	Smuggling Risk Score Low	Security Engineers
+129	Response Splitting Detector	Checks for CRLF injection risks.	HTTP security.	String Analysis	Splitting Risk 0	Security Engineers
+130	Host Header Injection Validator	Validates use of the Host header.	Cache poisoning prevention.	AST Analysis	Injection Risk 0	Security Engineers
+131	SSRF (Server-Side Request Forgery) Checker	Detects patterns vulnerable to SSRF.	Cloud metadata protection.	Taint Analysis	SSRF Risk 0	Security Engineers
+132	XXE (XML External Entity) Checker	Flags insecure XML parsers.	Legacy protocol security.	XML Parser Config	XXE Risk 0	Security Engineers
+133	Deserialization Bomb Detector	Flags unsafe object deserialization.	DoS prevention.	AST Analysis	Deserialization Risk 0	Security Engineers
+134	LDAP Injection Checker	Checks for unsafe LDAP queries.	Directory service security.	Taint Analysis	Injection Risk 0	Security Engineers
+135	HQL Injection Checker	Checks Hibernate Query Language safety.	ORM security.	AST Analysis	Injection Risk 0	Backend Devs
+136	NoSQL Injection Checker	Checks MongoDB/CouchDB queries.	NoSQL database security.	AST Analysis	Injection Risk 0	Backend Devs
+137	HTML Sanitizer Config Checker	Validates DOMPurify/jsoup configurations.	XSS prevention.	Config Analysis	Sanitizer Effectiveness	Security Engineers
+138	Content Security Policy (CSP) Builder	Helps generate strict CSP headers.	Browser security.	Header Analysis	CSP Strictness Score A	Security Engineers
+139	HTTP Strict Transport Security (HSTS) Checker	Enforces HSTS headers.	Transport security.	Header Analysis	HSTS Adoption 100%	Security Engineers
+140	Subresource Integrity (SRI) Generator	Generates SRI hashes for static assets.	CDN security.	Hash Generator	SRI Adoption 100%	Frontend Devs
+141	Referrer Policy Checker	Validates Referrer-Policy headers.	Privacy leakage prevention.	Header Analysis	Privacy Policy Score	Privacy Engineers
+142	Permissions Policy Checker	Validates Feature-Policy/Permissions-Policy headers.	Browser capability control.	Header Analysis	Policy Coverage 100%	Security Engineers
+143	Cross-Origin-Opener-Policy (COOP) Checker	Validates COOP headers.	Process isolation.	Header Analysis	Isolation Score A	Security Engineers
+144	Cross-Origin-Embedder-Policy (COEP) Checker	Validates COEP headers.	SharedArrayBuffer enablement.	Header Analysis	Header Compliance 100%	Performance Engineers
+145	Document Policy Checker	Validates Document-Policy headers.	Web standards enforcement.	Header Analysis	Policy Validity 100%	Frontend Devs
+146	Service Worker Scope Validator	Validates Service Worker registration scopes.	PWA security.	SW Parser	Scope Isolation 100%	Frontend Devs
+147	Web Manifest Validator	Validates manifest.json for PWA standards.	Installability/UX.	Schema Validator	Manifest Validity 100%	Frontend Devs
+148	Favicon Security Checker	Ensures favicon.ico doesn't leak sensitive data.	Obscure security vector.	File Analysis	Risk Score Low	Security Engineers
+149	Robots.txt Validator	Validates robots.txt syntax.	SEO control.	Parser Validation	Syntax Validity 100%	Marketing
+150	Sitemap.xml Validator	Validates sitemap.xml structure.	SEO visibility.	XML Schema Validation	Validity 100%	Marketing
+151	Humans.txt Checker	Encourages humans.txt for transparency.	FOSS culture.	File Check	File Presence > 90%	Community Managers
+152	Security.txt Checker	Encourages security.txt for disclosure policy.	Coordinated vulnerability disclosure.	File Check	File Presence 100%	Security Teams
+153	License File Completeness	Checks LICENSE file exists and matches standard text.	Legal compliance.	File Comparison	License Validity 100%	Legal
+154	Contributing Guide Link	Ensures README links to CONTRIBUTING.md.	Onboarding aid.	Link Checker	Link Validity 100%	Community Managers
+155	Code of Conduct Link	Ensures README links to CODE_OF_CONDUCT.md.	Community standards.	Link Checker	Link Validity 100%	Community Managers
+156	README Badge Validator	Validates links to badges (Build Status, etc.).	Dashboard accuracy.	Image Link Checker	Badge Validity 100%	DevOps
+157	Issue Template Validator	Validates .github/ISSUE_TEMPLATE/ forms.	Bug report quality.	YAML Parser	Template Validity 100%	QA
+158	Pull Request Template Validator	Validates PULL_REQUEST_TEMPLATE files.	Review quality.	Markdown Parser	Template Validity 100%	Maintainers
+159	Funding.yml Linker	Checks presence of GitHub Funding file.	Monetization support.	File Check	File Presence > 50%	Project Leads
+160	Issue Dependency Manager	Enforces that PRs reference issue numbers (#123).	Traceability.	Regex	Reference Rate 100%	Project Managers
+
+
+h.	Comprehensive List of Database Objects
+id	schema_name	object_name	object_type	description	feature_reference	column_names	constraints / notes	junction_tables
+1	m23_governance	contributors	TABLE	Stores profile and identity information for FOSS developers.	15	contributor_id, github_handle, email, pgp_key_fingerprint, reputation_score, is_corporate, created_at	PK contributor_id; Unique email, github_handle
+2	m23_governance	contributor_organizations	TABLE	Links contributors to companies/organizations for CLA purposes.	3	contributor_id, organization_id, role, signed_cla_at	PK (contributor_id, organization_id)	contributor_orgs
+3	m23_governance	organizations	TABLE	List of partner organizations participating in the ecosystem.	3	organization_id, name, domain, cla_text, contact_email	PK organization_id
+4	m23_governance	repositories	TABLE	Metadata for the various PARI repositories (core, wallet, docs).	68	repo_id, name, description, default_branch, visibility	PK repo_id
+5	m23_governance	pull_requests	TABLE	Core entity tracking all submitted Pull Requests.	2	pr_id, repo_id, contributor_id, number, title, state, target_branch, source_branch, opened_at, closed_at, merged_at	PK pr_id; FK repo_id, contributor_id
+6	m23_governance	commits	TABLE	Links commits to PRs for traceability and DCO validation.	2	commit_sha, pr_id, author_id, message, signed_off, committed_at	PK commit_sha; FK pr_id, author_id
+7	m23_governance	ci_pipeline_runs	TABLE	Tracks the execution of CI pipelines for a specific commit/PR.	8	run_id, pr_id, commit_sha, status, triggered_at, completed_at, duration_ms	PK run_id; FK pr_id
+8	m23_governance	ci_jobs	TABLE	Individual jobs within a pipeline run (e.g., test, lint, build).	8	job_id, run_id, job_name, status, log_url, started_at, finished_at	PK job_id; FK run_id
+9	m23_governance	test_results	TABLE	Detailed results of unit and integration tests.	8	test_id, job_id, suite_name, test_name, status, duration_ms, error_message	PK test_id; FK job_id
+10	m23_governance	code_coverage_metrics	TABLE	Stores coverage reports per commit.	9	coverage_id, pr_id, line_coverage_pct, branch_coverage_pct, lines_covered, lines_total	PK coverage_id; FK pr_id
+11	m23_governance	sast_findings	TABLE	Static Analysis security findings.	4	finding_id, pr_id, tool_name, severity, file_path, line_number, description, cwe_id	PK finding_id; FK pr_id
+12	m23_governance	sca_dependencies	TABLE	Dependency inventory scanned for a specific build.	5	dep_id, run_id, package_name, version, manager, license SPDX	PK dep_id; FK run_id
+13	m23_governance	sca_vulnerabilities	TABLE	CVEs found in dependencies.	5	vuln_id, dep_id, cve_id, severity, cvss_score, fixed_in_version	PK vuln_id; FK dep_id
+14	m23_governance	license_compliance_results	TABLE	Results of license scanning (e.g., GPLv2 vs AGPLv3+).	20	check_id, run_id, dependency_id, license_id, compliance_status	PK check_id; FK run_id
+15	m23_governance	approved_licenses	TABLE	Whitelist of allowed open-source licenses.	20	license_id, spdx_id, name, can_use_in_commercial, can_redistribute	PK license_id
+16	m23_governance	db_migration_scripts	TABLE	Tracks SQL migration scripts submitted in PRs.	6	migration_id, pr_id, script_name, checksum, is_idempotent	PK migration_id; FK pr_id
+17	m23_governance	db_schema_validation	TABLE	Results of automated DB schema checks.	6	validation_id, migration_id, check_type, passed, error_msg	PK validation_id; FK migration_id
+18	m23_governance	secret_scans	TABLE	Results of secret scanning on the repository.	11	scan_id, pr_id, file_path, secret_type, start_line, end_line	PK scan_id; FK pr_id
+19	m23_governance	approvals	TABLE	Tracks code reviews and approvals.	66	approval_id, pr_id, reviewer_id, state, submitted_at, commit_sha	PK approval_id; FK pr_id, reviewer_id
+20	m23_governance	review_comments	TABLE	Detailed comments made during code review.	23	comment_id, approval_id, file_path, line_number, body, sentiment_score	PK comment_id; FK approval_id
+21	m23_governance	issue_references	TABLE	Links PRs to Jira/GitHub issues.	160	pr_id, issue_id, issue_tracker, issue_type	PK (pr_id, issue_id)
+22	m23_governance	architecture_decision_records	TABLE	Stores metadata for ADRs linked to PRs.	10	adr_id, pr_id, title, status, url	PK adr_id; FK pr_id
+23	m23_governance	performance_benchmarks	TABLE	Stores benchmark results for PR comparisons.	28	benchmark_id, pr_id, scenario_name, value, unit, baseline_value, diff_pct	PK benchmark_id; FK pr_id
+24	m23_governance	build_artifacts	TABLE	Metadata for artifacts generated by CI.	58	artifact_id, run_id, name, type, size_bytes, hash_sha256, signed_signature	PK artifact_id; FK run_id
+25	m23_governance	sbom_entries	TABLE	Software Bill of Materials entries.	48	entry_id, artifact_id, component_name, version, supplier, download_location	PK entry_id; FK artifact_id
+26	m23_governance	container_images	TABLE	Docker image metadata.	18	image_id, artifact_id, registry, repo, tag, digest, layers_count	PK image_id; FK artifact_id
+27	m23_governance	image_vulnerabilities	TABLE	CVEs found in Docker layers.	59	img_vuln_id, image_id, cve_id, package_name, severity	PK img_vuln_id; FK image_id
+28	m23_governance	dependency_pins	TABLE	Tracks lock files (package-lock.json) to ensure pinning.	12	pin_id, run_id, file_name, dependency_name, expected_version	PK pin_id; FK run_id
+29	m23_governance	api_spec_changes	TABLE	Tracks changes to OpenAPI specs.	17	spec_change_id, pr_id, endpoint_path, method, change_type	PK spec_change_id; FK pr_id
+30	m23_governance	breaking_changes	TABLE	Logs detected breaking changes.	17	break_id, pr_id, description, severity	PK break_id; FK pr_id
+31	m23_governance	changelog_entries	TABLE	Changelog updates required for PRs.	53	changelog_id, pr_id, version, change_type, description	PK changelog_id; FK pr_id
+32	m23_governance	labels	TABLE	Definition of PR labels.	1	label_id, name, color, description	PK label_id
+33	m23_governance	pr_labels	TABLE	Junction for PR labels.	1	pr_id, label_id	PK (pr_id, label_id)
+34	m23_governance	milestones	TABLE	Project milestones for releases.	54	milestone_id, title, due_date, state	PK milestone_id
+35	m23_governance	pr_milestones	TABLE	Links PRs to milestones.	54	pr_id, milestone_id	PK (pr_id, milestone_id)
+36	m23_governance	badges	TABLE	Gamification badges.	69	badge_id, name, description, icon_url, criteria	PK badge_id
+37	m23_governance	contributor_badges	TABLE	Links badges to contributors.	69	contributor_id, badge_id, awarded_at	PK (contributor_id, badge_id)
+38	m23_governance	bounties	TABLE	Monetary rewards for issues.	70	bounty_id, issue_id, amount, currency, status	PK bounty_id
+39	m23_governance	bounty_claims	TABLE	Links PRs to bounty claims.	70	bounty_id, pr_id, claimed_at, paid_at	PK (bounty_id, pr_id)
+40	m23_governance	preview_environments	TABLE	Tracks ephemeral preview deployments.	71	env_id, pr_id, url, created_at, expires_at	PK env_id; FK pr_id
+41	m23_governance	quality_gates	TABLE	Definition of quality rules (e.g., coverage must be > 95).	9	gate_id, name, metric_type, operator, threshold_value	PK gate_id
+42	m23_governance	gate_results	TABLE	Results of quality gate evaluation.	9	result_id, run_id, gate_id, passed, actual_value	PK result_id; FK run_id, gate_id
+43	m23_governance	sentiment_analysis	TABLE	Stores sentiment of PR comments.	23	sentiment_id, comment_id, score, magnitude	PK sentiment_id; FK comment_id
+44	m23_governance	spam_reports	TABLE	Reports on spam or malicious contributions.	23	report_id, pr_id, reporter_id, reason, reviewed_at	PK report_id; FK pr_id
+45	m23_governance	technical_debt_tags	TABLE	Tags PRs that introduce debt.	39	debt_id, pr_id, description, estimated_hours	PK debt_id; FK pr_id
+46	m23_governance	documentation_updates	TABLE	Tracks documentation file changes.	19	doc_update_id, pr_id, file_path, words_added, words_removed	PK doc_update_id; FK pr_id
+47	m23_governance	access_control_policies	TABLE	Stores OPA/Rego policy metadata for PR checks.	37	policy_id, name, rego_path, last_checked_at	PK policy_id
+48	m23_governance	fuzz_test_results	TABLE	Results of fuzzing campaigns.	26	fuzz_id, pr_id, target_binary, execution_time_sec, unique_crashes, edge_cov	PK fuzz_id; FK pr_id
+49	m23_governance	merge_queue	TABLE	Queue for serializing merges.	22	queue_id, pr_id, position, status, enqueued_at	PK queue_id; FK pr_id
+50	m23_governance	branch_protection_rules	TABLE	Rules applied to git branches.	32	rule_id, repo_id, branch_pattern, requires_approvals, requires_status_checks	PK rule_id; FK repo_id
+51	m23_governance	contributor_stats_daily	TABLE	Daily aggregation stats for contributors.	68	stat_id, contributor_id, date, commits_made, prs_opened, reviews_completed	PK (contributor_id, date)
+52	m23_governance	repo_stats_daily	TABLE	Daily aggregation stats for repositories.	68	repo_stat_id, repo_id, date, stars, forks, issues_open, pr_open	PK (repo_id, date)
+53	m23_governance	audit_trail	TABLE	Immutable log of significant governance events.	5	event_id, timestamp, actor_type, actor_id, action_type, details_json	PK event_id
+54	m23_governance	webhooks	TABLE	External webhook endpoints for notifications.	68	webhook_id, url, secret, events	PK webhook_id
+55	m23_governance	webhook_deliveries	TABLE	Logs of webhook delivery attempts.	68	delivery_id, webhook_id, status, http_status, attempted_at	PK delivery_id; FK webhook_id
+56	m23_governance	project_settings	TABLE	Global module settings.	68	key, value, type	PK key
+57	m23_governance	security_advisories	TABLE	Published security advisories for vulnerabilities.	49	advisory_id, cve_id, summary, severity, published_at	PK advisory_id
+58	m23_governance	dependency_licenses	TABLE	Junction table for dependencies and licenses.	20	dep_id, license_id	PK (dep_id, license_id)
+59	m23_governance	i18n_strings	TABLE	Stores UI strings for translation checks.	40	string_id, key, source_text, context	PK string_id
+60	m23_governance	pr_i18n_files	TABLE	Tracks i18n files modified in a PR.	40	pr_id, language_code, file_path	PK (pr_id, language_code)
+61	m23_governance	accessibility_reports	TABLE	Results of a11y scans (e.g., AXE core).	41	report_id, pr_id, url, violation_count, timestamp	PK report_id; FK pr_id
+62	m23_governance	visual_regression_results	TABLE	Stores diff images for UI changes.	91	vr_id, pr_id, screenshot_name, diff_percentage, has_diff	PK vr_id; FK pr_id
+63	m23_governance	bundle_sizes	TABLE	JS bundle size metrics.	92	bundle_id, pr_id, bundle_name, size_bytes, gzip_bytes	PK bundle_id; FK pr_id
+64	m23_governance	code_complexity_metrics	TABLE	Cyclomatic complexity per file.	30	metric_id, pr_id, file_path, complexity_score, function_count	PK metric_id; FK pr_id
+65	m23_governance	code_duplication_records	TABLE	Duplication detection results.	38	dup_id, pr_id, file_path_a, file_path_b, lines_duplicated	PK dup_id; FK pr_id
+66	m23_governance	dead_code_records	TABLE	Detected unused code.	27	dead_code_id, pr_id, file_path, symbol_name, last_accessed_estimate	PK dead_code_id; FK pr_id
+67	m23_governance	test_impact_map	TABLE	Maps source files to test files.	34	source_file, test_file, confidence	PK source_file
+68	m23_governance	performance_regression_alerts	TABLE	Alerts for slow-downs.	28	alert_id, benchmark_id, threshold_exceeded, alert_sent_at	PK alert_id; FK benchmark_id
+69	m23_governance	threat_models	TABLE	Links PRs to threat model updates.	46	threat_id, pr_id, model_file_path, review_status	PK threat_id; FK pr_id
+70	m23_governance	pgp_keys	TABLE	Stores public PGP keys for contributors.	121	key_id, contributor_id, key_data, key_id_long, expiry_date	PK key_id; FK contributor_id
+71	m23_governance	commit_signatures	TABLE	Verification of git commit signatures.	57	commit_sha, signature_valid, signer_key_id, signed_at	PK commit_sha
+72	m23_governance	zksnark_proofs	TABLE	Metadata for ZK-SNARK circuits in PRs.	47	circuit_id, pr_id, circuit_name, r1cs_size, proving_time_ms	PK circuit_id; FK pr_id
+73	m23_governance	kubernetes_manifests	TABLE	List of K8s manifests in PR.	21	manifest_id, pr_id, file_path, kind, namespace	PK manifest_id; FK pr_id
+74	m23_governance	helm_charts	TABLE	Helm chart metadata.	111	chart_id, pr_id, chart_name, version	PK chart_id; FK pr_id
+75	m23_governance	terraform_plans	TABLE	Terraform plan summaries.	113	plan_id, pr_id, resource_additions, resource_changes, resource_deletions	PK plan_id; FK pr_id
+76	m23_governance	license_text_history	TABLE	Versioning of LICENSE files.	153	license_hist_id, repo_id, content_text, effective_date	PK license_hist_id; FK repo_id
+77	m23_governance	contributor_avatars	TABLE	Profile pictures.	68	contributor_id, image_url, is_gravatar	PK contributor_id
+78	m23_governance	email_notifications	TABLE	Notification preferences.	68	contributor_id, notification_type, enabled	PK (contributor_id, notification_type)
+79	m23_governance	spam_filter_rules	TABLE	Rules to auto-reject spam.	1	rule_id, pattern_type, pattern_value, action	PK rule_id
+80	m23_governance	api_deprecation_schedule	TABLE	Tracks deprecated APIs for warnings.	61	api_endpoint, deprecation_date, removal_date, replacement_endpoint	PK api_endpoint
+81	m23_governance	feature_flags	TABLE	Configuration for feature toggles.	76	flag_name, description, enabled_percent	PK flag_name
+82	m23_governance	release_notes	TABLE	Drafted release notes.	53	note_id, version, content, status	PK note_id
+83	m23_governance	dependency_update_automations	TABLE	Tracks Dependabot/Renovate PRs.	12	update_id, pr_id, package_name, old_version, new_version	PK update_id; FK pr_id
+84	m23_governance	merge_conflicts	TABLE	Logs detected merge conflicts.	22	conflict_id, pr_id, file_path, detected_at	PK conflict_id; FK pr_id
+85	m23_governance	lock_files	TABLE	Content hash of lock files to detect changes.	12	lock_id, pr_id, file_name, content_hash	PK lock_id; FK pr_id
+86	m23_governance	discussion_threads	TABLE	Top-level discussions (not PRs).	23	thread_id, title, author_id, created_at	PK thread_id
+87	m23_governance	thread_comments	TABLE	Comments in discussion threads.	23	comment_id, thread_id, author_id, body, sentiment_score	PK comment_id; FK thread_id
+88	m23_governance	wiki_pages	TABLE	Documentation wiki revisions.	46	page_id, title, slug, content, updated_at	PK page_id
+89	m23_governance	protected_branches	TABLE	Explicit list of protected branches.	32	repo_id, branch_name	PK (repo_id, branch_name)
+90	m23_governance	required_signatures	TABLE	Branches requiring signatures.	121	repo_id, branch_pattern	PK (repo_id, branch_pattern)
+91	m23_governance	static_analysis_rules	TABLE	Custom rules for SAST tools.	4	rule_id, tool, rule_key, severity, description	PK rule_id
+92	m23_governance	whitelisted_secrets	TABLE	Secrets that are allowed (e.g., test samples).	11	secret_pattern, reason	PK secret_pattern
+93	m23_governance	deployment_rollback_history	TABLE	History of rollbacks triggered by bad PRs.	73	rollback_id, pr_id, deployment_id, reason, timestamp	PK rollback_id; FK pr_id
+94	m23_governance	onboarding_checklists	TABLE	Checklist items for new contributors.	68	item_id, description, order_index	PK item_id
+95	m23_governance	contributor_progress	TABLE	Tracking completion of onboarding.	68	contributor_id, item_id, completed_at	PK (contributor_id, item_id)
+96	m23_governance	mentorship_pairs	TABLE	Pairs new contributors with mentors.	68	mentor_id, mentee_id, started_at	PK (mentor_id, mentee_id)
+97	m23_governance	community_events	TABLE	Hackathons or contribution sprints.	68	event_id, name, start_date, end_date	PK event_id
+98	m23_governance	event_contributions	TABLE	Links PRs to community events.	68	pr_id, event_id	PK (pr_id, event_id)
+99	m23_governance	documentation_search_index	TABLE	Full text search index for docs.	46	doc_id, content_vector	PK doc_id
+100	m23_governance	dependency_submissions	TABLE	Vulnerabilities submitted by contributors.	49	submission_id, contributor_id, description, status	PK submission_id; FK contributor_id
+101	m23_governance	pg_hba_rules	TABLE	Mock object for Postgres Host-Based Authentication checks in CI.	43	rule_id, database, user, address, method	PK rule_id
+102	m23_governance	row_level_security_policies	TABLE	Stores RLS policy metadata for validation.	25	policy_id, table_name, command, using_expr	PK policy_id
+103	m23_governance	sql_function_signatures	TABLE	Metadata for custom SQL functions.	44	func_name, arg_types, return_type, volatility	PK func_name
+104	m23_governance	query_plans	TABLE	Stored EXPLAIN ANALYZE results for PRs.	74	plan_id, pr_id, query_hash, plan_json, total_cost	PK plan_id; FK pr_id
+105	m23_governance	index_usage_stats	TABLE	Statistics on index usage from CI env.	74	index_id, table_name, index_name, idx_scan	PK index_id
+106	m23_governance	lock_wait_stats	TABLE	Lock wait statistics from load tests.	75	wait_id, pr_id, relation, mode, wait_time_ms	PK wait_id; FK pr_id
+107	m23_governance	pg_stat_statements	TABLE	Aggregated query statistics for performance reviews.	28	queryid, calls, total_time, rows	PK queryid
+108	m23_governance	partition_schemes	TABLE	Metadata on table partitioning strategies.	6	table_name, partition_key, strategy	PK table_name
+109	m23_governance	enum_types	TABLE	Registry of PostgreSQL ENUM types.	6	type_name, labels_array	PK type_name
+110	m23_governance	composite_types	TABLE	Registry of PostgreSQL composite types.	6	type_name, attributes_json	PK type_name
+111	m23_governance	extension_versions	TABLE	Allowed Postgres extensions and versions.	6	extname, default_version, installed_version	PK extname
+112	m23_governance	foreign_key_constraints	TABLE	List of FK constraints for validation.	6	constraint_name, table_name, referenced_table	PK constraint_name
+113	m23_governance	check_constraints	TABLE	List of CHECK constraints for validation.	6	constraint_name, table_name, check_clause	PK constraint_name
+114	m23_governance	exclusion_constraints	TABLE	List of exclusion constraints.	6	constraint_name, table_name, index_predicate	PK constraint_name
+115	m23_governance	trigger_definitions	TABLE	Metadata on triggers.	6	trigger_name, table_name, action_timing, function_name	PK trigger_name
+116	m23_governance	view_definitions	TABLE	SQL definitions of views.	6	view_name, definition_sql	PK view_name
+117	m23_governance	materialized_view_definitions	TABLE	Definitions of materialized views.	6	matview_name, definition_sql	PK matview_name
+118	m23_governance	refresh_policies	TABLE	Refresh schedules for MVs.	6	matview_name, schedule_cron	PK matview_name
+119	m23_governance	table_privileges	TABLE	Expected privileges for tables.	9	table_name, grantee, privileges_array	PK (table_name, grantee)
+120	m23_governance	schema_migrations_version	TABLE	Tracks current schema version.	6	version, dirty	PK version
+121	m23_governance	spdx_documents	TABLE	Full SPDX documents generated.	48	doc_id, artifact_id, spdx_version, data_license	PK doc_id; FK artifact_id
+122	m23_governance	spdx_packages	TABLE	Packages within SPDX docs.	48	pkg_id, doc_id, name, download_location	PK pkg_id; FK doc_id
+123	m23_governance	spdx_files	TABLE	Files verified within SPDX.	48	file_id, pkg_id, filename, checksum_sha1	PK file_id; FK pkg_id
+124	m23_governance	spdx_relationships	TABLE	Relationships between SPDX elements.	48	rel_id, spdx_doc_id, element, related_element, relationship_type	PK rel_id; FK spdx_doc_id
+125	m23_governance	vulnerability_intelligence	TABLE	Aggregated vulnerability data feeds.	49	cve_id, description, published_date, severity	PK cve_id
+126	m23_governance	cpe_matches	TABLE	CPE identifiers for vulnerabilities.	49	match_id, cve_id, cpe_string	PK match_id; FK cve_id
+127	m23_governance	remediation_playbooks	TABLE	Playbooks for common vulnerability fixes.	49	playbook_id, cve_pattern, instructions_json	PK playbook_id
+128	m23_governance	security_headers	TABLE	Required security headers for web components.	138	header_name, required_value, description	PK header_name
+129	m23_governance	csp_directives	TABLE	Content Security Policy directives.	137	directive_name, sources_array	PK directive_name
+130	m23_governance	permission_policies	TABLE	Feature policy permissions.	142	feature_name, allow_list	PK feature_name
+131	m23_governance	cors_origins	TABLE	Allowed CORS origins.	82	origin_pattern, allow_credentials	PK origin_pattern
+132	m23_governance	oauth_scopes	TABLE	Valid OAuth scopes.	118	scope_name, description	PK scope_name
+133	m23_governance	jwt_configurations	TABLE	JWT algorithm requirements.	119	issuer, algorithm_whitelist_array	PK issuer
+134	m23_governance	rate_limit_rules	TABLE	Rate limit configurations.	129	endpoint, requests_per_minute	PK endpoint
+135	m23_governance	ip_reputation	TABLE	Reputation of IP addresses (if applicable).	68	ip_address, score, last_seen	PK ip_address
+136	m23_governance	code_owners	TABLE	CODEOWNERS file parsing result.	64	owner_id, repo_id, pattern, owner_handle	PK owner_id; FK repo_id
+137	m23_governance	pr_review_assignments	TABLE	History of review assignments.	51	assignment_id, pr_id, reviewer_id, assigned_at	PK assignment_id; FK pr_id
+138	m23_governance	auto_ignored_files	TABLE	Files configured to be ignored by linters.	1	file_pattern, reason	PK file_pattern
+139	m23_governance	ci_environment_variables	TABLE	Variables injected into CI runs.	8	var_name, is_secret, value_mask	PK var_name
+140	m23_governance	runner_tags	TABLE	Tags for self-hosted CI runners.	8	tag_name, runner_type	PK tag_name
+141	m23_governance	runner_jobs	TABLE	Jobs assigned to specific runners.	8	job_id, runner_name, assigned_at	PK job_id; FK job_id
+142	m23_governance	cache_artifacts	TABLE	CI cache entries.	8	cache_key, location, created_at, last_accessed_at	PK cache_key
+143	m23_governance	workflow_runs	TABLE	Top level GitHub Actions workflow runs.	8	run_id, workflow_name, status, event	PK run_id
+144	m23_governance	workflow_jobs	TABLE	Jobs within a workflow run.	8	job_id, run_id, name, status, steps_json	PK job_id; FK run_id
+145	m23_governance	workflow_steps	TABLE	Steps within a job.	8	step_id, job_id, name, status, log	PK step_id; FK job_id
+146	m23_governance	marketplace_listings	TABLE	Internal marketplace for plugins/integrations.	7	listing_id, name, description, category	PK listing_id
+147	m23_governance	plugin_versions	TABLE	Versions of plugins.	7	version_id, listing_id, version, download_url	PK version_id; FK listing_id
+148	m23_governance	verified_publishers	TABLE	Verified plugin publishers.	7	publisher_id, name, domain	PK publisher_id
+149	m23_governance	sso_providers	TABLE	Configured SSO providers for contributors.	68	provider_id, provider_name, metadata_url	PK provider_id
+150	m23_governance	audit_log_exports	TABLE	History of audit log exports for auditors.	53	export_id, requested_by, date_range_start, date_range_end, status	PK export_id
+151	m23_governance	retention_policies	TABLE	Configured data retention policies.	11	policy_type, retention_days	PK policy_type
+152	m23_governance	compliance_reports	TABLE	Generated compliance reports (e.g., quarterly).	84	report_id, report_type, period_start, period_end, generated_at	PK report_id
+153	m23_governance	api_keys	TABLE	API keys for bot accounts.	68	key_id, account_id, key_hash, last_used	PK key_id
+154	m23_governance	personal_access_tokens	TABLE	PATs for contributors.	68	token_id, contributor_id, token_hash, scopes, expires_at	PK token_id; FK contributor_id
+155	m23_governance	ssh_keys	TABLE	SSH keys for git access.	122	key_id, contributor_id, key_type, key_data, fingerprint	PK key_id; FK contributor_id
+156	m23_governance	gpg_signatures	TABLE	GPG signatures for tags/commits.	121	sig_id, commit_sha, key_id, signature_payload	PK sig_id; FK key_id
+157	m23_governance	protected_tags	TABLE	Tags that require signing/protection.	121	tag_name, pattern	PK tag_name
+158	m23_governance	status_checks	TABLE	External status check contexts.	8	context_name, integration_url	PK context_name
+159	m23_governance	status_check_results	TABLE	Results of external status checks.	8	check_id, pr_id, context_name, state, description	PK check_id; FK pr_id
+160	m23_governance	environments	TABLE	Deployment environments (dev, staging, prod).	71	env_name, url, protection_rules	PK env_name
+161	m23_governance	deployment_protections	TABLE	Rules for protecting environments.	71	env_name, required_reviewers, wait_timer_minutes	PK env_name
+162	m23_governance	deployments	TABLE	Record of deployments.	71	deployment_id, env_name, pr_id, sha, status, created_at	PK deployment_id
+163	m23_governance	deployment_statuses	TABLE	Status updates for deployments.	71	status_id, deployment_id, state, log_url	PK status_id; FK deployment_id
+164	m23_governance	cron_jobs	TABLE	Scheduled jobs in the project.	28	job_id, schedule, command, last_run_at	PK job_id
+165	m23_governance	cron_job_history	TABLE	Execution history of cron jobs.	28	run_id, job_id, status, duration	PK run_id; FK job_id
+166	m23_governance	language_metrics	TABLE	Language breakdown of the repo.	68	language_name, bytes_of_code, file_count	PK language_name
+167	m23_governance	contributor_commits_history	TABLE	Aggregated commit history heatmap data.	68	contributor_id, date, commit_count	PK (contributor_id, date)
+168	m23_governance	pr_time_to_merge	TABLE	Analytics for time to merge.	68	pr_id, opened_at, first_review_at, merged_at, hours_to_merge	PK pr_id
+169	m23_governance	comment_activity	TABLE	Aggregated comment activity stats.	23	date, total_comments, unique_users	PK date
+170	m23_governance	review_turnaround	TABLE	Time taken for reviewers to review.	51	reviewer_id, avg_turnaround_hours	PK reviewer_id
+171	m23_governance	code_churn	TABLE	Lines added vs removed per day.	68	date, lines_added, lines_removed	PK date
+172	m23_governance	bug_reports	TABLE	Specifically tracks bug issue types.	157	issue_id, severity, priority	PK issue_id
+173	m23_governance	feature_requests	TABLE	Tracks feature requests.	157	issue_id, upvotes	PK issue_id
+174	m23_governance	project_boards	TABLE	Agile project boards.	68	board_id, name, columns_json	PK board_id
+175	m23_governance	board_cards	TABLE	Cards on project boards.	68	card_id, board_id, issue_id, column_name	PK card_id; FK board_id
+176	m23_governance	sprints	TABLE	Agile sprints.	68	sprint_id, board_id, start_date, end_date	PK sprint_id; FK board_id
+177	m23_governance	team_members	TABLE	Members of teams.	68	team_id, contributor_id, role	PK (team_id, contributor_id)
+178	m23_governance	teams	TABLE	Definition of teams.	68	team_id, name, slug	PK team_id
+179	m23_governance	team_permissions	TABLE	Permissions for teams.	178	permission_id, team_id, resource, permission_type	PK permission_id; FK team_id
+180	m23_governance	external_identities	TABLE	Links external accounts (Google, etc).	149	identity_id, contributor_id, provider, provider_user_id	PK identity_id; FK contributor_id
+181	m23_governance	notifications	TABLE	Generic notification queue.	68	notification_id, recipient_id, type, payload_json	PK notification_id
+182	m23_governance	notification_deliveries	TABLE	Status of notification delivery.	68	delivery_id, notification_id, channel, status	PK delivery_id; FK notification_id
+183	m23_governance	saved_replies	TABLE	Saved text for quick replies.	51	reply_id, contributor_id, title, body	PK reply_id; FK contributor_id
+184	m23_governance	draft_releases	TABLE	Draft release metadata.	53	release_id, tag_name, name, body	PK release_id
+185	m23_governance	release_assets	TABLE	Files attached to releases.	184	asset_id, release_id, name, size, download_count	PK asset_id; FK release_id
+186	m23_governance	emoji_reactions	TABLE	Reactions on comments/PRs.	68	reaction_id, content_type, content_id, emoji, user_id	PK reaction_id
+187	m23_governance	referenced_issues	TABLE	Issues referenced in PRs/Comments.	160	ref_id, source_type, source_id, issue_id	PK ref_id
+188	m23_governance	pinned_issues	TABLE	Issues pinned to repo top.	68	repo_id, issue_id, position	PK (repo_id, issue_id)
+189	m23_governance	locked_resources	TABLE	Resources locked for commenting (e.g. due to spam).	23	resource_type, resource_id, locked_reason	PK (resource_type, resource_id)
+190	m23_governance	transferred_issues	TABLE	History of issues transferred between repos.	160	issue_id, from_repo, to_repo, transferred_at	PK issue_id
+191	m23_governance	linked_issues	TABLE	Explicit linking of related issues.	160	issue_id_a, issue_id_b, relationship_type	PK (issue_id_a, issue_id_b)
+192	m23_governance	issue_timelines	TABLE	History of state changes on issues.	157	event_id, issue_id, event_type, actor_id, created_at	PK event_id; FK issue_id
+193	m23_governance	issue_assignees	TABLE	Users assigned to issues.	51	issue_id, assignee_id	PK (issue_id, assignee_id)
+194	m23_governance	issue_labels	TABLE	Labels applied to issues.	32	issue_id, label_id	PK (issue_id, label_id)
+195	m23_governance	milestone_issues	TABLE	Issues attached to milestones.	34	milestone_id, issue_id	PK (milestone_id, issue_id)
+196	m23_governance	stale_issues	TABLE	Issues marked as stale.	68	issue_id, marked_stale_at, close_after_days	PK issue_id
+197	m23_governance	blockchain_transactions	TABLE	Tracks bounties paid on-chain.	70	tx_hash, bounty_id, amount, network	PK tx_hash; FK bounty_id
+198	m23_governance	forks	TABLE	List of forks of the main repo.	68	fork_id, parent_repo_id, fork_name, owner_id	PK fork_id; FK parent_repo_id
+199	m23_governance	stars	TABLE	Users who starred the repo.	68	contributor_id, repo_id, starred_at	PK (contributor_id, repo_id)
+200	m23_governance	watchers	TABLE	Users watching the repo for notifications.	68	contributor_id, repo_id, subscription_type	PK (contributor_id, repo_id)

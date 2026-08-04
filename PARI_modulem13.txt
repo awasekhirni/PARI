@@ -1,0 +1,619 @@
+
+
+13.	Module M13	Secure Data Ingestion Pipeline
+a.	Summary
+The Secure Data Ingestion Pipeline (Module M13) serves as the foundational circulatory system for the PARI platform, acting as the high-throughput, fault-tolerant gateway responsible for ingesting the massive volume of heterogeneous financial data generated across the global ecosystem. In a high-frequency trading and digital payment environment capable of processing millions of transactions per minute, the integrity and reliability of data at the point of entry are paramount. This module is architected to solve the classic "dual-write problem" and network uncertainty by implementing an enterprise-grade, event-driven architecture centered around Apache Kafka, fortified with TLS 1.3 end-to-end encryption, and grounded in cryptographic immutability.
+
+At its core, Module M13 provides Exactly-Once Semantics (EOS), a critical requirement for financial systems where duplicate processing can lead to double-spending or incorrect tax calculations, and data loss can result in catastrophic financial and reputational damage. Unlike traditional message brokers that may offer at-least-once or at-most-once delivery, this pipeline utilizes idempotent producers and transactional-aware consumer groups to guarantee that every payment event, regulatory flag, or audit log is processed precisely once, regardless of network failures, retries, or system restarts. This is achieved through a sophisticated combination of Kafka transactional APIs and idempotency keys embedded within the message headers, allowing downstream services to safely reprocess messages without side effects.
+
+Security and privacy are woven directly into the ingestion logic. Leveraging TLS 1.3 with mutual authentication (mTLS), the pipeline ensures that all data in transit is encrypted and that only authenticated services—Wallets, Merchant Backends, or Exchange Nodes—can publish or consume topics. Furthermore, the module implements a cryptographic chaining mechanism using Merkle Trees. As batches of transactions are ingested, they are aggregated into Merkle structures, with the root hash stored immutably. This creates a tamper-evident seal for every batch of data entering the system, enabling auditors and regulators to verify the integrity of the data stream cryptographically without needing to inspect individual transaction payloads, thus preserving privacy while ensuring accountability.
+
+From an operational excellence perspective, guided by CMMI Level 5 principles, the pipeline is built for observability and self-healing. It incorporates real-time telemetry streaming to metrics backends (Prometheus) and distributed tracing (OpenTelemetry), allowing Site Reliability Engineers (SREs) to monitor ingestion throughput, latency percentiles, and consumer lag with granular precision. The design includes schema registry integration (Confluent Schema Registry or equivalent) to enforce backward and forward compatibility of data formats, preventing "bad data" from crashing downstream consumers. Additionally, the module supports dynamic throttling and backpressure handling to protect the database layer during peak load events, such as holiday sales or flash crowds, ensuring that the PARI system remains resilient and responsive under stress. By decoupling data producers from consumers, Module M13 provides the elasticity required to scale the PARI platform horizontally across geo-redundant zones, forming the bedrock of a robust, privacy-preserving financial infrastructure.
+b.	Scope
+The scope of Module M13 encompasses the entire data journey from the edge of the PARI infrastructure (the Northbound API Gateway) to the persistence layer or event stream processors.
+
+
+
+    Inclusions:
+         Management of Apache Kafka clusters (Topics, Partitions, Replicas).
+         Implementation of Producers (Wallets, Merchants) and Consumers (Analytics, Database Writers).
+         TLS 1.3/mTLS termination and certificate management integration.
+         Schema evolution and validation (Avro/JSON-LD/Protobuf).
+         Idempotency key generation and validation logic.
+         Merkle Tree generation and hash chaining for batch integrity.
+         Dead Letter Queue (DLQ) handling for poison pills.
+         Real-time metrics emission and alerting.
+         Geo-replication of data streams across availability zones.
+
+
+
+    Exclusions:
+         The actual business logic validation of transaction balances (handled by Module M01 & M05).
+         The persistence of the final financial state (handled by the PostgreSQL Database module, though M13 writes to it).
+         User Authentication (AuthN) via OAuth2 (handled at the API Gateway, though M13 validates the service token).
+
+
+c.	Business Case
+The digital payments landscape is plagued by data inconsistency and latency. Discrepancies between payment processors and merchant ledgers cost the global economy billions annually in chargebacks, manual reconciliation, and lost revenue. For a privacy-preserving system like PARI, where anonymity and auditability must coexist, the risk of data manipulation or loss at the ingestion layer is existential.
+
+Module M13 addresses these challenges directly:
+
+    Elimination of Reconciliation Costs: By guaranteeing exactly-once processing and using idempotency keys, the system removes the possibility of duplicate records, drastically reducing the need for expensive, manual bank-style reconciliation.
+    Regulatory Trust & Integrity: The Merkle Tree cryptographic chaining provides a mathematical proof of data integrity. Tax authorities and auditors can verify that the data stream has not been altered, satisfying strict fiscal traceability requirements without exposing user data.
+    High Availability & Scalability: Using an event-driven architecture allows PARI to handle peak loads (e.g., Black Friday) without degrading performance. This elasticity ensures a consistent user experience (sub-5s payments) and maintains merchant trust.
+    Security by Default: With mandatory TLS 1.3 and mTLS, the pipeline mitigates Man-in-the-Middle (MitM) attacks and ensures that only authorized, vetted components can inject financial data into the core.
+
+d.	KPIs
+     Ingestion Throughput: >50,000 Transactions Per Second (TPS) sustained.
+     End-to-End Latency: <100ms (P99) from API entry to Kafka commit.
+     Message Durability: 100% (Zero data loss, even with AZ failure).
+     Exactly-Once Semantics Success Rate: 100% (Zero duplicate processing).
+     Schema Compatibility Rate: >99.9% (Prevention of breaking changes).
+     Replay Attack Prevention: 100% (Expired/replayed nonce rejection).
+     Consumer Lag: <10ms (Real-time processing capability).
+
+e.	Stakeholder Insights
+Stakeholder	Concern	Implications
+SRE / Ops Team	System stability & observability during flash crowds.	Requires granular metrics, automated failover, and backpressure mechanisms to prevent cascading failures.
+Tax Authorities	Verifiable integrity of the transaction history.	Needs cryptographically immutable audit trails (Merkle roots) to trust the data without surveilling individual payloads.
+Merchants	Guarantee of payment receipt and no double-charging.	Relies on idempotency to ensure customers aren't charged twice and that settlements are accurate.
+Data Scientists (Fraud)	Timeliness and completeness of data for model training.	Real-time streaming (low latency) is critical; missing data (data loss) directly impacts fraud detection accuracy.
+Security Auditors	Encryption in transit and authentication of sources.	Mandatory TLS 1.3 and mTLS enforcement are non-negotiable for compliance with ISO 27001 and PSD3.
+
+f.	Knowledge Representation Graph (mermaid.js)
+graph TD
+    subgraph "External Sources"
+        A[Customer Wallet]
+        B[Merchant POS]
+        C[Bank Adapter]
+    end
+
+    subgraph "Module M13: Secure Data Ingestion Pipeline"
+        D[API Gateway / Load Balancer]
+        E[TLS 1.3 / mTLS Termination]
+        F[Schema Registry Validator]
+        G[Idempotency Key Checker]
+        H[Apache Kafka Cluster]
+        I[Zookeeper / KRaft Controller]
+        J[Merkle Tree Aggregator Service]
+    end
+
+    subgraph "Downstream Consumers"
+        K[Fraud Engine M03]
+        L[Settlement Hub M05]
+        M[PostgreSQL Database]
+        N[Auditor Module M06]
+    end
+
+    A -- JSON-LD Payment --> D
+    B -- ISO 20022 Msg --> D
+    C -- SWIFT/EBICS --> D
+
+    D -- Encrypted TLS 1.3 --> E
+    E -- Decrypted Payload --> F
+    F -- Validate Schema --> G
+    G -- Check Dedupe --> H
+
+    H -- Partition 1 --> K
+    H -- Partition 2 --> L
+    H -- Compact Topic --> M
+
+    H -- Batch Read --> J
+    J -- Merkle Root Hash --> N
+    J -- Integrity Check --> M
+
+    style H fill:#f9f,stroke:#333,stroke-width:2px
+    style J fill:#bbf,stroke:#333,stroke-width:2px
+
+g.	Comprehensive List of Features
+ID	Feature	Description	Business Case	AI/ML Algorithms	KPIs	Primary Users
+F001	TLS 1.3 Encryption	Enforces TLS 1.3 for all inbound connections to the Kafka cluster.	Ensures highest level of encryption in transit, protecting against eavesdropping.	N/A	Encryption Success Rate 100%	Security Engineers
+F002	Mutual TLS (mTLS)	Requires client certificates for all producer/consumer connections.	Prevents unauthorized services from injecting or reading data (Zero Trust).	N/A	Auth Failures < 0.01%	Security Engineers
+F003	Kafka Topic Partitioning	Automatic partitioning of topics based on Transaction ID or Merchant ID.	Enables horizontal scaling and parallel processing of high-volume streams.	N/A	Partition Balance Score 95%	Architects
+F004	Idempotent Producer	Configures Kafka producers to enable idempotency to prevent duplicate writes.	Guarantees exactly-once delivery semantics crucial for financial accuracy.	N/A	Duplicate Write Rate 0%	Backend Devs
+F005	Transactional API Support	Allows atomic writes across multiple partitions and topics.	Ensures consistency of related data (e.g., payment + receipt generation).	N/A	Transaction Commit Success 100%	Backend Devs
+F006	Schema Registry Integration	Validates Avro/JSON schemas against a central registry before ingestion.	Prevents bad data from crashing downstream consumers; enables governance.	N/A	Schema Rejection Rate >0%	Data Engineers
+F007	Backward Compatibility Check	Automatically enforces backward compatibility rules for schema evolution.	Allows system updates without breaking existing consumers (Zero downtime).	N/A	Breaking Changes Deployed 0%	Architects
+F008	Merkle Tree Hashing	Calculates SHA-3 root hashes for batches of messages.	Provides cryptographic proof of data integrity for auditors.	N/A	Hash Generation Time <5ms	Cryptographers
+F009	Merkle Proof Publication	Publishes Merkle roots to an immutable append-only log/Topic.	Enables external auditors to verify data integrity without accessing raw PII.	N/A	Proof Publication Latency <100ms	Compliance Officers
+F010	Dead Letter Queue (DLQ)	Automatically routes poison pill messages (unprocessible) to a DLQ topic.	Prevents a single bad message from halting the entire processing pipeline.	N/A	Pipeline Uptime 99.99%	SREs
+F011	DLQ Analysis Tooling	Automated parsing and alerting for messages entering the DLQ.	Reduces Mean Time To Recovery (MTTR) for data ingestion issues.	Anomaly Detection	MTTR < 15 mins	SREs
+F012	Exactly-Once Consumer	Consumer group configuration ensuring offsets are committed only after processing.	Prevents data loss during consumer crashes.	N/A	Data Loss Incidents 0	Backend Devs
+F013	Offsets Management	Kafka offset management to track consumer progress.	Allows consumers to rewind/replay for disaster recovery.	N/A	Offset Commit Latency <10ms	Backend Devs
+F014	Data Compression (Zstd)	High-ratio compression of payloads before network transmission.	Reduces network bandwidth costs and storage requirements.	N/A	Compression Ratio > 4:1	Architects
+F015	Consumer Group Rebalancing	Dynamic rebalancing of partitions when consumer pods scale up/down.	Ensures efficient resource utilization during auto-scaling events.	N/A	Rebalance Latency <30s	SREs
+F016	Sticky Assignor	Strategy to minimize partition movement during rebalancing.	Reduces unnecessary network traffic and processing churn.	N/A	Partition Movement Count	SREs
+F017	Dynamic Throttling	Automatically throttles producer rate if broker lag exceeds thresholds.	Protects the system from overwhelming the database layer.	Reinforcement Learning	Backpressure Trigger Accuracy	SREs
+F018	Producer Acknowledgment (acks=all)	Requires acknowledgment from all in-sync replicas before commit.	Ensures maximum data durability in event of node failure.	N/A	Durability Guarantee 100%	Architects
+F019	Min In-Sync Replicas (min.insync.replicas)	Configures the minimum number of replicas that must acknowledge a write.	Balances availability and consistency for high-value transactions.	N/A	RPO (Recovery Point Objective)=0	Architects
+F020	Unclean Leader Election	Prevention of unclean leader election to avoid data loss.	Prioritizes data consistency over availability during network partitions.	N/A	Data Consistency Violations 0	Architects
+F021	Prometheus Metrics Export	Exposes JMX/Java/Kafka metrics to Prometheus endpoint.	Enables real-time monitoring of cluster health.	N/A	Metrics Scraping Success 100%	SREs
+F022	Grafana Dashboarding	Pre-built dashboards for Bytes In/Out, Lag, and Request Rate.	Provides visual operational visibility.	N/A	Dashboard Refresh Rate 1s	SREs
+F023	AlertManager Integration	Alerts on critical events (Under Replicated Partitions, Offline Partitions).	Proactive incident response before users are impacted.	N/A	Alert Latency <1 min	SREs
+F024	Log Aggregation (ELK)	Centralizes broker and application logs.	Facilitates debugging and forensic analysis.	N/A	Log Indexing Latency <30s	Support
+F025	Distributed Tracing (OpenTelemetry)	Injects trace context into message headers.	Tracks a transaction across microservices end-to-end.	N/A	Trace Completion Rate 95%	Backend Devs
+F026	Geo-Replication	Replication of topics across data centers (Cross-Cluster Replication).	Disaster recovery capability for regional outages.	N/A	RPO < 1s (Cross DC)	Architects
+F027	MirrorMaker 2.0	Utilization of MirrorMaker 2.0 for cluster replication.	Standardized tooling for multi-cluster data sync.	N/A	Replication Lag <100ms	SREs
+F028	Connect API Support	Kafka Connect for sink/source connectors (e.g., to S3 or Elasticsearch).	Simplifies integration with external data stores.	N/A	Connector Uptime 99.9%	Data Engineers
+F029	JDBC Sink Connector	Streaming data directly from Kafka to PostgreSQL in real-time.	Enables low-latency updates to the financial ledger.	N/A	Sink Lag <100ms	Data Engineers
+F030	Debezium CDC	Change Data Capture for database changes into Kafka.	Synchronizes database state with other microservices.	N/A	CDC Latency <500ms	Backend Devs
+F031	JSON-LD Validation	Specific validation for Linked Data payloads in the pipeline.	Ensures semantic interoperability for regulatory reporting.	N/A	Validation Accuracy 100%	Data Engineers
+F032	ISO 20022 Parsing	Parsing of ISO 20022 financial messages before routing.	Ensures compatibility with legacy banking rails.	N/A	Parse Success Rate >99.9%	Integration Spec
+F033	Message Timestamp Extraction	Extracts event time from payload vs. using log time.	Critical for handling out-of-order data correctly.	N/A	Timestamp Accuracy 100%	Backend Devs
+F034	Graceful Shutdown	Hooks for draining existing messages before pod termination.	Prevents data loss during Kubernetes deployments.	N/A	Deployment Success Rate 100%	DevOps
+F035	Liveness/Readiness Probes	Kubernetes probes based on broker connectivity.	Ensures orchestration system routes traffic correctly.	N/A	Health Check Latency <1s	DevOps
+F036	RBAC for Kafka	Role-Based Access Control for topic operations (read/write/describe).	Principle of least privilege for internal services.	N/A	Access Denied Events (Monitored)	Security Engineers
+F037	ACL Management	Automated management of Access Control Lists via CI/CD.	Infrastructure as Code for security policies.	N/A	ACL Sync Time <5 mins	DevOps
+F038	Field-Level Encryption	Encryption of sensitive fields (e.g., identity) before writing to Kafka.	Defense in depth; prevents data leakage from broker storage.	N/A	Encryption Overhead <5%	Security Engineers
+F039	Tokenization	Replacing sensitive data with tokens in the stream.	Reduces compliance scope (PCI-DSS) for the ingestion layer.	N/A	Token Lookup Latency <1ms	Backend Devs
+F040	Payload Size Limit Enforcement	Rejects messages exceeding max payload size (e.g., 10MB).	Prevents "OOM" errors on consumers.	N/A	Rejection Rate Accuracy 100%	Architects
+F041	Batch Processing	Consumers process records in batches for efficiency.	Improves throughput for bulk writes to the database.	N/A	Batch Throughput >10k rec/s	Backend Devs
+F042	Async I/O	Non-blocking I/O for network communication.	Maximizes resource utilization under high concurrency.	N/A	Thread Utilization <80%	Backend Devs
+F043	Zero-Copy Optimization	Using Zero-Copy file transfer (page cache) in Kafka.	Reduces CPU usage and latency for data movement.	N/A	CPU Efficiency Gain 20%	Architects
+F044	Priority Topics	Dedicated high-throughput topics for urgent payments.	Ensures critical transactions are not delayed by bulk analytics.	N/A	Priority Queue Latency <50ms	Architects
+F045	Request Timeout Config	Dynamic configuration of producer/consumer timeouts.	Allows tuning for different network conditions.	N/A	Timeout Error Rate <0.1%	SREs
+F046	Retry Backoff Strategy	Exponential backoff for failed produce requests.	Prevents thundering herd effects during outages.	N/A	Retry Storm Prevention	Backend Devs
+F047	Client Quotas	Limits on bandwidth or request rate per client ID.	Prevents noisy neighbors from degrading cluster performance.	N/A	Fairness Index 100%	SREs
+F048	Record Header Metadata	Storing metadata (trace ID, tenant ID) in record headers.	Enables routing and filtering without deserializing the body.	N/A	Header Read Latency <1ms	Backend Devs
+F049	Compact Cleanup Policy	Log compaction for topics retaining only latest value per key.	Enables "Table-like" usage of Kafka for latest state.	N/A	Compaction Lag <5 mins	Architects
+F050	Delete Cleanup Policy	Time-based retention (e.g., 7 days) for non-critical topics.	Manages storage costs effectively.	N/A	Storage reclaim latency <1hr	SREs
+F051	Log Segment Rolling	Rolling log segments based on size or time.	Ensures efficient file management and deletion.	N/A	Segment Size Adherence 100%	SREs
+F052	KRaft Mode	Utilizing Kafka Raft metadata mode (vs Zookeeper).	Simplifies architecture by removing Zookeeper dependency.	N/A	Controller Recovery Time <30s	Architects
+F053	Controller Quorum	Configuring controller quorum votes.	Ensures consensus for metadata changes.	N/A	Metadata Consistency 100%	Architects
+F054	Self-Balancing Clusters	Automatic reassignment of partitions based on load.	Reduces manual operational overhead.	K-Means Clustering	Cluster Balance Score 95%	SREs
+F055	Cruise Control	Deployment of Cruise Control for cluster optimization.	Automates resource rebalancing and anomaly detection.	Anomaly Detection	Optimization Frequency Daily	SREs
+F056	Kafka Streams Support	Support for stream processing applications within the module.	Enables real-time aggregation and filtering.	N/A	Stream Lag <10ms	Backend Devs
+F057	Windowed Operations	Time-windowed aggregations (tumbling/hopping windows).	Enables real-time metrics calculation (e.g., volume per hour).	N/A	Window Latency Accuracy	Backend Devs
+F058	Join Operations	Stream-Table joins in Kafka Streams.	Enriches transaction data with merchant profiles in real-time.	N/A	Join Success Rate 99.9%	Backend Devs
+F059	Custom Serialization	specialized serializers for complex financial objects.	Optimizes performance and schema evolution.	N/A	Serialization Time <1ms	Backend Devs
+F060	Schema Evolution Strategy	Strategies for handling removed/added fields (e.g., DEFAULT, IGNORE).	Provides flexibility in API changes.	N/A	Schema Migration Success 100%	Architects
+F061	Confluent Platform Features	Utilization of specific Confluent enterprise features if applicable.	Access to advanced governance tools.	N/A	Feature Usage Rate	Architects
+F062	Multi-Tenancy Support	Isolation of data per tenant using prefixes or dedicated clusters.	Enables SaaS model for the PARI platform.	N/A	Tenant Isolation Score 100%	Architects
+F063	Topic Naming Convention	Strict naming conventions (e.g., prod.payment.eu).	Enforces organizational standards.	N/A	Naming Violations 0	Governance
+F064	Topic Auto-Creation	Disablement of auto-creation to enforce governance.	Prevents accidental topic creation.	N/A	Governance Violations 0	SREs
+F065	Producer Batching	Aggregation of multiple records into a single request.	Improves network throughput.	N/A	Batch Size Efficiency	Backend Devs
+F066	Linger Time	Configurable linger time to wait for more records before sending.	Balances latency and throughput.	N/A	Optimal Linger Tuning	SREs
+F067	Buffer Memory	Management of producer buffer memory.	Prevents OutOfMemoryErrors in high-throughput scenarios.	N/A	Memory Usage <80%	Backend Devs
+F068	Fetch Min Bytes	Minimum amount of data the server waits for before sending a fetch.	Improves consumer throughput.	N/A	Fetch Efficiency	Backend Devs
+F069	Max Poll Records	Limiting records returned in a single poll.	Prevents consumer overload and long processing times.	N/A	Poll Time Stability	Backend Devs
+F070	Max Poll Interval	Maximum time between polls before consumer leaves the group.	Detects hung consumers.	N/A	Hung Consumer Detection	SREs
+F071	Heartbeat Thread	Separate thread for sending heartbeats to coordinator.	Ensures liveness of active consumers.	N/A	Heartbeat Success Rate 100%	Backend Devs
+F072	Session Timeout	Timeout for consumer session to be considered dead.	Triggers rebalancing for failures.	N/A	Failover Time <30s	Architects
+F073	Consumer Lag Monitoring	Tooling to monitor lag per consumer group.	Ensures real-time processing capability.	N/A	Lag > 1000 alerts	SREs
+F074	End-to-End Encryption (E2EE)	Application-level encryption on top of TLS.	Protects data even if the cluster is compromised.	N/A	Decryption Success Rate 100%	Security Engineers
+F075	Hardware Security Modules (HSM)	Integration with HSMs for key management.	FIPS 140-2 compliance for high security.	N/A	HSM Latency <50ms	Security Engineers
+F076	FIPS 140-2 Mode	Running Kafka in FIPS compliant mode (Java crypto).	Regulatory requirement for some government deployments.	N/A	Compliance Pass Rate 100%	Security Engineers
+F077	Audit Logging	Logging of all administrative actions on the cluster.	Security forensics and compliance.	N/A	Log Completeness 100%	Auditors
+F078	GDPR Right to Erasure	Tools to scrub or compact topics containing user data.	Compliance with GDPR Art. 17.	N/A	Erasure Completion Time <24h	DPO
+F079	Data Retention Policies	Automated application of retention based on data classification.	Legal compliance and storage management.	N/A	Policy Violation Rate 0%	DPO
+F080	Cold Data Archival	Automated tiering of old data to S3/Glacier.	Cost optimization for long-term audit data.	N/A	Archival Cost Reduction	SREs
+F081	Replay Protection	Detecting and rejecting messages with older timestamps/sequence numbers.	Prevents replay attacks.	N/A	Replay Rejection Rate 100%	Security Engineers
+F082	Nonce Checking	Validation of unique nonces in message headers.	Ensures uniqueness of transactions.	N/A	Nonce Collision Rate 0	Backend Devs
+F083	Checksum Validation	CRC32/CRC32C validation of payloads.	Detects network corruption early.	N/A	Corrupt Packet Rate 0	Backend Devs
+F084	Chaos Engineering	Injection of faults (latency, pod kill) to test resilience.	Improves system antifragility.	Greedy Algorithms	MTTR Improvement	SREs
+F085	Capacity Planning	Automated forecasting of storage and throughput needs.	Prevents resource exhaustion.	Time Series Forecasting	Forecast Accuracy >90%	Architects
+F086	Cost Attribution	Tagging resources for cost allocation per business unit.	Financial transparency of infrastructure.	N/A	Billing Accuracy 100%	Finance
+F087	SLA Monitoring	Continuous monitoring against Service Level Agreements.	Ensures contractual obligations are met.	N/A	SLA Breach Count 0	Product Mgmt
+F088	SLO Error Budgets	Calculation and tracking of Error Budgets.	Data-driven decision making for releases.	N/A	Budget Utilization Tracking	SREs
+F089	Runbooks	Automated runbooks for common operational issues.	Reduces human error during incidents.	N/A	Runbook Execution Time <5m	SREs
+F090	Disaster Recovery Drills	Regular testing of DR procedures (failover/failback).	Validates recovery capabilities.	N/A	Drill Success Rate 100%	SREs
+F091	Blue/Green Deployment	Strategy for upgrading Kafka brokers with zero downtime.	Continuous delivery without service interruption.	N/A	Deployment Failure Rate 0%	DevOps
+F092	Canary Releases	Gradual rollout of new producer/consumer versions.	Mitigates risk of new code releases.	N/A	Canary Abort Time <10m	DevOps
+F093	Feature Flagging	Dynamic toggling of ingestion features.	Rapid rollback of problematic features.	N/A	Toggle Latency <1s	Product Mgmt
+F094	A/B Testing Support	Routing subsets of traffic to different processing logic.	Enables safe experimentation.	N/A	Sample Size Accuracy	Product Mgmt
+F095	Dark Launching	Deploying features in production without user traffic.	Validates performance under load.	N/A	Stability Score	SREs
+F096	Secret Management	Integration with Vault/K8s Secrets for credentials.	Prevents hardcoded secrets in code.	N/A	Secret Rotation 90 days	Security Engineers
+F097	Certificate Automation	ACME/Let's Encrypt or internal PKI automation for TLS certs.	Reduces operational overhead of cert management.	N/A	Cert Renewal Success 100%	SREs
+F098	IP Whitelisting	Network policies restricting access to Kafka brokers.	Reduces attack surface.	N/A	Unauthorized Access 0	Security Engineers
+F099	Network Policies (K8s)	Isolation of Kafka pods using NetworkPolicies.	Segments network traffic.	N/A	Policy Violation Rate 0	DevOps
+F100	Service Mesh Integration	Sidecar injection for mTLS and observability.	Uniform security layer.	N/A	Mesh Latency Overhead <5ms	Architects
+F101	gRPC Client Support	Native support for gRPC clients producing to Kafka.	High performance RPC integration.	N/A	gRPC Throughput >50k tps	Backend Devs
+F102	REST Proxy	RESTful interface for producing/consuming Kafka messages.	Enables simple integration for non-Java clients.	N/A	HTTP Error Rate <0.1%	Integration Spec
+F103	MQTT Bridge	Bridge for IoT devices to send data via MQTT to Kafka.	Support for connected payment terminals.	N/A	Bridge Throughput	IoT Engineers
+F104	AMQP Bridge	Bridge for legacy enterprise messaging (RabbitMQ).	Eases migration from legacy systems.	N/A	Translation Error Rate 0	Integration Spec
+F105	Schema Transformation	Auto-conversion between Avro, JSON, and Protobuf.	Interoperability between polyglot systems.	N/A	Transform Success Rate 100%	Data Engineers
+F106	Data Masking	Dynamic masking of PII in log streams.	Protects privacy in debugging environments.	N/A	Mask Coverage 100%	Security Engineers
+F107	Queryable State	Interactive queries in Kafka Streams.	Low-latency lookups of current state.	N/A	Query Latency <50ms	Backend Devs
+F108	Versioned Schema	Storing all versions of a schema in the registry.	Historical data traceability.	N/A	Schema Retrieval Time <100ms	Architects
+F109	Schema References	References between schemas (e.g., common types).	Reusability and consistency.	N/A	Reference Integrity 100%	Architects
+F110	Compatibility Level Config	Setting backward/forward/full/no compatibility per subject.	Granular control over evolution.	N/A	Config Accuracy 100%	Architects
+F111	Kerberos Authentication	Integration with Kerberos for enterprise environments.	Standardized enterprise auth.	N/A	Auth Latency <20ms	Security Engineers
+F112	LDAP Integration	User/Group synchronization with LDAP.	Centralized identity management.	N/A	Sync Time <5 mins	Security Engineers
+F113	OAuth2/OIDC Support	OAuth2 bearer token authentication for clients.	Modern web standard auth.	N/A	Token Validation Time <10ms	Backend Devs
+F114	Delegation Tokens	Delegation tokens for long-running jobs.	Avoids storing user credentials in jobs.	N/A	Token Expiry Handling	Backend Devs
+F115	SASL/SCRAM	Salted Challenge Response Authentication Mechanism.	Strong username/password auth.	N/A	Auth Success Rate 100%	Security Engineers
+F116	SASL/GSSAPI	Generic Security Services Application Program Interface (Kerberos).	Interoperability with Windows domains.	N/A	Interop Success Rate 100%	Security Engineers
+F117	Broker Metrics Granularity	High-resolution metrics (per topic, per partition).	Deep performance analysis.	N/A	Metric Collection Overhead <1%	SREs
+F118	JMX Exporter Security	Securing the JMX exporter endpoint.	Prevents unauthorized metrics scraping.	N/A	Auth Failures 0	Security Engineers
+F119	Log4j Configuration	Secure configuration of logging framework.	Prevents Log4Shell style vulnerabilities.	N/A	Vulnerability Scan Pass 100%	Security Engineers
+F120	Dependency Scanning	Automated scanning of Kafka client libraries.	Supply chain security.	N/A	Critical Vuln Time <24h	Security Engineers
+F121	Container Hardening	Hardened Docker images for Kafka brokers.	Minimal attack surface.	N/A	CVE Count 0 (High/Crit)	Security Engineers
+F122	Root Filesystem Read-Only	Running containers with read-only root FS.	Prevents runtime modifications.	N/A	Runtime Integrity 100%	DevOps
+F123	Non-Root User	Running Kafka processes as non-root user.	Least privilege execution.	N/A	Privilege Escalation 0	Security Engineers
+F124	Seccomp Profiles	Restricting system calls for containers.	Kernel-level hardening.	N/A	Syscall Filter Accuracy	Security Engineers
+F125	AppArmor/SELinux Profiles	Mandatory Access Control policies.	OS-level security enforcement.	N/A	Policy Violation Rate 0	Security Engineers
+F126	Resource Quotas	CPU/Memory limits for Kafka pods.	Prevents noisy neighbor issues.	N/A	OOM Kill Count 0	SREs
+F127	Pod Disruption Budgets	Ensuring minimum available pods during maintenance.	High availability during upgrades.	N/A	PDB Violation Rate 0	SREs
+F128	Pod Priority Classes	Prioritizing critical broker pods during eviction.	Ensures cluster stability.	N/A	Preemption Rate	SREs
+F129	Topology Spread Constraints	Spreading brokers across racks/zones.	Maximum fault isolation.	N/A	Zone Balance Score 100%	Architects
+F130	Volume Snapshots	Snapshots of Kafka log directories.	Fast recovery of broker storage.	N/A	Snapshot Restore Time <10m	SREs
+F131	Persistent Volume Claims	Dynamic provisioning of storage for brokers.	Automated storage management.	N/A	Provisioning Time <30s	DevOps
+F132	StorageClass Selection	Selecting SSD vs. HDD based on topic tier.	Optimizing cost vs. performance.	N/A	IOPS Performance vs Cost	Architects
+F133	Local PV Support	Use of local persistent volumes for extreme IOPS.	Maximizing throughput for critical topics.	N/A	IOPS > 50k	Architects
+F134	Disk Failure Detection	SMART monitoring and broker failure detection.	Proactive hardware replacement.	N/A	Failure Prediction Accuracy	SREs
+F135	Disk Balancing	Rebalancing data across disks on the same broker.	Preventing disk hotspots.	N/A	Disk Utilization Variance <10%	SREs
+F136	Controller Isolation	Isolating the controller on dedicated nodes.	Improves cluster stability.	N/A	Metadata Latency <10ms	Architects
+F137	Rack Awareness	Awareness of rack topology for replica placement.	Disaster recovery resilience.	N/A	Replica Spread	Architects
+F138	Producer Interceptor	Custom interceptor logic for adding metadata (Trace ID).	Enforces observability standards.	N/A	Interceptor Success Rate 100%	Backend Devs
+F139	Consumer Interceptor	Custom interceptor logic for monitoring consumption.	Granular consumer metrics.	N/A	Intercept Latency <1ms	Backend Devs
+F140	Custom Partitioner	Partitioning strategy based on business logic (e.g., geography).	Data locality optimization.	N/A	Partition Distribution	Backend Devs
+F141	Sticky Partitioning (Producers)	Batching records to the same partition before switching.	Reduces request latency.	N/A	Batch Latency Reduction	Backend Devs
+F142	Enable Idempotence Toggle	Runtime toggle for idempotence (risk management).	Debugging flexibility.	N/A	Toggle Audit Log	SREs
+F143	Transaction Timeout	Timeout for transaction completion.	Prevents dangling transactions.	N/A	Timeout Abort Rate 0%	Backend Devs
+F144	Transactional Coordinator	Caching of transaction state.	Performance optimization for transactions.	N/A	Cache Hit Rate >95%	Architects
+F145	Zombie Fencing	fencing out old zombie producers.	Data consistency during restarts.	N/A	Zombie Incident Rate 0	Architects
+F146	Fetch Error Handling	Logic for handling disconnected/illegal generation errors.	Robust consumer error handling.	N/A	Error Recovery Time <5s	Backend Devs
+F147	Max Poll Interval Handling	Extension of max poll interval during long batch processing.	Prevents accidental consumer rebalance.	N/A	Unnecessary Rebalance Count 0	Backend Devs
+F148	Assignors Customization	Custom partition assignor logic for complex topologies.	Fine-grained control over consumption.	N/A	Assignor Runtime	Backend Devs
+F149	Cooperative Rebalancing	Incremental (cooperative) vs stop-the-world rebalancing.	Reduces availability impact during rebalance.	N/A	Rebalance Availability Impact	Architects
+F150	Eager Rebalancing	Legacy rebalancing mode (fallback).	Compatibility with older clients.	N/A	Fallback Success Rate 100%	Architects
+
+
+
+h.	Comprehensive List of Database Objects
+
+ID	schema_name	object_name	object_type	description	feature_reference	column_names	constraints / notes	junction_tables
+T001	public	kafka_topics	TABLE	Registry of all Kafka topics managed by the platform.	F003	id, topic_name, partitions, replication_factor, retention_ms, config_json	PK: id, UQ: topic_name
+T002	public	topic_subscriptions	TABLE	Maps consumer groups to the topics they subscribe to.	F015	id, consumer_group_id, topic_id, subscription_pattern	PK: id, FK: topic_id
+T003	public	consumer_groups	TABLE	Metadata regarding active consumer groups.	F015	id, group_id, state, members, coordinator_id, rebalance_epoch	PK: group_id
+T004	public	consumer_lag	TABLE	Stores historical lag metrics for SRE monitoring.	F073	id, group_id, topic_partition, lag, offset, timestamp	PK: id, FK: group_id
+T005	public	schema_registry	TABLE	Stores Avro/JSON schemas and their versions.	F006	id, subject, version, schema_type, schema_text, compatibility_level	PK: (subject, version)
+T006	public	ingress_transactions	TABLE	Raw staging table for transactions before processing (if JDBC Sink).	F029	id, message_id, topic_name, partition, offset, payload_json, ingest_ts	PK: id, UQ: message_id
+T007	public	merkle_trees	TABLE	Stores root hashes for transaction batches for auditability.	F008	id, batch_id, root_hash, tree_algorithm, start_ts, end_ts, record_count	PK: id, UQ: root_hash
+T008	public	merkle_nodes	TABLE	Individual nodes of the Merkle tree for proof reconstruction.	F008	id, tree_id, node_hash, parent_id, node_depth, node_index	PK: id, FK: tree_id
+T009	public	dead_letter_queue	TABLE	Logs of messages that failed processing.	F010	id, original_topic, original_partition, original_offset, error_reason, payload_blob, failed_ts	PK: id
+T010	public	ingestion_metrics	TABLE	Aggregated throughput and latency metrics.	F022	id, metric_name, metric_value, unit, window_start_ts, labels_json	PK: id
+T011	public	api_client_quotas	TABLE	Defines throughput limits per client ID.	F047	id, client_id, produce_quota_mb, request_quota_per_sec, expiry_date	PK: client_id
+T012	public	tls_certificates	TABLE	Tracks active TLS certificates for mTLS.	F002	id, common_name, fingerprint, not_before, not_after, issuer_dn, status	PK: fingerprint, UQ: common_name
+T013	public	acl_policies	TABLE	Kafka Access Control Lists definitions.	F037	id, principal, resource_type, resource_name, operation, permission, host	PK: id
+T014	public	connector_configs	TABLE	Configurations for Kafka Connect sink/source connectors.	F028	id, connector_name, connector_class, config_json, status, last_modified	PK: connector_name
+T015	public	connector_status	TABLE	Real-time status of connector tasks.	F028	id, connector_name, task_id, state, worker_id, trace, timestamp	PK: (connector_name, task_id)
+T016	public	cluster_nodes	TABLE	Inventory of Kafka broker nodes.	F052	id, broker_id, host, port, rack, controller_id, status	PK: broker_id
+T017	public	partition_states	TABLE	State of individual partitions (ISR, leader, replicas).	F003	id, topic_name, partition_id, leader_epoch, isr_list, replicas_list, offline_replicas	PK: (topic_name, partition_id)
+T018	public	audit_logs	TABLE	Audit trail of administrative actions on the cluster.	F077	id, admin_user, action_type, resource, details_json, ip_address, timestamp	PK: id
+T019	public	replay_protection_cache	TABLE	Short-term cache of processed nonces/message IDs.	F082	id, nonce_hash, expiry_ts	PK: nonce_hash, TTL: 24h
+T020	public	compression_stats	TABLE	Metrics on compression efficiency per topic.	F014	id, topic_name, algorithm, avg_compression_ratio, total_bytes_before, total_bytes_after	PK: (topic_name, date)
+T021	public	retention_policies	TABLE	Custom retention rules mapped to data classification.	F050	id, classification_level, retention_ms, cleanup_policy, delete_reason	PK: id
+T022	public	rebalance_history	TABLE	History of consumer group rebalance events.	F015	id, group_id, reason, duration_ms, participant_changes, timestamp	PK: id
+T023	public	encryption_keys	TABLE	Mapping of Key IDs to encryption algorithms.	F075	id, key_id, algorithm, status, activation_ts, deactivation_ts	PK: key_id
+T024	public	ingestion_alerts	TABLE	Fired alerts from the monitoring system.	F023	id, alert_name, severity, description, affected_resource, resolved_at, fired_at	PK: id
+T025	public	offset_commits	TABLE	Log of consumer offset commits for analysis.	F013	id, group_id, topic, partition, offset, commit_timestamp	PK: id
+T026	public	geo_replication_lag	TABLE	Lag metrics for cross-cluster replication.	F026	id, source_cluster, target_cluster, topic, partition, time_lag_ms, timestamp	PK: (source_cluster, target_cluster, topic)
+T027	public	schema_compatibility_checks	TABLE	Results of schema compatibility validations.	F007	id, subject, proposed_version, current_version, result, error_msg, checked_at	PK: id
+T028	public	client_ip_whitelist	TABLE	Allowed IP ranges for producers/consumers.	F098	id, client_id, cidr_range, description, active_from, active_until	PK: id
+T029	public	topic_configs	TABLE	Detailed configuration overrides per topic.	F003	id, topic_name, config_key, config_value, is_default, updated_at	PK: (topic_name, config_key)
+T030	public	transaction_coordinators	TABLE	State of active transaction coordinators.	F144	id, transactional_id, coordinator_epoch, state, timeout_ms	PK: transactional_id
+T031	public	txn_participants	TABLE	Participants (partitions) in a transaction.	F144	id, transactional_id, topic, partition	PK: id
+T032	public	producer_states	TABLE	State of idempotent producers.	F004	id, producer_id, producer_epoch, last_sequence, coordinator_epoch	PK: producer_id
+T033	public	token_blacklist	TABLE	Revoked/OAuth2 tokens.	F114	id, token_hash, revoked_at, reason	PK: token_hash
+T034	public	data_classifications	TABLE	Data classification labels for PII handling.	F106	id, label_name, description, retention_period, encryption_required	PK: id
+T035	public	topic_classifications	TABLE	Mapping of topics to data classifications.	F106	id, topic_name, classification_id	PK: id, FK: classification_id
+T036	public	dr_runbooks	TABLE	Documentation for disaster recovery procedures.	F090	id, runbook_name, content, last_tested_date, owner	PK: id
+T037	public	dr_execution_logs	TABLE	Logs of executed disaster recovery drills.	F090	id, runbook_id, started_at, finished_at, success_flag, notes	PK: id
+T038	public	capacity_forecasts	TABLE	ML-based capacity forecasting results.	F085	id, forecast_date, metric_name, predicted_value, model_version	PK: id
+T039	public	cost_allocation	TABLE	Tagging and cost data for infrastructure.	F086	id, resource_id, cost_center, month, cost_usd	PK: (resource_id, month)
+T040	public	sla_breaches	TABLE	Record of SLA violations.	F087	id, sla_name, threshold, actual_value, breach_time, duration	PK: id
+T041	public	error_budgets	TABLE	Tracking of error budgets for SLOs.	F088	id, slo_name, budget_percentage, remaining_budget, period_start	PK: slo_name
+T042	public	feature_flags	TABLE	Feature toggles for ingestion services.	F093	id, flag_name, is_enabled, rollout_percentage, conditions_json	PK: flag_name
+T043	public	canary_releases	TABLE	Tracking of canary deployments.	F092	id, version, traffic_percentage, status, started_at	PK: version
+T044	public	secret_rotations	TABLE	History of secret rotation events.	F096	id, secret_path, rotated_by, rotated_at, status	PK: id
+T045	public	vulnerability_scans	TABLE	Results of dependency scans.	F120	id, library_name, version, cve_id, severity, scan_date, status	PK: id
+T046	public	backup_manifests	TABLE	Metadata for volume snapshots.	F130	id, snapshot_id, broker_id, creation_date, size_gb, status	PK: snapshot_id
+T047	public	broker_metrics_raw	TABLE	High-frequency metrics storage (time-series optimized).	F117	id, broker_id, metric_name, value, timestamp	PK: (broker_id, metric_name, timestamp)
+T048	public	log4j_events	TABLE	Application logs stored in DB for forensic analysis.	F119	id, level, logger, message, exception_stack, thread, timestamp	PK: id
+T049	public	kafka_users	TABLE	User management for SASL/SCRAM.	F115	id, username, mechanism, salt, stored_key, server_key, created_at	PK: username
+T050	public	kafka_acls	TABLE	Fine-grained ACL definitions.	F036	id, principal, host, operation, permission_type, resource_pattern_type	PK: id
+E001	public	acl_permission_enum	ENUM	Types of ACL permissions (ALLOW, DENY).	T050	ALLOW, DENY
+E002	public	acl_operation_enum	ENUM	Kafka operations (READ, WRITE, CREATE, DELETE, ALTER).	T050	READ, WRITE, CREATE, DELETE, ALTER, DESCRIBE, CLUSTER_ACTION, ALL
+E003	public	resource_type_enum	ENUM	Kafka resource types (TOPIC, GROUP, CLUSTER).	T013	TOPIC, GROUP, CLUSTER, TRANSACTIONAL_ID
+E004	public	schema_type_enum	ENUM	Schema types supported.	T005	AVRO, PROTOBUF, JSONSCHEMA
+E005	public	cleanup_policy_enum	ENUM	Log cleanup policies.	T021	DELETE, COMPACT, COMPACT_AND_DELETE
+E006	public	connector_status_enum	ENUM	States for Kafka Connect.	T015	RUNNING, PAUSED, FAILED, RESTARTING, UNASSIGNED
+E007	public	consumer_state_enum	ENUM	States of consumer groups.	T003	STABLE, PREPARING_REBALANCE, COMPLETING_REBALANCE, DEAD, EMPTY
+E008	public	severity_enum	ENUM	Alert severity levels.	T024	CRITICAL, HIGH, MEDIUM, LOW, INFO
+E009	public	compression_type_enum	ENUM	Compression algorithms.	T020	NONE, GZIP, SNAPPY, LZ4, ZSTD
+E010	public	tls_cert_status_enum	ENUM	Status of a certificate.	T012	ACTIVE, REVOKED, EXPIRED
+V001	public	v_consumer_lag_summary	VIEW	Summarized lag per consumer group.	T004	group_id, total_lag, stale_partitions
+V002	public	v_topic_throughput	VIEW	Bytes in/out per topic.	T010	topic_name, bytes_in, bytes_out, window_ts
+V003	public	v_broker_health	VIEW	Overall status of Kafka brokers.	T016, T047	broker_id, status, cpu_avg, disk_usage
+V004	public	v_active_connectors	VIEW	List of running connectors.	T014, T015	connector_name, tasks_running, last_error
+V005	public	v_audit_trail_recent	VIEW	Last 50 admin actions.	T018	admin_user, action, timestamp
+P001	public	sp_purge_old_metrics	PROCEDURE	Purges metrics older than retention period.	T010	IN retention_days
+P002	public	sp_recalculate_merkle_root	PROCEDURE	Recalculates Merkle root for audit integrity.	T007	IN batch_id
+P003	public	sp_rotate_kafka_acls	PROCEDURE	Applies new ACL definitions from table to cluster.	T050
+P004	public	sp_expire_delegation_tokens	PROCEDURE	Marks expired tokens.	T033
+P005	public	sp_check_schema_compatibility	PROCEDURE	Validates proposed schema against registry.	T005	IN subject, IN new_schema
+P006	public	sp_replay_dead_letter	PROCEDURE	Re-submits messages from DLQ to main topic.	T009	IN limit_count
+P007	public	sp_update_consumer_quota	PROCEDURE	Updates client quotas dynamically.	T011	IN client_id, IN new_quota
+P008	public	sp_log_audit_action	PROCEDURE	Standardized logging for audit trail.	T018	IN user, IN action, IN details
+P009	public	sp_create_topic_registry	PROCEDURE	Registers a new topic in the management DB.	T001	IN topic_name, IN partitions
+P010	public	sp_analyze_rebalance	PROCEDURE	Analyzes rebalance logs for anomalies.	T022	IN group_id
+T051	public	stream_applications	TABLE	Registry of Kafka Streams apps deployed.	F056	id, app_id, status, docker_image, config_json	PK: app_id
+T052	public	stream_thread_metrics	TABLE	Per-thread metrics for stream apps.	F056	id, app_id, thread_id, metric_name, value, ts	PK: id
+T053	public	custom_state_stores	TABLE	Metadata for custom state stores in streams.	F107	id, store_name, app_id, changelog_topic, retention_ms	PK: id
+T054	public	protobuf_dependencies	TABLE	Dependency graph for Protobuf schemas.	T005	id, parent_schema_id, dependency_schema_id	PK: id, FK: schema_id
+T055	public	queryable_state_cache	TABLE	Cache for interactive query results.	F107	id, store_name, key_hash, value_blob, ttl_ts	PK: id
+T056	public	bridge_configs	TABLE	Configuration for MQTT/AMQP bridges.	F103, F104	id, bridge_type, remote_addr, topic_mapping_json	PK: id
+T057	public	bridge_status	TABLE	Connection status of bridges.	T056	id, bridge_id, connected_clients, msg_in, msg_out, status	PK: bridge_id
+T058	public	ldap_sync_history	TABLE	Logs of user syncs from LDAP.	F112	id, sync_start, sync_end, users_added, users_removed	PK: id
+T059	public	kerberos_principals	TABLE	Valid Kerberos principals.	F111	id, principal_name, realm, role	PK: principal_name
+T060	public	oauth_introspection	TABLE	Cache of OAuth2 introspection results.	F113	id, token_hash, active, scope, client_id, expiry	PK: token_hash
+T061	public	quota_violations	TABLE	Log of clients exceeding quotas.	F047	id, client_id, limit_type, actual_value, timestamp	PK: id
+T062	public	partition_reassignments	TABLE	History of partition reassignments.	T054	id, topic, partition, old_broker, new_broker, status	PK: id
+T063	public	controller_elections	TABLE	History of Kafka controller elections.	F053	id, epoch, broker_id, timestamp	PK: id
+T064	public	log_segment_sizes	TABLE	Size metrics for log segments per partition.	F051	id, topic, partition, segment_id, size_bytes, age_ms	PK: id
+T065	public	disk_health	TABLE	SMART health data for broker disks.	F134	id, broker_id, device_id, smart_raw, health_status	PK: id
+T066	public	pod_disturbance_events	TABLE	Kubernetes pod disruption events.	F127	id, pod_name, disruption_type, timestamp	PK: id
+T067	public	priority_topic_configs	TABLE	Specific configs for priority topics.	F044	id, topic_name, min_insync_replicas, unclean_leader_election_enable	PK: topic_name
+T068	public	low_latency_qos	TABLE	QoS settings for low-latency streams.	F003	id, topic_name, fetch_min_bytes, fetch_max_wait_ms	PK: topic_name
+T069	public	high_throughput_qos	TABLE	QoS settings for high-volume streams.	F003	id, topic_name, batch_size, linger_ms, compression_type	PK: topic_name
+T070	public	interceptor_metrics	TABLE	Metrics from producer/consumer interceptors.	F138, F139	id, interceptor_type, class_name, success_count, fail_count	PK: id
+T071	public	custom_partitioner_stats	TABLE	Statistics on custom partitioner distribution.	F140	id, topic_name, partition_id, record_count	PK: (topic_name, partition_id)
+T072	public	zombie_producers	TABLE	Detected fenced (zombie) producers.	F145	id, producer_id, detected_epoch, fencing_timestamp	PK: id
+T073	public	transaction_timeouts	TABLE	Log of transactions that timed out.	F143	id, transactional_id, timeout_ms, start_ts, end_ts	PK: id
+T074	public	eager_rebalance_stats	TABLE	Metrics for eager rebalancing mode.	F150	id, group_id, stop_time_ms, processing_time_ms	PK: id
+T075	public	cooperative_rebalance_stats	TABLE	Metrics for cooperative rebalancing mode.	F149	id, group_id, tasks_revoked, tasks_assigned, total_duration	PK: id
+T076	public	network_policy_rules	TABLE	K8s NetworkPolicy rules applied to Kafka.	F099	id, pod_selector, ingress_cidr, egress_cidr, port	PK: id
+T077	public	service_mesh_configs	TABLE	Istio/Linkerd configuration overrides.	F100	id, service_name, sidecar_injection, mtls_mode	PK: service_name
+T078	public	rest_proxy_users	TABLE	Auth for Kafka REST Proxy.	F102	id, username, password_hash, role	PK: username
+T079	public	rest_proxy_acl	TABLE	ACL for REST proxy access to topics.	F102	id, username, resource, pattern_type, operation	PK: id
+T080	public	mqtt_client_sessions	TABLE	Active MQTT client sessions via bridge.	F103	id, client_id, connected_at, last_seen, subscriptions	PK: client_id
+T081	public	amqp_bindings	TABLE	AMQP queue to Kafka topic bindings.	F104	id, queue_name, topic_name, routing_key	PK: id
+T082	public	schema_approval_queue	TABLE	Queue for proposed schemas requiring manual approval.	T005	id, subject, version, proposed_schema, requester, status	PK: id
+T083	public	data lineage graph	TABLE	Graph representation of data flow (Topic -> App -> Topic).	T006	id, source_topic, destination_topic, app_id	PK: id
+T084	public	field_level_encryption_keys	TABLE	Keys for specific field encryption.	F038	id, field_name, key_id, algorithm, active	PK: id
+T085	public	masking_rules	TABLE	Rules for dynamic data masking.	F106	id, field_path, mask_function, user_role_context	PK: id
+T086	public	gdpr_right_to_be_forgot	TABLE	Queue for GDPR deletion requests.	F078	id, user_subject, request_type, status, requested_at	PK: id
+T087	public	cold_storage_manifests	TABLE	Manifests for data archived to S3/Glacier.	T080	id, topic_name, partition, start_offset, end_offset, s3_uri	PK: id
+T088	public	archival_jobs	TABLE	Status of archival jobs.	T080	id, job_type, status, started_at, completed_at, records_processed	PK: id
+T089	public	cost_forecasts	TABLE	Forecasts for infrastructure costs.	T039	id, forecast_date, estimated_cost, confidence_interval	PK: id
+T090	public	incident_responses	TABLE	Records of incident responses.	T024	id, incident_id, severity, root_cause, resolved_at	PK: id
+T091	public	on_call_roster	TABLE	Schedule of on-call engineers.	T024	id, engineer_id, shift_start, shift_end, role	PK: id
+T092	public	runbook_steps	TABLE	Steps defined in a runbook.	T036	id, runbook_id, step_order, command, expected_outcome	PK: id
+T093	public	chaos_tests	TABLE	Configuration of chaos engineering tests.	T084	id, test_name, fault_injection_type, target_service, schedule	PK: id
+T094	public	chaos_test_results	TABLE	Results of executed chaos tests.	T093	id, test_id, run_id, success_flag, latency_impact, error_log	PK: id
+T095	public	capacity_planning_reports	TABLE	Generated reports for capacity planning.	T038	id, report_date, created_by, content_json	PK: id
+T096	public	feature_flag_usage	TABLE	Usage statistics of feature flags.	T042	id, flag_name, evaluation_count, last_evaluated_ts	PK: id
+T097	public	canary_analysis	TABLE	Analysis of canary release performance.	T043	id, canary_version, metric_name, baseline_value, canary_value	PK: id
+T098	public	secret_versioning	TABLE	History of secret versions.	T044	id, secret_path, version, checksum, created_at	PK: (secret_path, version)
+T099	public	vulnerability_patches	TABLE	Tracking of vulnerability remediation.	T045	id, cve_id, patched_version, patch_date, status	PK: id
+T100	public	volume_snapshot_schedule	TABLE	Schedule for automated snapshots.	T046	id, broker_id, cron_expression, retention_count	PK: id
+T101	public	slos	TABLE	Service Level Objectives definitions.	T041	id, slo_name, description, target_value, window	PK: slo_name
+T102	public	burn_rate_alerts	TABLE	Alerts triggered by high error budget burn rate.	T041	id, slo_name, burn_rate, window_minutes, alert_sent	PK: id
+T103	public	error_budget_policy	TABLE	Policy definitions for how to use error budgets.	T041	id, policy_name, action_trigger, action_description	PK: id
+T104	public	api_rate_limits	TABLE	Rate limits for REST API endpoints.	F102	id, endpoint, requests_per_minute, burst_capacity	PK: endpoint
+T105	public	grpc_service_methods	TABLE	Registry of supported gRPC methods.	F101	id, service_name, method_name, request_type, response_type	PK: (service_name, method_name)
+T106	public	grpc_interceptors	TABLE	List of applied gRPC interceptors.	F101	id, interceptor_order, class_name, config	PK: id
+T107	public	mqtt_qos_levels	TABLE	Mapping of MQTT QoS to Kafka guarantees.	F103	id, mqtt_qos, kafka_acks, description	PK: mqtt_qos
+T108	public	amqp_delivery_modes	TABLE	Mapping of AMQP delivery modes.	F104	id, delivery_mode, persistence_flag, description	PK: id
+T109	public	json_schema_validation	TABLE	Validation rules for generic JSON schemas.	F031	id, schema_id, rule_path, rule_type, constraint	PK: id
+T110	public	xml_namespace_registry	TABLE	Registry for ISO 20022 XML namespaces.	F032	id, prefix, uri, version	PK: uri
+T111	public	data_type_catalog	TABLE	Catalog of financial data types.	F031	id, type_name, format_regex, example	PK: id
+T112	public	transform_functions	TABLE	Registry of available data transform functions.	F105	id, function_name, input_type, output_type, code_blob	PK: function_name
+T113	public	data_lineage_rules	TABLE	Rules for inferring data lineage.	T083	id, source_pattern, target_pattern, rule_type	PK: id
+T114	public	encryption_rotation_schedule	TABLE	Schedule for key rotation.	F075	id, key_id, next_rotation_date, status	PK: id
+T115	public	fips_compliance_checks	TABLE	Logs of FIPS mode compliance checks.	F076	id, check_time, component, is_compliant, details	PK: id
+T116	public	audit_report_submissions	TABLE	Records of audit reports submitted to authorities.	F009	id, report_period, merkle_root_hash, submission_date, status	PK: id
+T117	public	dpia_records	TABLE	Data Protection Impact Assessments (GDPR).	T034	id, processing_activity, risk_level, mitigation_measures	PK: id
+T118	public	data_subject_requests	TABLE	Tracking of GDPR user requests (access/delete).	T078	id, request_id, user_id, type, status, completed_at	PK: request_id
+T119	public	legal_hold_tags	TABLE	Tags preventing deletion of data for legal reasons.	T080	id, tag_name, reason, expiry_date	PK: id
+T120	public	retention_override_requests	TABLE	Requests to override retention policies.	T050	id, topic_name, requester, justification, approved	PK: id
+T121	public	replication_throttling	TABLE	Config for throttling inter-broker replication.	T026	id, source_broker, target_broker, bytes_per_sec	PK: (source_broker, target_broker)
+T122	public	leader_balancing_tasks	TABLE	Background tasks for leader election balancing.	T054	id, task_id, status, start_ts, moved_leaders_count	PK: id
+T123	public	preferred_replica_election	TABLE	Queue of preferred replica elections.	T054	id, topic, partition, preferred_leader	PK: id
+T124	public	reassign_partitions	TABLE	JSON configs for partition reassignments.	T062	id, version, partitions_json, status	PK: id
+T125	public	cruise_control_anomaly	TABLE	Detected anomalies by Cruise Control.	F055	id, anomaly_type, severity, detection_time	PK: id
+T126	public	cruise_control_goals	TABLE	Active optimization goals.	F055	id, goal_name, priority, weight	PK: id
+T127	public	cpu_throttling_metrics	TABLE	Metrics on CPU throttling for containers.	T126	id, pod_name, throttle_time_total, timestamp	PK: id
+T128	public	memory_usage_history	TABLE	Historical memory usage stats.	T126	id, pod_name, rss_bytes, cache_bytes, timestamp	PK: id
+T129	public	network_io_stats	TABLE	Network I/O statistics per pod.	T126	id, pod_name, rx_bytes, tx_bytes, timestamp	PK: id
+T130	public	disk_io_stats	TABLE	Disk I/O statistics per broker.	T126	id, broker_id, read_bytes, write_bytes, timestamp	PK: id
+T131	public	thread_pool_stats	TABLE	Kafka broker thread pool utilization.	T047	id, broker_id, pool_name, active, queue, timestamp	PK: id
+T132	public	log_cleaner_stats	TABLE	Statistics for log compaction.	T003	id, topic_name, bytes_cleaned, mb_per_sec, time_spent_ratio	PK: id
+T133	public	fetch_request_metrics	TABLE	Detailed fetch request performance.	T025	id, partition, fetch_time_ms, bytes_fetched, records_fetched	PK: id
+T134	public	produce_request_metrics	TABLE	Detailed produce request performance.	T025	id, topic, produce_time_ms, bytes_produced, throttle_time	PK: id
+T135	public	request_handler_avg	TABLE	Average time spent in request handler.	T047	id, broker_id, request_type, avg_time_ms, timestamp	PK: id
+T136	public	network_processor_avg	TABLE	Average time in network processor.	T047	id, broker_id, avg_idle_percent, timestamp	PK: id
+T137	public	message_conversion	TABLE	Count of message format conversions.	F105	id, from_format, to_format, count, timestamp	PK: id
+T138	public	failed_auth_attempts	TABLE	Log of failed authentication attempts.	F115	id, username, source_ip, reason, timestamp	PK: id
+T139	public	successful_auth_attempts	TABLE	Log of successful authentications.	F115	id, username, source_ip, mechanism, timestamp	PK: id
+T140	public	authorization_decisions	TABLE	Log of authorization checks.	F036	id, principal, operation, resource, allowed, timestamp	PK: id
+T141	public	token_revocation_list	TABLE	CRL style list for revoked tokens.	T033	id, token_id, revoked_at, revoked_by	PK: token_id
+T142	public	dynamic_config_history	TABLE	History of dynamic config changes.	T001	id, config_type, resource, old_value, new_value, changed_at	PK: id
+T143	public	quota_exemption_requests	TABLE	Requests for temporary quota exemptions.	T047	id, client_id, requested_limit, reason, expiry	PK: id
+T144	public	rack_topology	TABLE	Definition of rack topology.	T016	id, rack_id, zone, availability_domain	PK: rack_id
+T145	public	broker_rack_mapping	TABLE	Mapping of brokers to racks.	T016	id, broker_id, rack_id	PK: broker_id
+T146	public	failover_events	TABLE	Log of failover events.	T016	id, failed_broker, successor_broker, failover_time_ms	PK: id
+T147	public	maintenance_windows	TABLE	Scheduled maintenance windows.	T091	id, window_start, window_end, affected_brokers, type	PK: id
+T148	public	rolling_upgrade_status	TABLE	Status of a rolling upgrade process.	T091	id, version_to, total_brokers, upgraded_count, status	PK: id
+T149	public	broker_start_stop	TABLE	Log of broker start and stop events.	T016	id, broker_id, event_type, timestamp	PK: id
+T150	public	controller_failover	TABLE	Log of controller failover events.	T053	id, old_controller, new_controller, epoch, timestamp	PK: id
+T151	public	unclean_leader_election	TABLE	Log of unclean leader elections.	T020	id, topic, partition, elected_leader, preferred_leader	PK: id
+T152	public	offline_partitions_count	TABLE	Timeseries of offline partition count.	T017	id, timestamp, count	PK: id
+T153	public	under_replicated_partitions	TABLE	Timeseries of under replicated partition count.	T017	id, timestamp, count	PK: id
+T154	public	active_controllers	TABLE	History of active controller brokers.	T053	id, broker_id, epoch, start_time, end_time	PK: id
+T155	public	cluster_id	TABLE	Store for the unique Cluster ID.	T016	id, cluster_uuid	PK: id
+T156	public	feature_version_map	TABLE	Map of supported Kafka API versions.	T016	id, api_key, min_version, max_version	PK: api_key
+T157	public	supported_compressions	TABLE	Supported compression codecs per broker.	T020	id, broker_id, codec_name	PK: (broker_id, codec_name)
+T158	public	listener_security	TABLE	Configuration for listeners and security protocols.	F002	id, listener_name, protocol, port, keystore_location	PK: listener_name
+T159	public	sasl_mechanisms	TABLE	Enabled SASL mechanisms.	F115	id, mechanism_name, jaas_config_module	PK: mechanism_name
+T160	public	inter_broker_listener	TABLE	Listener used for inter-broker communication.	T016	id, listener_name, security_protocol	PK: listener_name
+T161	public	client_metrics_config	TABLE	Config for collecting client side metrics.	T025	id, group_id, matching_pattern, interval_ms	PK: id
+T162	public	client_metrics_data	TABLE	Ingested client telemetry data.	T025	id, client_id, name, tags_json, value	PK: id
+T163	public	create_topic_policy	TABLE	Config validation policy for topic creation.	T064	id, policy_name, validation_rules_json	PK: id
+T164	public	alter_config_policy	TABLE	Config validation policy for config alterations.	T064	id, policy_name, validation_rules_json	PK: id
+T165	public	client_quotas_match	TABLE	Match rules for dynamic client quotas.	T047	id, quota_entity, match_pattern, limit	PK: id
+T166	public	token_cache	TABLE	Cache for delegation tokens.	T033	id, token_id, hmac, owner, renewers, expiry	PK: token_id
+T167	public	scram_credential	TABLE	SCRAM credentials for users.	T049	id, username, salt, stored_key, server_key, iterations	PK: username
+T168	public	user_scram_credentials	TABLE	User-level SCRAM mappings.	T049	id, user_id, mechanism_name	PK: user_id
+T169	public	alter_user_scram_credentials	TABLE	History of SCRAM credential alterations.	T049	id, username, timestamp, operation	PK: id
+T170	public	consumer_group_heartbeat	TABLE	Consumer group heartbeat timestamps.	T071	id, group_id, member_id, generation_id, timestamp	PK: (group_id, member_id)
+T171	public	txn_marker	TABLE	Transaction markers written to log.	T144	id, transactional_id, producer_id, epoch, type, offset	PK: id
+T172	public	txn_id_mapping	TABLE	Mapping of transaction IDs to internal IDs.	T144	id, transactional_id, producer_id	PK: transactional_id
+T173	public	producer_id_mapping	TABLE	Mapping of producer IDs to metadata.	T032	id, producer_id, current_txn_id	PK: producer_id
+T174	public	log_dir_failure	TABLE	Log directory failure events.	T065	id, broker_id, log_dir, failure_time	PK: id
+T175	public	isr_expansion_rate	TABLE	Rate of ISR expansion events.	T017	id, timestamp, rate	PK: id
+T176	public	isr_shrink_rate	TABLE	Rate of ISR shrink events.	T017	id, timestamp, rate	PK: id
+T177	public	producer_request_size	TABLE	Histogram of producer request sizes.	T134	id, bucket_size, count	PK: bucket_size
+T178	public	fetch_request_size	TABLE	Histogram of fetch request sizes.	T133	id, bucket_size, count	PK: bucket_size
+T179	public	bytes_in_per_replica	TABLE	Bytes in rate per replica.	T047	id, broker_id, topic, partition, rate	PK: (broker_id, topic, partition)
+T180	public	bytes_out_per_replica	TABLE	Bytes out rate per replica.	T047	id, broker_id, topic, partition, rate	PK: (broker_id, topic, partition)
+T181	public	reassign_partitions_status	TABLE	Status of ongoing partition reassignments.	T124	id, topic, partition, status, completion_pct	PK: (topic, partition)
+T182	public	list_partition_reassignments	TABLE	List of current partition reassignments.	T124	id, topic, partition, replicas, adding_replicas, removing_replicas	PK: (topic, partition)
+T183	public	elect_leaders	TABLE	Leader election results.	T124	id, topic, partition, elected_leader, timestamp	PK: (topic, partition)
+T184	public	alter_partition_reassignments	TABLE	Log of alter partition reassignment commands.	T124	id, command_json, timestamp	PK: id
+T185	public	incremental_cooperative_reassign	TABLE	Logs for incremental reassignment.	T149	id, group_id, topic, partition, action	PK: id
+T186	public	client_quotas_description	TABLE	Description of current quota limits.	T047	id, entity, limit_name, limit_value	PK: (entity, limit_name)
+T187	public	alter_client_quotas	TABLE	Log of alter quota commands.	T047	id, entity, operation, delta, timestamp	PK: id
+T188	public	describe_user_scram_credentials	TABLE	List of SCRAM credentials.	T049	id, username, mechanism	PK: username
+T189	public	alter_user_scram_credentials_log	TABLE	Log of altering SCRAM creds.	T169	id, username, operation, timestamp	PK: id
+T190	public	delete_records	TABLE	Records of delete records requests.	T021	id, topic, partition, before_offset, low_watermark	PK: id
+T191	public	describe_configs	TABLE	Current configuration of resources.	T064	id, resource_type, resource_name, config_name, config_value	PK: id
+T192	public	alter_configs	TABLE	Log of alter configuration requests.	T142	id, resource_type, resource_name, config_name, old_val, new_val	PK: id
+T193	public	create_acls	TABLE	Log of ACL creation.	T036	id, principal, host, operation, permission_type, resource_pattern	PK: id
+T194	public	delete_acls	TABLE	Log of ACL deletion.	T036	id, principal, host, operation, permission_type, resource_pattern	PK: id
+T195	public	describe_acls	TABLE	List of current ACLs.	T036	id, principal, host, operation, permission_type, resource_pattern	PK: id
+T196	public	add_partitions_to_txn	TABLE	Log of adding partitions to transactions.	T144	id, transactional_id, producer_id, epoch, topic, partition	PK: id
+T197	public	add_offsets_to_txn	TABLE	Log of adding offsets to transactions.	T144	id, transactional_id, producer_id, epoch, group_id	PK: id
+T198	public	end_txn	TABLE	Log of transaction end (commit/abort).	T144	id, transactional_id, producer_id, epoch, commit	PK: id
+T199	public	txn_offset_commit	TABLE	Log of transaction offset commits.	T144	id, transactional_id, producer_id, epoch, group_id, offset	PK: id
+T200	public	describe_configs_quotas	TABLE	Specific config for quotas.	T047	id, entity, config_name, config_value	PK: id
+T201	public	pq_crypto_configurations	TABLE	Stores configurations for post-quantum cryptographic algorithms (e.g., CRYSTALS-Dilithium) used for signing message batches.	M24 (PQC), F075	id, algorithm_name, parameter_set, key_length, status	PK: id, UQ: algorithm_name
+T202	public	pq_key_rotation_schedule	TABLE	Schedule and history of Post-Quantum key rotations for cryptographic chaining.	M24, F114	id, key_id, rotation_ts, next_rotation_ts, status, approved_by	PK: id, FK: T023
+T203	public	signature_verification_audit	TABLE	Logs of cryptographic signature verifications (RSA vs. PQC) for ingested batches.	F009, F083	id, batch_id, signature_type, verification_result, verification_ts, algo_version	PK: id
+T204	public	data_residency_policies	TABLE	Defines data sovereignty rules mapping data classifications to physical regions/Availability Zones.	F026, F034	id, classification_level, allowed_region, allowed_cloud_provider, legal_jurisdiction	PK: id
+T205	public	sovereignty_violation_log	TABLE	Logs of events where data was processed or stored in a non-compliant region.	F026, T204	id, event_id, data_class, intended_region, actual_region, severity, timestamp	PK: id
+T206	public	region_latency_matrix	TABLE	Inter-region latency measurements used for routing optimization.	F026	id, source_region, target_region, latency_ms, last_updated	PK: (source_region, target_region)
+T207	public	distributed_trace_index	TABLE	Index mapping Trace IDs to the specific Kafka topics/partitions they traversed.	F025	id, trace_id, topic_name, partition, offset, timestamp	PK: trace_id, FK: T017
+T208	public	synthetic_transactions	TABLE	Records of synthetic "ping" transactions used to monitor pipeline health.	F084	id, transaction_id, source, payload_hash, inject_ts, receive_ts	PK: transaction_id
+T209	public	alert_suppression_rules	TABLE	Rules for suppressing alerts during known maintenance windows or false-positive conditions.	F023	id, alert_name_pattern, reason, start_ts, end_ts, created_by	PK: id
+T210	public	noise_reduction_config	TABLE	Thresholds and algorithms for reducing alert noise (e.g., flapping detection).	F023	id, metric_name, min_occurrence_count, time_window_sec	PK: id
+T211	public	change_requests	TABLE	Links ITSM change tickets to Kafka configuration changes for auditability (CMMI).	F142, T018	id, change_ticket_id, description, approver, status, scheduled_start	PK: change_ticket_id
+T212	public	deployment_checklist	TABLE	CMMI checklist items required to be verified before pipeline deployment.	M18, F091	id, item_name, item_category, is_critical, verified_by, verification_ts	PK: id
+T213	public	root_cause_analysis	TABLE	Stores post-incident RCA data linked to specific ingestion failures.	M18, F090	id, incident_id, root_cause, contributing_factors, corrective_actions, owner	PK: id
+T214	public	process_improvement_log	TABLE	Tracks CMMI Level 5 continuous process improvements applied to the ingestion module.	M18	id, improvement_id, description, kpi_impact, implemented_date	PK: id
+T215	public	producer_retry_backoff_config	TABLE	Dynamic configuration for retry backoff strategies per producer group.	F046	id, producer_group, max_retries, initial_backoff_ms, max_backoff_ms	PK: producer_group
+T216	public	fetch_session_cache	TABLE	State of fetch sessions used to optimize incremental fetches.	T133	id, session_id, cached_partitions, last_used_ts, cache_hit_count	PK: session_id
+T217	public	consumer_heartbeat_config	TABLE	Detailed heartbeat tuning settings per consumer group.	F071	id, group_id, heartbeat_interval_ms, session_timeout_ms, max_poll_interval_ms	PK: group_id
+T218	public	max_poll_records_tuning	TABLE	Tuning parameters for max.poll.records based on load testing.	F069	id, group_id, current_max_records, optimal_max_records, last_tuned_ts	PK: group_id
+T219	public	schema_evolution_impact	TABLE	Analysis of the impact of new schema versions on consumers.	F007	id, subject, new_version, impact_summary, affected_consumers, risk_score	PK: id
+T220	public	breaking_change_justification	TABLE	Approval workflow for unavoidable schema breaking changes.	F007	id, subject, justification, business_justification, approver_role, approved_ts	PK: id
+T221	public	data_quality_rules	TABLE	Rules applied during ingestion (e.g., VAT amount must be > 0).	T006, F012	id, rule_name, json_path, condition_sql, severity, active_flag	PK: id
+T222	public	quality_check_failures	TABLE	Logs of messages rejected due to data quality rule violations.	T221, F010	id, rule_id, message_id, payload_sample, violation_reason, ts	PK: id
+T223	public	sftp_ingestion_log	TABLE	Logs for SFTP-to-Kafka bridge ingestion events.	T014	id, source_server, file_name, bytes_read, transfer_duration_ms, status	PK: id
+T224	public	http_polling_source	TABLE	Configuration for HTTP polling connectors.	T014	id, url, poll_interval_ms, method, headers_json, last_poll_ts	PK: url
+T225	public	websocket_gateways	TABLE	Mappings of WebSocket channels to Kafka topics for real-time feeds.	T103	id, channel_path, topic_name, auth_required, subscriber_count	PK: channel_path
+T226	public	bridge_error_mapping	TABLE	Mapping of external error codes (e.g., SAP, SWIFT) to internal PARI error codes.	T104, T057	id, external_system, external_code, internal_code, description	PK: (external_system, external_code)
+T227	public	tenant_resource_usage	TABLE	High-granularity tracking of storage and throughput usage per tenant.	F062, T039	id, tenant_id, topic_id, storage_mb, tps_hourly, window_ts	PK: (tenant_id, window_ts)
+T228	public	cost_allocation_rule	TABLE	Complex rules for splitting infrastructure costs among business units.	T039	id, cost_center_id, metric_basis, split_percentage, effective_date	PK: id
+T229	public	spot_instance_interruptions	TABLE	Logs of spot instance termination warnings and handling actions.	T046, T126	id, node_id, interruption_notice_ts, drain_started_ts, drain_completed_ts	PK: id
+T230	public	broker_decommissioning_log	TABLE	History of broker removal and data migration events.	T016	id, broker_id, reason, partitions_migrated, completion_ts	PK: id
+T231	public	cluster_scaling_events	TABLE	Kubernetes Horizontal Pod Autoscaler scaling events.	T016	id, event_type, old_replicas, new_replicas, condition, timestamp	PK: id
+T232	public	log_preallocation_status	TABLE	Tracking of file preallocation to prevent disk fragmentation.	T051	id, topic_name, preallocation_enabled, file_type	PK: topic_name
+T233	public	file_descriptor_usage	TABLE	Metrics tracking open file descriptors per broker.	T047	id, broker_id, fd_count, fd_limit, usage_percent, timestamp	PK: id
+T234	public	payment_state_machine	TABLE	Tracks state transitions of payment messages passing through the pipe.	T006, F003	id, transaction_id, previous_state, current_state, transition_reason, timestamp	PK: id
+T235	public	refund_aggregation_buffer	TABLE	Temporary buffer table for batching refund transactions before writing to Kafka.	F002	id, merchant_id, refund_batch_id, total_amount, item_count, status	PK: id
+T236	public	tax_calculation_queue	TABLE	Staging for messages specifically requiring tax calculation before persistence.	M22, T006	id, message_id, tax_jurisdiction, calculation_status, priority	PK: id
+T237	public	message_headers_index	TABLE	Secondary index of message headers for rapid lookup (e.g., correlation-id).	F048	id, message_id, header_key, header_value	PK: id, INDEX: header_value
+T238	public	stream_join_cache_metrics	TABLE	Metrics on the hit rate of join caches in Kafka Streams.	T052	id, app_id, store_name, cache_hits, cache_misses, hit_rate	PK: (app_id, store_name)
+T239	public	rockdb_stats	TABLE	Detailed statistics for RocksDB state stores (used by Kafka Streams).	T053	id, app_id, store_name, memtable_bytes, num_immutable_memtable, block_cache_usage	PK: id
+T240	public	standby_tasks_status	TABLE	Status of standby replica tasks in Kafka Streams.	T051	id, app_id, task_id, state, changelog_lag	PK: (app_id, task_id)
+T241	public	partition_reassign_throttle	TABLE	Dynamic throttling limits for partition reassignment traffic.	T062	id, throttle_bytes_per_sec, reassignments_active, timestamp	PK: id
+T242	public	leader_balancer_throttle	TABLE	Throttling limits for leader balancing operations.	T054	id, leader_moves_per_broker, current_moves, timestamp	PK: id
+T243	public	log_repair_ops	TABLE	Logs of operations to repair corrupted log segments.	T064	id, topic, partition, damaged_segment_id, repair_action, status	PK: id
+T244	public	remote_log_metadata	TABLE	Metadata for logs stored in remote storage (Tiered Storage).	T080	id, topic_partition, remote_segment_uuid, start_offset, end_offset, size_bytes	PK: id
+T245	public	tiered_storage_policy	TABLE	Configuration for moving old log segments to remote storage.	T080	id, topic_name, retention_local_days, retention_remote_days, remote_storage_class	PK: topic_name
+T246	public	remote_copy_manager	TABLE	Status of remote copy tasks for tiered storage.	T244	id, task_id, status, start_offset, end_offset, bytes_copied, lag	PK: id
+T247	public	quota_exemptions_audit	TABLE	Audit log for any temporary quota exemptions granted.	T047, T143	id, client_id, exemption_start, exemption_end, exempted_by, business_reason	PK: id
+T248	public	client_metrics_subscription	TABLE	Registry of clients subscribed to push-based client telemetry.	T161	id, client_id, metrics_interval_ms, matching_regex	PK: client_id
+T249	public	controller_migration	TABLE	History of controller migration events.	T053	id, from_broker_id, to_broker_id, trigger_reason, duration_ms	PK: id
+T250	public	znode_paths	TABLE	Tracks critical Zookeeper/KRaft metadata paths (if legacy integration).	F053	id, path_type, path_value, data_hash, modified_ts	PK: path_value
+T251	public	consumer_group_lag_summary	TABLE	Aggregated lag view per topic for high-level dashboards.	T004	id, topic_name, total_lag, consumer_group_count	PK: topic_name
+T252	public	throughput_forecast_input	TABLE	Input data for ML-based throughput forecasting models.	T038	id, metric_name, value, day_of_week, hour_of_day, is_holiday	PK: id
+T253	public	forecasting_model_versions	TABLE	Registry of ML model versions used for capacity planning.	T038	id, model_name, version, accuracy_score, training_data_end_date	PK: (model_name, version)
+T254	public	anomaly_detection_scores	TABLE	Output of anomaly detection algorithms on metrics.	T038, T125	id, metric_name, anomaly_score, threshold, detected_ts, context_json	PK: id
+T255	public	broker_replacement_plan	TABLE	Plan for replacing faulty hardware (brokers).	T016	id, old_broker_id, new_broker_id, plan_ts, status	PK: id
+T256	public	os_kernel_tuning	TABLE	Audit of OS kernel parameters (sysctl) on broker nodes.	T047	id, broker_id, parameter_name, value, current_value, compliant	PK: (broker_id, parameter_name)
+T257	public	disk_scheduler_stats	TABLE	I/O scheduler statistics per broker disk.	T065	id, broker_id, device, scheduler, read_merge_count, write_merge_count	PK: id
+T258	public	tcp_connection_stats	TABLE	TCP level metrics for client connections.	T047	id, broker_id, port, active_opens, passive_opens, failed_attempts	PK: id
+T259	public	jvm_gc_stats	TABLE	Java Garbage Collection statistics for broker JVMs.	T047	id, broker_id, collector_name, gc_time_ms, collections_count	PK: id
+T260	public	jvm_memory_pools	TABLE	JVM memory pool usage per broker.	T047	id, broker_id, pool_name, used_bytes, committed_bytes, max_bytes	PK: id
+T261	public	fetch_session_metrics	TABLE	Metrics regarding fetch session usage and performance.	T216	id, broker_id, sessions_active, sessions_evicted, errors_invalid_session_id	PK: id
+T262	public	alter_configs_quotas	TABLE	History of dynamic config quota alterations.	T047, T192	id, config_name, old_value, new_value, altered_by, timestamp	PK: id
+T263	public	quota_exemption_rules	TABLE	Rules defining who can request quota exemptions.	T143	id, role, max_exemption_pct, approval_workflow_id	PK: role
+T264	public	scram_credential_history	TABLE	History of SCRAM password changes for security auditing.	T049	id, username, old_iteration_count, new_iteration_count, changed_by, timestamp	PK: id
+T265	public	delegation_token_expiration	TABLE	Scheduled expiration of delegation tokens.	T033	id, token_id, owner, expiry_timestamp, notification_sent	PK: token_id
+T266	public	token_renewal_requests	TABLE	Log of token renewal requests.	T033	id, token_id, renewed_by, renewed_at, new_expiry	PK: id
+T267	public	produce_request_version_stats	TABLE	Usage statistics of produce request API versions.	T134	id, api_version, request_count, success_count, error_count	PK: api_version
+T268	public	fetch_request_version_stats	TABLE	Usage statistics of fetch request API versions.	T133	id, api_version, request_count, success_count, error_count	PK: api_version
+T269	public	client_software_versions	TABLE	Detected client software versions from metadata.	T047	id, client_software_name, version, count, last_seen	PK: (client_software_name, version)
+T270	public	unsupported_client_versions	TABLE	Logs of requests from unsupported/outdated client versions.	T269	id, client_id, version, api_key, rejected_reason	PK: id
+T271	public	topic_authorization_failed	TABLE	Logs of failed authorization attempts per topic.	T140	id, principal, operation, topic_name, denied_at	PK: id
+T272	public	acl_sync_status	TABLE	Status of syncing ACLs from external Identity Providers.	T050	id, sync_batch_id, source_system, records_processed, status, sync_ts	PK: id
+T273	public	group_authorization_failed	TABLE	Logs of failed consumer group authorization attempts.	T140	id, principal, group_id, operation, denied_at	PK: id
+T274	public	transaction_coordinator_metrics	TABLE	Detailed metrics for transaction coordinator state machines.	T144	id, broker_id, active_txn_count, txn_timeout_count, partition_count	PK: id
+T275	public	txn_log_checkpoint	TABLE	Checkpoints for transaction logs used for recovery.	T144	id, topic_partition, start_offset, end_offset, checkpoint_ts	PK: id
+T276	public	zombie_fence_stats	TABLE	Statistics on fencing out zombie producers.	T145	id, producer_id, epoch_fence_count, last_fence_ts	PK: id
+T277	public	eager_rebalance_stats_hourly	TABLE	Hourly rollup of eager rebalance metrics.	T150	id, hour_ts, total_rebalances, avg_duration_ms, affected_groups	PK: hour_ts
+T278	public	cooperative_rebalance_stats_hourly	TABLE	Hourly rollup of cooperative rebalance metrics.	T149	id, hour_ts, total_rebalances, avg_duration_ms, tasks_revoked	PK: hour_ts
+T279	public	network_policy_audit_log	TABLE	Audit log of changes to Kubernetes NetworkPolicies.	T099	id, policy_name, old_rule, new_rule, changed_by, ts	PK: id
+T280	public	service_mesh_traffic_stats	TABLE	Traffic stats via service mesh (mTLS termination).	T100	id, source_service, dest_service, request_count, latency_p50, latency_p99	PK: id
+T281	public	rest_proxy_access_log	TABLE	Access logs for the Kafka REST Proxy.	T102	id, client_ip, http_method, path, status_code, response_time_ms	PK: id
+T282	public	mqtt_acl	TABLE	Access Control List for MQTT bridge.	T103	id, client_id, topic_filter, action	PK: id
+T283	public	amqp_acl	TABLE	Access Control List for AMQP bridge.	T104	id, exchange_name, permission, user_id	PK: id
+T284	public	schema_evolution_validation_queue	TABLE	Queue for validating backward/forward compatibility of schemas.	T027	id, schema_id, validation_task_id, status, result_message	PK: id
+T285	public	field_masking_mapping	TABLE	Mappings of fields to specific masking functions.	T085	id, table_name, column_name, mask_function_name, salt	PK: (table_name, column_name)
+T286	public	gdpr_anonymization_logs	TABLE	Logs of anonymization operations performed on DLQ/Messages.	T078	id, record_id, original_hash, anonymized_hash, operation_ts	PK: id
+T287	public	archival_manifest_details	TABLE	Detailed manifest of files in S3/Glacier archive.	T087	id, manifest_id, file_name, size_bytes, checksum, restore_status	PK: id
+T288	public	restore_jobs	TABLE	Jobs to restore data from cold storage.	T087	id, restore_request_id, s3_uri, target_topic, status, completion_ts	PK: id
+T289	public	capacity_planning_alerts	TABLE	Alerts generated by the capacity planning engine.	T038	id, alert_type, resource_id, current_utilization, forecast_utilization	PK: id
+T290	public	sla_report_daily	TABLE	Daily generated SLA compliance reports.	T041	id, report_date, availability_pct, max_latency_ms, sla_breach_count	PK: report_date
+T291	public	incident_participants	TABLE	People participating in incident response.	T024	id, incident_id, user_id, role, join_time	PK: id
+T292	public	runbook_execution_history	TABLE	History of executed runbooks.	T036, T092	id, runbook_id, execution_id, started_by, success_flag, duration_ms	PK: execution_id
+T293	public	chaos_experiment_config	TABLE	Detailed configuration for specific chaos experiments.	T084	id, experiment_name, fault_type, magnitude, duration_min	PK: id
+T294	public	chaos_experiment_results	TABLE	Aggregated results of chaos experiments.	T293	id, experiment_id, run_id, system_impact, mttr_before, mttr_after	PK: id
+T295	public	feature_flag_rollout_history	TABLE	History of percentage rollouts for feature flags.	T042	id, flag_name, from_pct, to_pct, changed_by, changed_at	PK: id
+T296	public	canary_analysis_result	TABLE	Analysis results comparing canary vs baseline.	T043	id, canary_version, metric_name, baseline_value, canary_value, verdict	PK: id
+T297	public	secret_deployment_history	TABLE	History of secrets deployed to the cluster.	T096	id, secret_path, version, deployed_by, deployed_to_node, status	PK: id
+T298	public	dependency_scan_result	TABLE	Raw result of a vulnerability scan.	T045	id, scan_id, library_name, version, severity, cve_id, fix_version	PK: id
+T299	public	volume_snapshot_retention	TABLE	Policy for how long volume snapshots are kept.	T046	id, snapshot_type, retention_days, cost_estimate	PK: snapshot_type
+T300	public	slo_history	TABLE	Historical changes to SLO definitions and targets.	T101	id, slo_name, old_target, new_target, change_reason, changed_at	PK: id
+E011	public	encryption_status_enum	ENUM	Status of encryption operations.	T084	PENDING, ENCRYPTED, FAILED
+E012	public	archive_status_enum	ENUM	Status of archival jobs.	T088	PENDING, IN_PROGRESS, COMPLETED, FAILED
+E013	public	chaos_verdict_enum	ENUM	Verdict of chaos tests.	T294	PASSED, FAILED, INCONCLUSIVE
+E014	public	canary_verdict_enum	ENUM	Verdict of canary analysis.	T296	PROMOTE, ROLLBACK, MONITOR
+V006	public	v_cluster_health_composite	VIEW	Overall health composite score (Broker health + Lag + Errors).	T016, T004	health_score, critical_alerts, degraded_brokers
+V007	public	v_data_sovereignty_compliance	VIEW	Current compliance status regarding data residency.	T204, T205	jurisdiction, compliant_percentage, violation_count
+V008	public	v_capacity_forecast	VIEW	Forecast of resource utilization vs capacity.	T038, T289	resource_type, week, forecast_utilization, current_capacity
+V009	public	v_slo_dashboard	VIEW	Rolling SLO status for the current window.	T101, T041	slo_name, target, achieved, error_budget_remaining
+V010	public	v_pqc_compliance	VIEW	Status of Post-Quantum Crypto migration.	T201, T202	algorithm, migration_status, key_expiry_date
+P011	public	sp_trigger_manual_failover	PROCEDURE	Triggers manual failover for a specific topic/partition.	T146	IN topic_name, IN partition_id, IN preferred_leader
+P012	public	sp_rotate_pq_keys	PROCEDURE	Initiates the rotation of Post-Quantum cryptographic keys.	T202	IN algorithm_name, OUT new_key_id
+P013	public	sp_anomaly_detection_workflow	PROCEDURE	Runs anomaly detection on recent metrics and creates alerts.	T254	IN lookback_hours
+P014	public	sp_archive_partition_data	PROCEDURE	Moves partition data to cold storage.	T088	IN topic_name, IN partition_id, IN before_offset
+P015	public	sp_restore_topic	PROCEDURE	Restores a topic from cold storage.	T288	IN topic_name, IN manifest_id
+P016	public	sp_repair_corrupted_segment	PROCEDURE	Attempts to repair a corrupted log segment.	T243	IN topic_name, IN partition_id, IN segment_id
+P017	public	sp_sync_acls_from_ldap	PROCEDURE	Syncs ACLs from LDAP groups to Kafka.	T272
+P018	public	sp_generate_sla_report	PROCEDURE	Generates the daily SLA report.	T290	IN report_date
+P019	public	sp_execute_chaos_test	PROCEDURE	Executes a defined chaos experiment.	T293	IN experiment_name
+P020	public	sp_create_tenant_namespace	PROCEDURE	Provisions resources for a new tenant.	F062	IN tenant_id, IN topic_prefix
+P021	public	sp_calculate_merkle_proof	PROCEDURE	Calculates Merkle proof for a specific message.	T007	IN batch_id, IN message_offset
+P022	public	sp_purge_dlq	PROCEDURE	Purges messages from the DLQ older than X days.	T009	IN retention_days
+P023	public	sp_update_client_quota	PROCEDURE	Updates dynamic client quotas.	T047	IN client_id, IN produce_quota, IN fetch_quota
+P024	public	sp_trigger_rebalance	PROCEDURE	Triggers a consumer group rebalance.	T015	IN group_id
+P025	public	sp_delete_expired_tokens	PROCEDURE	Cleans up expired delegation tokens.	T033
+P026	public	sp_validate_schema_compatibility	PROCEDURE	Validates a new schema against existing versions.	T027	IN subject, IN schema_def
+P027	public	sp_record_incident	PROCEDURE	Creates a new incident record.	T090	IN severity, IN description, IN reporter
+P028	public	sp_update_capacity_forecast	PROCEDURE	Runs the ML capacity forecasting model.	T038	IN forecast_horizon_days
+P029	public	sp_rotate_tls_certs	PROCEDURE	Initiates TLS certificate rotation for brokers.	T012
+P030	public	sp_cleanup_old_metrics	PROCEDURE	Removes raw metrics older than retention.	T010	IN retention_days

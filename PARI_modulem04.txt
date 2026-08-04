@@ -1,0 +1,574 @@
+
+
+4.	Module M04	Universal Wallet Layer
+a.	Summary
+The Universal Wallet Layer (Module M04) represents the critical user-facing frontier of the PARI ecosystem, serving as the primary interface between citizens and the next-generation financial infrastructure. It is architected not merely as a payment application, but as a comprehensive, privacy-preserving digital identity and value management instrument. Designed in strict adherence to WCAG 2.1 AA accessibility standards, the wallet ensures that financial inclusion is a reality for users with disabilities, supporting screen readers, high-contrast modes, and scalable text inputs across all supported platforms. By leveraging Trusted Execution Environments (TEE) and Secure Elements (SE), the wallet provides military-grade security for private keys, ensuring that sensitive cryptographic operations—such as the generation of blind signatures and zero-knowledge proofs—occur entirely offline and within the hardware-protected confines of the user's device.
+
+A core tenet of the M04 architecture is the principle of "Progressive KYC." Unlike traditional financial applications that demand exhaustive documentation before functionality is granted, the Universal Wallet allows users to transact immediately with low transaction limits. As the user’s volume requirements grow, the wallet guides them through a tiered verification process, seamlessly integrating with the Regulatory Policy Engine (M02) to dynamically upgrade permissions without disrupting the user experience. This approach drastically reduces onboarding friction, targeting a session abandonment rate of less than 5% and aiming for an activation rate exceeding 85%.
+
+Furthermore, M04 is engineered to bridge the gap between proprietary financial walled gardens and the Free and Open Source Software (FOSS) movement. Through embedded SDKs, the wallet transforms standard social and collaborative platforms—such as Matrix, Mastodon, and WriteFreely—into vibrant economic zones. Users can perform micropayments, tip content creators, or access paywalled articles with a single click, all without exposing their financial history to the hosting platform. This seamless interoperability is achieved via standard Web Monetization APIs and deep linking protocols, ensuring that payments are completed in under five seconds.
+
+The wallet also incorporates advanced privacy features that protect user sovereignty. It utilizes masked authentication codes and anonymous credentials to interact with merchants, ensuring that while the merchant receives guaranteed funds, the payer’s identity remains cryptographically shielded. This architecture supports P2P transfers via QR codes and NFC, enabling cash-like interactions in the physical world while retaining the auditability required by the Exchange Layer (M05). To support this, the wallet manages complex cryptographic coin management, handling refresh protocols and expiry dates transparently to the user, ensuring a fluid experience akin to physical cash but with the resilience of digital state.
+
+Built with a "Mobile-First" but "Multi-Platform" philosophy, the Universal Wallet supports native execution on Android, iOS, Linux, Windows, and macOS, alongside a Progressive Web App (PWA) for instant access. The UI/UX is driven by data-informed design, utilizing differential privacy to gather usage analytics that help optimize flows without profiling individuals. By integrating directly with the Independent Auditor Interface (M06), the wallet also provides users with a "Data Dashboard," giving them transparency into exactly what data is shared with tax authorities and regulators, reinforcing the trust model essential for widespread adoption. In essence, Module M04 is the catalyst that transforms PARI’s cryptographic and regulatory innovations into tangible, daily utility for the global citizen.
+
+b.	Scope
+The scope of Module M04 encompasses the end-user client applications, the embedded software development kits (SDKs) for third-party integration, and the local cryptographic agents responsible for secure key management. It covers:
+
+     Client Applications: Native mobile apps (iOS/Android), Desktop clients (Windows/macOS/Linux), and a secure Progressive Web App (PWA).
+     Hardware Integration: Interaction with Secure Elements (SE), Trusted Execution Environments (TEE), and biometric sensors (FaceID, TouchID, Windows Hello).
+     FOSS SDK Integration: Development libraries for Python, JavaScript, Rust, and Java to enable payments within third-party applications.
+     User Interface/Experience: Design systems, accessibility engines, and localization frameworks supporting 50+ languages.
+     Local Cryptography: Execution of Chaumian blinding, unblinding, and zero-knowledge proof generation on the client side.
+     Onboarding Logic: The progressive KYC workflows, user consent management, and recovery mechanisms.
+     Connectivity: Secure channels (TLS 1.3, Noise Protocol Framework) for communicating with the Exchange (M05) and Integration Gateway (M07).
+
+
+c.	Business Case
+Current digital payment landscapes are bifurcated: legacy banking offers high surveillance and fees, while emerging cryptocurrencies offer privacy but lack regulatory compliance and merchant adoption. Users are forced to sacrifice either their financial privacy or their convenience. Furthermore, the FOSS ecosystem lacks a sustainable monetization standard, often relying on intrusive ads or proprietary payment gateways that extract high fees.
+
+The Solution: Module M04 provides a zero-friction, privacy-first payments interface that is legally compliant and universally accessible.
+
+Value Proposition:
+
+     For Citizens: Restores financial privacy; eliminates profiling by banks and merchants; reduces transaction costs to near-zero; ensures accessibility for the disabled.
+     For Merchants & FOSS Developers: Provides an embedded, low-cost payment rail that eliminates chargeback fraud and offers instant settlement. The SDKs turn any app into a point of sale.
+     For the Ecosystem: By offering <5-second payment times and progressive KYC, M04 drives mass adoption, which is critical for the network effects required to displace cash and expensive card networks. The focus on accessibility opens the market to the 1 billion people globally with disabilities, a demographic often underserved by fintech.
+
+
+d.	KPIs
+
+     Wallet Activation Rate: >85% (Percentage of installed apps that complete initial setup and generate a keypair).
+     Session Abandonment Rate: <5% (Percentage of payment initiations dropped before completion).
+     End-to-End Transaction Latency: <5 seconds (Time from "Pay" click to merchant confirmation).
+     Accessibility Compliance Score: 100% (Passing all WCAG 2.1 AA automated and manual audits).
+     Mean Time to Onboard (MTTO): <120 seconds (Time to first successful payment for a new user).
+     SDK Integration Volume: Number of active third-party apps using the PARI SDKs.
+     Support Ticket Density: <0.1 tickets per 1,000 transactions (Indicating UX intuitiveness).
+     Biometric Authentication Success Rate: >98% (Fast, secure access for returning users).
+
+
+e.	Stakeholder Insights
+
+Stakeholder	Concern	Implications
+Citizens (Users)	Fear of surveillance, data theft, and complex banking fees.	Demand a UI that guarantees privacy via cryptographic assurance and offers clear transparency on data usage. High usability is non-negotiable.
+Merchants	High chargeback costs, integration complexity, and slow settlement.	Require the Wallet Layer to generate unforgeable, legally valid proofs of payment and simple SDKs for web/mobile shops.
+NGOs & Activists	Need for financial privacy to protect sensitive operations and donors.	Wallet must support advanced privacy modes (Tor/I2P routing) and ensure that transaction metadata cannot be correlated to reveal identities.
+FOSS Developers	Difficulty monetizing open-source projects without compromising ethics (ads/tracking).	Need a lightweight, permissively licensed SDK that handles micropayments seamlessly without requiring complex backend infrastructure.
+Regulators (Accessibility)	Exclusion of disabled populations from digital finance.	Strict adherence to WCAG 2.1 AA is mandatory to ensure legal compliance in major jurisdictions (EU, US).
+Auditors	Inability to verify client-side security and key integrity.	Wallet must implement remote attestation (TPM/TEE) to prove to the backend that the client software has not been tampered with.
+
+
+
+f.	Knowledge Representation Graph (mermaid.js)
+graph TD
+    subgraph "Universal Wallet Layer (M04)"
+        UI[User Interface]
+        CryptoEngine[Cryptographic Engine]
+        KeyMgr[Key Management SE/TEE]
+        SDKHub[FOSS SDK Hub]
+        KYCFlow[Progressive KYC Manager]
+        Accessibility[Accessibility Engine]
+    end
+
+    User((Citizen)) -->|Interacts| UI
+    UI -->|Requests Payment| CryptoEngine
+    CryptoEngine -->|Stores/Signs| KeyMgr
+    CryptoEngine -->|Blind Signs| Exchange[M05 Exchange Layer]
+    KYCFlow -->|Submits Docs| Compliance[M02 Compliance Hub]
+
+    subgraph "FOSS Ecosystem"
+        Matrix[Matrix Client]
+        Mastodon[Mastodon Instance]
+        WriteFreely[WriteFreely Blog]
+    end
+
+    SDKHub -->|Embeds| Matrix
+    SDKHub -->|Embeds| Mastodon
+    SDKHub -->|Embeds| WriteFreely
+
+    Matrix -->|Triggers Payment| CryptoEngine
+    Mastodon -->|Triggers Payment| CryptoEngine
+
+    UI -->|Renders| Accessibility
+    Accessibility -->|Ensures Compliance| WCAG[WCAG 2.1 AA]
+
+    Style M04 fill:#f9f,stroke:#333,stroke-width:2px
+    Style KeyMgr fill:#bbf,stroke:#333,stroke-width:2px
+
+g.	Comprehensive List of Features
+
+id	Feature	Description	Business Case	AI/ML Algorithms	KPIs	Primary Users
+F001	Biometric Login	Authenticate using FaceID, TouchID, or Windows Hello.	Reduces friction compared to passwords/pins while enhancing security.	Computer Vision (Liveness Detection)	Login Time < 1s	Citizens
+F002	PIN Entry Fallback	Allows access via 6-digit PIN when biometrics fail.	Ensures accessibility for users without modern biometric sensors.	N/A	Failure Rate < 0.1%	Citizens
+F003	Secure Key Generation	Generates RSA/ECC keypairs within device TEE.	Prevents key extraction; foundational for privacy.	CSPRNG (Cryptographically Secure Pseudo-Random Number Generator)	Entropy Score > 7.0	System
+F004	Blind Signature Protocol	Client-side blinding of coins before sending to Exchange.	Guarantees payer anonymity; core value proposition of PARI.	Elliptic Curve Cryptography	Processing Time < 200ms	System
+F005	Wallet Recovery Seed	Generates 12/24-word BIP39 mnemonic phrase for backup.	Allows users to recover funds if device is lost; standard practice.	N/A	User Retention	Citizens
+F006	Social Recovery	Allows trusted contacts to approve wallet recovery.	Reduces permanent loss of funds for users who lose seeds.	Trust Score Calculation	Recovery Success Rate > 90%	Citizens
+F007	Progressive KYC Tier 1	Self-declaration of identity with minimal limits.	Removes barrier to entry; allows immediate testing.	N/A	Onboarding Rate	Citizens
+F008	Progressive KYC Tier 2	Upload ID document scanned via camera.	Enables higher transaction limits required for regular use.	OCR (Optical Character Recognition), Face Matching	Verification Speed < 60s	Citizens
+F009	Progressive KYC Tier 3	NFC-based eID reading (e.g., EU Digital Identity).	Highest tier; enables full banking-equivalent limits.	N/A	Read Success Rate > 98%	Citizens
+F010	QR Code Scanner	Scan static or dynamic QR codes for payments.	Ubiquitous, offline-compatible merchant payment method.	Edge Detection, QR Decoding	Scan Latency < 500ms	Citizens
+F011	NFC Payment Tap	Initiate payment via tapping phone to POS terminal.	Matches physical card speed; essential for physical retail.	N/A	Latency < 300ms	Citizens
+F012	P2P Payment Link Generation	Create a payment link to send via SMS/Email.	Enables remote payments between individuals without merchants.	N/A	Link Activation Rate	Citizens
+F013	Offline Payment Queue	Queue transactions when offline, sync when online.	Ensures usability in areas with poor connectivity (subways, rural).	Conflict Resolution (Vector Clocks)	Sync Success Rate > 99%	Citizens
+F014	Multi-Currency Balance	View balances in EUR, CHF, USD, etc.	Essential for cross-border travel and commerce.	N/A	Display Accuracy	Citizens
+F015	Transaction History Filter	Filter history by date, merchant, amount, or category.	Helps users manage finances and verify spending.	N/A	Search Latency < 1s	Citizens
+F016	Merchant Name Lookup	Resolve merchant public key to readable business name.	Prevents phishing; ensures user knows who they are paying.	Distributed Hash Tables (DHT)	Lookup Accuracy 100%	Citizens
+F017	Dark Mode UI	Toggle between light and dark interface themes.	Improves battery life and reduces eye strain; user preference.	N/A	Adoption Rate	Citizens
+F018	High Contrast Mode	WCAG compliant high contrast visual theme.	Accessibility requirement for visually impaired users.	N/A	Accessibility Pass Rate	Visually Impaired
+F019	Screen Reader Optimization	Full semantic labeling for TalkBack/VoiceOver.	Enables blind users to manage finances independently.	N/A	Accessibility Pass Rate	Blind Users
+F020	Dyslexia-Friendly Font	Option to switch to OpenDyslexic or similar font.	Cognitive accessibility improvement.	N/A	Usage Rate	Neurodivergent Users
+F021	Font Scaling	Dynamic text resizing up to 200%.	Accessibility for low-vision users.	N/A	Rendering Stability	Low-Vision Users
+F022	Haptic Feedback	Vibration confirmation for successful actions.	Tangible confirmation improves trust and UX.	N/A	User Satisfaction	Citizens
+F023	Voice Command Support	Initiate payments or check balance via voice.	Hands-free operation for accessibility or convenience.	NLP (Natural Language Processing)	Command Accuracy > 95%	Motor Impaired
+F024	Matrix SDK Integration	Embed wallet into Element/Matrix clients.	Monetize FOSS chat ecosystems; enables tipping.	N/A	Integration Volume	Matrix Users
+F025	Mastodon Boost Payment	Pay to 'boost' a post on Mastodon.	Revenue stream for creators; decentralized social media.	N/A	Transaction Volume	Mastodon Users
+F026	WriteFreely Article Unlock	Micro-payment to unlock premium articles.	Sustainable business model for independent blogging.	N/A	Conversion Rate	Readers
+F027	Jitsi Call Tipping	Tip participants during encrypted video calls.	Incentivizes community support and expert consultation.	N/A	Feature Usage	Jitsi Users
+F028	Web Monetization API	Standard browser API for streaming micropayments.	Interoperability with existing web standards.	N/A	Site Compatibility	Web Users
+F029	Payment Widget (HTML)	Drag-and-drop payment button for web merchants.	Simplifies integration for non-technical merchants.	N/A	Integration Ease	Merchants
+F030	Automatic Refresh	Refresh expired digital coins automatically.	Maintains liquidity without user intervention.	N/A	Refresh Success Rate	System
+F031	Refund Processing	Accept refunds without revealing original identity.	Consumer protection rights preserved in anonymous system.	Blind Signatures	Refund Rate	Citizens
+F032	Dispute Submission	Submit cryptographically signed evidence for disputes.	Reduces fraud; provides legal recourse.	N/A	Submission Accuracy	Citizens
+F033	Spending Analytics	Visual breakdown of spending by category.	Financial wellness tool; user engagement.	Clustering (K-Means)	Engagement Time	Citizens
+F034	Budget Setting	Set monthly limits for specific categories.	Promotes responsible financial behavior.	N/A	Adherence Rate	Citizens
+F035	Low Balance Alert	Notify when funds fall below threshold.	Prevents payment rejection embarrassment.	N/A	Alert Timeliness	Citizens
+F036	Transaction Receipt	Generate PDF/JSON receipt for purchase.	Proof of purchase for expenses/warranty.	N/A	Generation Speed	Citizens
+F037	Export to Excel/CSV	Export transaction history for accounting.	Useful for freelancers and small businesses.	N/A	Data Integrity	Merchants
+F038	Local Language Support	Interface translation for 50+ languages.	Global accessibility; regulatory requirement in EU.	NLP (Translation)	Translation Accuracy	Global Citizens
+F039	Regional Currency Formatting	Display numbers/currencies based on device locale.	Prevents confusion in international transactions.	N/A	Formatting Accuracy	Travelers
+F040	Push Notifications	Real-time alerts for payments and KYC status.	Keeps user informed without app open.	N/A	Delivery Rate > 99%	Citizens
+F041	In-App Support Chat	Chat with support bot/human for help.	Reduces support costs; improves resolution time.	Sentiment Analysis	CSAT Score	Citizens
+F042	FAQ Search	Searchable knowledge base within app.	Self-service support reduces load on human agents.	TF-IDF / BERT	Query Success Rate	Citizens
+F043	Zero-Knowledge Password Proof	Prove knowledge of password without sending it.	Prevents credential theft during authentication.	ZK-STARKs	Security Incident Rate	Security
+F044	Anti-Screen-Recording	Detects if screen is being recorded/sharing.	Protects PINs and sensitive data from malware.	Heuristic Analysis	Detection Accuracy	Security
+F045	Clipboard Sanitization	Clear clipboard after copying payment details.	Prevents background apps from reading sensitive data.	N/A	Sanitization Speed	Security
+F046	App Integrity Check	Verify app signature/hash against server whitelist.	Prevents use of modified/tampered apps.	Hashing (SHA-3)	Check Latency	System
+F047	Jailbreak/Root Detection	Detect if device OS is compromised.	Risk mitigation; trigger stricter security measures.	Heuristic Analysis	Detection Accuracy	Security
+F048	Trusted UI Display	Render sensitive prompts in secure hardware-backed screen.	Prevents overlay attacks (clickjacking).	N/A	UI Reliability	Security
+F049	Automatic Logout	Log out after inactivity or app backgrounding.	Secures device if left unattended.	N/A	Security Incidents	Citizens
+F050	Biometric Timeout	Require re-authentication after specific time.	Balances security and convenience.	N/A	Auth Frequency	Citizens
+F051	Multi-Wallet Support	Manage multiple identities (personal vs business).	Separation of funds for tax/privacy purposes.	N/A	Wallet Creation Rate	Professionals
+F052	Wallet Naming	Custom labels for different wallets.	User personalization and organization.	N/A	Usage Rate	Citizens
+F053	Contact Management	Save payee addresses with aliases.	Simplifies recurring payments.	N/A	Save Rate	Citizens
+F054	Recurring Payments	Schedule automated weekly/monthly payments.	Subscription model support (Netflix, etc).	N/A	Execution Success Rate	Citizens
+F055	Split Bill Feature	Calculate and request split payments from friends.	Social utility; P2P engagement.	N/A	Feature Adoption	Social Users
+F056	Request Payment	Generate a QR/invoice to request money.	Enables peer-to-peer merchant scenarios (street vendors).	N/A	Request Fulfillment	Merchants
+F057	Discount Voucher Input	Apply merchant promo codes during payment.	Loyalty programs integration.	N/A	Validation Speed	Citizens
+F058	Loyalty Points Staking	Stake merchant tokens for discounts (if supported).	Enhances customer retention for merchants.	N/A	Staking Volume	Merchants
+F059	Tax Report Generation	Auto-generate tax report from spending history.	Simplifies annual tax filing for users.	Regression (Category Prediction)	Report Accuracy	Citizens
+F060	Charity Donation Mode	Donate rounded-up change to NGOs.	Micro-philanthropy; social impact.	N/A	Total Donated	NGOs
+F061	Carbon Footprint Tracker	Estimate carbon impact of purchases.	Promotes sustainable consumption.	Classification Algorithm	Engagement	Eco-conscious Users
+F062	Child Wallet	Parent-controlled sub-wallet with allowances.	Financial education for youth; family management.	N/A	Family Adoption	Parents
+F063	Transaction Memo	Add private notes to transactions.	Personal bookkeeping aid.	N/A	Usage Rate	Citizens
+F064	Searchable Tags	Custom tags for transaction categorization.	Enhanced personal finance management.	N/A	Tagging Frequency	Citizens
+F065	Favorites Grid	Quick access to frequently used merchants/contacts.	UX optimization for repeat transactions.	N/A	Tap Reduction	Citizens
+F066	Dynamic QR Animation	Animated QR for higher data density/security.	Faster scanning and more data capacity.	N/A	Scan Speed	Citizens
+F067	Bluetooth Low Energy (BLE) Payment	Initiate payment via BLE proximity.	Alternative to NFC; works in background.	Distance Estimation (RSSI)	Connection Latency	Citizens
+F068	Sound-Based Payment	Ultrasonic data transmission for payments.	Device-to-device transfer without internet/NFC.	Acoustic Modem	Transfer Accuracy	Citizens
+F069	Geofence Payments	Trigger payment based on GPS location (e.g. toll).	Seamless transit/toll payments.	Geospatial Querying	Trigger Accuracy	Commuters
+F070	Transit Ticket Integration	Display transport tickets inside wallet.	All-in-one super app utility.	N/A	Display Latency	Commuters
+F071	Digital ID Card	Display verified ID attributes (age, nationality).	Age verification without revealing full ID.	Zero-Knowledge Proofs (ZKP)	Verification Speed	Citizens
+F072	Vaccine Certificate Display	Store and display health certificates (if req).	Pandemic/Health response utility.	Cryptographic Signature Check	Validation Speed	Citizens
+F073	Event Ticketing	Store and validate event entry tickets.	Secure, transferrable ticketing.	N/A	Transfer Speed	Event Organizers
+F074	Backup to Cloud	Encrypted backup of wallet data to personal cloud.	Disaster recovery beyond seed phrase.	AES-256 Encryption	Backup Success Rate	Citizens
+F075	Multi-Device Sync	Sync balance/keys across user devices (limited).	Convenience for users with phone+tablet.	Synchronization Algorithms	Sync Conflict Rate	Power Users
+F076	Watch App Support	Apple Watch / WearOS companion app.	Quick payments on the go (running, etc).	N/A	App Launch Speed	Fitness Users
+F078	Desktop Widget	Check balance/pay via desktop widget.	Quick access for remote workers.	N/A	Widget Load Time	Professionals
+F079	Browser Extension Popup	Pay via browser extension icon.	frictionless web payments.	N/A	Popup Latency	Shoppers
+F080	Deeplink Handling	Handle pari:// payment links from web.	Universal linking from emails/browsers.	N/A	Link Open Success	Merchants
+F081	Shake to Pay	Gesture to initiate payment flow.	Novelty/Quick access interaction.	Accelerometer Detection	Trigger Accuracy	Citizens
+F082	Face Expression Payment	Smile to confirm payment (experimental).	Accessibility/Touchless interaction.	Facial Expression Recognition	Accuracy > 90%	Tech Enthusiasts
+F083	FIDO2 Security Key Support	Use YubiKey for transaction signing.	High-security option for corporate/advanced users.	N/A	Auth Success Rate	Security Pros
+F084	Hardware Wallet Integration	Support Ledger/Trezor for cold storage.	High-value storage protection.	N/A	Integration Stability	Investors
+F085	In-App Exchange (Fiat)	Top up balance via bank transfer/card.	Off-ramp/On-ramp functionality.	Fraud Detection	Conversion Rate	Citizens
+F086	Cash-In Voucher	Buy a digital voucher at retail store to top up.	Financial inclusion for unbanked.	N/A	Redemption Rate	Unbanked
+F087	ATM Withdrawal	Generate code to withdraw cash at partner ATMs.	Bridge to physical cash infrastructure.	N/A	Withdrawal Success	Citizens
+F088	Scheduled Transfers	Move funds between wallets at set times.	Cash management automation.	N/A	Execution Reliability	Businesses
+F089	Instant Payment Notification	Visual/Audio cue immediately upon success.	Reassurance to user.	N/A	Display Latency	Citizens
+F090	Error Code Explanation	Plain language explanation of technical errors.	Reduces user frustration and support calls.	NLP (Simplification)	Comprehension Score	Citizens
+F091	One-Click Support	Button to send logs to support on error.	Streamlines troubleshooting.	N/A	Ticket Resolution Time	Support
+F092	Rate Limiting UI	Visual cooldown timer to prevent spam.	Protects user from accidental double spends.	N/A	UX Clarity	Citizens
+F093	Smart Routing	Select cheapest/fastest payment path automatically.	Cost and time optimization.	Graph Theory (Shortest Path)	Routing Efficiency	System
+F094	Fee Estimation	Show estimated network/operator fees before send.	Transparency; avoids surprise costs.	N/A	Estimation Accuracy	Citizens
+F095	Max Send Button	Send all available balance in one tap.	UX convenience.	N/A	Usage Rate	Citizens
+F096	Round-Up Savings	Round up transactions to save difference.	Micro-savings feature.	N/A	Savings Growth	Citizens
+F097	Goal Tracking	Visual progress toward savings goals.	Financial wellness engagement.	N/A	Goal Completion	Citizens
+F098	Merchant Discovery	In-app directory of accepting merchants.	Drives network adoption.	Geo-location	Search Accuracy	Citizens
+F099	Map View	Show nearby accepting merchants on map.	Location-based shopping utility.	Mapping API	Load Time	Shoppers
+F100	Review/Rating Merchant	Rate merchant post-transaction.	Quality control; reputation system.	Sentiment Analysis	Review Volume	Citizens
+F101	Merchant Coupons	Receive auto-generated coupons from merchants.	Customer retention tool.	N/A	Redemption Rate	Citizens
+F102	Split Tender	Pay part with coins, part with voucher.	Flexible payment scenarios.	N/A	Transaction Success	Citizens
+F103	Escrow Service	Hold funds for goods delivery verification.	Trust mechanism for P2P marketplace.	Smart Contracts	Dispute Rate	Marketplace Users
+F104	Time-Locked Lock	Funds only available at specific future date.	Savings or contractual agreements.	N/A	Release Accuracy	Citizens
+F105	Hash-Locked Lock	Funds released only if secret is revealed.	Atomic swaps; cross-chain payments (future).	Hash Verification	Security Level	Developers
+F106	Stealth Address	Generate unique address per transaction.	Privacy enhancement; prevents blockchain analysis.	Elliptic Curve Diffie-Hellman (ECDH)	Anonymity Set	Privacy Advocates
+F107	Tor Routing Integration	Route traffic through Tor network.	Maximize privacy; circumvent censorship.	N/A	Connection Latency	Activists
+F108	I2P Integration	Alternative anonymous routing layer.	Resilience against network attacks.	N/A	Uptime	Privacy Advocates
+F109	Dandelion Protocol	Obfuscate transaction origin in P2P broadcast.	Network-level privacy protection.	N/A	Privacy Leakage	Network
+F110	Coin Control	Manually select which coins to spend.	Advanced privacy management (input consolidation).	N/A	Usage Frequency	Power Users
+F111	Coin Mixing (Local)	Mix coins locally within wallet before spend.	Break transaction heuristics.	Mixing Algorithm	Anonymity Score	Privacy Advocates
+F112	PayJoin Protocol	Collaborative transaction to break heuristics.	Standard for privacy against chain analysis.	N/A	Success Rate	Merchants
+F113	Audio Feedback for Blind	Beeps/tones confirming scan/success.	Accessibility for blind users.	N/A	Accessibility Score	Blind Users
+F114	Large Button Mode	Simplified UI with massive buttons.	Accessibility for motor impairments.	N/A	Usability Score	Motor Impaired
+F115	Color Blind Mode	Palette safe for all color blindness types.	Visual accessibility.	N/A	Readability Score	Color Blind Users
+F116	Screen Magnifier	Built-in magnifier for QR scanning.	Accessibility for low vision.	N/A	Usage Rate	Low Vision
+F117	High Visibility QR	Generate QR with high contrast margins.	Ensures scanners can read it.	N/A	Scan Success Rate	Merchants
+F118	Voice Receipt	Read receipt aloud via TTS.	Accessibility for blind users.	TTS Engine	Usage Rate	Blind Users
+F119	Braille Display Support	Output transaction details to braille display.	Accessibility for deafblind users.	N/A	Compatibility Score	Deafblind
+F120	Customizable Gestures	Remap gestures (swipe to pay).	Accessibility/User Preference.	N/A	Configuration Rate	Power Users
+F121	Switch Access	Support external switch devices.	Accessibility for severe motor impairment.	N/A	Latency	Motor Impaired
+F122	Voice Over LTE (VoLTE) Integration	seamless handoff of verification calls.	Reliability of 2FA calls.	N/A	Call Success Rate	Citizens
+F123	SMS Payment Command	Pay via text message syntax (legacy).	Basic phone support.	NLP (Parsing)	Command Accuracy	Rural Users
+F124	Offline First Architecture	App functions fully without internet.	Reliability in dead zones.	Local Storage (IndexedDB)	Offline Duration	Travelers
+F125	Data Saver Mode	Disable images/animations to save data.	Cost management for expensive data plans.	N/A	Data Reduction	Budget Users
+F126	Background Sync	Sync data silently when on Wi-Fi.	Ensures data freshness without battery drain.	N/A	Sync Frequency	Citizens
+F127	Battery Optimization	Minimize CPU/crypto usage to save battery.	UX improvement.	Power Profiling	Battery Drain	Citizens
+F128	Adaptive Brightness	Adjust screen based on ambient light (QR).	Improve QR scanning reliability.	Light Sensor	Scan Success Rate	Citizens
+F129	Auto-Focus Camera	Continuous auto-focus for QR scanning.	Hardware optimization.	N/A	Focus Speed	Citizens
+F130	Vibration Patterns	Unique vibrations for different alerts.	Non-visual status updates.	N/A	Recognition Rate	Blind Users
+F131	Do Not Disturb Mode	Silence notifications during payments.	Security/Focus.	N/A	Usage Rate	Citizens
+F132	Privacy Report	Show which apps have accessed wallet data.	Transparency/Control.	N/A	Data Point Accuracy	Citizens
+F133	Permission Manager	Granular control over camera/location/biometrics.	User control.	N/A	Revocation Rate	Citizens
+F134	Data Wipe Command	Remote wipe of wallet data.	Security for lost devices.	Cryptographic Erasure	Wipe Confirmation	Citizens
+F135	Lost Mode	Lock wallet but display return message.	Recovery aid.	N/A	Activation Rate	Citizens
+F136	Trusted Device List	Whitelist devices allowed to login.	Security convenience.	N/A	Device Auth Rate	Citizens
+F137	Risk-based Auth	Trigger step-up auth if transaction looks risky.	Fraud prevention.	Anomaly Detection	Fraud Reduction	Citizens
+F138	Behavioral Biometrics	Analyze typing/swipe patterns for continuous auth.	Passive security.	Neural Networks	False Positive Rate	Security
+F139	Context Awareness	Warn if paying at unusual location/time.	Social engineering defense.	Geo-fencing	Alert Accuracy	Citizens
+F140	Gamification	Badges/achievements for security habits (e.g. backup).	Encourage best practices.	N/A	Engagement Score	Gen Z
+F141	Referral Program	Reward users for inviting friends.	Growth hacking.	N/A	Viral Coefficient	Citizens
+F142	A/B Testing Framework	Serve different UI variants to cohorts.	UX optimization.	Statistical Analysis	Conversion Lift	Product
+F143	Crash Reporting	Automatic crash logs sent to devs.	Stability improvement.	N/A	Crash Free Rate	Devs
+F144	Performance Monitoring	Monitor UI lag and startup times.	Performance tuning.	N/A	P95 Latency	Devs
+F145	Feature Flags	Toggle features remotely without app update.	Continuous delivery.	N/A	Flag Latency	Devs
+F146	Forced Update	Block app usage if version is too old.	Security compliance.	N/A	Update Compliance	Security
+F147	Beta Tester Channel	Opt-in to experimental features.	Community engagement.	N/A	Bug Reports	FOSS Devs
+F148	Translation Crowdsourcing	Allow users to suggest translations.	Localization scale.	N/A	Translation Quality	Community
+F149	Plugin System	Third-party plugins for extensibility.	Ecosystem growth.	Sandboxing	Plugin Count	Developers
+F150	Custom Themes	User-generated color themes.	Personalization.	N/A	Theme Uploads	Designers
+F151	Widget Builder	Build custom home screen widgets.	User agency.	N/A	Widget Usage	Power Users
+F152	Export to PDF	Export settings/keys for paper backup.	Advanced backup.	N/A	Generation Speed	Power Users
+F153	Import from Competitor	Import keys/wallets from other systems.	Migration ease.	Parsing Algorithms	Import Success	Migrants
+F154	Health Check	Diagnose device compatibility issues.	Support automation.	Heuristic Analysis	Issue Detection	Citizens
+F155	Feedback Loop	Easy way to report bugs/ideas.	Continuous improvement.	Sentiment Analysis	Actionable Insights	Citizens
+F156	Terms of Service (ToS) Manager	Track version of ToS consented to.	Legal compliance.	Versioning	Consent Rate	Legal
+F157	GDPR Right to Export	Export all user data (Portability).	Regulatory compliance.	N/A	Export Completeness	DPOs
+F158	GDPR Right to Delete	Trigger deletion request.	Regulatory compliance.	N/A	Deletion Confirmation	DPOs
+F159	Cookie/Tracker Manager	Control webview trackers.	Privacy.	N/A	Blocking Rate	Privacy Advocates
+F160	Decentralized Identifier (DID)	User-controlled portable identity.	Interoperability/Self-Sovereign Identity.	DID Methods	DID Verifications	Citizens
+
+h.	Comprehensive List of Database Objects
+
+id	schema_name	object_name	object_type	description	feature_reference	column_names	constraints / notes
+T001	m04_wallet	users	Table	Stores core user profile and registration details.	F001, F007	user_id (PK), uuid, email_hash, phone_hash, created_at, status, last_login	CHECK (status IN ('active','suspended','pending'))
+T002	m04_wallet	user_devices	Table	Tracks registered devices for a specific user.	F046, F047	device_id (PK), user_id (FK), device_type, os_version, app_version, push_token, is_trusted, last_seen	UNIQUE (user_id, device_token)
+T003	m04_wallet	user_biometrics	Table	Stores biometric metadata (templates never stored, only registration).	F001	bio_id (PK), user_id (FK), bio_type, registration_date, last_used	bio_type IN ('faceid','touchid','voice')
+T004	m04_wallet	kyc_documents	Table	Stores metadata and hashes of KYC documents.	F008, F009	doc_id (PK), user_id (FK), doc_type, hash_sha3, extraction_status, verified_at, expiry_date	CHECK (expiry_date > CURRENT_DATE)
+T005	m04_wallet	kyc_tiers	Table	Defines verification levels and limits.	F007, F008	tier_id (PK), tier_name, daily_limit, monthly_limit, required_docs	UNIQUE (tier_name)
+T006	m04_wallet	user_kyc_status	Table	Current verification status of a user.	F008	user_id (PK,FIX), current_tier_id (FK), approved_until, risk_score	FK tier_id refs kyc_tiers
+T007	m04_wallet	wallet_keys	Table	Public keys and encrypted private key blobs (TEE storage).	F003, F004	key_id (PK), user_id (FK), public_key, encrypted_private_blob, key_type, created_at, active_until	key_type IN ('sign','verify','exchange')
+T008	m04_wallet	wallet_recovery	Table	Stores encrypted recovery seeds and social recovery shares.	F005, F006	recovery_id (PK), user_id (FK), encrypted_seed, social_shares_json, last_verified	CHECK (social_shares_json IS NOT NULL)
+T009	m04_wallet	transactions	Table	Local cache of user transactions for offline view.	F015	tx_id (PK), user_id (FK), amount, currency, merchant_id, timestamp, blind_sig_hash, status, tx_type	CHECK (amount > 0)
+T010	m04_wallet	transaction_categories	Table	Categories for spending analytics.	F034	category_id (PK), name, icon_url, parent_category_id	FK parent_category_id refs self
+T011	m04_wallet	transaction_tags	Table	User-defined tags for transactions.	F064	tag_id (PK), user_id (FK), label, color	UNIQUE (user_id, label)
+T012	m04_wallet	transaction_tag_mapping	Table	Junction table for tx-tag relationship.	F064	tx_id (FK), tag_id (FK)	Composite PK (tx_id, tag_id)
+T013	m04_wallet	contacts	Table	User's saved payees/contacts.	F053	contact_id (PK), user_id (FK), alias, public_key, favorite_rank	UNIQUE (user_id, public_key)
+T014	m04_wallet	recurring_payments	Table	Schedule for automated payments.	F054	recur_id (PK), user_id (FK), destination_public_key, amount, currency, frequency, next_run_date	CHECK (next_run_date > CURRENT_DATE)
+T015	m04_wallet	vouchers	Table	Stored payment vouchers for top-ups.	F086	voucher_code (PK), user_id (FK), amount, status, redeemed_at, expiry_date	UNIQUE (voucher_code)
+T016	m04_wallet	preferences	Table	User app settings (UI, notifications).	F017, F018, F021	user_id (PK), language, theme, font_size, high_contrast_bool, notifications_enabled	JSON column for extensible settings
+T017	m04_wallet	accessibility_settings	Table	Specific accessibility overrides.	F019, F020, F024	user_id (PK), screen_reader_bool, dyslexic_font_bool, haptic_feedback_bool, voice_control_bool
+T018	m04_wallet	fos_integrations	Table	Registered third-party FOSS apps linked to wallet.	F024, F025, F026	integration_id (PK), user_id (FK), app_name, app_type, oauth_token, permissions_json	UNIQUE (user_id, app_name)
+T019	m04_wallet	support_tickets	Table	User-generated support requests.	F041, F091	ticket_id (PK), user_id (FK), subject, status, logs_json, created_at	status IN ('open','closed','pending')
+T020	m04_wallet	security_events	Table	Audit log for security actions (login, failed auth).	F049, F046, F052	event_id (PK), user_id (FK), event_type, ip_hash, device_id, timestamp	Index on timestamp
+T021	m04_wallet	alerts	Table	In-app notifications for user.	F035, F040	alert_id (PK), user_id (FK), message, is_read, action_link, created_at
+T022	m04_wallet	budget_limits	Table	User-defined budget limits.	F034	budget_id (PK), user_id (FK), category_id (FK), limit_amount, period_type ('weekly','monthly')	FK category_id refs transaction_categories
+T023	m04_wallet	offline_queue	Table	Queue of actions to sync when online.	F013	queue_id (PK), user_id (FK), payload_json, created_at, attempts
+T024	m04_wallet	merchant_metadata	Table	Cached merchant info for name resolution.	F016	merchant_id (PK), public_key, display_name, logo_url, category, location_lat_long
+T025	m04_wallet	split_bills	Table	Records for split bill requests.	F055	split_id (PK), initiator_user_id (FK), total_amount, currency, status, created_at
+T026	m04_wallet	split_participants	Table	Users involved in a split bill.	F055	split_id (FK), user_id (FK), amount_owed, status	Composite PK (split_id, user_id)
+T027	m04_wallet	feedback	Table	General user feedback and ratings.	F100, F155	feedback_id (PK), user_id (FK), rating, comment, feature_area, created_at
+T028	m04_wallet	analytics_events	Table	Privacy-preserved local analytics events.	F033, F042	event_id (PK), session_id, event_name, anonymized_props	No PII allowed
+T029	m04_wallet	push_tokens	Table	Mapping of devices to push notification tokens.	F040	device_id (FK), token, platform, last_updated	UNIQUE (token)
+T030	m04_wallet	tax_reports	Table	Generated tax report metadata.	F059	report_id (PK), user_id (FK), year, pdf_url_hash, generated_at	UNIQUE (user_id, year)
+T031	m04_wallet	charity_donations	Table	Record of micro-donations.	F060	donation_id (PK), user_id (FK), charity_id, amount, transaction_id (FK)
+T032	m04_wallet	child_wallets	Table	Parent-controlled child wallets.	F062	child_id (PK), parent_user_id (FK), allowance_amount, spending_limit
+T033	m04_wallet	favorite_merchants	Table	Frequently used merchants.	F065	user_id (FK), merchant_id (FK), rank	Composite PK (user_id, merchant_id)
+T034	m04_wallet	coupons	Table	Available discount vouchers for user.	F057	coupon_id (PK), user_id (FK), code, discount_percent, merchant_id, expiry_date
+T035	m04_wallet	geo_fences	Table	Locations for automatic payments.	F069	fence_id (PK), user_id (FK), latitude, longitude, radius_meters, merchant_id, active_bool
+T036	m04_wallet	tickets	Table	Stored event/tickets.	F073	ticket_id (PK), user_id (FK), event_name, qr_secret, valid_from, valid_until
+T037	m04_wallet	digital_id	Table	Verifiable credentials (e.g., Age).	F071	cred_id (PK), user_id (FK), credential_type, issuer_did, signed_jwt, expiry_date
+T038	m04_wallet	cloud_backups	Table	Metadata of cloud backups.	F074	backup_id (PK), user_id (FK), provider, storage_path, size_bytes, backup_date
+T039	m04_wallet	widgets	Table	User configured home screen widgets.	F078	widget_id (PK), user_id (FK), widget_type, config_json
+T040	m04_wallet	error_logs	Table	Client-side error logs.	F090, F143	log_id (PK), user_id (FK), error_code, stack_trace_hash, app_version
+T041	m04_wallet	feature_flags	Table	Remote feature flag values.	F145	flag_key (PK), enabled_bool, rollout_percentage, description
+T042	m04_wallet	translations	Table	Localization strings.	F038	lang_code, key, value	Composite PK (lang_code, key)
+T043	m04_wallet	referral_codes	Table	User referral tracking.	F141	code (PK), referrer_user_id (FK), reward_amount
+T044	m04_wallet	atm_sessions	Table	Active ATM withdrawal sessions.	F087	session_id (PK), user_id (FK), code, amount, expires_at
+T045	m04_wallet	escrow_contracts	Table	Funds held in escrow.	F103	contract_id (PK), buyer_id (FK), seller_id (FK), amount, release_condition_hash
+T046	m04_wallet	stealth_addresses	Table	One-time payment addresses for privacy.	F106	address_id (PK), user_id (FK), public_address, scan_key, spent_bool	Index on spent_bool
+T047	m04_wallet	behavioral_profiles	Table	Encrypted templates for behavioral biometrics.	F138	profile_id (PK), user_id (FK), vector_model, updated_at
+T048	m04_wallet	plugins	Table	Installed third-party plugins.	F149	plugin_id (PK), user_id (FK), plugin_name, permissions_hash, active_bool
+T049	m04_wallet	themes	Table	Custom UI themes.	F150	theme_id (PK), user_id (FK), name, colors_json
+T050	m04_wallet	did_registry	Table	Decentralized Identifiers.	F160	did (PK), user_id (FK), verification_method, created_at
+T051	m04_wallet	transaction_splits	Table	Breakdown of a transaction into multiple inputs.	F110	split_id (PK), transaction_id (FK), input_index, amount
+T052	m04_wallet	coin_inventory	Table	Local cache of digital coins (denominations).	F030	coin_id (PK), user_id (FK), denomination, public_key_sig, status, expiry_date	status IN ('fresh','spent','expired')
+T053	m04_wallet	refresh_sessions	Table	Sessions for refreshing expired coins.	F030	session_id (PK), user_id (FK), old_coin_ids, new_coin_ids, status
+T054	m04_wallet	routing_hints	Table	Hints for optimal payment paths.	F093	hint_id (PK), destination, fee_estimate, latency_ms, timestamp
+T055	m04_wallet	friends_requests	Table	Incoming contact requests.	F053	request_id (PK), from_user_id (FK), to_user_id (FK), status	status IN ('pending','accepted','rejected')
+T056	m04_wallet	transaction_receipts	Table	Links to generated PDF receipts.	F036	receipt_id (PK), transaction_id (FK), pdf_hash, storage_key
+T057	m04_wallet	subscriptions	Table	Active merchant subscriptions.	F054	sub_id (PK), user_id (FK), merchant_id (FK), amount, next_billing_date
+T058	m04_wallet	failed_transactions	Table	Log of failed txs for retry/analysis.	F013	fail_id (PK), user_id (FK), payload_json, error_reason, retry_count
+T059	m04_wallet	consent_records	Table	Records of legal consents (ToS, Privacy).	F156	consent_id (PK), user_id (FK), document_version, granted_at	UNIQUE (user_id, document_version)
+T060	m04_wallet	data_deletion_requests	Table	GDPR right to be forgotten requests.	F158	request_id (PK), user_id (FK), status, requested_at, completed_at
+T061	m04_wallet	notification_preferences	Table	Granular notification settings.	F040	user_id (PK), tx_alerts_bool, promo_alerts_bool, security_alerts_bool
+T062	m04_wallet	currency_preferences	Table	Preferred display currencies.	F014	user_id (PK), primary_currency, secondary_currency
+T063	m04_wallet	app_state	Table	Stores last known state (e.g. last sync time).	F013	user_id (PK), last_sync_timestamp, offline_mode_bool
+T064	m04_wallet	fraud_scores	Table	AML/Fraud scores for sessions.	F137	session_id (PK), user_id (FK), score, risk_factors_json, timestamp
+T065	m04_wallet	backup_recovery_log	Table	Log of recovery attempts.	F005	attempt_id (PK), user_id (FK), success_bool, method_used, ip_hash
+T066	m04_wallet	hardware_wallet_links	Table	Links to external HW wallets.	F084	hw_id (PK), user_id (FK), device_type, fingerprint
+T067	m04_wallet	exchange_rates	Table	Cached FX rates.	F014	from_currency, to_currency, rate, timestamp	Composite PK (from_currency, to_currency)
+T068	m04_wallet	merchant_ratings	Table	Specific ratings left for merchants.	F100	rating_id (PK), user_id (FK), merchant_id (FK), score, comment	UNIQUE (user_id, merchant_id)
+T069	m04_wallet	carbon_offsets	Table	Records of carbon offset purchases.	F061	offset_id (PK), user_id (FK), transaction_id (FK), kg_co2
+T070	m04_wallet	sound_settings	Table	Audio/haptic preferences.	F022, F113	user_id (PK), volume_level, haptic_intensity
+T071	m04_wallet	display_settings	Table	Visual accessibility settings.	F017, F021	user_id (PK), brightness_level, text_scaling
+T072	m04_wallet	gesture_mappings	Table	Custom gesture to action mappings.	F120	gesture_id (PK), user_id (FK), gesture_type, action_name
+T073	m04_wallet	offline_content	Table	Cached static content (FAQ, ToS).	F042	content_key (PK), content_blob, last_updated, version
+T074	m04_wallet	beta_features	Table	Features available to beta testers.	F147	feature_name (PK), description, enabled_users_list
+T075	m04_wallet	crash_reports	Table	Detailed crash dumps.	F143	crash_id (PK), user_id (FK), stack_trace, device_info, app_version
+T076	m04_wallet	performance_metrics	Table	Client-side performance telemetry.	F144	metric_id (PK), user_id (FK), metric_name, value_ms, timestamp
+T077	m04_wallet	search_history	Table	History of merchant/contact searches.	F099	search_id (PK), user_id (FK), query_string, result_count
+T078	m04_wallet	scan_history	Table	History of QR/NFC scans.	F010	scan_id (PK), user_id (FK), data_hash, success_bool
+T079	m04_wallet	location_history	Table	Temporary storage of location for geo-fencing.	F069	loc_id (PK), user_id (FK), latitude, longitude, timestamp	Index on timestamp (TTL)
+T080	m04_wallet	message_threads	Table	Support chat threads.	F041	thread_id (PK), user_id (FK), subject, status
+T081	m04_wallet	chat_messages	Table	Individual chat messages.	F041	msg_id (PK), thread_id (FK), sender_type, body, sent_at
+T082	m04_wallet	tutorial_progress	Table	Tracking of user onboarding/tutorial steps.	F007	step_id (PK), user_id (FK), step_name, completed_bool
+T083	m04_wallet	achievements	Table	Gamification badges.	F140	achievement_id (PK), name, description, icon_url
+T084	m04_wallet	user_achievements	Table	Unlocked badges per user.	F140	user_id (FK), achievement_id (FK), unlocked_at	Composite PK (user_id, achievement_id)
+T085	m04_wallet	qr_templates	Table	Pre-defined QR templates for invoices.	F056	template_id (PK), user_id (FK), label, amount, currency
+T086	m04_wallet	bank_accounts	Table	User's linked bank accounts (for top-up).	F085	account_id (PK), user_id (FK), iban_masked, bank_name, verified_bool
+T087	m04_wallet	topup_transactions	Table	Fiat to digital coin top-up logs.	F085	topup_id (PK), user_id (FK), amount, fee, provider_tx_id
+T088	m04_wallet	withdrawal_transactions	Table	Digital coin to Fiat withdrawal logs.	F087	withdrawal_id (PK), user_id (FK), amount, fee, status, provider_tx_id
+T089	m04_wallet	network_status	Table	Cached connectivity status.	F013	status (PK), latency_ms, last_checked	Single row table
+T090	m04_wallet	scheduled_tasks	Table	Background jobs manager (e.g. sync).	F126	task_id (PK), task_type, payload_json, scheduled_for, status
+T091	m04_wallet	security_questions	Table	For backup recovery verification.	F005	question_id (PK), user_id (FK), question_hash, answer_hash
+T092	m04_wallet	trusted_contacts	Table	Contacts authorized for social recovery.	F006	contact_id (PK), user_id (FK), trusted_user_id (FK), public_key_share
+T093	m04_wallet	session_tokens	Table	Short-lived auth tokens.	F001, F049	token_id (PK), user_id (FK), token_hash, expiry, device_id	Index on token_hash
+T094	m04_wallet	audit_logs	Table	Comprehensive audit trail for compliance.	F052	log_id (PK), user_id, action, actor_type, timestamp
+T095	m04_wallet	user_roles	Table	Roles assigned to users (e.g. beta tester, merchant).	T001	user_id (FK), role_name	Composite PK (user_id, role_name)
+T096	m04_wallet	merchant_categories	Table	Standard industry classification for merchants.	F024	category_id (PK), name, code, parent_id
+T097	m04_wallet	widget_types	Table	Available widget definitions.	F078	type_id (PK), name, config_schema, min_sdk_version
+T098	m04_wallet	app_versions	Table	Minimum required app versions for features.	F146	version_id (PK), os_type, version_string, force_update_bool
+T099	m04_wallet	currencies	Table	List of supported ISO 4217 currencies.	F014	currency_code (PK), name, symbol, decimal_places
+T100	m04_wallet	countries	Table	Country data for jurisdiction settings.	F039	country_code (PK), name, currency_code, phone_code
+T101	m04_wallet	language_packs	Table	Metadata for available language downloads.	F038	pack_id (PK), lang_code, version, size_bytes, download_url
+T102	m04_wallet	faq_articles	Table	Content for FAQ.	F042	article_id (PK), lang_code, category, question, answer, order_index
+T103	m04_wallet	notification_channels	Table	Definition of notification types.	F040	channel_id (PK), name, description, default_enabled
+T104	m04_wallet	user_channel_subs	Table	User subscription to specific channels.	F040	user_id (FK), channel_id (FK), subscribed_bool	Composite PK (user_id, channel_id)
+T105	m04_wallet	discount_codes	Table	Global discount codes.	F057	code (PK), merchant_id, discount_type, value, max_uses, expiry_date
+T106	m04_wallet	loyalty_points	Table	Points earned from merchants.	F058	points_id (PK), user_id (FK), merchant_id (FK), points_balance, last_updated
+T107	m04_wallet	point_redemptions	Table	History of point redemptions.	F058	redemption_id (PK), points_id (FK), transaction_id (FK), points_used
+T108	m04_wallet	carbon_footprints	Table	Carbon intensity factors for categories.	F061	category_id (PK), co2_per_currency_unit
+T109	m04_wallet	child_transactions	Table	Transactions made from child wallets.	F062	tx_id (PK), child_id (FK), amount, merchant_id, approved_by_parent_id
+T110	m04_wallet	allowance_schedules	Table	Parent-defined allowance schedules.	F062	schedule_id (PK), child_id (FK), amount, frequency, next_transfer_date
+T111	m04_wallet	ticket_types	Table	Definitions of supported ticket types.	F073	type_id (PK), name, schema_version
+T112	m04_wallet	health_certificates	Table	COVID/Health certs.	F072	cert_id (PK), user_id (FK), issuer, valid_from, valid_until, payload_hash
+T113	m04_wallet	credential_types	Table	Supported Verifiable Credential types.	F071	type_id (PK), name, schema_url
+T114	m04_wallet	wallet_backups	Table	List of available backups for restore.	F074	backup_id (PK), user_id (FK), timestamp, size, device_source
+T115	m04_wallet	did_documents	Table	Stored DID Documents.	F160	did (PK), document_json, updated_at
+T116	m04_wallet	service_endpoints	Table	Service endpoints for DIDs.	F160	did (FK), type, endpoint_url
+T117	m04_wallet	verification_methods	Table	Public keys for DIDs.	F160	did (FK), key_id, public_key, type
+T118	m04_wallet	mixer_pools	Table	Configuration of local mixing pools.	F111	pool_id (PK), mix_count, fee_percentage
+T119	m04_wallet	mix_sessions	Table	Logs of mixing operations.	F111	session_id (PK), user_id (FK), input_coins, output_coins, timestamp
+T120	m04_wallet	payjoin_params	Table	Parameters for PayJoin transactions.	F112	param_id (PK), tx_id (FK), psbt_json
+T121	m04_wallet	accessibility_fonts	Table	Available dyslexia-friendly fonts.	F020	font_id (PK), name, file_url
+T122	m04_wallet	color_palettes	Table	Color blindness safe palettes.	F115	palette_id (PK), name, colors_json
+T123	m04_wallet	voice_commands	Table	Mappings of voice phrases to actions.	F023	command_id (PK), phrase_hash, action_name, language_code
+T124	m04_wallet	tts_settings	Table	Text-to-Speech settings.	F113, F118	user_id (PK), voice_name, speed, pitch
+T125	m04_wallet	braille_configs	Table	Braille display configurations.	F119	config_id (PK), user_id (FK), baud_rate, table_type
+T126	m04_wallet	switch_actions	Table	Mappings for switch access devices.	F121	switch_id (PK), user_id (FK), switch_num, action_name
+T127	m04_wallet	offline_actions	Table	Actions permitted offline.	F124	action_name (PK), requires_auth_bool
+T128	m04_wallet	sync_conflicts	Table	Log of sync conflicts requiring resolution.	F075	conflict_id (PK), user_id (FK), local_data, remote_data, status
+T129	m04_wallet	data_savings	Table	Metrics for data saver mode.	F125	metric_id (PK), user_id (FK), date, bytes_saved
+T130	m04_wallet	battery_optimization	Table	Rules for background task execution.	F127	task_type (PK), allow_on_battery_bool, min_charge_level
+T131	m04_wallet	camera_configs	Table	Camera settings for QR scanning.	F128	config_id (PK), user_id (FK), resolution, focus_mode, flash_bool
+T132	m04_wallet	vibration_patterns	Table	Haptic patterns for alerts.	F130	pattern_id (PK), alert_type, timing_json
+T133	m04_wallet	dnd_schedules	Table	Do Not Disturb schedules.	F131	schedule_id (PK), user_id (FK), start_time, end_time, days_of_week
+T134	m04_wallet	permission_requests	Table	Logs of requested app permissions.	F133	req_id (PK), permission_name, granted_bool, timestamp
+T135	m04_wallet	remote_wipes	Table	History of remote wipe commands.	F134	wipe_id (PK), user_id (FK), initiated_by, completed_at
+T136	m04_wallet	lost_mode_status	Table	Status of lost mode.	F135	user_id (PK), active_bool, message, return_contact
+T137	m04_wallet	risk_models	Table	Config for fraud risk scoring.	F137	model_id (PK), version, threshold, weights_json
+T138	m04_wallet	behavior_events	Table	Raw events for behavioral biometric training.	F138	event_id (PK), user_id (FK), event_type, features_json
+T139	m04_wallet	context_events	Table	Location/Time context events.	F139	event_id (PK), user_id (FK), latitude, longitude, action_taken
+T140	m04_wallet	referral_rewards	Table	Processed rewards for referrals.	F141	reward_id (PK), referrer_id (FK), referee_id (FK), amount, status
+T141	m04_wallet	ab_test_experiments	Table	Definition of active A/B tests.	F142	experiment_id (PK), name, description, start_date
+T142	m04_wallet	ab_test_buckets	Table	User assignment to experiment buckets.	F142	user_id (FK), experiment_id (FK), bucket_name	Composite PK (user_id, experiment_id)
+T143	m04_wallet	user_feedback_votes	Table	Votes on user feedback/suggestions.	F148	vote_id (PK), feedback_id (FK), user_id (FK), vote_type
+T144	m04_wallet	translation_suggestions	Table	Community translation suggestions.	F148	suggestion_id (PK), lang_code, key, suggested_value, user_id (FK)
+T145	m04_wallet	plugin_manifests	Table	Metadata for approved plugins.	F149	plugin_id (PK), name, developer, version, permissions_required
+T146	m04_wallet	user_plugins	Table	Active user plugins.	F149	user_id (FK), plugin_id (FK), settings_json	Composite PK (user_id, plugin_id)
+T147	m04_wallet	custom_themes	Table	User created themes.	F150	theme_id (PK), user_id (FK), name, colors_json, is_public
+T148	m04_wallet	export_jobs	Table	Jobs for exporting user data (PDF/CSV).	F037, F157	job_id (PK), user_id (FK), type, status, file_url
+T149	m04_wallet	import_jobs	Table	Jobs for importing data from competitors.	F153	job_id (PK), user_id (FK), source_type, status, records_imported
+T150	m04_wallet	health_checks	Table	Results of app health checks.	F154	check_id (PK), user_id (FK), check_type, result_bool, details_json
+T151	m04_wallet	tos_versions	Table	Version history of Terms of Service.	F156	version_id (PK), content_hash, effective_date
+T152	m04_wallet	privacy_policy_versions	Table	Version history of Privacy Policy.	F156	version_id (PK), content_hash, effective_date
+T153	m04_wallet	cookie_preferences	Table	Cookie/Tracker consent.	F159	category_id (PK), name, allowed_bool
+T154	m04_wallet	tracker_list	Table	List of known web trackers.	F159	tracker_id (PK), domain, category
+T155	m04_wallet	blocked_trackers	Table	User blocked trackers.	F159	user_id (FK), tracker_id (FK)	Composite PK (user_id, tracker_id)
+T156	m04_wallet	payment_methods	Table	Enum of supported payment methods.	F085, F086	method_id (PK), name, code, icon_url
+T157	m04_wallet	topup_providers	Table	External providers for fiat topup.	F085	provider_id (PK), name, api_endpoint, fee_structure
+T158	m04_wallet	withdrawal_providers	Table	External providers for ATM/Withdrawal.	F087	provider_id (PK), name, type
+T159	m04_wallet	session_activity	Table	Tracking of active user sessions.	F049	session_id (PK), user_id (FK), ip_hash, user_agent, started_at
+T160	m04_wallet	auth_attempts	Table	Log of authentication attempts.	F001	attempt_id (PK), user_id (FK), method, success_bool, timestamp
+T161	m04_wallet	biometric_enrollments	Table	History of biometric registrations.	F001	enrollment_id (PK), user_id (FK), bio_type, device_id
+T162	m04_wallet	pin_history	Table	History of PIN changes (to prevent reuse).	F002	history_id (PK), user_id (FK), pin_hash_hash, set_at
+T163	m04_wallet	recovery_questions_answers	Table	Encrypted Q&A for account recovery.	F005	qa_id (PK), user_id (FK), question_id, answer_encrypted
+T164	m04_wallet	social_shares	Table	Encrypted shards of recovery key.	F006	share_id (PK), user_id (FK), holder_contact_id, share_encrypted
+T165	m04_wallet	documents	Table	Generic table for storing document metadata.	F008	doc_id (PK), user_id (FK), doc_type, hash, uri
+T166	m04_wallet	document_ocr_data	Table	Extracted data from documents.	F008	ocr_id (PK), doc_id (FK), field_name, value, confidence
+T167	m04_wallet	liveness_checks	Table	Records of liveness verification attempts.	F008	check_id (PK), user_id (FK), session_id, score, result_bool
+T168	m04_wallet	nfc_tags	Table	Read NFC tag history.	F011	tag_id (PK), user_id (FK), tag_data, timestamp
+T169	m04_wallet	ble_devices	Table	Scanned BLE devices for payments.	F067	device_id (PK), mac_addr_hash, name, rssi
+T170	m04_wallet	sound_codes	Table	Recorded/Decoded sound codes.	F068	code_id (PK), session_id, payload, duration
+T171	m04_wallet	transport_tickets	Table	Specific transit tickets.	F070	ticket_id (PK), user_id (FK), issuer, valid_from, valid_until, usage_count
+T172	m04_wallet	events	Table	Generic events (concerts, etc).	F073	event_id (PK), name, organizer_id, date, location
+T173	m04_wallet	event_tickets	Table	User ownership of event tickets.	F073	ticket_id (PK), event_id (FK), user_id (FK), seat_info, qr_hash
+T174	m04_wallet	wallet_shares	Table	Sharing of wallet data with family view.	F062	share_id (PK), owner_id (FK), viewer_id (FK), permissions_json
+T175	m04_wallet	savings_goals	Table	User defined savings goals.	F097	goal_id (PK), user_id (FK), name, target_amount, current_amount, deadline
+T176	m04_wallet	goal_contributions	Table	Transactions contributing to a goal.	F097	contrib_id (PK), goal_id (FK), tx_id (FK), amount
+T177	m04_wallet	recurring_templates	Table	Templates for recurring payments.	F054	template_id (PK), user_id (FK), name, amount_template
+T178	m04_wallet	subscriptions_history	Table	Snapshot of subscription history.	F054	history_id (PK), sub_id (FK), amount, billing_date
+T179	m04_wallet	disputes	Table	Dispute records.	F032	dispute_id (PK), user_id (FK), tx_id (FK), reason, status, evidence_json
+T180	m04_wallet	dispute_messages	Table	Chat within a dispute.	F032	msg_id (PK), dispute_id (FK), sender_id (FK), message, timestamp
+T181	m04_wallet	refund_requests	Table	Refund requests from user.	F031	request_id (PK), user_id (FK), tx_id (FK), amount, status
+T182	m04_wallet	invoices	Table	Invoices received by user.	F056	invoice_id (PK), user_id (FK), sender_id, amount, due_date, status
+T183	m04_wallet	payments_sent	Table	Payments initiated by user.	F010	payment_id (PK), user_id (FK), invoice_id (FK), amount, status
+T184	m04_wallet	scheduled_actions	Table	General scheduler for actions.	F126	action_id (PK), user_id (FK), action_type, trigger_time, payload
+T185	m04_wallet	background_jobs	Table	Queue of background jobs.	F090	job_id (PK), job_type, status, attempts, next_run_at
+T186	m04_wallet	lock_screen_widgets	Table	Widgets displayed on lock screen.	F078	widget_id (PK), user_id (FK), type, config
+T187	m04_wallet	quick_actions	Table	User defined quick actions (long press).	F151	action_id (PK), user_id (FK), gesture, action_config
+T188	m04_wallet	notification_groups	Table	Grouping of notifications.	F040	group_id (PK), name, channels_json
+T189	m04_wallet	search_index	Table	FTS index for merchants/contacts.	F099	doc_id (PK), content_text
+T190	m04_wallet	recent_merchants	Table	Cache of recently used merchants.	F099	merchant_id (FK), user_id (FK), last_used
+T191	m04_wallet	favorites	Table	General favorites list.	F065	fav_id (PK), user_id (FK), item_type, item_id, rank
+T192	m04_wallet	bookmarks	Table	Bookmarked content/articles.	F026	bookmark_id (PK), user_id (FK), content_url, title
+T193	m04_wallet	reading_list	Table	Paid articles to read later.	F026	article_id (PK), user_id (FK), access_token, added_at
+T194	m04_wallet	donation_recipients	Table	Frequently donated charities.	F060	recipient_id (PK), user_id (FK), charity_id, total_donated
+T195	m04_wallet	carbon_footprint_log	Table	History of carbon footprint.	F061	log_id (PK), user_id (FK), date, total_kg_co2
+T196	m04_wallet	screen_time	Table	App usage stats.	F033	stat_id (PK), user_id (FK), date, seconds_opened
+T197	m04_wallet	feature_usage	Table	Usage stats for specific features.	F142	usage_id (PK), user_id (FK), feature_name, count, date
+T198	m04_wallet	error_analytics	Table	Aggregated error stats.	F143	error_id (PK), error_code, count, affected_version
+T199	m04_wallet	funnels	Table	Conversion funnel tracking.	F007	stage_id (PK), user_id (FK), funnel_name, stage_name, timestamp
+T200	m04_wallet	cohorts	Table	User cohort assignment (for analytics).	F142	user_id (PK), cohort_name, join_date
+V001	m04_wallet	v_user_balance_summary	View	Aggregates the total value of coins held by a user per currency.	F014, F052	user_id, currency, total_amount, coin_count, last_updated	Index on user_id for fast dashboard loading
+V002	m04_wallet	v_transaction_history	View	Enriches transaction records with merchant names and categories.	F015, F016	tx_id, timestamp, amount, currency, merchant_name, category_name, status	Joins T009, T024, T010
+V003	m04_wallet	v_unread_notifications	View	Filters alerts for the user that have not been read.	F040	alert_id, user_id, message, action_link, created_at	Simple filter on is_read = false
+V004	m04_wallet	v_spending_by_category	View	Groups transaction amounts by category for the analytics charts.	F034, F033	user_id, category_name, total_amount, transaction_count	Grouped by category_id
+V005	m04_wallet	v_merchant_directory	View	Publicly viewable list of merchants with ratings and location.	F098, F099	merchant_id, display_name, category, average_rating, location_lat_long	Joins T024 with Aggregates of T068
+V006	m04_wallet	v_contact_list	View	User's contacts with their current online status (if available).	F053	contact_id, alias, public_key, is_favorite, last_seen	Joins T013 with User Activity logs
+V007	m04_wallet	v_recurring_payments_active	View	Lists upcoming recurring payments sorted by next run date.	F054, F057	recur_id, destination_alias, amount, next_run_date, frequency	Filter next_run_date > NOW()
+V008	m04_wallet	v_user_kyc_profile	View	Denormalized view of user's KYC status and current limits.	F007, F008	user_id, current_tier, daily_limit, monthly_limit, docs_verified	Joins T001, T006, T005
+V009	m04_wallet	v_wallet_health_status	View	Determines the overall health of the wallet (backup status, key validity).	F005, F074	user_id, has_backup, keys_valid, last_backup_date, health_score	Calculated status flags
+V010	m04_wallet	v_fraud_alert_summary	View	High-level view of recent security events and risk scores.	F137, F046	user_id, total_risk_score, recent_failed_attempts, locked_status	Joins T064 with T020
+V011	m04_wallet	v_favorite_merchants	View	Quick access list of frequently used merchants.	F065	user_id, merchant_name, logo_url, category	Joins T033 with T024
+V012	m04_wallet	v_offline_queue_status	View	Summary of pending actions in the offline queue.	F013	user_id, pending_count, oldest_pending_timestamp, total_amount_stuck	Aggregates T023
+V013	m04_wallet	v_tax_report_line_items	View	Generates line items for tax export (CSV/PDF generation).	F059	tx_date, merchant_name, category, amount, vat_amount, tax_region	Filters business-related txs
+V014	m04_wallet	v_charity_impact	View	Summarizes total donations made by the user.	F060	user_id, total_donated, charities_supported, co2_offset	Joins T031, T069
+V015	m04_wallet	v_family_wallet_overview	View	Parental view of all child wallets and allowances.	F062, F110	parent_user_id, child_alias, balance, allowance_amount, spending_this_month	Joins T032, T052
+V016	m04_wallet	v_budget_progress	View	Shows current spending against defined budget limits.	F034	user_id, category_name, budget_limit, spent_amount, percentage_used, is_over	Joins T022 with Aggregated T009
+V017	m04_wallet	v_active_subscriptions	View	Lists all active merchant subscriptions.	F054, F057	sub_id, merchant_name, amount, next_billing_date, status	Joins T057 with T024
+V018	m04_wallet	v_refund_history	View	History of refunds processed for the user.	F031	refund_id, original_tx_id, amount, status, processed_date	Joins T181 with T009
+V019	m04_wallet	v_device_inventory	View	Lists all devices associated with the user and their trust status.	F046, F047	user_id, device_type, os_version, last_seen, is_trusted, app_version	From T002
+V020	m04_wallet	v_pending_disputes	View	Active disputes requiring user attention.	F032	dispute_id, merchant_name, amount, open_date, status	Joins T179 with T024
+V021	m04_wallet	v_available_vouchers	View	Vouchers available to the user that have not expired.	F086, F057	voucher_code, amount, expiry_date, merchant_name	Joins T015 with Discount table
+V022	m04_wallet	v_loyalty_points_balance	View	Current loyalty points balance per merchant.	F058	user_id, merchant_name, points_balance, tier_level	Joins T106 with T024
+V023	m04_wallet	v_geofenced_merchants	View	Merchants near the user's current location.	F069, F099	user_id, merchant_name, distance_km, address	Geospatial query result
+V024	m04_wallet	v_event_tickets_upcoming	View	Future event tickets stored in the wallet.	F073	ticket_id, event_name, date, venue, qr_secret	Joins T036 with T172
+V025	m04_wallet	v_digital_credentials	View	List of verifiable credentials held by the user.	F071	credential_type, issuer, expiry_date, status	From T037
+V026	m04_wallet	v_exchange_rates_current	View	Latest exchange rates for user's preferred currencies.	F014	from_currency, to_currency, rate, last_updated_timestamp	From T067
+V027	m04_wallet	v_support_conversation	View	Chat history for a specific support ticket.	F041	ticket_id, message_history, status, last_activity	Aggregates T081
+V028	m04_wallet	v_user_anonymized_metrics	View	Metrics stripped of PII for analytics/differential privacy.	F033, F042	cohort_id, feature_usage_count, session_duration_avg	Aggregated data
+V029	m04_wallet	v_pending_requests	View	Incoming payment requests from contacts.	F056	request_id, requester_alias, amount, currency, request_date	From T025
+V030	m04_wallet	v_transaction_details_receipt	View	Detailed view for generating PDF receipts.	F036	tx_id, date, items_details, taxes, total, merchant_address	Joins multiple tables
+V031	m04_wallet	v_backup_eligible_devices	View	Devices allowed to act as a backup destination.	F074, F075	user_id, device_name, storage_capacity, last_sync_success	From T002 filtered
+V032	m04_wallet	v_plugin_status	View	Status of installed plugins (active, error, update available).	F149	plugin_name, version, status, last_used	From T048
+V033	m04_wallet	v_beta_features_enabled	View	Features currently enabled for the beta user.	F147	feature_name, description, feedback_link	Joins T074 with user mapping
+V034	m04_wallet	v_security_audit_log	View	Read-only view of critical security changes.	F046, F052	timestamp, event_type, ip_hash, outcome	From T020
+V035	m04_wallet	v_split_bill_activity	View	Recent split bills involving the user.	F055	split_id, initiator, total_amount, my_share, status	Joins T025, T026
+V036	m04_wallet	v_coin_inventory_expiring	View	Coins that will expire soon and need refreshing.	F030	coin_id, denomination, expiry_date, days_remaining	Filtered T052
+V037	m04_wallet	v_payjoin_opportunities	View	Transactions eligible for PayJoin privacy enhancement.	F112	tx_id, merchant_payjoin_capable_bool, amount	Logic check on T009
+V038	m04_wallet	v_stealth_address_usage	View	History of generated stealth addresses and their status.	F106	address_id, created_at, spent_bool, associated_tx_id	From T046
+V039	m04_wallet	v_local_merchants_map	View	Optimized format for rendering map markers.	F099	merchant_id, lat, long, name, category	Minimal columns for map UI
+V040	m04_wallet	v_savings_goal_progress	View	Tracks progress towards savings goals.	F097	goal_name, target_amount, current_amount, remaining_amount, completion_pct	From T175
+V041	m04_wallet	v_child_spending_report	View	Detailed spending report for child wallets.	F062	child_alias, date, merchant, amount, category	From T109
+V042	m04_wallet	v_import_export_history	View	Log of data import/export jobs.	F037, F153	job_type, start_time, end_time, status, record_count	Union of T148, T149
+V043	m04_wallet	v_accessibility_settings_summary	View	Current accessibility configuration for the user.	F019	user_id, screen_reader_bool, font_size, contrast_mode, voice_control	Single row per user
+V044	m04_wallet	v_notification_preferences_summary	View	Summary of notification opt-ins.	F040	user_id, push_enabled, email_enabled, sms_enabled, categories_disabled	Pivoted from T061
+V045	m04_wallet	v_language_packs_installed	View	List of languages currently downloaded on device.	F038	lang_code, lang_name, version, size_mb	From T101 filtered
+V046	m04_wallet	v_theme_settings	View	Current theme configuration.	F017, F150	user_id, theme_name, is_custom, primary_color	From T016, T149
+V047	m04_wallet	v_search_results	View	Materialized view for search indexing.	F099	search_vector, item_type, item_id, title	Full Text Search (FTS) target
+V048	m04_wallet	v_widget_data	View	Data feed for home screen widgets.	F078	widget_type, data_json, refresh_interval	From T039
+V049	m04_wallet	v_network_status	View	Current connectivity and latency metrics.	F013, F126	connection_type, latency_ms, offline_mode_active, background_sync_bool	From T089
+V050	m04_wallet	v_user_engagement_score	View	Calculated score based on feature usage and login frequency.	F140	user_id, score, tier_name, last_activity_date	Computed via aggregation
+P001	m04_wallet	sp_register_user	Procedure	Registers a new user, generates keypairs, and creates initial TEE records.	F007	IN email_hash, IN device_info	Idempotent check on email_hash
+P002	m04_wallet	sp_initiate_payment	Procedure	Validates balance, selects coins (change-making), signs transaction, and locks coins.	F010, F030	IN user_id, IN amount, IN merchant_pub_key, IN currency	ACID transaction; raises exception if insufficient funds
+P003	m04_wallet	sp_process_offline_sync	Procedure	Iterates through the offline queue and replays transactions against the Exchange.	F013, F023	IN user_id	Handles conflict resolution via vector clocks
+P004	m04_wallet	sp_refresh_coins	Procedure	Selects coins near expiry and requests new blind signatures from the Exchange (M05).	F030, F053	IN user_id, IN coin_ids[]	Updates T052 status to 'refreshing'
+P005	m04_wallet	sp_submit_kyc_documents	Procedure	Uploads encrypted document hashes and triggers OCR/AI verification via M02.	F008	IN user_id, IN doc_type, IN file_hash, IN encrypted_blob	Checks T006 for upgrade eligibility
+P006	m04_wallet	sp_verify_biometric	Procedure	Verifies biometric template match against TEE stored reference.	F001	IN user_id, IN biometric_data	Returns boolean success/fail
+P007	m04_wallet	sp_create_recurring_payment	Procedure	Sets up a scheduled payment job and calculates the next run date.	F054	IN user_id, IN dest_key, IN amount, IN freq	Validates against T006 limits
+P008	m04_wallet	sp_execute_recurring_payment	Procedure	Background worker procedure to execute due recurring payments.	F054	(Cron job)	Logs to T014 on success/failure
+P009	m04_wallet	sp_add_contact	Procedure	Adds a new payee to the user's contact list.	F053	IN user_id, IN alias, IN public_key	Checks for duplicate public_key
+P010	m04_wallet	sp_initiate_split_bill	Procedure	Creates a split bill record and generates share requests for participants.	F055	IN user_id, IN total_amount, IN participant_ids[]	Notifies participants via T026
+P011	m04_wallet	sp_accept_split_share	Procedure	Allows a user to accept their share of a split bill.	F055	IN split_id, IN user_id	Updates T026 status
+P012	m04_wallet	sp_submit_support_ticket	Procedure	Creates a support ticket and attaches relevant logs.	F041	IN user_id, IN subject, IN logs_json	Auto-generates ticket_id
+P013	m04_wallet	sp_backup_wallet_to_cloud	Procedure	Encrypts wallet seed and keys, uploads to cloud storage, records metadata.	F074	IN user_id, IN provider_type	Stores storage_path in T038
+P014	m04_wallet	sp_restore_wallet_from_cloud	Procedure	Downloads, decrypts, and validates wallet backup integrity.	F074	IN user_id, IN backup_id	Requires re-authentication
+P015	m04_wallet	sp_social_recovery_request	Procedure	Initiates recovery request and distributes key shares to trusted contacts.	F006	IN user_id	Sends notifications to T006
+P016	m04_wallet	sp_social_recovery_shard_submit	Procedure	Allows a trusted contact to submit their encrypted share of the recovery key.	F006	IN user_id, IN shard, IN contact_id	Validates against T092
+P017	m04_wallet	sp_finalize_recovery	Procedure	Reconstructs the master secret from shares and resets wallet keys.	F006	IN user_id	Invalidates old keys in T007
+P018	m04_wallet	sp_update_user_preferences	Procedure	Updates UI/UX preferences.	F016, F017	IN user_id, IN preferences_json	Validates JSON schema
+P019	m04_wallet	sp_process_webhook	Procedure	Handles incoming webhooks from Exchange (M05) regarding settlement status.	F085	IN tx_id, IN status, IN settlement_hash	Updates T009
+P020	m04_wallet	sp_generate_tax_report	Procedure	Aggregates transactions and generates a PDF/CSV report record.	F059	IN user_id, IN year, IN format	Inserts record into T030
+P021	m04_wallet	sp_create_escrow_contract	Procedure	Locks funds into an escrow state pending verification.	F103	IN buyer_id, IN seller_id, IN amount, IN condition_hash	Reduces available balance in V001
+P022	m04_wallet	sp_release_escrow	Procedure	Releases funds from escrow to the seller.	F103	IN contract_id	Validates condition_hash
+P023	m04_wallet	sp_submit_dispute	Procedure	Raises a formal dispute on a transaction and freezes funds temporarily.	F032	IN tx_id, IN user_id, IN reason	Creates record in T179
+P024	m04_wallet	sp_topup_fiat	Procedure	Initiates a fiat-to-coin topup via linked bank or card.	F085	IN user_id, IN amount, IN source_id	Creates record in T087
+P025	m04_wallet	sp_withdraw_fiat	Procedure	Initiates a coin-to-fiat withdrawal to bank account.	F087	IN user_id, IN amount, IN dest_account	Creates record in T088
+P026	m04_wallet	sp_generate_qr_invoice	Procedure	Generates a QR code payload for receiving payment.	F056	IN user_id, IN amount, IN currency, IN description	Returns encoded string
+P027	m04_wallet	sp_scan_and_parse_qr	Procedure	Validates and parses a scanned QR code string.	F010	IN qr_string	Returns structured payment request
+P028	m04_wallet	sp_nfc_initiate	Procedure	Prepares NFC controller for payment transmission.	F011	IN amount, IN currency	Activates hardware interface
+P029	m04_wallet	sp_check_duplicate_transaction	Procedure	Prevents double-spending by checking transaction hash uniqueness.	F010	IN tx_hash	Used before sp_initiate_payment
+P030	m04_wallet	sp_calculate_routing_fee	Procedure	Queries the routing engine to estimate payment fees.	F093	IN amount, IN destination, IN currency	Returns fee amount
+P031	m04_wallet	sp_apply_voucher	Procedure	Validates and applies a discount voucher code.	F057	IN user_id, IN voucher_code	Checks expiry and usage count in T015
+P032	m04_wallet	sp_record_analytics_event	Procedure	Inserts anonymized analytics events with differential privacy noise.	F033, F042	IN user_id, IN event_name, IN properties	Adds noise to numerical values
+P033	m04_wallet	sp_rotate_keys	Procedure	Generates new keypair and signs it with the old key (key rotation).	F104	IN user_id	Updates T007
+P034	m04_wallet	sp_link_foss_app	Procedure	Authorizes a third-party FOSS app to initiate payments.	F024	IN user_id, IN app_name, IN permissions	Inserts record into T018
+P035	m04_wallet	sp_revoke_foss_app	Procedure	Revokes authorization for a specific app.	F024	IN user_id, IN integration_id	Deletes record from T018
+P036	m04_wallet	sp_set_budget_limit	Procedure	Sets or updates a budget limit for a category.	F034	IN user_id, IN category_id, IN limit_amount	Upserts into T022
+P037	m04_wallet	sp_check_budget_threshold	Procedure	Checks if spending has exceeded budget limits (Triggered on payment).	F034	IN user_id, IN amount, IN category_id	Returns boolean violation
+P038	m04_wallet	sp_add_to_favorites	Procedure	Adds a merchant or item to the user's favorites.	F065	IN user_id, IN item_type, IN item_id	Inserts into T191
+P039	m04_wallet	sp_add_to_reading_list	Procedure	Adds a paid article to the reading list.	F026	IN user_id, IN content_url, IN title	Inserts into T192
+P040	m04_wallet	sp_donate_roundup	Procedure	Calculates the roundup amount and donates it.	F060	IN user_id, IN base_tx_id	Calculates (round(base) - base)
+P041	m04_wallet	sp_calculate_carbon	Procedure	Estimates carbon footprint of a transaction based on category.	F061	IN amount, IN category_id	Returns kg_co2 using T108
+P042	m04_wallet	sp_create_child_wallet	Procedure	Creates a sub-wallet for a child with specific limits.	F062	IN parent_id, IN child_name	Inserts into T032
+P043	m04_wallet	sp_approve_child_transaction	Procedure	Parental approval for a transaction exceeding child limits.	F062	IN tx_id, IN parent_id	Updates T109 status
+P044	m04_wallet	sp_load_ticket	Procedure	Loads a ticket for display (QR/Barcode).	F073	IN ticket_id	Validates expiry in T036
+P045	m04_wallet	sp_verify_credential	Procedure	Generates a Zero-Knowledge Proof for a specific credential (e.g., Age > 18).	F071	IN credential_id, IN proof_request	Returns ZKP payload
+P046	m04_wallet	sp_register_did	Procedure	Generates a new Decentralized Identifier (DID).	F160	IN user_id, IN did_method	Inserts into T050
+P047	m04_wallet	sp_mixin_coins	Procedure	Performs local coin mixing (if allowed by jurisdiction).	F111	IN user_id, IN coin_ids[]	Updates T046 status
+P048	m04_wallet	sp_payjoin_sign	Procedure	Participates in a PayJoin transaction as the payer.	F112	IN tx_id, IN psbt_unsigned	Returns signed psbt
+P049	m04_wallet	sp_schedule_notification	Procedure	Queues a push notification for delivery.	F040	IN user_id, IN message, IN channel	Inserts into T029
+P050	m04_wallet	sp_cleanup_old_logs	Procedure	Maintenance job to archive/delete old security and event logs.	F094, T094	IN retention_days	Runs weekly; enforces retention policy
+E001	m04_wallet	enum_transaction_status	Enum	States of a transaction.	F009	PENDING, COMPLETED, FAILED, REFUNDED, EXPIRED
+E002	m04_wallet	enum_kyc_tier	Enum	Levels of verification.	F007	TIER_ANON, TIER_BASIC, TIER_VERIFIED, TIER_CORPORATE
+E003	m04_wallet	enum_device_type	Enum	Types of user devices.	F046	IOS, ANDROID, DESKTOP_WIN, DESKTOP_MAC, DESKTOP_LINUX, WEB
+E004	m04_wallet	enum_notification_channel	Enum	Methods of delivering alerts.	F040	PUSH, EMAIL, SMS, IN_APP
+E005	m04_wallet	enum_recurring_frequency	Enum	Frequency of recurring payments.	F054	WEEKLY, BI_WEEKLY, MONTHLY, QUARTERLY, YEARLY
+E006	m04_wallet	enum_auth_method	Enum	Methods of authentication.	F001	BIOMETRIC, PIN, PASSWORD, PATTERN
+E007	m04_wallet	enum_coin_status	Enum	States of digital coins in inventory.	F052	FRESH, RESERVED, SPENT, EXPIRED, REFRESHING
+E008	m04_wallet	enum_split_bill_status	Enum	Status of a split bill.	F055	INITIATED, ACCEPTED, REJECTED, COMPLETED, CANCELLED
+E009	m04_wallet	enum_ticket_type	Enum	Types of tickets stored.	F073	EVENT, TRANSPORT, LOYALTY
+E010	m04_wallet	enum_dispute_status	Enum	Status of a dispute.	F032	OPEN, UNDER_REVIEW, RESOLVED, CLOSED

@@ -1,0 +1,458 @@
+
+20.	Module M20	Automated Threat Modeling & SBOM Generator
+a.	Summary
+In the contemporary landscape of financial software, particularly within a high-stakes environment like the Privacy Preserving Payment Anonymous Regulatory Insights (PARI) system, the integrity of the software supply chain is not merely a technical consideration but a foundational pillar of existential security. The shift from monolithic architectures to complex, microservice-based ecosystems, heavily reliant on open-source software (FOSS), has expanded the attack surface exponentially. Legacy approaches to security—manual threat modeling and periodic vulnerability scanning—are no longer sufficient to defend against sophisticated, automated, and supply-chain-based attacks. Module M20, the Automated Threat Modeling & SBOM Generator, represents a paradigm shift in DevSecOps, engineered to meet the rigorous demands of a CMMI Level 5 organization while providing the agility required for modern fintech development.
+
+This module addresses the critical "blind spots" in traditional security audits. By integrating deeply into the Continuous Integration/Continuous Deployment (CI/CD) pipeline, M20 acts as an intelligent, automated gatekeeper. Its primary function is the generation and management of Software Bill of Materials (SBOMs) in industry-standard formats (SPDX, CycloneDX). Unlike static manifests, M20’s SBOMs are living documents, cryptographically signed and verified against the actual binary artifacts deployed to production. This ensures that what is audited is exactly what is running, closing the gap between development intent and operational reality. This capability directly addresses the threat scenario epitomized by the Log4j incident, where a single deep-transitive dependency could compromise the entire payment rail. By maintaining an immutable graph of every dependency, including its hash, origin, and license, M20 allows for instantaneous impact assessment when a new Common Vulnerabilities and Exposures (CVE) is announced.
+
+Beyond inventory management, M20 automates the discipline of Threat Modeling. Historically, threat modeling has been a labor-intensive, manual exercise often reserved for critical systems only, leading to "knowledge rot" as systems evolve. M20 leverages the OWASP Threat Dragon engine to dynamically generate data flow diagrams (DFDs) based on code changes and architectural blueprints. It applies STRIDE (Spoofing, Tampering, Repudiation, Information Disclosure, Denial of Service, Elevation of Privilege) analysis automatically to every proposed merge request. This "shifts left" the security posture, identifying design flaws—such as insecure data flows between the Wallet Layer and the Exchange Layer—before a single line of code is committed to the main branch.
+
+To handle the sheer volume of data and noise inherent in vulnerability scanning, Module M20 incorporates a dedicated AI/ML layer. Standard scanners often flood developers with thousands of false positives, leading to "alert fatigue" and the desensitization that precedes security breaches. M20 utilizes machine learning algorithms to prioritize vulnerabilities based on exploitability, asset criticality (e.g., a database in the Exchange Layer is weighted higher than a font in the Merchant UI), and threat intelligence feeds. This context-aware triage ensures that engineering resources are focused on the patches that truly matter to the PARI ecosystem’s security posture.
+
+Furthermore, M20 enforces a quantitative approach to risk management aligned with CMMI Level 5. It does not merely flag errors; it measures process performance. By tracking metrics such as Mean Time to Remediate (MTTR) and the rate of vulnerability recurrence, M20 provides the data needed for statistical process control. It integrates with the broader PARI governance framework, enforcing policy-based access control (PBAC) over code promotions. For instance, a module handling Personally Identifiable Information (PII) may have a stricter SBOM hygiene policy than a static content server.
+
+Finally, M20 serves as the bridge between technical security and regulatory compliance. In an era of increasing digital sovereignty laws (e.g., EU Cyber Resilience Act), the ability to produce an accurate, machine-readable SBOM on demand is transitioning from a best practice to a legal requirement. M20 automates the generation of Vulnerability Disclosure Reports (VDR) for auditors and stakeholders, ensuring that PARI can demonstrate compliance with ISO 27001, PCI-DSS, and PSD3 without manual intervention. In essence, Module M20 transforms the chaotic complexity of the FOSS supply chain into a quantifiably managed, transparent, and resilient asset, safeguarding the integrity of the world’s most privacy-preserving payment system.
+b.	Scope
+Module M20 encompasses the entire lifecycle of software supply chain security and threat analysis within the PARI ecosystem.
+
+     Inbound: Automated ingestion of source code, container images, and third-party libraries.
+     Processing: Deep binary analysis, dependency graph traversal, cryptographic hash generation, license compliance checking, and automated threat model generation using STRIDE/DREAD methodologies.
+     Analysis: AI-driven vulnerability prioritization, exploitability prediction, and policy violation detection.
+     Outbound: Generation of signed SBOMs (SPDX/CycloneDX), automated Vulnerability Disclosure Reports (VDR), and direct integration with ticketing systems (Jira) for remediation workflows.
+     Governance: Enforcement of security gates within CI/CD pipelines, management of security exceptions, and audit logging for CMMI process improvement.
+
+c.	Business Case
+The proliferation of open-source software has introduced a "supply chain paradox": speed vs. security. For a system like PARI, which handles sensitive financial transactions and adheres to strict regulatory standards, a single compromised dependency (like Log4j or SolarWinds) could result in catastrophic financial loss, regulatory fines (GDPR/PSD2), and irreversible reputational damage. Manually tracking thousands of dependencies is impossible and error-prone. Module M20 automates this process, reducing the Mean Time to Detect (MTTD) and Mean Time to Remediate (MTTR) critical vulnerabilities from weeks to hours. By preventing "vulnerability debt" from entering the codebase, M drastically lowers the long-term cost of security remediation and insurance premiums. Furthermore, automated compliance reporting frees up senior engineering resources to focus on innovation rather than manual audit preparation, directly accelerating time-to-market for new features while maintaining the highest security assurance.
+d.	KPIs
+•	CVSS Remediation Time (<24h): Average time taken to patch or mitigate vulnerabilities with a CVSS score of 7.0+.
+•	SBOM Completeness (100%): Percentage of production artifacts with a verifiable, signed SBOM.
+•	False Positive Rate (<0.5%): Ratio of scanner-reported vulnerabilities dismissed as non-exploitable by human review.
+•	Threat Coverage Score (>95%): Percentage of system components covered by an active, automated threat model.
+•	Dependency Obsolescence Rate: Percentage of dependencies flagged as End-of-Life (EOL).
+•	Policy Violation Block Rate: Number of builds rejected per week due to non-compliance with supply chain policies.
+
+e.	Stakeholder Insights
+Stakeholder	Concern	Implications
+Chief Information Security Officer (CISO)	Visibility into the "black box" of third-party code and shadow IT.	Without M20, the CISO lacks a real-time inventory of the attack surface, making risk reporting to the board speculative rather than data-driven.
+Development Leads	Disruption of CI/CD pipelines by false positive security alerts.	Developers spend more time investigating non-issues than coding. M20's AI triage ensures only valid, actionable threats block deployment.
+Compliance Officers / Auditors	Adherence to EU Cyber Resilience Act and ISO standards regarding software transparency.	Inability to produce SBOMs on demand could result in massive fines or the revocation of the license to operate as a payment processor.
+Procurement / Legal	License compliance (e.g., GPL vs. MIT) and intellectual property risk.	Accidental inclusion of copyleft licenses could force PARI to open-source proprietary code. M20 automates license policy enforcement.
+Customers / Merchants	Trust that the payment infrastructure is resilient to hacks.	A breach destroys trust instantly. M20 provides a public proof of security hygiene, acting as a competitive differentiator.
+
+f.	Knowledge Representation Graph (mermaid.js)
+graph TD
+    subgraph "Input Sources"
+        SRC[Source Code Repos]
+        PKG[Package Registries]
+        IMG[Container Registries]
+        ARCH[Architecture Blueprints]
+    end
+
+    subgraph "Module M20: Automated Threat Modeling & SBOM"
+        INGEST[Ingestion & normalization Layer]
+        SBOMGEN[SBOM Generator Engine]
+        HASHER[Cryptographic Hasher SHA-3/256]
+        TMENGINE[Threat Modeling Engine]
+        TMDRAG[OWASP Threat Dragon Integration]
+        VULNDB[Vulnerability Intelligence Feeds]
+        AI_PRIORITIZER[AI/ML Prioritization Engine]
+        POLICY[Policy Enforcement Gate]
+        SIGNER[Code Signing Service]
+    end
+
+    subgraph "Outputs & Actions"
+        REPO[SBOM Storage]
+        DASHBOARD[Security Dashboard]
+        CICD[CI/CD Pipeline Gate]
+        TICKETING[Jira/Remediation System]
+        AUDITOR[Audit Reports]
+    end
+
+    SRC --> INGEST
+    PKG --> INGEST
+    IMG --> INGEST
+    ARCH --> TMENGINE
+
+    INGEST --> SBOMGEN
+    INGEST --> TMENGINE
+    SBOMGEN --> HASHER
+    HASHER --> REPO
+
+    TMENGINE --> TMDRAG
+    TMDRAG --> AI_PRIORITIZER
+
+    VULNDB --> AI_PRIORITIZER
+    REPO --> AI_PRIORITIZER
+
+    AI_PRIORITIZER --> POLICY
+    POLICY -->|Pass| CICD
+    POLICY -->|Fail| TICKETING
+    POLICY --> DASHBOARD
+    POLICY --> AUDITOR
+
+    SBOMGEN --> SIGNER
+    SIGNER --> CICD
+
+g.	Comprehensive List of Features
+ID	Feature	Description	Business Case	AI/ML Algorithms	KPIs	Primary Users
+M20-F001	Multi-Format SBOM Generation	Automatically generate SPDX, CycloneDX, and SWID tags for all artifacts.	Ensures compatibility with various regulatory frameworks and client tools.	N/A	Format coverage 100%	DevOps Engineers
+M20-F002	Deep Transitive Dependency Scanning	Resolve and scan dependencies beyond the first level (nested dependencies).	Detects vulnerabilities buried deep in the library tree.	Graph Traversal	Depth resolution >10 levels	Security Analysts
+M20-F003	Cryptographic SBOM Signing	Sign all generated SBOMs using Sigstore/Cosign or internal HSM.	Guarantees integrity and provenance of the software bill of materials.	N/A	Signature validity 100%	Release Managers
+M20-F004	Real-Time CVE Ingestion	Stream CVE data from NVD, GitHub Advisories, and vendor feeds.	Maintains an up-to-the-minute threat intelligence database.	N/A	Feed latency <1hr	Threat Intel Team
+M20-F005	CVSS v3.1 Scoring Integration	Calculate and store CVSS scores for every detected vulnerability.	Standardizes risk assessment across the organization.	N/A	Scoring accuracy 100%	Security Analysts
+M20-F006	AI-Based False Positive Reduction	Utilize ML to flag and filter out non-exploitable vulnerability reports.	Reduces alert fatigue for engineering teams.	Random Forest / Gradient Boosting	False Positive Rate <0.5%	Developers
+M20-F007	Vulnerability Exploitability Prediction	Predict the likelihood of a CVE being weaponized in the wild.	Prioritizes patching of "dangerous" flaws over theoretical ones.	Logistic Regression / Time-Series	Exploit Prediction Recall >90%	CISO
+M20-F008	Automated Threat Model Creation	Generate DFDs (Data Flow Diagrams) from code and config changes.	"Shifts left" security by identifying design flaws early.	NLP / AST Parsing	Model Gen Time <5min	Solution Architects
+M20-F009	STRIDE Analysis Automation	Automatically apply STRIDE methodology to generated DFDs.	Systematically identifies architectural security weaknesses.	Rule-Based Inference	Threat Coverage >95%	Security Engineers
+M20-F010	License Compliance Checking	Detect licenses (GPL, AGPL, MIT) and enforce corporate policy.	Prevents legal/IP risks associated with FOSS usage.	NLP (Text Classification)	Policy Violation Accuracy 100%	Legal Dept
+M20-F011	CI/CD Pipeline Gate Integration	Block builds if critical vulnerabilities are found or SBOM is missing.	Prevents insecure code from reaching production.	N/A	Block Rate <5%	DevOps Engineers
+M20-F012	Jira/ServiceNow Auto-Ticketing	Create and update tickets for newly discovered vulnerabilities.	Streamlines the remediation workflow and tracking.	N/A	Ticket Creation Latency <5min	Release Managers
+M20-F013	Container Image Layer Analysis	Scan each layer of Docker/OCI images independently.	Identifies insecure base images or build steps.	N/A	Layer Scan Coverage 100%	Platform Engineers
+M20-F014	Binary Hardening Validation	Verify compiled binaries have stack canaries, ASLR, and PIE enabled.	Ensures build security configurations are correct.	Static Analysis (Binary)	Hardening Compliance 100%	Build Engineers
+M20-F015	Secret Scanning in Code	Detect accidental commits of API keys, passwords, or tokens.	Prevents credential leakage as a primary attack vector.	Regular Expression / Entropy Analysis	Detection Recall >99%	Developers
+M20-F016	Dependency Reachability Analysis	Determine if a vulnerable function is actually called by the app.	Drastically reduces the number of patches required.	Call Graph Analysis	Unused Vuln Reduction >60%	Developers
+M20-F017	SBOM Dependency Graph Visualization	Interactive graph showing relationships between components.	Helps engineers understand the blast radius of a vulnerability.	Graph Visualization	UI Load Time <2s	Security Analysts
+M20-F018	Supply Chain Attack Detection	Detect typosquatting or suspicious commits in dependencies.	Mitigates the risk of malicious package injection.	Heuristic Analysis / Anomaly Detection	Detection F1 Score >0.95	Threat Hunters
+M20-F019	Automated Patch PR Generation	Create Pull Requests with version bumps for vulnerable libs.	Accelerates the remediation process significantly.	N/A	PR Success Rate >80%	Developers
+M20-F020	Base Image Freshness Monitoring	Alert if container base images are older than a threshold (e.g., 30 days).	Ensures the underlying OS is patched and supported.	Time-Series Analysis	Image Age <30 days	Platform Engineers
+M20-F021	Custom Vulnerability Feed Injection	Allow ingestion of internal or proprietary vulnerability data.	Handles threats specific to the PARI ecosystem.	N/A	Feed Update Latency <1hr	Security Researchers
+M20-F022	Component End-of-Life (EOL) Tracking	Identify dependencies that are no longer supported by vendors.	Prevents usage of unmaintained, high-risk software.	N/A	EOL Detection Accuracy 100%	Enterprise Architects
+M20-F023	Policy Exception Management Workflow	Allow temporary waivers for vulnerabilities with audit trails.	Balances security with business continuity deadlines.	N/A	Approval Time <24h	CISO
+M20-F024	Risk-Based Scoring Dashboard	Aggregate view of application risk scores based on vulns.	Provides executives with a quick view of security posture.	Weighted Scoring Algorithm	Dashboard Accuracy	Executives
+M20-F025	OPA (Open Policy Agent) Integration	Enforce fine-grained policies over SBOM data using Rego.	Provides flexible, code-as-policy governance.	N/A	Policy Eval Latency <50ms	DevSecOps
+M20-F026	SBOM Diffing & Comparison	Compare SBOMs between builds to detect unauthorized changes.	Ensures supply chain integrity during release.	Delta Computation	Diff Time <10s	Release Managers
+M20-F027	Vulnerability Disclosure Report (VDR) Export	Generate PDF/Excel reports for auditors and customers.	Fulfills contractual and regulatory security requirements.	N/A	Report Gen Time <30s	Compliance Officers
+M20-F028	VEX (Vulnerability Exploitability Exchange) Gen	Generate VEX documents analyzing exploitability of specific vulns.	Communicates clearly that a product is NOT affected by a CVE.	N/A	VEX Accuracy 100%	Security Analysts
+M20-F029	Fuzzing Integration	Trigger fuzzing tests on high-risk components.	Finds deep memory corruption bugs that scanners miss.	Coverage-Guided Fuzzing	Bug Detection Rate	QA Engineers
+M20-F030	Static Application Security Testing (SAST) Correlation	Correlate SAST findings with SBOM components.	Links code vulnerabilities to specific libraries/packages.	Data Linkage	Correlation Accuracy >90%	Developers
+M20-F031	Kubernetes Manifest Scanner	Scan K8s YAMLs for insecure configurations (privilege escalation).	Prevents cluster-level compromises.	Schema Validation	Config Violations <1%	Cluster Admins
+M20-F032	Infrastructure as Code (IaC) Scanning	Scan Terraform/Ansible for security misconfigurations.	Ensures infrastructure deploys securely.	Static Analysis	IaC Findings	DevOps Engineers
+M20-F033	Software Composition Analysis (SCA) API	Provide REST API for querying component status.	Enables integration with other internal tools.	N/A	API Uptime 99.9%	System Integrators
+M20-F034	Developer-Friendly Remediation Guides	Provide step-by-step instructions for fixing vulnerabilities.	Reduces the cognitive load on developers during patching.	Retrieval Augmented Generation (RAG)	Guide Usage Rate	Developers
+M20-F035	SLA Enforcement for Patching	Automatically escalate tickets if patching exceeds SLA.	Ensures timely remediation of critical threats.	Escalation Logic	SLA Compliance 100%	Ops Managers
+M20-F036	Multi-Tenant Vulnerability Isolation	Ensure tenant-specific data (A vs B) doesn't leak in reports.	Critical for the multi-jurisdictional nature of PARI.	RBAC	Isolation Violations 0	SecOps
+M20-F037	Threat Model Version Control	Track changes to threat models over time (Git integration).	Maintains an audit trail of architectural security decisions.	N/A	Version Accuracy 100%	Architects
+M20-F038	Granular Role-Based Access Control	Restrict access to vulnerability data based on team role.	Enforces least privilege and prevents insider threats.	N/A	Access Denials >0	Admins
+M20-F039	Dependency Health Score	Assign a "trust score" to libraries based on age/maintenance.	Helps developers choose better libraries during selection.	Weighted Algorithm	Adoption of High Score Libs	Developers
+M20-F040	Automated Penetration Test Planning	Use threat models to generate pen-test scope and plans.	Optimizes the resources of external security testers.	NLP / Planning	Plan Generation Time	Security Leads
+M20-F041	Malware Signature Scanning	Scan binaries for embedded malware signatures.	Detects compromised build tools or supply chain injection.	Hash Matching	Detection Time <1min	Security Ops
+M20-F042	Supply Chain Attestation Verification	Verify SLSA (Supply-chain Levels for Software Artifacts) provenance.	Ensures the build process itself was secure.	Cryptographic Verification	Attestation Validity	Release Engineers
+M20-F043	Code to SBOM Mapping	Map lines of code to specific SBOM components.	Helps developers understand exactly where a library is used.	Static Analysis	Map Precision	Developers
+M20-F044	Shadow Repo Detection	Detect unauthorized code repositories (GitLab/GitHub bitbucket).	Prevents "shadow IT" development bypassing security.	Network Scanning / DNS	Rogue Repo Count	IT Security
+M20-F045	Zero-Day/Zero-Day Vulnerability Watch	Monitor dark web/socials for chatter regarding 0-days.	Provides early warning before official CVEs are published.	Sentiment Analysis / NLP	Warning Lead Time	Threat Intel
+M20-F046	Dynamic Library Loading Monitor	Detect unsafe loading of libraries (dlopen) at runtime.	Prevents runtime manipulation of the memory space.	Runtime Instrumentation	Alert Latency <1s	Site Reliability
+M20-F047	Cross-Build Dependency Consistency	Ensure dependency versions match across Dev, Test, Prod builds.	Prevents "it works on my machine" security issues.	Diff Algorithm	Inconsistency Count 0	QA Leads
+M20-F048	SBOM Compression & Storage Optimization	Efficiently store large SBOMs to minimize costs.	Reduces cloud storage overhead for historical data.	Compression Algorithms (Zstd)	Storage Cost Reduction	DBAs
+M20-F049	Component Obsolescence Risk Prediction	Predict when a library will likely become unmaintained.	Proactively replaces dying dependencies.	Survival Analysis	Prediction Accuracy	Architects
+M20-F050	Automated "Bill of Materials" for Data	Generate a data lineage SBOM (DSBOM) for PII.	Aids in GDPR compliance and data protection.	Data Flow Analysis	DSBOM Completeness	DPOs
+M20-F051	Integration with SIEM (Splunk/Sentinel)	Feed vulnerability events into the Security Incident Center.	Centralizes security monitoring for the enterprise.	N/A	Feed Latency <1min	SOC Analysts
+M20-F052	Dependency Confusion Reversal	Detect and mitigate dependency confusion attacks (public vs private).	Prevents attackers from publishing malicious public packages.	Namespace Analysis	Attack Prevention 100%	DevSecOps
+M20-F053	Build Environment Integrity Check	Verify the VM/Container running the build is uncompromised.	Ensures the "source of truth" build is clean.	Attestation	Build Trust Score 100%	Build Engineers
+M20-F054	License Obligation Automation	Extract obligations (attribution, notice) from licenses.	Automates legal compliance tasks.	NLP	Obligation Recall	Legal
+M20-F055	Vulnerability Lifetime Tracking	Track a vulnerability from introduction to remediation.	Provides metrics for process improvement (CMMI).	State Machine Tracking	MTTR Reduction	Quality Assurance
+M20-F056	Custom Query Builder for SBOMs	Allow users to write SQL-like queries on SBOM data.	Enables ad-hoc analysis of the supply chain.	Query Parser	Query Response <5s	Security Researchers
+M20-F057	AI-Generated Test Cases for Vulnerabilities	Create unit tests to verify a vulnerability is patched.	Ensures patches actually fix the issue without regression.	Generative AI (LLM)	Test Pass Rate >90%	QA Engineers
+M20-F058	Peer Review Risk Analysis	Analyze pull request metadata for risky patterns.	Identifies potential supply chain risks introduced by contributors.	Anomaly Detection	Risk Score Accuracy	Maintainers
+M20-F059	SBOM Watermarking	Embed invisible watermarks in documents for leak tracing.	Deters leaking of proprietary SBOM data.	Steganography	Watermark Robustness	Legal/Security
+M20-F060	Automated Rollback Safety Check	Verify that rolling back a patch doesn't re-introduce a vuln.	Ensures stability during emergency patching.	Dependency Analysis	Rollback Failures 0	SREs
+M20-F061	Vendor Risk Scorecard Integration	Import security scores from external vendors (e.g., BitSight).	Contextualizes risk based on the creator of the library.	Normalization Algorithm	Score Freshness	Procurement
+M20-F062	Just-In-Time (JIT) Access for Secrets	Rotate secrets found in code immediately upon detection.	Limits the window of opportunity for attackers using leaked creds.	Automation	Rotation Latency <5min	SecOps
+M20-F063	Regulatory Rule Mapping	Map CVEs/CWEs to specific regulatory controls (e.g., ISO 27001 A.12.6).	Simplifies compliance audit mapping.	Classification Algorithm	Mapping Accuracy >95%	Compliance
+M20-F064	Supply Chain Topology Mapping	Visualize the entire upstream supply chain network.	Understands systemic risk to critical shared libraries.	Graph Analytics	Node Centrality Score	Architects
+M20-F065	Binary Diffing for Patch Validation	Compare binary pre-patch and post-patch to verify changes.	Ensures that the binary actually changed as expected.	Hex/ASM Diff	Diff Accuracy	Release Eng
+M20-F066	FIPS 140-2/3 Validation Mode	Verify that cryptographic libraries used are FIPS certified.	Mandatory for many government and financial integrations.	Certificate Validation	Compliance Rate 100%	Security Leads
+M20-F067	Supply Chain Attack Simulation	Simulate an attack (e.g., changing a dependency hash) to test detection.	Validates the efficacy of the monitoring tools.	Chaos Engineering	Detection Success Rate	Red Team
+M20-F068	Vulnerability Severity Override	Allow manual adjustment of CVSS scores based on context.	Tailors risk to the specific operational environment.	N/A	Override Justification	CISO
+M20-F069	Native Mobile Library Scanning	Scan .ipa and .apk files for vulnerable SDKs.	Critical for the PARI Mobile Wallet security.	Binary Analysis	Mobile SDK Coverage	Mobile Devs
+M20-F070	SBOM Aggregation for Microservices	Combine SBOMs from all microservices into a system-level view.	Provides a holistic view of the PARI platform risk.	Aggregation Logic	Aggregation Completeness	Platform Team
+M20-F071	Historical Trend Analysis for Vulnerabilities	Plot vulnerability introduction/remediation rates over time.	Tracks the effectiveness of secure coding training.	Time-Series Decomposition	Trend Correlation	Management
+M20-F072	Automated "Safe Harbor" Verification	Verify if a system is in a "safe state" regarding a specific CVE.	Quickly answers "Are we vulnerable?" for execs.	Logic Engine	Verification Speed	CISO
+M20-F073	Dependency Renaming Detection	Detect if a library was simply renamed to hide a vulnerable dep.	Advanced evasion technique detection.	Hash/Code Structure Matching	Evasion Detection Rate	Security Researchers
+M20-F074	Threat Modeling Review Workflow	Enforce peer review of automatically generated threat models.	Ensures AI-generated models are validated by human experts.	Workflow Engine	Review Completion Rate	Architects
+M20-F075	SBOM Standardization Enforcement	Enforce a single standard (e.g., CycloneDX) across the org.	Reduces tooling complexity and parsing errors.	Validation Linter	Standard Adherence 100%	DevOps Leads
+M20-F076	Continuous Control Monitoring (CCM)	Continuous monitoring of security controls defined in threat models.	Moves from point-in-time to continuous compliance.	Anomaly Detection	Control Drift Time	Auditors
+M20-F077	AI-Driven Security Code Review Assistant	Suggest secure code alternatives while developer types.	Prevents vulnerabilities at the point of creation.	Transformer Models (LLM)	Suggestion Acceptance	Developers
+M20-F078	Outbound Connection Firewalling	Alert if a scanned binary tries to connect to C2 servers during analysis.	Sandboxing mechanism to verify binary behavior.	Network Monitoring	Detection Latency <100ms	Malware Analysts
+M20-F079	Component Age Analysis	Flag "young" dependencies that haven't stood the test of time.	Prevents usage of immature, potentially buggy libraries.	Time-Series Calculation	Age Threshold Compliance	Tech Leads
+M20-F080	SBOM Distribution to Partners	Secure mechanism to share SBOMs with external auditors/partners.	Facilitates transparency in the ecosystem.	API / Encrypted Transfer	Distribution Success	B2B Integrators
+M20-F081	Cloud-Native Security Posture Management (CSPM) Link	Link vulnerabilities to cloud resource configurations.	Connects code flaws to infrastructure context.	Graph Linkage	Contextual Accuracy	Cloud Architects
+M20-F082	Software Factory Telemetry	Collect data on build speed, success rates, and security scan times.	Optimizes the CI/CD pipeline for efficiency.	Statistical Process Control	Pipeline Efficiency	DevOps Managers
+M20-F083	Attack Graph Generation	Generate potential attack paths from vulnerabilities found.	Visualizes how an attacker might pivot through the system.	Graph Theory	Path Accuracy	Pen Testers
+M20-F084	Automatic Compiler Flag Injection	Inject security flags (e.g., -fstack-protector) at build time.	Enforces secure build configurations automatically.	Build Wrapper	Flag Injection Success	Build Engineers
+M20-F085	SBOM for Firmware/Hardware	Generate SBOMs for firmware running on HSMs/Secure Elements.	Extends supply chain security to the hardware layer.	Hardware Analysis	Firmware Coverage	Hardware Engineers
+M20-F086	Vulnerability Chaining Analysis	Identify combinations of low-risk vulns that form a high-risk chain.	Detects complex attack scenarios requiring multiple steps.	Pathfinding Algorithms	Chain Detection Rate	Threat Modelers
+M20-F087	Developer Productivity Metrics	Track time spent on security vs. feature development.	Justifies the investment in automation tools.	Time Tracking	Security Overhead %	Management
+M20-F088	Automated Dependency Pinning	Pin dependency versions to prevent automatic updates to vulns.	Prevents accidental introduction of vulnerabilities.	Version Resolution	Pinning Accuracy	DevOps
+M20-F089	Compliance Evidence Locker	Store scan results, SBOMs, and approvals as immutable evidence.	Creates a single source of truth for audits.	Immutable Storage	Retrieval Speed	Auditors
+M20-F090	Predictive Scaling of Scanners	Auto-scale scanner pods based on queue length.	Maintains pipeline speed during peak loads.	Reactive Scaling	Queue Wait Time <5min	Platform Ops
+M20-F091	Typosquatting Prevention Policy	Block installation of packages that look like popular ones.	Simple but effective preventive control.	String Similarity (Levenshtein)	Block Accuracy	Security Ops
+M20-F092	SBOM Payload Verification	Verify the SBOM file hasn't been tampered with in transit/storage.	Ensures data integrity of the security artifact.	HMAC Verification	Verification Failure Rate 0%	SecOps
+M20-F093	Threat Intelligence Enrichment	Add context (e.g., "active exploitation") to CVE data.	Helps prioritize threats that are currently "in the wild".	External API Integration	Enrichment Rate >95%	Threat Intel
+M20-F094	Container Escape Feasibility Check	Check if a container vuln allows host escape.	Prioritizes critical infrastructure breaches.	Configuration Analysis	Escape Risk Score	Cluster Admins
+M20-F095	SBOM Search Engine	Full-text search over all component metadata.	Quickly answers "Do we use Log4j?" queries.	Inverted Index	Search Latency <1s	All Staff
+M20-F096	Artifact Reuse Promotion	Suggest reusing existing internal vetted libraries.	Reduces supply chain surface by favoring trusted code.	Recommendation Engine	Reuse Rate Increase	Architects
+M20-F097	Dynamic Application Security Testing (DAST) Trigger	Trigger DAST scans if new high-risk vulns are found in SBOM.	Combines static analysis with dynamic runtime testing.	Logic Engine	Trigger Accuracy	QA Leads
+M20-F098	Zero-Knowledge Proof of Compliance	Generate ZK-Proof that SBOM is compliant without revealing full details.	Future-proofing for privacy-preserving audits.	zk-SNARKs	Proof Gen Time	Advanced Sec
+M20-F099	API Key Rotation Alert	Alert if an API key in code is nearing expiration.	Prevents service outages due to stale credentials.	Time-Based Trigger	Alert Lead Time >7d	DevOps
+M20-F100	Legal Precedence Database	Link vulnerabilities to past legal cases/fines.	Highlights legal liability of specific unpatched flaws.	Database Lookup	Reference Accuracy	Legal Dept
+M20-F101	Multi-Region SBOM Mirroring	Mirror SBOMs across geo-redundant storage for resilience.	Ensures availability of compliance data during outages.	Async Replication	RPO <1min	Disaster Recovery
+M20-F102	AI-Powered Risk Acceptance Justification	Draft text for accepting a risk based on cost/benefit analysis.	Speeds up the governance process for low-risk issues.	Generative AI	Draft Quality	CISO
+M20-F103	Dependency freshness score	Score based on last commit date/release frequency.	Identifies abandoned projects.	Time-Series Analysis	Score Correlation	Tech Leads
+M20-F104	OpenSSF Scorecard Integration	Pull in OpenSSF Scorecard metrics for critical projects.	Uses industry-standard health metrics for open source.	API Integration	Metric Freshness	Security Leads
+M20-F105	SBOM Signature Revocation List	Maintain a list of compromised/revoked signing keys.	Prevents trust in signed artifacts from compromised actors.	Key Management	Revocation Latency <1h	PKI Admins
+M20-F106	Custom Severity Calculator	Allow customization of CVSS weights (e.g., impact vs exploitability).	Aligns risk scoring with specific business priorities.	Weighted Algorithm	Custom Rule Count	Risk Managers
+M20-F107	SBOM Diff Anomaly Detection	Detect suspicious changes in dependency structure between builds.	Identifies supply chain attacks that inject new modules.	Diff + ML	Anomaly Precision	Security Ops
+M20-F108	Real-Time Chat Ops Integration	Post vulnerability alerts to Slack/Teams channels.	Immediate visibility for development teams.	Webhooks	Alert Latency <10s	Developers
+M20-F109	Sandbox Environment for Artifact Testing	Auto-deploy artifacts to a sandbox for behavioral analysis.	Verifies functionality and security in isolation.	Orchestration	Deployment Success	QA Engineers
+M20-F110	Quantum-Resistance Check	Flag cryptographic libraries that are not quantum-resistant.	Future-proofs the crypto stack against Q-day.	Algorithm Classification	Quantum Risk Score	Cryptographers
+M20-F111	SBOM Compression for Edge	Compress SBOMs for transmission to edge devices/IoT.	Enables SBOM usage in resource-constrained environments.	Compression	Size Reduction >80%	Edge Engineers
+M20-F112	Vulnerability Recurrence Analysis	Track if the same vulnerability is re-introduced after patching.	Identifies process gaps in fix management.	Pattern Matching	Recurrence Rate <1%	QA Leads
+M20-F113	Code Ownership Mapping	Map SBOM components to the specific developer/team who owns them.	Directs notifications to the right people immediately.	Git Blame / Mapping	Ownership Accuracy >90%	Engineering Leads
+M20-F114	Supply Chain Insurance Data Export	Format data for cyber insurance premium calculations.	Reduces insurance premiums through demonstrable hygiene.	Data Transformation	Export Success	Risk Managers
+M20-F115	SBOM Versioning Strategy	Enforce semantic versioning of SBOM documents.	Ensures clear tracking of artifact evolution.	Validation	Version Validity 100%	Release Eng
+M20-F116	Integration with Dependency Management Tools	Sync with Renovate/Dependabot for auto-remediation.	Automates the patching end-to-end.	API Integration	Sync Success >95%	DevOps
+M20-F117	False Positive Feedback Loop	Allow devs to mark false positives, feeding the AI model.	Continuously improves the ML accuracy over time.	Active Learning	Model Drift <1%	Data Scientists
+M20-F118	Incident Response Playbooks Generation	Generate IR playbooks based on the specific vulnerability type.	Speeds up response time during active breaches.	NLP / Template Matching	Playbook Relevance	Incident Responders
+M20-F119	Secure Build Pipeline Verification	Verify the integrity of the CI/CD pipeline scripts themselves.	Prevents pipeline compromise attacks.	File Integrity Monitoring	FIM Alert Count	SecOps
+M20-F120	Compliance Heatmap	Visual map of compliance status across all modules.	Quick visual status for management.	Data Viz	UI Responsiveness	Executives
+M20-F121	SBOM Digital Notarization	Notarize SBOMs with a trusted third-party timestamp.	Provides legal non-repudiation.	Trusted Timestamping	Notary Availability	Legal
+M20-F122	Vulnerability Impact Simulation	Simulate the business impact if a specific vulnerability is exploited.	Quantifies risk in monetary terms for execs.	Monte Carlo Simulation	Impact Estimate $	Risk Managers
+M20-F123	Open Source Contribution Policy Check	Check if contributions comply with internal FOSS policy.	Ensures outbound code contribution is safe.	Policy Engine	Check Success	Legal
+M20-F124	Dependency "Blast Radius" Calculation	Calculate how many services are affected by one vulnerable lib.	Prioritizes patching of widely used components.	Graph Analysis	Radius Accuracy	Platform Leads
+M20-F125	AI-Based Threat Modeling Assistant	Suggest mitigations for threats identified in the threat model.	Accelerates the architectural design phase.	Generative AI	Mitigation Relevance	Solution Architects
+M20-F126	SBOM Lifecycle Automation	Auto-archive SBOMs for end-of-life software.	Manages data retention costs and compliance.	Lifecycle Policy	Archive Compliance 100%	Records Mgmt
+M20-F127	Secure Code Snippet Library	Library of vetted, secure code snippets to avoid copy-paste vulns.	Encourages reuse of safe patterns.	Search Engine	Snippet Usage	Developers
+M20-F128	Vulnerability Intelligence Feeds Aggregation	Aggregate paid and free intel feeds for maximum coverage.	Ensures no blind spots in threat data.	Feed Normalization	Feed Uptime 99.9%	Threat Intel
+M20-F129	SBOM Integrity Check on Runtime	Verify running container hash matches SBOM hash at runtime.	Detects drift between deployment and execution.	Runtime Agent	Check Frequency 1/hr	SRE
+M20-F130	Build-to-Run Consistency	Ensure the artifact built is exactly the one running.	Prevents post-build tampering.	Hash Comparison	Consistency 100%	Release Eng
+M20-F131	Custom CWE Mapping	Map internal bug types to CWEs for standardization.	Aligns internal tracking with industry standards.	Classification Engine	Mapping Coverage	Sec Leads
+M20-F132	Regulatory Horizon Scanning	Scan for upcoming regulations affecting software supply chain.	Prepares the organization for future compliance needs.	NLP / Regulatory Watch	Prediction Accuracy	Legal
+M20-F133	SBOM Fragmentation Handling	Merge fragmented SBOMs from different build stages.	Creates a unified view of the complex build process.	Merge Logic	Merge Success 100%	Build Engineers
+M20-F134	Vulnerability Dependency Graph	Visualize dependencies between vulnerabilities (one requires another).	Understands complex attack prerequisites.	Graph Viz	Graph Load Time	Threat Researchers
+M20-F135	License Compatibility Matrix	Matrix showing conflicts between licenses in the same project.	Quickly visualizes IP risk.	Matrix Logic	Conflict Detection 100%	Legal
+M20-F136	Automated Root Cause Analysis for Vulns	Trace back to the commit that introduced the vulnerability.	Accelerates understanding of the flaw's origin.	Git Blame / Bisect	Trace Time <5min	Developers
+M20-F137	SBOM Data Quality Score	Score SBOMs based on completeness, accuracy, and depth.	Metric to drive improvements in build processes.	Quality Algorithm	Score Trend	Quality
+M20-F138	Peer Dependency Conflict Resolution	Detect and suggest fixes for peer dependency conflicts.	Prevents build failures during security patching.	Dependency Solver	Resolution Accuracy	DevOps
+M20-F139	Security Culture Metrics	Track security training completion vs. vulnerability introduction rate.	Measures the effectiveness of human education.	Statistical Analysis	Correlation Coeff	HR/Sec
+M20-F140	Malicious Package Artifact Analysis	Analyze package internals (install scripts) for malware.	Detects malicious build scripts in packages.	Static Analysis / Heuristics	Malware Detection Rate	Malware Analysts
+M20-F141	SBOM Distribution via CDN	Distribute SBOMs via CDN for high-speed external access.	Improves partner access to transparency data.	CDN Integration	Cache Hit Ratio >90%	NetOps
+M20-F142	Zero-Day Vulnerability Simulation	Simulate the impact of a theoretical zero-day in a critical lib.	Tests incident response readiness.	Simulation Engine	Scenario Count	Red Team
+M20-F143	Integration with Service Mesh	Inject security context into service mesh based on SBOM data.	Enables network-level policies based on software version.	Sidecar Injection	Policy Success	Platform
+M20-F144	Automated Security Changelog	Generate a security-only changelog for every release.	Communicates security fixes clearly to customers.	NLP / Filtering	Changelog Accuracy	Product Mgmt
+M20-F145	SBOM Verification as Code	Write tests that verify the SBOM state (e.g., "no GPL").	Infrastructure-as-Code approach to compliance.	Test Framework	Test Pass Rate >95%	DevOps
+M20-F146	Vulnerability Age Metric	Track "vulnerability age" (time since detection vs patch).	Measures efficiency of the patching process.	Time Calculation	Avg Age <7d	Process Eng
+M20-F147	AI-Driven Threat Prioritization	Prioritize threats based on PARI's specific architecture context.	Focuses resources on the most dangerous vectors for PARI.	Context-Aware Ranking	Priority Accuracy	CISO
+M20-F148	SBOM Interoperability Test Suite	Test generated SBOMs against various consumer tools.	Ensures the SBOMs are usable by downstream partners.	Integration Testing	Compatibility Score >95%	QA
+M20-F149	Developer Security Dashboard	Personalized dashboard of a dev's security "health".	Gamifies and incentivizes secure coding.	Data Aggregation	Dashboard Usage	Developers
+M20-F150	Supply Chain Risk Taxonomy	Categorize risks (Technical, Legal, Operational) in the supply chain.	Provides a structured framework for risk management.	Taxonomy Engine	Categorization Accuracy	Risk Mgmt
+M20-F151	SBOM Anonymization	Anonymize internal package names before sharing externally.	Protects IP while sharing vulnerability data.	Data Masking	Anonymization Strength	Legal
+M20-F152	Automated "Bill of Materials" for APIs	Generate an API-BOM (API specification list).	Extends BOM concept to interface definitions.	Parser	API Coverage 100%	Architects
+M20-F153	Vulnerability Suppression Justification	Require mandatory text field for suppressing a vuln alert.	Prevents accidental or reckless ignoring of threats.	Validation	Justification Quality	Approvers
+M20-F154	Cross-Project Vulnerability Correlation	See if a vuln in one project exists in others.	Enables organization-wide patching campaigns.	Search / Index	Correlation Recall	SecOps
+M20-F155	SBOM Metadata Enrichment	Add business context (owner, cost, criticality) to SBOMs.	Merges technical data with business value.	Data Enrichment	Metadata Completeness	PMs
+M20-F156	Software Hermetic Build Enforcement	Enforce builds that use only cached dependencies (no network).	Prevents supply chain injection during build time.	Network Policy	Hermetic Rate 100%	Build Engineers
+
+
+h.	Comprehensive List of Database Objects
+
+ID	schema_name	object_name	object_type	description	feature_reference	column_names	constraints / notes	junction_tables
+M20-DB001	m20_sec	sbom_documents	Table	Stores the primary SBOM records for each artifact.	M20-F001	id, artifact_id, format_type, version, document_json, created_at, signature_hash	PK: id, UQ: (artifact_id, version)	N/A
+M20-DB002	m20_sec	components	Table	Individual software components (libraries/packages).	M20-F002	id, sbom_id, purl, cpe, name, version, supplier, download_location, checksum_sha256	PK: id, FK: sbom_id REFERENCES sbom_documents	N/A
+M20-DB003	m20_sec	dependencies	Table	Relationships between components (dependency graph).	M20-F002	id, parent_component_id, child_component_id, dependency_type	PK: id, FK: parent, child REFERENCES components	N/A
+M20-DB004	m20_sec	vulnerabilities	Table	Standard vulnerability definitions (CVEs).	M20-F004	id, cve_id, description, published_date, modified_date, cvss_v3_vector, cvss_v3_score, severity	PK: id, UQ: cve_id	N/A
+M20-DB005	m20_sec	component_vulnerabilities	Table	Mapping of vulnerabilities to affected components.	M20-F005	id, component_id, vulnerability_id, status, analysis_justification, remediation_id	PK: id, FK: component_id, vulnerability_id	N/A
+M20-DB006	m20_sec	licenses	Table	Software license definitions.	M20-F010	id, spdx_id, name, text_content, is_copyleft, is_osi_approved	PK: id, UQ: spdx_id	N/A
+M20-DB007	m20_sec	component_licenses	Table	Mapping of licenses to components.	M20-F010	id, component_id, license_id	PK: id, FK: component_id, license_id	N/A
+M20-DB008	m20_sec	threat_models	Table	Stores generated threat models.	M20-F008	id, application_id, model_json, created_by, created_at, status, review_status	PK: id	N/A
+M20-DB009	m20_sec	threat_elements	Table	Nodes in the threat model diagram (Process, Data Store, etc).	M20-F009	id, threat_model_id, element_type, name, description, trust_zone	PK: id, FK: threat_model_id	N/A
+M20-DB010	m20_sec	threats	Table	Identified threats against elements (STRIDE).	M20-F009	id, threat_element_id, threat_type (STRIDE), description, likelihood, impact, risk_score	PK: id, FK: threat_element_id	N/A
+M20-DB011	m20_sec	mitigations	Table	Mitigations for identified threats.	M20-F009	id, threat_id, description, status	PK: id, FK: threat_id	N/A
+M20-DB012	m20_sec	projects	Table	Tracks PARI projects/modules using security.	M20-F011	id, name, repo_url, owner_team, sensitivity_level	PK: id	N/A
+M20-DB013	m20_sec	pipelines	Table	CI/CD pipeline definitions and status.	M20-F011	id, project_id, pipeline_name, last_run_status, config_json	PK: id, FK: project_id	N/A
+M20-DB014	m20_sec	pipeline_runs	Table	Individual execution records of pipelines.	M20-F011	id, pipeline_id, run_number, started_at, completed_at, triggered_by, sbom_generated_id	PK: id, FK: pipeline_id, sbom_generated_id	N/A
+M20-DB015	m20_sec	policy_rules	Table	Definition of security policies (e.g., "No High CVSS").	M20-F025	id, name, rule_logic (Rego/JSON), severity, scope, enabled	PK: id	N/A
+M20-DB016	m20_sec	policy_violations	Table	Records of policy breaches during pipeline runs.	M20-F025	id, pipeline_run_id, policy_rule_id, component_id, details_json, is_blocked	PK: id, FK: pipeline_run_id, policy_rule_id, component_id	N/A
+M20-DB017	m20_sec	remediation_tickets	Table	Tracks ticket creation for vulnerabilities.	M20-F012	id, external_ticket_id (Jira), component_vulnerability_id, status, created_at, resolved_at	PK: id, UQ: external_ticket_id, FK: component_vulnerability_id	N/A
+M20-DB018	m20_sec	container_images	Table	Scanned container image metadata.	M20-F013	id, image_name, tag, digest, os_family, os_version	PK: id, UQ: (image_name, tag, digest)	N/A
+M20-DB019	m20_sec	image_layers	Table	Individual layers of container images.	M20-F013	id, container_image_id, layer_digest, size	PK: id, FK: container_image_id	N/A
+M20-DB020	m20_sec	secrets	Table	Detected secrets in code.	M20-F015	id, pipeline_run_id, file_path, line_number, secret_hash, secret_type, status	PK: id, FK: pipeline_run_id	N/A
+M20-DB021	m20_sec	false_positives	Table	ML predicted false positives.	M20-F006	id, component_vulnerability_id, predicted_by, confidence_score, verified_by	PK: id, FK: component_vulnerability_id	N/A
+M20-DB022	m20_sec	call_graphs	Table	Stores call graph data for reachability analysis.	M20-F016	id, component_id, caller_function, callee_function, file_path	PK: id, FK: component_id	N/A
+M20-DB023	m20_sec	suspicious_packages	Table	Packages flagged for potential typosquatting/malicious behavior.	M20-F018	id, purl, risk_score, reason_flagged, date_flagged	PK: id, UQ: purl	N/A
+M20-DB024	m20_sec	pull_requests	Table	Metadata about incoming code changes.	M20-F058	id, project_id, pr_number, author, branch, is_merged	PK: id, FK: project_id	N/A
+M20-DB025	m20_sec	eol_components	Table	Components identified as End-of-Life.	M20-F022	id, component_id, eol_date, notification_sent	PK: id, FK: component_id	N/A
+M20-DB026	m20_sec	risk_scores	Table	Aggregated risk scores per project.	M20-F024	id, project_id, calculated_date, score, critical_vuln_count, high_vuln_count	PK: id, FK: project_id	N/A
+M20-DB027	m20_sec	vex_documents	Table	Vulnerability Exploitability Exchange documents.	M20-F028	id, component_id, document_json, analysis_timestamp	PK: id, FK: component_id	N/A
+M20-DB028	m20_sec	iac_scans	Table	Infrastructure as Code scan results.	M20-F032	id, pipeline_run_id, file_path, resource_type, violation_severity, description	PK: id, FK: pipeline_run_id	N/A
+M20-DB029	m20_sec	audit_logs	Table	Comprehensive audit trail of all security actions.	M20-F038	id, actor_id, action_type, target_object_id, timestamp, ip_address	PK: id	N/A
+M20-DB030	m20_sec	users	Table	System users and their roles.	M20-F038	id, username, email, role, department	PK: id, UQ: email	N/A
+M20-DB031	m20_sec	api_keys	Table	API keys for external integration.	M20-F033	id, user_id, key_hash, scope, expires_at	PK: id, FK: user_id	N/A
+M20-DB032	m20_sec	feedback	Table	User feedback on ML predictions (False Positive/Negative).	M20-F117	id, target_type, target_id, user_rating, comment, timestamp	PK: id	N/A
+M20-DB033	m20_sec	ml_model_versions	Table	Versioning of ML models used for scanning.	M20-F006	id, model_name, version, file_path, deployed_at, performance_metrics	PK: id	N/A
+M20-DB034	m20_sec	shadow_repos	Table	Detected unauthorized repositories.	M20-F044	id, url, platform, discovered_date, owner, status	PK: id, UQ: (url, platform)	N/A
+M20-DB035	m20_sec	threat_intel_feed	Table	Raw threat intelligence data.	M20-F045	id, source, title, description, published_date, relevance_score	PK: id	N/A
+M20-DB036	m20_sec	binary_analyses	Table	Results of binary hardening checks.	M20-F014	id, pipeline_run_id, binary_name, check_type (ASLR/PIE), result	PK: id, FK: pipeline_run_id	N/A
+M20-DB037	m20_sec	attestations	Table	SLSA Provenance attestations.	M20-F042	id, sbom_id, builder_id, recipe_type, signature, payload_json	PK: id, FK: sbom_id	N/A
+M20-DB038	m20_sec	legal_precedents	Table	Legal cases linked to vulnerabilities.	M20-F100	id, vulnerability_id, case_name, jurisdiction, outcome	PK: id, FK: vulnerability_id	N/A
+M20-DB039	m20_sec	compliance_mappings	Table	Mappings of controls to regulations (ISO, GDPR).	M20-F063	id, control_id, regulation_name, article_id	PK: id	N/A
+M20-DB040	m20_sec	risk_acceptances	Table	Records of accepted risks with waivers.	M20-F023	id, component_vulnerability_id, accepted_by, expiry_date, justification	PK: id, FK: component_vulnerability_id	N/A
+M20-DB041	m20_sec	code_owners	Table	Mapping of code paths to owners.	M20-F113	id, file_pattern, owner_team_id, owner_user_id	PK: id	N/A
+M20-DB042	m20_sec	notification_channels	Table	Configured channels for alerts (Slack, Email).	M20-F108	id, channel_type, endpoint, team_id	PK: id	N/A
+M20-DB043	m20_sec	incident_playbooks	Table	Playbooks for incident response.	M20-F118	id, name, trigger_type, content_json, version	PK: id	N/A
+M20-DB044	m20_sec	patch_schedules	Table	Scheduled windows for patching.	M20-F035	id, project_id, start_window, end_window, timezone	PK: id, FK: project_id	N/A
+M20-DB045	m20_sec	dependency_healthy_scores	Table	Health scores for dependencies.	M20-F039	id, component_id, score, last_commit_date, contributor_count	PK: id, FK: component_id	N/A
+M20-DB046	m20_sec	scorecard_data	Table	OpenSSF Scorecard data.	M20-F104	id, component_id, score_json, fetched_at	PK: id, FK: component_id	N/A
+M20-DB047	m20_sec	signature_keys	Table	Public keys for SBOM verification.	M20-F105	id, key_id, public_key, owner, status, revoked_at	PK: id	N/A
+M20-DB048	m20_sec	custom_weights	Table	Custom weights for CVSS calculation.	M20-F106	id, user_id, metric_name, weight_value	PK: id, FK: user_id	N/A
+M20-DB049	m20_sec	anomalies	Table	Detected anomalies in SBOM diffs.	M20-F107	id, pipeline_run_id, description, anomaly_type	PK: id, FK: pipeline_run_id	N/A
+M20-DB050	m20_sec	sandbox_results	Table	Results of sandbox artifact testing.	M20-F109	id, component_id, test_type, result_json, status	PK: id, FK: component_id	N/A
+M20-DB051	m20_sec	quantum_risks	Table	Libraries not quantum-resistant.	M20-F110	id, component_id, algorithm_name, is_quantum_safe	PK: id, FK: component_id	N/A
+M20-DB052	m20_sec	recurrent_vulnerabilities	Table	Tracking of recurring vulns.	M20-F112	id, vulnerability_id, first_seen, recurrence_count	PK: id, FK: vulnerability_id	N/A
+M20-DB053	m20_sec	insurance_data	Table	Exported data for insurance.	M20-F114	id, export_date, payload_json, status	PK: id	N/A
+M20-DB054	m20_sec	vendor_scores	Table	Risk scores of software vendors.	M20-F061	id, vendor_name, score, source, last_updated	PK: id	N/A
+M20-DB055	m20_sec	security_snippets	Table	Library of secure code snippets.	M20-F127	id, language, title, code_content, tags	PK: id	N/A
+M20-DB056	m20_sec	runtime_checks	Table	Records of runtime SBOM verification.	M20-F129	id, instance_id, sbom_id, check_result, timestamp	PK: id	N/A
+M20-DB057	m20_sec	blast_radius	Table	Calculated impact of component failure.	M20-F124	id, component_id, affected_project_count, affected_service_list	PK: id, FK: component_id	N/A
+M20-DB058	m20_sec	horizon_scan	Table	Regulatory horizon scanning results.	M20-F132	id, regulation_name, effective_date, description, impact_level	PK: id	N/A
+M20-DB059	m20_sec	conflicts	Table	License conflict matrix.	M20-F135	id, license_a_id, license_b_id, conflict_type, description	PK: id, FK: license_a_id, license_b_id	N/A
+M20-DB060	m20_sec	build_tests	Table	Security tests for build pipeline.	M20-F145	id, test_name, description, logic	PK: id	N/A
+M20-DB061	m20_sec	vulnerability_age	Table	Tracking age of vulnerabilities.	M20-F146	id, vulnerability_id, detected_date, days_active	PK: id, FK: vulnerability_id	N/A
+M20-DB062	m20_sec	api_boms	Table	API Bill of Materials.	M20-F152	id, project_id, api_spec, endpoint_count	PK: id, FK: project_id	N/A
+M20-DB063	m20_sec	suppression_log	Table	Log of vulnerability suppressions.	M20-F153	id, user_id, vulnerability_id, justification, timestamp	PK: id, FK: user_id, vulnerability_id	N/A
+M20-DB064	m20_sec	business_context	Table	Business context for components.	M20-F155	id, component_id, cost_center, criticality_level, business_owner	PK: id, FK: component_id	N/A
+M20-DB065	m20_sec	build_network_policies	Table	Network policies for hermetic builds.	M20-F156	id, pipeline_id, allowed_domain, protocol	PK: id, FK: pipeline_id	N/A
+M20-DB066	m20_sec	cwe_references	Table	Common Weakness Enumeration references.	M20-F131	id, cwe_id, name, description	PK: id, UQ: cwe_id	N/A
+M20-DB067	m20_sec	vulnerability_cwe_mapping	Table	Mapping CVE to CWE.	M20-F131	id, vulnerability_id, cwe_id	PK: id, FK: vulnerability_id, cwe_id	N/A
+M20-DB068	m20_sec	training_data	Table	ML model training data.	M20-F006	id, feature_vector, label, model_version	PK: id	N/A
+M20-DB069	m20_sec	vulnerability_references	Table	External links for vulnerabilities.	M20-F004	id, vulnerability_id, url, source	PK: id, FK: vulnerability_id	N/A
+M20-DB070	m20_sec	configurations	Table	General system configuration.	M20-F025	id, key, value, description	PK: id, UQ: key	N/A
+M20-DB071	m20_sec	component_hashes	Table	All hashes (MD5, SHA1, SHA256) for components.	M20-F003	id, component_id, algorithm, hash_value	PK: id, FK: component_id	N/A
+M20-DB072	m20_sec	sbom_signatures	Table	Digital signatures applied to SBOMs.	M20-F003	id, sbom_id, signature_value, signer_id	PK: id, FK: sbom_id	N/A
+M20-DB073	m20_sec	dependency_conflicts	Table	Resolved dependency conflicts.	M20-F138	id, component_id, conflict_type, resolution_action	PK: id, FK: component_id	N/A
+M20-DB074	m20_sec	culture_metrics	Table	Security culture metrics per team.	M20-F139	id, team_id, date, training_complete_pct, vuln_introduction_rate	PK: id	N/A
+M20-DB075	m20_sec	supply_chain_taxonomy	Table	Risk taxonomy definitions.	M20-F150	id, category, sub_category, description	PK: id	N/A
+M20-DB076	m20_sec	peer_dependencies	Table	Explicit peer dependency requirements.	M20-F002	id, component_id, peer_name, peer_version_range	PK: id, FK: component_id	N/A
+M20-DB077	m20_sec	component_versions	Table	History of versions for a component.	M20-F002	id, component_purl, version_number, publish_date	PK: id, UQ: (component_purl, version_number)	N/A
+M20-DB078	m20_sec	malware_signatures	Table	Known malware signatures.	M20-F041	id, signature_hash, name, source	PK: id	N/A
+M20-DB079	m20_sec	quarantine	Table	Quarantined artifacts.	M20-F041	id, artifact_id, reason, quarantine_date	PK: id	N/A
+M20-DB080	m20_sec	patch_candidates	Table	Identified available patches.	M20-F019	id, component_id, current_version, patch_version, vulnerability_id	PK: id, FK: component_id	N/A
+M20-DB081	m20_sec	deployment_status	Table	Status of patch deployment.	M20-F019	id, ticket_id, environment, status, timestamp	PK: id, FK: ticket_id	N/A
+M20-DB082	m20_sec	exploit_predictions	Table	ML predictions for exploitability.	M20-F007	id, vulnerability_id, probability, prediction_date, model_version	PK: id, FK: vulnerability_id	N/A
+M20-DB083	m20_sec	service_mesh_policies	Table	Policies injected into service mesh.	M20-F143	id, component_id, policy_json, applied	PK: id, FK: component_id	N/A
+M20-DB084	m20_sec	kubernetes_manifests	Table	Scanned K8s manifests.	M20-F031	id, pipeline_run_id, file_path, resource_type, violations	PK: id, FK: pipeline_run_id	N/A
+M20-DB085	m20_sec	vulnerability_comments	Table	Discussion threads on vulnerabilities.	M20-F006	id, vulnerability_id, user_id, comment, timestamp	PK: id, FK: vulnerability_id	N/A
+M20-DB086	m20_sec	base_images	Table	Base images used in builds.	M20-F020	id, image_name, tag, last_scan_date, status	PK: id	N/A
+M20-DB087	m20_sec	external_ticket_mappings	Table	Maps internal IDs to external systems.	M20-F012	id, internal_type, internal_id, external_system, external_id	PK: id	N/A
+M20-DB088	m20_sec	data_lineage	Table	Data flow lineage for DSBOM.	M20-F050	id, element_id, source, destination, data_type	PK: id	N/A
+M20-DB089	m20_sec	vulnerability_impact_sim	Table	Simulation results of vulnerability impact.	M20-F122	id, vulnerability_id, simulation_run_id, financial_impact, risk_increase	PK: id, FK: vulnerability_id	N/A
+M20-DB090	m20_sec	component_attributes	Table	Extended attributes for components.	M20-F001	id, component_id, key, value	PK: id, FK: component_id	N/A
+M20-DB091	m20_sec	custom_fields	Table	Custom field definitions.	M20-F056	id, field_name, field_type, applies_to	PK: id	N/A
+M20-DB092	m20_sec	security_changelogs	Table	Generated security changelogs.	M20-F144	id, project_id, version, content_json, generated_at	PK: id, FK: project_id	N/A
+M20-DB093	m20_sec	dashboard_widgets	Table	User dashboard configurations.	M20-F024	id, user_id, widget_type, config_json	PK: id, FK: user_id	N/A
+M20-DB094	m20_sec	notification_subscriptions	Table	User subscriptions to alerts.	M20-F108	id, user_id, criteria_json, channel_id	PK: id, FK: user_id	N/A
+M20-DB095	m20_sec	hermetic_build_records	Table	Records of hermetic build attempts.	M20-F156	id, pipeline_run_id, is_hermetic, violations	PK: id, FK: pipeline_run_id	N/A
+M20-DB096	m20_sec	integration_configs	Table	Configs for third-party integrations (Jira, Git).	M20-F012	id, integration_type, auth_token, url	PK: id	N/A
+M20-DB097	m20_sec	root_cause_analysis	Table	Automated RCA for vulnerabilities.	M20-F136	id, vulnerability_id, commit_id, file_path, analysis_details	PK: id, FK: vulnerability_id	N/A
+M20-DB098	m20_sec	build_cache	Table	Cache for build artifacts.	M20-F048	id, key, value, expiry	PK: id	N/A
+M20-DB099	m20_sec	scan_queue	Table	Queue for pending scans.	M20-F090	id, artifact_id, priority, queued_at, status	PK: id	N/A
+M20-DB100	m20_sec	vulnerability_lifecycles	Table	State transitions for vulnerabilities.	M20-F055	id, vulnerability_id, from_state, to_state, changed_by, timestamp	PK: id, FK: vulnerability_id	N/A
+M20-DB101	m20_sec	project_metrics	Table	Historical metrics for projects.	M20-F071	id, project_id, metric_name, value, recorded_at	PK: id, FK: project_id	N/A
+M20-DB102	m20_sec	safe_harbor_status	Table	Status of "safe harbor" for specific CVEs.	M20-F072	id, vulnerability_id, is_safe, justification	PK: id, FK: vulnerability_id	N/A
+M20-DB103	m20_sec	anonymized_sboms	Table	Anonymized SBOMs for external sharing.	M20-F151	id, original_sbom_id, anonymized_json, shared_with	PK: id, FK: sbom_documents	N/A
+M20-DB104	m20_sec	attack_paths	Table	Calculated attack paths.	M20-F083	id, path_json, entry_point, critical_asset	PK: id	N/A
+M20-DB105	m20_sec	compiler_flags	Table	Security compiler flags to inject.	M20-F084	id, language, flag_name, description	PK: id	N/A
+M20-DB106	m20_sec	sbom_quality_metrics	Table	Quality scores for SBOMs.	M20-F137	id, sbom_id, completeness_score, depth_score, validity_score	PK: id, FK: sbom_documents	N/A
+M20-DB107	m20_sec	zero_day_scenarios	Table	Simulation scenarios for zero-days.	M20-F142	id, description, target_component, likelihood	PK: id	N/A
+M20-DB108	m20_sec	firmware_sboms	Table	SBOMs for firmware/Hardware.	M20-F085	id, hardware_id, firmware_version, sbom_json	PK: id	N/A
+M20-DB109	m20_sec	vulnerability_chains	Table	Chains of vulnerabilities.	M20-F086	id, chain_id, vulnerability_id, order_in_chain	PK: id	N/A
+M20-DB110	m20_sec	api_keys_audit	Table	Audit trail for API key usage.	M20-F033	id, api_key_id, accessed_at, ip_address, endpoint	PK: id, FK: api_keys	N/A
+M20-DB111	m20_sec	sbom_interoperability_tests	Table	Results of interop tests.	M20-F148	id, sbom_id, tool_name, test_result, error_log	PK: id, FK: sbom_documents	N/A
+M20-DB112	m20_sec	mobile_sboms	Table	SBOMs for mobile apps (.apk/.ipa).	M20-F069	id, app_id, platform, sbom_json	PK: id	N/A
+M20-DB113	m20_sec	mobile_sdks	Table	Detected SDKs in mobile apps.	M20-F069	id, mobile_sbom_id, sdk_name, sdk_version	PK: id, FK: mobile_sboms	N/A
+M20-DB114	m20_sec	fips_validations	Table	FIPS 140 validation status of crypto libs.	M20-F066	id, component_id, fips_module_id, validation_status	PK: id, FK: component_id	N/A
+M20-DB115	m20_sec	cve_enrichment	Table	Enrichment data for CVEs.	M20-F093	id, vulnerability_id, key, value, source	PK: id, FK: vulnerability_id	N/A
+M20-DB116	m20_sec	regulatory_rules	Table	Rules defined by regulations.	M20-F063	id, regulation_name, rule_logic	PK: id	N/A
+M20-DB117	m20_sec	compliance_reports	Table	Generated compliance reports.	M20-F027	id, report_type, generated_at, file_path, status	PK: id	N/A
+M20-DB118	m20_sec	dashboard_filters	Table	Pre-defined filters for dashboards.	M20-F024	id, name, criteria_json	PK: id	N/A
+M20-DB119	m20_sec	sbom_fragments	Table	Fragmented SBOM pieces.	M20-F133	id, fragment_id, parent_sbom_id, fragment_json	PK: id, FK: sbom_documents	N/A
+M20-DB120	m20_sec	developer_health	Table	Individual developer security health scores.	M20-F149	id, user_id, score, calculated_at	PK: id, FK: users	N/A
+M20-DB121	m20_sec	component_reuse	Table	Metrics on component reuse.	M20-F096	id, component_id, usage_count, last_used	PK: id, FK: components	N/A
+M20-DB122	m20_sec	build_run_artifacts	Table	Artifacts produced by a pipeline run.	M20-F011	id, pipeline_run_id, artifact_path, type	PK: id, FK: pipeline_runs	N/A
+M20-DB123	m20_sec	dependency_update_prs	Table	Pull requests created by dependency bots.	M20-F019	id, ticket_id, pr_id, status	PK: id, FK: remediation_tickets	N/A
+M20-DB124	m20_sec	sast_findings	Table	SAST findings correlated to SBOM.	M20-F030	id, pipeline_run_id, component_id, finding_type, severity	PK: id, FK: pipeline_run_id, component_id	N/A
+M20-DB125	m20_sec	dast_scans	Table	DAST scan results.	M20-F097	id, pipeline_run_id, target_url, scan_report	PK: id, FK: pipeline_run_id	N/A
+M20-DB126	m20_sec	team_vulnerabilities	Table	Aggregated vulnerabilities by team.	M20-F113	id, team_id, vulnerability_count, critical_count	PK: id	N/A
+M20-DB127	m20_sec	auto_escalations	Table	Records of automatic escalations.	M20-F035	id, ticket_id, escalation_level, escalated_to, timestamp	PK: id, FK: remediation_tickets	N/A
+M20-DB128	m20_sec	patch_safety_checks	Table	Safety checks for rollbacks.	M20-F060	id, ticket_id, rollback_safe, reason	PK: id, FK: remediation_tickets	N/A
+M20-DB129	m20_sec	legal_obligations	Table	Legal obligations extracted from licenses.	M20-F054	id, license_id, obligation_text, obligation_type	PK: id, FK: licenses	N/A
+M20-DB130	m20_sec	package_maintainers	Table	Maintainer data for packages.	M20-F049	id, component_id, maintainer_name, email	PK: id, FK: components	N/A
+M20-DB131	m20_sec	incident_response_tasks	Table	Tasks generated from playbooks.	M20-F118	id, playbook_run_id, task_description, assignee, status	PK: id	N/A
+M20-DB132	m20_sec	vulnerability_clusters	Table	Clusters of related vulnerabilities.	M20-F086	id, cluster_id, vulnerability_id	PK: id	N/A
+M20-DB133	m20_sec	build_integrity_checks	Table	Integrity checks for build tools.	M20-F119	id, pipeline_id, tool_path, expected_hash, actual_hash	PK: id, FK: pipelines	N/A
+M20-DB134	m20_sec	supply_chain_attacks	Table	Database of historical supply chain attacks.	M20-F018	id, attack_name, date, description, affected_packages	PK: id	N/A
+M20-DB135	m20_sec	compliance_exceptions	Table	Exceptions to compliance rules.	M20-F063	id, rule_id, justification, approved_by, expiry	PK: id, FK: policy_rules	N/A
+M20-DB136	m20_sec	component_reachability	Table	Pre-calculated reachability metrics.	M20-F016	id, component_id, is_reachable, depth	PK: id, FK: components	N/A
+M20-DB137	m20_sec	security_training_records	Table	Training records linked to metrics.	M20-F139	id, user_id, course_name, completion_date	PK: id, FK: users	N/A
+M20-DB138	m20_sec	vulnerability_prioritization	Table	AI prioritization results.	M20-F147	id, component_vulnerability_id, priority_score, factors_json	PK: id, FK: component_vulnerabilities	N/A
+M20-DB139	m20_sec	sbom_distribution	Table	Records of SBOM distribution.	M20-F080	id, sbom_id, recipient, method, timestamp	PK: id, FK: sbom_documents	N/A
+M20-DB140	m20_sec	encrypted_storage	Table	Reference to encrypted storage blobs.	M20-F048	id, bucket_name, object_key, encryption_status	PK: id	N/A
+M20-DB141	m20_sec	risk_taxonomies	Table	Detailed taxonomy definitions.	M20-F150	id, parent_id, name, description	PK: id	N/A
+M20-DB142	m20_sec	api_usage_logs	Table	API usage logs.	M20-F033	id, user_id, endpoint, response_code, latency	PK: id	N/A
+M20-DB143	m20_sec	secret_rotation	Table	Secret rotation status.	M20-F062	id, secret_id, rotation_status, last_rotation, next_rotation	PK: id	N/A
+M20-DB144	m20_sec	build_templates	Table	Templates for CI/CD pipelines.	M20-F011	id, name, template_json	PK: id	N/A
+M20-DB145	m20_sec	notification_history	Table	History of sent notifications.	M20-F108	id, subscription_id, content, sent_at, status	PK: id	N/A
+M20-DB146	m20_sec	component_vulnerabilities_history	Table	Historical snapshot of component-vuln mapping.	M20-F055	id, component_vulnerability_id, snapshot_date, state	PK: id	N/A
+M20-DB147	m20_sec	pipeline_block_history	Table	History of pipeline blocks.	M20-F011	id, pipeline_run_id, reason, blocked_by, duration	PK: id, FK: pipeline_runs	N/A
+M20-DB148	m20_sec	search_index	Table	Full-text search index components.	M20-F095	id, component_id, searchable_text	PK: id	N/A
+M20-DB149	m20_sec	integration_health	Table	Health status of external integrations.	M20-F012	id, integration_config_id, status, last_check, error_msg	PK: id, FK: integration_configs	N/A
+M20-DB150	m20_sec	vulnerability_descriptions	Table	AI-generated descriptions.	M20-F034	id, vulnerability_id, generated_description	PK: id, FK: vulnerabilities	N/A
+M20-DB151	m20_sec	ml_predictions_log	Table	Log of all ML predictions.	M20-F006	id, model_id, input_data, prediction, confidence	PK: id	N/A
+M20-DB152	m20_sec	sbom_verification_errors	Table	Errors during SBOM verification.	M20-F092	id, sbom_id, error_type, error_message, timestamp	PK: id, FK: sbom_documents	N/A
+M20-DB153	m20_sec	build_summary	Table	High-level summary of build runs.	M20-F082	id, pipeline_run_id, duration, artifact_count, vuln_count	PK: id, FK: pipeline_runs	N/A
+M20-DB154	m20_sec	container_file_system	Table	File system listing of containers.	M20-F013	id, container_image_id, file_path, permissions, hash	PK: id, FK: container_images	N/A
+M20-DB155	m20_sec	exploit_intelligence	Table	Intelligence on active exploits.	M20-F093	id, vulnerability_id, exploit_type, source, url	PK: id, FK: vulnerabilities	N/A
+M20-DB156	m20_sec	remediation_actions	Table	Specific actions taken for remediation.	M20-F012	id, ticket_id, action_type, description, actor	PK: id, FK: remediation_tickets	N/A
+M20-DB157	m20_sec	vulnerability_aging	Table	Aging buckets for SLA reporting.	M20-F146	id, vulnerability_id, bucket_name, days_in_bucket	PK: id, FK: vulnerabilities	N/A
+M20-DB158	m20_sec	project_teams	Table	Mapping of teams to projects.	M20-F113	id, project_id, team_name, role	PK: id, FK: projects	N/A
+M20-DB159	m20_sec	build_metrics	Table	Metrics for build performance.	M20-F082	id, pipeline_run_id, metric_name, value	PK: id, FK: pipeline_runs	N/A
+M20-DB160	m20_sec	threat_intel_subscriptions	Table	Subscriptions to intel feeds.	M20-F045	id, feed_name, api_endpoint, active	PK: id	N/A
+M20-DB161	m20_sec	binary_signatures	Table	Signatures found in binaries.	M20-F041	id, pipeline_run_id, signature_name, match_type	PK: id, FK: pipeline_runs	N/A
+M20-DB162	m20_sec	component_usage	Table	Metrics on component usage across projects.	M20-F096	id, component_id, project_id, last_seen	PK: id, FK: components, projects	N/A
+M20-DB163	m20_sec	code_review_comments	Table	Security comments in code reviews.	M20-F074	id, pr_id, comment_text, security_relevant	PK: id, FK: pull_requests	N/A
+M20-DB164	m20_sec	developer_suggestions	Table	AI suggestions for developers.	M20-F077	id, file_path, line_number, suggestion, accepted	PK: id	N/A
+M20-DB165	m20_sec	vulnerability_groups	Table	Groupings of vulnerabilities (e.g. Log4Shell).	M20-F004	id, group_name, description, cve_ids	PK: id	N/A
+M20-DB166	m20_sec	sbom_ancestry	Table	Ancestry tree of SBOMs.	M20-F133	id, parent_sbom_id, child_sbom_id, relationship_type	PK: id	N/A
+M20-DB167	m20_sec	build_environment	Table	Environment variables and configs of builds.	M20-F053	id, pipeline_run_id, env_var_name, value	PK: id, FK: pipeline_runs	N/A
+M20-DB168	m20_sec	dependency_licenses	Table	Licenses of dependencies (transitive).	M20-F010	id, dependency_id, license_id	PK: id, FK: dependencies, licenses	N/A
+M20-DB169	m20_sec	compliance_mappings_history	Table	History of regulation mappings.	M20-F063	id, mapping_id, changed_at, old_value, new_value	PK: id	N/A
+M20-DB170	m20_sec	team_metrics	Table	Aggregated metrics per team.	M20-F087	id, team_id, metric_name, value, date	PK: id	N/A
+M20-DB171	m20_sec	vulnerability_corrections	Table	Corrections to vulnerability data (NVD updates).	M20-F004	id, vulnerability_id, correction_description, corrected_at	PK: id, FK: vulnerabilities	N/A
+M20-DB172	m20_sec	sbom_dependencies	Table	SBOM level dependencies.	M20-F002	id, sbom_id, depends_on_sbom_id	PK: id, FK: sbom_documents	N/A
+M20-DB173	m20_sec	secret_types	Table	Definitions of secret types.	M20-F015	id, type_name, pattern_regex	PK: id	N/A
+M20-DB174	m20_sec	anomaly_detection_rules	Table	Rules for anomaly detection.	M20-F107	id, rule_name, logic, severity	PK: id	N/A
+M20-DB175	m20_sec	component_purls	Table	Normalized Package URLs.	M20-F002	id, purl_string, canonical_form	PK: id, UQ: purl_string	N/A
+M20-DB176	m20_sec	project_risks	Table	High-level risks for projects.	M20-F024	id, project_id, risk_description, mitigation_status	PK: id, FK: projects	N/A
+M20-DB177	m20_sec	user_roles	Table	Role definitions.	M20-F038	id, role_name, permissions_json	PK: id, UQ: role_name	N/A
+M20-DB178	m20_sec	build_failures	Table	Analysis of build failures.	M20-F082	id, pipeline_run_id, failure_reason, category	PK: id, FK: pipeline_runs	N/A
+M20-DB179	m20_sec	policy_templates	Table	Templates for policies.	M20-F025	id, template_name, description, template_logic	PK: id	N/A
+M20-DB180	m20_sec	vulnerability_disclosures	Table	Internal disclosures before public CVE.	M20-F093	id, vulnerability_id, disclosed_to, disclosure_date	PK: id, FK: vulnerabilities	N/A
+M20-DB181	m20_sec	sbom_migrations	Table	History of SBOM format migrations.	M20-F001	id, sbom_id, from_format, to_format, migration_date	PK: id, FK: sbom_documents	N/A
+M20-DB182	m20_sec	component_ownership_history	Table	History of component ownership.	M20-F113	id, component_id, owner_id, effective_from	PK: id, FK: components	N/A
+M20-DB183	m20_sec	scan_errors	Table	Errors during scanning.	M20-F090	id, scan_job_id, error_message, stack_trace	PK: id	N/A
+M20-DB184	m20_sec	scan_jobs	Table	Master record for scan jobs.	M20-F090	id, artifact_id, scanner_type, status, started_at	PK: id	N/A
+M20-DB185	m20_sec	vulnerability_comments_audit	Table	Audit of comment edits/deletions.	M20-F085	id, comment_id, action, actor, timestamp	PK: id	N/A
+M20-DB186	m20_sec	mobile_permissions	Table	Permissions requested by mobile apps.	M20-F069	id, mobile_sbom_id, permission_name, risk_level	PK: id, FK: mobile_sboms	N/A
+M20-DB187	m20_sec	hermetic_violations	Table	Specific violations of hermeticity.	M20-F156	id, pipeline_run_id, violation_type, domain	PK: id, FK: pipeline_runs	N/A
+M20-DB188	m20_sec	zero_knowledge_proofs	Table	ZK-Proof data for compliance.	M20-F098	id, compliance_check_id, proof_hash	PK: id	N/A
+M20-DB189	m20_sec	compliance_evidence	Table	Evidence items for compliance.	M20-F089	id, report_id, evidence_type, file_path, hash	PK: id, FK: compliance_reports	N/A
+M20-DB190	m20_sec	component_metrics	Table	Metrics for specific components.	M20-F106	id, component_id, metric_name, value	PK: id, FK: components	N/A
+M20-DB191	m20_sec	incident_history	Table	History of security incidents.	M20-F118	id, incident_id, timeline_json	PK: id	N/A
+M20-DB192	m20_sec	playbook_runs	Table	Executions of playbooks.	M20-F118	id, playbook_id, triggered_by, status, started_at	PK: id, FK: incident_playbooks	N/A
+M20-DB193	m20_sec	sandbox_configs	Table	Configurations for sandboxes.	M20-F109	id, config_name, os_spec, resources_json	PK: id	N/A
+M20-DB194	m20_sec	patch_rollbacks	Table	Records of patch rollbacks.	M20-F060	id, patch_id, reason, timestamp	PK: id	N/A
+M20-DB195	m20_sec	project_compliance_status	Table	Current compliance status of projects.	M20-F063	id, project_id, regulation_name, status, last_check	PK: id, FK: projects	N/A
+M20-DB196	m20_sec	cve_aliases	Table	Aliases for CVEs (e.g. GHSA).	M20-F004	id, cve_id, alias_id	PK: id, FK: vulnerabilities	N/A
+M20-DB197	m20_sec	package_metadata	Table	Extended metadata for packages.	M20-F002	id, purl, authors_json, homepage, description	PK: id, UQ: purl	N/A
+M20-DB198	m20_sec	vulnerability_references_cwe	Table	Mapping references to CWEs.	M20-F131	id, reference_id, cwe_id	PK: id, FK: vulnerability_references, cwe_references	N/A
+M20-DB199	m20_sec	build_artifacts_history	Table	History of artifacts produced.	M20-F011	id, artifact_id, version, created_at	PK: id	N/A
+M20-DB200	m20_sec	ml_feature_importance	Table	Feature importance for ML models.	M20-F006	id, model_id, feature_name, importance_score	PK: id	N/A

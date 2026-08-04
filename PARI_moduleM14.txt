@@ -1,0 +1,622 @@
+
+14.	Module M14	Success Metrics & Business Impact Engine
+a.	Summary
+The Success Metrics & Business Impact Engine (M14) serves as the central nervous system for the PARI ecosystem, transforming raw cryptographic transactional data into actionable strategic intelligence. While the underlying PARI architecture ensures privacy and security, M14 ensures value realization, providing a rigorous, data-driven framework to quantify the system’s success against economic, social, and operational goals. In a landscape where digital payment initiatives often struggle to demonstrate direct ROI beyond transaction volume, M14 bridges the gap between technical throughput and real-world impact, offering a granular, real-time view of the financial health of the network and its contribution to the broader digital economy.
+
+At its core, M14 is designed to address the "Privacy Compliance Paradox" inherent in reporting. It calculates critical fiscal indicators—such as VAT collected and tax gap reduction—without compromising the payer anonymity guaranteed by the PARI protocol. By aggregating data at the merchant and jurisdictional levels, and applying differential privacy techniques, M14 allows Tax Authorities and Policymakers to observe the economic effect of transactions (e.g., €1M in VAT collected via the system) without ever accessing the identity of the individual payers. This capability transforms the PARI system from a mere payment rail into a strategic national asset for governments, enabling real-time fiscalization and unprecedented accuracy in economic forecasting.
+
+Operationalizing CMMI Level 5 principles, M14 employs a quantitatively managed approach to business process monitoring. It does not merely report "what happened"; it utilizes advanced machine learning models to predict "what will happen." By correlating transaction latency, merchant adoption rates, and fraud detection scores with external factors (e.g., holiday seasons, regulatory changes), M14 provides Executive Stakeholders with the predictive insights necessary for proactive governance. For instance, it can model the environmental impact of cash displacement, calculating the reduction in carbon footprint based on the volume of physical transactions digitized, thereby aligning PARI’s operations with ESG (Environmental, Social, and Governance) mandates.
+
+Furthermore, M14 is the engine behind the sustainability of the FOSS (Free and Open Source Software) ecosystem. It tracks the flow of micropayments to open-source developers and content creators, providing concrete metrics on the "value of openness." This data is crucial for grant bodies, innovation labs, and policymakers who need to justify funding for the digital public infrastructure. By surfacing metrics such as "Average Tipping Volume" or "FOSS Project Revenue Retention," M14 validates the economic viability of the PARI protocol.
+
+The engine is built upon a high-performance, event-streaming architecture utilizing Apache Kafka for ingestion and specialized analytical schemas within PostgreSQL. It leverages materialized views for sub-second dashboard rendering and ensures data integrity through idempotent processing pipelines. Whether it is demonstrating a reduction in merchant fees from 3% to <0.5%, verifying the closure of the VAT gap, or proving the scalability of the infrastructure to millions of concurrent users, M14 provides the single source of truth. It ensures that every line of code written, and every transaction processed, contributes measurably to the vision of a secure, private, and prosperous digital economy.
+b.	Scope
+The scope of Module M14 encompasses the end-to-end lifecycle of data analysis, metric definition, and business intelligence reporting within the PARI ecosystem. This includes:
+
+     Data Ingestion & Normalization: Consuming encrypted and anonymized transaction events from the Core Exchange (M01) and Merchant Backend (M03), normalizing them into a unified analytics format.
+     Privacy-Preserving Aggregation: Applying statistical methods (k-anonymity, differential privacy) to ensure that all aggregated reports are deanonymization-resistant.
+     KPI Framework Management: Defining, versioning, and storing the logic for over 200 distinct KPIs covering financial, operational, and social impact domains.
+     Fiscal Calculations: Real-time computation of VAT/GST, transaction fees, and cash displacement estimates based on jurisdiction-specific tax rules stored in the Regulatory Policy Engine (M02).
+     Predictive Analytics: Utilizing ML models to forecast trends in adoption, fraud risk, and infrastructure load.
+     Reporting & Visualization: Generating dashboards for Executives, APIs for Regulators, and public reports for the FOSS community.
+     Exclusion: The module explicitly excludes rawPersonally Identifiable Information (PII) storage and individual transaction auditing, which are handled by M06 (Auditor) and M09 (Access Control) under strict governance.
+
+c.	Business Case
+The Problem:
+In the current digital payments landscape, stakeholders operate with fragmented visibility. Central Banks struggle to measure the real-time velocity of money; Merchants lack granular insights into fee savings versus traditional card networks; and Policymakers cannot accurately quantify the economic impact of digital privacy initiatives. Existing systems prioritize throughput over insight, treating data as exhaust rather than fuel for strategic improvement.
+
+The Solution:
+M14 provides a unified, high-fidelity intelligence layer.
+
+     For Governments: It directly addresses the VAT Gap in the EU (estimated at €93 billion). By providing real-time visibility into taxable events at the point of sale, PARI (via M14) enables immediate tax accrual, significantly improving public liquidity.
+     For Merchants: It offers a competitive edge. By dynamically comparing PARI transaction fees against legacy networks (Visa/MC) and highlighting settlement speed (instant vs. 2-3 days), M14 provides irrefutable proof of operational cost savings.
+     For Investors/Stakeholders: It de-risks the infrastructure investment. By monitoring CMMI Level 5 process metrics (defect rates, deployment frequency) alongside business metrics (adoption curves), M14 proves that the system is both technically robust and economically viable.
+     Societal Impact: It quantifies the "Green" impact of digitizing cash, supporting ESG goals, and measures the financial health of the Open-Source ecosystem, proving that privacy-preserving payments can sustain digital creators.
+
+
+Financial Impact:
+Targeted to reduce VAT leakage by 10-15% in pilot jurisdictions and reduce merchant operational costs by an average of 65% on payment processing fees.
+d.	KPIs
+KPI Name	Description	Target
+VAT Capture Accuracy	Variance between system-calculated VAT and merchant-reported VAT.	>99.9%
+Merchant Fee Savings Rate	Average % saved per transaction compared to legacy card networks.	>60% (Baseline vs 2.9% + fees)
+Cash Displacement Index	Estimated volume of physical cash replaced by PARI transactions.	20% YoY growth
+FOSS Monetization Volume	Total value transferred via embedded micropayments in FOSS apps.	€10M/year (Phase 2)
+Metric Latency (P99)	Time from transaction event to metric availability in dashboard.	<2 seconds
+Regulatory Reporting Success	Success rate of automated fiscal reports to tax authorities.	100%
+
+
+e.	Stakeholder Insights
+
+Stakeholder	Concern	Implications
+Policymakers / Government	Need to close the VAT gap and track economic health without violating citizen privacy (GDPR).	M14 provides aggregated, jurisdictional fiscal data, proving tax compliance without exposing payer identity.
+Merchants (SMB/Enterprise)	Want to know exactly how much money they are saving and if the system is reliable.	M14 delivers real-time fee dashboards and ROI calculators, demonstrating direct financial benefit.
+Central Banks / Regulators	Concerns about systemic risk, money laundering, and stability of new payment rails.	M14 offers systemic risk dashboards tracking velocity and liquidity with differential privacy to protect commercial secrets.
+Executive Leadership (PARI)	Need to justify the CMMI Level 5 investment and show platform adoption.	M14 correlates process quality metrics (from M18) with business growth, proving engineering efficiency.
+FOSS Community	Need to validate that the "Open Web" business model is sustainable.	M14 tracks micropayment flows to creators, providing transparent data on the success of the Web Monetization integration.
+
+f.	Knowledge Representation Graph (mermaid.js)
+graph TD
+    %% Nodes
+    Core[PARI Core Transaction Stream]
+    M14[M14: Success Metrics & BI Engine]
+    Ingestion[Event Ingestion Layer Kafka]
+    PrivacyLayer[Privacy Preserving Aggregator]
+    DataWarehouse[Analytics Data Warehouse Postgres]
+
+    Subgraph Domains
+        VAT[VAT & Taxation Analytics]
+        Financial[Financial Impact & ROI]
+        Operational[Operational Health & CMMI]
+        ESG[ESG & Cash Displacement]
+        FOSS[FOSS Economy Tracker]
+    end
+
+    Subgraph Consumers
+        Exec[Executive Dashboard]
+        Gov[Tax Authority API]
+        Merch[Merchant Portal]
+        Public[Public Transparency Report]
+    end
+
+    %% Relationships
+    Core -->|Encrypted Events| Ingestion
+    Ingestion -->|Stream Processing| M14
+    M14 -->|Anonymize & Aggregate| PrivacyLayer
+    PrivacyLayer -->|Store Facts| DataWarehouse
+
+    DataWarehouse --> VAT
+    DataWarehouse --> Financial
+    DataWarehouse --> Operational
+    DataWarehouse --> ESG
+    DataWarehouse --> FOSS
+
+    VAT --> Gov
+    Financial --> Merch
+    Financial --> Exec
+    Operational --> Exec
+    ESG --> Exec
+    FOSS --> Public
+
+    %% Styles
+    style M14 fill:#f9f,stroke:#333,stroke-width:4px
+    style DataWarehouse fill:#bbf,stroke:#333,stroke-width:2px
+
+g.	Comprehensive List of Features
+
+ID	Feature	Description	Business Case	AI/ML Algorithms	KPIs	Primary Users
+F01	Real-Time VAT Aggregator	Continuously aggregates VAT collected per merchant/jurisdiction from live transactions.	Ensures tax authorities have immediate visibility into tax revenue.	Stream Processing (Kafka Streams)	Data Freshness (<2s)	Tax Authority
+F02	Cash Displacement Calculator	Estimates physical cash volume replaced based on transaction location/amount profiles.	Supports ESG reporting and environmental impact assessment.	Linear Regression based on historic cash usage	Displacement Rate	Policymakers
+F03	Merchant Fee Comparator	Benchmarks PARI fees against standard industry rates (Visa/MC) per merchant.	Demonstrates direct ROI to merchants to drive adoption.	Rule Engine	Savings Percentage	Merchants
+F04	FOSS Micropayment Tracker	Tracks total volume of payments sent to Matrix/Mastodon/Jitsi integrations.	Validates the sustainability of the Open Source economy.	Time-Series Analysis	FOSS Volume (€)	FOSS Foundation
+F05	Settlement Latency Heatmap	Visualizes the time taken for funds to reach merchant accounts vs traditional rails.	Highlights the "Instant Settlement" value proposition.	Statistical Process Control	P99 Latency	Merchants
+F06	Transaction Velocity Monitor	Measures the speed of money circulation within the PARI ecosystem.	Indicator of economic health and inflationary pressure.	econometric modeling	Velocity Index	Central Banks
+F07	Privacy Leakage Auditor	Continuously scans aggregated reports for k-anonymity violations.	Prevents GDPR fines and ensures user trust.	k-Anonymity Check Algorithms	Privacy Violation Count	DPO
+F08	Fraud Impact Quantifier	Calculates financial loss prevented by M03 (Fraud Engine).	Justifies the cost of advanced fraud detection infrastructure.	Cost-Benefit Analysis	Savings (€)	Executives
+F09	Regional Adoption Index	Tracks new wallet activations vs. population density per region.	Identifies under-served markets for marketing campaigns.	Geospatial Clustering	Adoption %	Marketing
+F10	Fiscal Error Rate Monitor	Flags discrepancies between calculated VAT and expected tax brackets.	Identifies configuration errors in tax modules early.	Anomaly Detection (Isolation Forest)	Error Rate	Compliance Officer
+F11	CMMI Process Quality Dashboard	Correlates defect density (M18) with transaction availability.	Proves high engineering maturity drives business stability.	Statistical Control Charts (SPC)	Process Capability (CpK)	CTO
+F12	Merchant Churn Predictor	Predicts which merchants are likely to stop using PARI based on activity.	Enables proactive retention efforts.	Logistic Regression / Random Forest	Churn Probability	Account Managers
+F13	Peak Load Forecaster	Predicts transaction volume spikes for infrastructure scaling.	Ensures system resilience during holidays.	ARIMA / LSTM Prophet	Prediction Accuracy (MAPE)	SRE
+F14	Fee Revenue Forecaster	Projects future revenue for the Exchange based on growth trends.	Essential for financial planning and liquidity management.	Monte Carlo Simulation	Revenue Variance	CFO
+F15	Cross-Border Payment Volume	Tracks payments originating in one jurisdiction and settling in another.	Identifies demand for multi-currency support.	Classification Algorithms	Cross-Border %	Product Team
+F16	Refund Rate Analysis	Monitors frequency and volume of refunds to detect product quality issues.	Helps merchants improve their offerings.	Descriptive Statistics	Refund Rate	Merchants
+F17	Average Transaction Value (ATV) Tracker	Monitors trends in spending amounts per sector.	Helps in understanding consumer purchasing power.	Moving Averages	ATV Trend	Economists
+F18	Instant Payment Uptime	Measures availability of the instant settlement rail.	Guarantees SLA compliance with banks.	Time-Series Decomposition	Uptime %	Operations
+F19	Carbon Footprint Estimator	Calculates CO2 savings by reducing cash transport and card server usage.	Meets corporate sustainability goals.	Emission Factor Models	CO2 Saved (kg)	Sustainability Officer
+F20	Wallet Distribution Analysis	Breaks down usage by OS (Android/iOS) and version.	Guides resource allocation for app development.	Segmentation Analysis	OS Market Share	Dev Team
+F21	Failed Transaction Root Cause	Categorizes failures (tech, fraud, insufficient funds) for reporting.	Prioritizes technical roadmap improvements.	Decision Trees	Failure Category %	Engineering
+F22	Regulatory Compliance Score	Assigns a health score to jurisdictions based on reporting completeness.	Manages regulatory risk across different countries.	Weighted Scoring Algorithm	Compliance Score	Legal
+F23	Merchant Category Performance	Analyzes transaction volumes by MCC (Merchant Category Code).	Identifies high-growth verticals.	Comparative Analysis	Growth by MCC	Sales
+F24	Liquidity Pool Monitor	Tracks reserves in the Exchange (M05) for redemption capacity.	Prevents bank runs and ensures solvency.	Threshold Monitoring	Reserve Ratio	Treasury
+F25	User Sentiment Correlation	Correlates support ticket volume with transaction failures.	Links operational stability to user satisfaction.	NLP / Sentiment Analysis	Sentiment Score	Support
+F26	Interoperability Success Rate	Tracks success rate of transactions bridging to other banks (ISO 20022).	Measures quality of external integrations.	Uptime Monitoring	Bridge Success %	Integrations
+F27	Tax Gap Estimation	Extrapolates PARI data to estimate total digital tax gap in a region.	Provides high-value macroeconomic insights to governments.	Extrapolation Algorithms	Gap Estimate (€)	Policymakers
+F28	Grant Impact Tracker	Measures transaction volume generated by funded FOSS projects.	Measures ROI of innovation grants.	Attribution Modeling	Grant ROI	Innovation Lab
+F29	Cost Per Transaction (CPT)	Calculates operational cost of processing a single transaction.	Drives efficiency optimizations.	Activity-Based Costing	CPT (€)	Finance
+F30	Anonymity Set Size Monitor	Measures the statistical size of the anonymity crowd for privacy assurance.	Ensures the privacy guarantees remain strong as network grows.	Statistical Analysis	Set Size	Cryptographers
+F31	Daily Active Merchants (DAM)	Counts unique merchants transacting daily.	Key leading indicator for network effects.	Unique Count Query	DAM Count	Product
+F32	Transaction Size Distribution	Histogram of transaction values (micro vs macro).	Validates the micropayment use case.	Statistical Binning	Micro %	Product
+F33	Chargeback Avoidance Savings	Quantifies savings from eliminating legacy chargebacks.	Highlights merchant benefits.	Comparative Analysis	Savings (€)	Merchants
+F34	Know Your Transaction (KYT) Alert	Aggregates AML alerts for high-level risk reporting.	Summarizes systemic risk without revealing identities.	Aggregation Logic	Alert Count	Compliance
+F35	Exchange Rate Volatility Impact	Measures impact of FX rates on cross-border PARI fees.	Optimizes pricing strategies.	Volatility Modeling	Volatility Index	Finance
+F36	Audit Trail Integrity Check	Verifies cryptographic hashes of the audit logs (M06).	Ensures data immutability for regulators.	Hash Verification	Integrity Score	Auditor
+F37	API Usage Analytics	Tracks calls to PARI APIs by 3rd party developers.	Identifies popular integration points.	Log Parsing	API Call Volume	Developer Relations
+F38	Demographic Spending Profile	Aggregates spending by zip code (not individual).	Helps urban planners and local businesses.	Spatial Aggregation	Spend/Region	Merchants
+F39	Time-to-Settlement (TTS) Report	Detailed breakdown of settlement delays.	Optimizes banking connections.	Percentile Calculation	P95 TTS	Operations
+F40	Revenue Per User (ARPU)	Calculates average fees generated per active wallet.	Measures commercial efficiency.	Simple Average	ARPU (€)	Executives
+F41	Seasonality Adjustment	Normalizes metrics for seasonal effects (Christmas, etc.).	Provides accurate YoY comparisons.	Seasonal Decomposition	Adjusted Growth	Analysts
+F42	Smart Contract Analytics	Analyzes automated payment contracts (subscriptions).	Tracks adoption of recurring payments.	Pattern Matching	Contract Count	Product
+F43	Data Retention Compliance	Monitors data age and triggers archival/deletion workflows.	Ensures GDPR Article 17 compliance.	Time-Based Trigger	Compliance %	DPO
+F44	Wallet Upgrade Funnel	Tracks conversion from basic to full KYC wallets.	Measures onboarding effectiveness.	Funnel Analysis	Conversion Rate	Growth
+F45	Denomination Usage	Tracks which coin denominations are most popular.	Optimizes minting strategies in Exchange.	Frequency Analysis	Usage %	Exchange
+F46	Peer-to-Peer (P2P) Volume	Isolates C2C transfers from B2C.	Measures viral growth.	Graph Filtering	P2P Volume	Growth
+F47	Recurring Payment Retention	Measures churn rate of subscription-based payments.	Indicates stability of merchant revenue.	Cohort Analysis	Retention Rate	Merchants
+F48	Infrastructure Cost Attribution	Attributes cloud costs to specific transaction types.	Optimizes pricing models.	Tag-Based Allocation	Cost/Type	FinOps
+F49	Sanctions Screening Hit Rate	Aggregates hits from the compliance engine (M02).	Measures systemic exposure to sanctioned entities.	Rate Calculation	Hit Rate	Compliance
+F50	Merchant Fraud Ranking	Ranks merchants by frequency of incoming fraudulent attempts.	Identifies compromised merchants.	Z-Score Normalization	Risk Score	Risk Mgmt
+F51	Biometric Auth Success	Tracks success rate of facial/fingerprint auth in wallets.	Monitors UX friction.	Success Rate Calculation	Auth Success %	UX Team
+F52	Offline Payment Sync Rate	Measures success of payments synced when coming back online.	Validates offline capability.	Sync Ratio	Sync Success %	Engineering
+F53	Geo-Transaction Velocity	Tracks how fast transactions move geographically.	Detects unusual movement patterns indicative of laundering.	Geospatial Speed	Velocity Index	Fraud
+F54	Invoice Reconciliation Time	Time for merchants to match PARI payments with invoices.	Measures back-office efficiency.	Time Delta	Reconciliation Time	Merchants
+F55	Bank Integration Health	Latency and error rates for specific partner bank connections.	Manages external SLAs.	Latency Monitoring	Bank Latency	Partnerships
+F56	Tokenization Rate	Percentage of payments using network tokens vs raw details.	Security metric.	Percentage Calculation	Tokenization %	Security
+F57	Third-Party Risk Assessment	Aggregates risk scores of external API providers.	Manages supply chain risk.	Weighted Average	Supply Chain Risk	CISO
+F58	Consumer Confidence Index	Derived from transaction volume and wallet activity.	Proxy for economic sentiment.	Composite Index	Confidence Score	Economists
+F59	Instant Payout Usage	% of merchants choosing instant payouts vs standard.	Product preference metric.	Usage Rate	Instant Payout %	Product
+F60	Regulatory Change Impact	Simulates impact of new tax laws on collected VAT.	Proactive policy adaptation.	What-If Analysis	Impact Delta	Policy
+F61	Customer Lifetime Value (CLV) Prediction	Estimates long-term value of wallet cohorts.	Guides marketing spend.	Predictive Analytics (GBM)	Predicted CLV	Marketing
+F62	Systemic Risk Dashboard	Aggregate view of operational, financial, and security risks.	Single pane of glass for leadership.	Multi-factor Scoring	Risk Score	Executives
+F63	Developer API Latency	Response time for public APIs used by FOSS devs.	Developer experience metric.	P95 Latency	API Latency	DevRel
+F64	AML Transaction Monitoring	Count of transactions flagged for AML review.	Compliance volume tracking.	Count	Flagged Count	Compliance
+F65	Grant Distribution Efficiency	Time from grant approval to funds landing in wallet.	Operational efficiency.	Time Delta	Distribution Time	Grants Team
+F66	Open Banking Refresh Rate	Frequency of account data updates via PSD2.	Data freshness metric.	Frequency	Refresh Rate	Integrations
+F67	Mobile Data Usage	Average data consumed per transaction.	Performance metric for low-bandwidth users.	Data Volume	KB/Tx	Engineering
+F68	Error Code Frequency	Breakdown of specific API errors returned to clients.	Debugging prioritization.	Frequency Count	Error Frequency	Engineering
+F69	Merchant Comparison Tool	Allows a merchant to benchmark their stats against sector averages.	Value-add feature for merchants.	Benchmarking	Engagement	Merchants
+F70	Tax Authority Latency	Time to submit reports to national tax infra (e.g., SDI).	Regulatory compliance.	Time Delta	Report Latency	Compliance
+F71	Profitability Per Segment	Breakdown of profit by merchant size (SMB vs Enterprise).	Strategic focus metric.	Segmentation Analysis	Margin/Segment	Strategy
+F72	Network Effect Score	Algorithmic score of how valuable the network is to users.	Growth indicator.	Metcalfe’s Law Calculation	Network Score	Product
+F73	Currency Distribution	Transaction volume split by fiat currency (EUR, CHF, etc.).	Liquidity planning.	Volume %	Currency Mix	Treasury
+F74	Age of Money Analysis	How long funds sit in wallets before being spent.	Economic velocity metric.	Duration Analysis	Avg Age	Economists
+F75	Quantum Readiness Score	Assessment of cryptographic strength against future threats.	Security roadmap.	Heuristic Scoring	Quantum Score	Security
+F76	Accessibility Usage	Usage of accessibility features (screen readers, high contrast).	Inclusivity metric.	Feature Toggle Tracking	A11y Usage	UX Team
+F77	Marketing Campaign Attribution	Links signup codes to transaction volume.	ROMI calculation.	Attribution Modeling	ROI	Marketing
+F78	Dynamic Currency Conversion (DCC) Usage	Usage of auto-conversion for tourists.	Revenue metric.	Transaction Count	DCC Count	Product
+F79	Wallet Security Setup Rate	% of users with 2FA/Biometrics enabled.	Security hygiene metric.	Percentage	Secure Wallet %	Security
+F80	Bank Settlement Reconciliation	Matches Exchange bank balances with expected ledger state.	Critical financial control.	Reconciliation Algorithm	Variance (€)	Finance
+F81	Peer-to-Merchant Ratio	Ratio of P2P vs P2M transactions.	Network balance metric.	Ratio Calculation	P2P Ratio	Product
+F82	Failed Payment Recovery	Rate of successful retry after initial failure.	Resilience metric.	Recovery Rate	Recovery %	Engineering
+F83	Vendor Payment Efficiency	Speed of B2B invoice payments.	Working capital metric.	Days Payable Outstanding (DPO)	DPO Days	Merchants
+F84	Click-to-Pay Time	Time taken from app launch to payment completion.	UX performance.	Time Measurement	Click-to-Pay	UX Team
+F85	Fiscal Quarter Forecast	Predicts end-of-quarter VAT totals based on current run-rate.	Cash flow planning.	Linear Projection	Forecast Accuracy	Finance
+F86	Node Geographic Distribution	Map of active Exchange/Merchant nodes.	Infrastructure redundancy view.	Geospatial Plot	Node Density	SRE
+F87	Schema Change Impact	Measures deployment impact on transaction throughput.	CMMI process metric.	Impact Analysis	Throughput Delta	DevOps
+F88	Bug Bounty Impact	Metrics on vulnerabilities found vs severity.	Security community efficacy.	Vulnerability Count	Severity Index	Security
+F89	Community Engagement Score	Activity on forums/GitHub correlated with code commits.	Ecosystem health.	Sentiment/Volume Analysis	Engagement Score	Community Mgr
+F90	Regulatory Sandbox Performance	Metrics specific to pilot program regions.	Proof of concept validation.	Pilot KPIs	Sandbox Success	Policy
+F91	Digital Euro Readiness	Preparation status for specific CBDC integration.	Strategic readiness.	Checklist Completion	Readiness %	Strategy
+F92	Legacy System Decommissioning	Tracks reduction in volume of non-PARI payments.	Migration progress.	Volume Comparison	Legacy Decline %	Transformation
+F93	Support Ticket Resolution	Time to close payment-related tickets.	Customer service efficiency.	MTTR	Resolution Time	Support
+F94	Data Egress Cost	Cost of moving analytics data to external tools.	FinOps metric.	Cost Calculation	Egress Cost	FinOps
+F95	Micro-Donation Trends	Trends in small charitable contributions.	Social impact metric.	Trend Analysis	Donation Volume	NGOs
+F96	Transaction Replay Success	Rate of successful event replay in DR scenarios.	Disaster Recovery validation.	Success Rate	Replay %	SRE
+F97	Liquidity Stress Test	Simulation of high redemption demand.	Financial resilience.	Stress Simulation	Survivability %	Treasury
+F98	Partner API Adoption	Usage of white-label wallet APIs by partners.	Business development metric.	Active Partners	Partner Count	BizDev
+F99	Cross-Jurisdiction Fee Arbitrage	Tracking fees across borders for optimization.	Revenue optimization.	Arbitrage Analysis	Fee Delta	Finance
+F100	User Journey Funnel	Drop-off points in the payment flow.	UX optimization.	Funnel Analysis	Drop-off %	UX Team
+F101	Smart Receipt Interaction	Rate of users opening/viewing digital receipts.	Feature engagement.	Interaction Rate	Open Rate	Merchants
+F102	Inflation Hedging Metric	Analysis of stablecoin/peg usage vs fiat.	Financial behavior metric.	Usage Ratio	Hedge Usage	Product
+F103	Automated Reconciliation Run-time	Time for daily batch jobs to settle.	Batch performance.	Duration	Job Time	Data Eng
+F104	Token Velocity Within App	How fast micro-tips move within a specific app (e.g., game).	App-specific economy health.	Velocity	In-App Velocity	Developers
+F105	Real-time Fraud Loss	Actual funds lost to fraud that escaped detection.	Ultimate failure metric.	Loss Sum	Loss (€)	Fraud Mgmt
+F106	Certificate Rotation Frequency	Rate of mTLS cert updates.	Security hygiene.	Frequency	Rotation Rate	SecOps
+F107	Database Query Performance	Slowest queries in the analytics stack.	Performance tuning.	Latency	Query P95	Data Eng
+F108	Feature Flag Adoption	% of traffic exposed to new features.	Deployment safety.	Traffic %	Exposure %	Release Mgr
+F109	Merchant Dispute Volume	Count of raised disputes.	Merchant satisfaction.	Count	Disputes	Support
+F110	Payment Link Conversion	Rate of payment links (email/SMS) getting paid.	Remote payment success.	Conversion %	Link Conv %	Merchants
+F111	Hardware Wallet Usage	Usage of YubiKey/HSM for high-value accounts.	Power user metric.	User Count	HW Wallet %	Product
+F112	Location Spoofing Detection	Detection of VPN/Proxy usage for evasion.	Security metric.	IP Analysis	Spoof Rate	Fraud
+F113	VAT Refund Rate	Accuracy of VAT refunds processed for tourists.	Tax compliance.	Accuracy	Refund Acc %	Tax Auth
+F114	System Downtime Impact	Estimated financial loss during outages.	Risk quantification.	Loss Modeling	Loss/Hour	Executives
+F115	Dark Web Monitoring	Alerts on PARI credentials/data appearing on dark web.	Threat intelligence.	scraping Hits	Threat Count	SecOps
+F116	Grant Sustainability Score	How long a grant-funded project can survive on micropayments.	Grant allocation guidance.	Burn Rate Analysis	Months Runway	Grant Committee
+F117	Payment Method Preference	QR vs NFC vs Link usage.	UX research.	Distribution	Preference Share	Product
+F118	Transaction Graph Density	Complexity of web-of-trust in transactions.	Privacy/Security analysis.	Graph Theory	Density Score	Privacy
+F119	Regulatory Fines Estimator	Potential exposure calculation based on non-compliance.	Risk management.	Exposure Modeling	Exposure (€)	Legal
+F120	Carbon Intensity per Transaction	Energy consumed per transaction.	Green IT metric.	Energy Metering	Joules/Tx	Sustainability
+F121	Merchant Revenue Velocity	Speed at which merchants turn over their inventory.	Economic health.	Turnover Rate	Inventory Days	Merchants
+F122	Cross-Currency Spread	Revenue generated from FX spreads.	Revenue stream analysis.	Spread Analysis	FX Income	Finance
+F123	Software Bill of Materials (SBOM) Coverage	% of dependencies scanned in analytics pipeline.	Supply chain security.	Coverage %	SBOM Score	SecOps
+F124	Identity Verification Cost	Cost per KYC check.	Operational efficiency.	Cost/Unit	KYC Cost	Ops
+F125	Abandoned Cart Recovery	Revenue recovered via follow-up payments.	Merchant tool ROI.	Recovered Rev	Recovery (€)	Merchants
+F126	Real-Time Gross Settlement (RTGS) Link	Latency to central bank systems.	Systemic importance.	Link Latency	RTGS ms	Architecture
+F127	Social Media Buzz Volume	Mentions of PARI correlated with signups.	Brand strength.	Social Listening	Buzz Score	Marketing
+F128	Serverless Function Cold Starts	Latency impact of serverless scaling.	UX impact.	Duration	Cold Start ms	Engineering
+F129	Data Scientist Query Time	Time for ad-hoc queries to run.	Internal productivity.	Query Duration	Ad-hoc sec	Data Science
+F130	Payment Initiation Time	Time to initiate payment from bank side.	Open Banking metric.	Initiation Duration	PIS ms	Integrations
+F131	Wallet Backup Restoration	Success rate of restoring wallet from backup.	User retention.	Success Rate	Restore %	Support
+F132	Batch Payment Efficiency	Cost savings of batch payouts vs individual.	B2B metric.	Efficiency %	Batch Savings	Merchants
+F133	Jurisdictional Arbitrage	Users shifting regions for better rates.	Risk metric.	Migration Rate	Arbitrage Vol	Risk
+F134	API Deprecation Impact	Traffic on old API versions.	Tech debt management.	Traffic %	Legacy API %	Engineering
+F135	Cloud Cost Per Region	Infrastructure spend by geo-region.	Cost optimization.	Cost/Region	Spend/AZ	FinOps
+F136	Merchant Multi-Location Aggregation	Aggregates stats for chains with multiple stores.	Enterprise feature.	Rollup Logic	Chain Total	Merchants
+F137	Payment Rail Availability	Uptime of specific underlying rails (SEPA, SWIFT).	Dependency health.	Availability %	Rail Uptime	Ops
+F138	Fiscal Impact Simulator	"What if" tool for tax rate changes.	Policy tool.	Simulation Logic	Revenue Delta	Govt
+F139	Zero-Knowledge Proof Generation Time	Time taken to generate ZK proofs for transactions.	UX friction.	Duration	ZK ms	Cryptography
+F140	Customer Acquisition Cost (CAC)	Marketing spend per new active user.	Efficiency metric.	Cost/User	CAC (€)	Marketing
+F141	Lifetime Value (LTV) to CAC Ratio	Fundamental unit economics health.	Viability metric.	Ratio	LTV:CAC	Executives
+F142	Gross Merchandise Value (GMV)	Total value of goods sold via PARI.	Ecommerce standard.	Sum	GMV (€)	Merchants
+F143	Net Merchandise Value (NMV)	GMV minus refunds/returns.	Realized value.	Sum	NMV (€)	Merchants
+F144	Ticket Size Stability	Variance in average transaction amount.	Predictability metric.	Variance	Std Dev	Finance
+F145	Payment Failure Reason Distribution	Breakdown (Insufficient funds, tech error, etc.).	Targeted fixes.	Distribution	Failure Reason %	Engineering
+F146	Regulatory Update Latency	Time to implement new tax code in production.	Agility metric.	Deployment Time	Impl. Days	Compliance
+F147	Data Replication Lag	Lag between primary and DR database replicas.	RPO metric.	Lag ms	Replication Lag	SRE
+F148	Encryption Key Rotation Age	Age of current active encryption keys.	Security policy.	Age	Key Age	SecOps
+F149	Interoperability Test Coverage	% of external partners certified.	Integration quality.	Coverage %	Cert Rate	Partnerships
+F150	Social Impact Index	Composite score of FOSS funding + VAT Gap + Green impact.	High-level mission alignment.	Composite Index	Impact Score	Board
+
+
+h.	Comprehensive List of Database Objects
+
+ID	Schema Name	Object Name	Object Type	Description	Feature Reference	Column Names	Constraints / Notes	Junction Tables
+D01	analytics	fact_transaction	Table	Core fact table for all transaction events	F01, F03, F17	tx_id, merchant_id, amount, currency, timestamp, vat_amount, fee_amount, status	PK: tx_id, FK: merchant_id	N/A
+D02	analytics	fact_transaction_hourly	Table	Aggregated hourly transactions for OLAP	F01, F13	hour_timestamp, jurisdiction, count, sum_amount, sum_vat	PK: (hour_timestamp, jurisdiction)	N/A
+D03	analytics	fact_transaction_daily	Table	Aggregated daily transactions for OLAP	F01, F14	date_id, jurisdiction, merchant_category, count, sum_amount, sum_vat	PK: (date_id, jurisdiction)	N/A
+D04	analytics	fact_merchant_performance	Table	Monthly performance snapshot per merchant	F03, F31, F40	month_id, merchant_id, gmv, fees_paid, settlement_time_avg, churn_score	PK: (month_id, merchant_id)	N/A
+D05	analytics	fact_vat_aggregate	Table	Pre-calculated VAT totals per jurisdiction	F01, F27	period_start, period_end, jurisdiction_code, vat_collected, vat_gap_estimated	PK: period_start	N/A
+D06	analytics	fact_cash_displacement	Table	Estimates of cash replaced by digital payments	F02	date_id, region_code, population, cash_volume_est, digital_volume, displacement_ratio	PK: (date_id, region_code)	N/A
+D07	analytics	fact_operational_health	Table	Daily operational metrics (uptime, latency)	F18, F21, F26	date_id, api_endpoint, uptime_pct, p99_latency, error_count	PK: (date_id, api_endpoint)	N/A
+D08	analytics	fact_fraud_metrics	Table	Aggregate fraud statistics	F08, F34, F105	date_id, fraud_type, total_attempted, total_prevented, financial_loss	PK: (date_id, fraud_type)	N/A
+D09	analytics	fact_foss_economy	Table	Tracking micropayments to FOSS projects	F04, F28, F116	month_id, project_name, platform (matrix/mastodon), total_received, donor_count_anonymized	PK: (month_id, project_name)	N/A
+D10	analytics	fact_settlement	Table	Settlement batch records	F05, F39, F80	settlement_id, merchant_id, bank_account, amount, currency, settled_at, status	PK: settlement_id	N/A
+D11	analytics	dim_merchant	Table	Dimension table for merchants	F50, F136	merchant_id, name, registered_date, business_type, tier, is_active	PK: merchant_id	N/A
+D12	analytics	dim_jurisdiction	Table	Dimension for countries/regions	F01, F27	jurisdiction_code, country_name, vat_rate, currency_code, regulator_name	PK: jurisdiction_code	N/A
+D13	analytics	dim_date	Table	Standard date dimension for reporting	F14, F35	date_id, day_of_week, month, quarter, year, is_holiday	PK: date_id	N/A
+D14	analytics	dim_currency	Table	Currency exchange rates and metadata	F35, F73, F122	currency_code, symbol, name, exchange_rate_to_eur, updated_at	PK: currency_code	N/A
+D15	analytics	dim_merchant_category	Table	MCC codes and verticals	F23, F121	mcc_code, category_name, description, vertical_group	PK: mcc_code	N/A
+D16	analytics	dim_error_code	Table	Classification of transaction errors	F21, F68	error_code, http_status, category, severity, description	PK: error_code	N/A
+D17	analytics	dim_kpi_definition	Table	Registry of all tracked KPIs	F04, F60	kpi_id, name, formula, unit, owner_dept, threshold_warning	PK: kpi_id	N/A
+D18	analytics	dim_feature_flag	Table	Feature toggles for rollout	F108	flag_name, is_enabled, rollout_percentage, description, updated_at	PK: flag_name	N/A
+D19	analytics	dim_bank_partner	Table	Partner banks and their SLAs	F26, F55	partner_id, bank_name, iso20022_endpoint, sla_uptime_target, region	PK: partner_id	N/A
+D20	analytics	dim_regulation	Table	Regulatory rules mapped to metrics	F22, F146	regulation_id, jurisdiction_code, description, effective_date, status	PK: regulation_id	N/A
+D21	analytics	config_alert_thresholds	Table	Alerting rules for dashboards	F13, F114	metric_name, operator, threshold_value, severity, notification_channel	PK: metric_name	N/A
+D22	analytics	vw_merchant_roi	View	Merchant ROI calculation (Fee savings)	F03	merchant_id, current_fees, legacy_projected_fees, savings	N/A	N/A
+D23	analytics	vw_executive_dashboard	View	High level KPIs for C-Suite	F14, F40, F62	date, gmv, active_wallets, vat_collected, system_health_score	N/A	N/A
+D24	analytics	vw_tax_authority_report	View	Privacy-preserved report for tax office	F01, F06	jurisdiction, date, vat_due, transaction_count_anonymized	N/A	N/A
+D25	analytics	vw_network_health	View	Real-time latency and uptime	F18, F26	service_name, availability, latency_p99, status	N/A	N/A
+D26	analytics	vw_foss_impact	View	Public report on FOSS funding	F04	project_id, total_funded, rank, trend	N/A	N/A
+D27	analytics	mv_cash_displacement_monthly	Materialized View	Monthly cash displacement metrics	F02	month, region, displacement_volume, co2_saved	Refresh: Daily	N/A
+D28	analytics	mv_merchant_churn_prediction	Materialized View	ML predictions for merchant churn	F12	merchant_id, churn_probability, last_active_date, risk_factors	Refresh: Weekly	N/A
+D29	analytics	mv_peak_forecast	Materialized View	Predicted load for next 7 days	F13	forecast_date, predicted_tps, confidence_interval, capacity	Refresh: Hourly	N/A
+D30	analytics	seq_transaction_batch	Sequence	Sequence for batch processing IDs	N/A	N/A	Increment by 1	N/A
+D31	analytics	etl_log	Table	Logging for ETL pipeline jobs	F103	job_id, start_time, end_time, status, rows_processed, error_message	PK: job_id	N/A
+D32	analytics	stg_transaction_raw	Table	Staging area for raw Kafka events	F13	message_id, payload_json, received_at, processed_flag	PK: message_id	N/A
+D33	analytics	stg_merchant_updates	Table	Staging for merchant dimension updates	F11	merchant_id, update_type, new_value_json, updated_at	PK: update_id	N/A
+D34	analytics	idx_fact_tx_merchant	Index	Index on merchant_id for fast lookup	N/A	merchant_id	B-Tree	N/A
+D35	analytics	idx_fact_tx_timestamp	Index	Index on timestamp for time-series queries	N/A	timestamp	B-Tree	N/A
+D36	analytics	idx_fact_vat_jurisdiction	Index	Index on jurisdiction for tax reports	N/A	jurisdiction_code	B-Tree	N/A
+D37	analytics	fn_calculate_vat_gap	Function	SQL function to estimate VAT gap	F27	N/A	Returns numeric	N/A
+D38	analytics	fn_savings_calculator	Function	Calculates merchant savings vs Visa/MC	F03	N/A	Returns numeric	N/A
+D39	analytics	fn_uptime_percentage	Function	Calculates uptime from operational logs	F18	N/A	Returns numeric	N/A
+D40	analytics	sp_daily_metrics_refresh	Stored Procedure	Refreshes daily materialized views	F14	N/A	Runs daily 00:01 UTC	N/A
+D41	analytics	sp_archive_old_data	Stored Procedure	Moves data older than 7 years to S3	F11, F43	N/A	Runs monthly	N/A
+D42	analytics	fact_marketing_campaign	Table	Marketing attribution data	F77	campaign_id, date, spend, signups_attributed, cac	PK: campaign_id	N/A
+D43	analytics	dim_geo_location	Table	Geo-hierarchy for mapping	F09, F38	zip_code, city, region, country, coordinates	PK: zip_code	N/A
+D44	analytics	fact_geo_spend	Table	Spending by geographic region	F38	date, region_code, sum_amount, transaction_count	PK: (date, region_code)	N/A
+D45	analytics	dim_support_ticket	Table	Customer support tickets	F25, F93	ticket_id, merchant_id, user_id_anon, created_at, category, resolution_time	PK: ticket_id	N/A
+D46	analytics	fact_sentiment	Table	Aggregated sentiment scores	F25	date_id, source, sentiment_score_avg, mention_count	PK: (date_id, source)	N/A
+D47	analytics	fact_infrastructure_cost	Table	Cloud costs attributed to services	F29, F48	date_id, service_name, cost_eur, usage_unit	PK: (date_id, service_name)	N/A
+D48	analytics	dim_user_agent	Table	Device and OS info	F20, F63	user_agent_hash, os_family, browser_family, is_mobile	PK: user_agent_hash	N/A
+D49	analytics	fact_device_usage	Table	Usage metrics by device type	F20	date_id, os_family, transaction_count	PK: (date_id, os_family)	N/A
+D50	analytics	fact_refund	Table	Refund transaction records	F16, F33	refund_id, original_tx_id, amount, reason_code, processed_at	PK: refund_id	N/A
+D51	analytics	dim_refund_reason	Table	Standard reasons for refunds	F16	reason_code, description, category	PK: reason_code	N/A
+D52	analytics	fact_forecast_accuracy	Table	Tracking accuracy of predictions	F13, F85	forecast_date, metric_name, predicted_value, actual_value, error_pct	PK: forecast_date	N/A
+D53	analytics	fact_liquidity	Table	Liquidity pool metrics	F24	date_id, currency_code, balance_min, balance_max, reserve_ratio	PK: (date_id, currency_code)	N/A
+D54	analytics	fact_settlement_variance	Table	Reconciliation differences	F80	settlement_id, expected_amount, actual_amount, variance_code	PK: settlement_id	N/A
+D55	analytics	dim_variance_code	Table	Reasons for settlement variance	F80	code, description, severity	PK: code	N/A
+D56	analytics	fact_partner_api_usage	Table	Usage stats for white-label partners	F98	date_id, partner_id, call_count, error_count	PK: (date_id, partner_id)	N/A
+D57	analytics	fact_smart_contract	Table	Automated recurring contracts	F42	contract_id, merchant_id, frequency, amount, status	PK: contract_id	N/A
+D58	analytics	fact_subscription_retention	Table	Retention metrics for subscriptions	F47	cohort_month, period_number, active_count, retained_pct	PK: (cohort_month, period_number)	N/A
+D59	analytics	fact_sanctions_screening	Table	Aggregate results of AML screening	F49	date_id, jurisdiction, total_scanned, hits_count, confirmed_hits	PK: date_id	N/A
+D60	analytics	dim_merchant_risk	Table	Merchant risk ranking scores	F50	merchant_id, risk_score, last_updated, risk_factors_json	PK: merchant_id	N/A
+D61	analytics	fact_biometric_auth	Table	Biometric authentication attempts	F51	date_id, auth_type, success_count, failure_count	PK: (date_id, auth_type)	N/A
+D62	analytics	fact_offline_sync	Table	Offline payment synchronization stats	F52	sync_batch_id, attempted_count, success_count, failure_count	PK: sync_batch_id	N/A
+D63	analytics	fact_geo_velocity	Table	High speed movement detection	F53	alert_id, wallet_id_anon, distance_km, time_minutes, velocity_score	PK: alert_id	N/A
+D64	analytics	fact_invoice_reconciliation	Table	Time to match invoices	F54	invoice_id, merchant_id, matched_tx_id, reconciliation_time_sec	PK: invoice_id	N/A
+D65	analytics	fact_bank_health	Table	Health status of partner banks	F55	date_id, partner_id, latency_ms, error_rate, status	PK: (date_id, partner_id)	N/A
+D66	analytics	fact_tokenization	Table	Tokenized payment metrics	F56	date_id, payment_type, count, amount	PK: (date_id, payment_type)	N/A
+D67	analytics	dim_third_party_risk	Table	Risk scores for external APIs	F57	provider_name, service, risk_score, last_assessed	PK: provider_name	N/A
+D68	analytics	fact_consumer_confidence	Table	Derived index of economic sentiment	F58	date_id, confidence_index, spend_velocity, wallet_growth	PK: date_id	N/A
+D69	analytics	fact_instant_payout	Table	Usage of instant payout feature	F59	date_id, merchant_id, payout_count, fee_incurred	PK: (date_id, merchant_id)	N/A
+D70	analytics	fact_regulatory_impact	Table	Simulated impact of regulation changes	F60	simulation_id, regulation_code, effective_date, projected_vat_delta	PK: simulation_id	N/A
+D71	analytics	fact_clv_cohort	Table	Customer Lifetime Value by cohort	F61	cohort_month, age_months, clv_avg, clv_median	PK: (cohort_month, age_months)	N/A
+D72	analytics	fact_systemic_risk	Table	Composite risk score calculation	F62	date_id, operational_risk, financial_risk, security_risk, overall_score	PK: date_id	N/A
+D73	analytics	fact_api_latency	Table	Detailed API latency metrics	F63	endpoint_path, timestamp, duration_ms	PK: id	N/A
+D74	analytics	fact_aml_monitoring	Table	AML flag aggregates	F64	date_id, jurisdiction, flags_raised, flags_cleared, false_positive_rate	PK: date_id	N/A
+D75	analytics	fact_grant_distribution	Table	Grant to wallet tracking	F65	grant_id, wallet_id_anon, amount_eur, distribution_time_sec	PK: grant_id	N/A
+D76	analytics	fact_open_banking_refresh	Table	PSD2 data refresh stats	F66	bank_id, last_refresh, status, record_count	PK: bank_id	N/A
+D77	analytics	fact_mobile_data	Table	Data usage per transaction	F67	tx_id_anon, data_bytes, connection_type	PK: tx_id_anon	N/A
+D78	analytics	fact_error_code_freq	Table	Frequency of specific errors	F68	date_id, error_code, count	PK: (date_id, error_code)	N/A
+D79	analytics	dim_sector_benchmark	Table	Sector averages for benchmarking	F69	mcc_code, avg_ticket_size, avg_fee_rate, growth_rate	PK: mcc_code	N/A
+D80	analytics	fact_tax_latency	Table	Latency to tax authorities	F70	submission_id, tax_auth_id, submitted_at, acknowledged_at, latency_sec	PK: submission_id	N/A
+D81	analytics	fact_profitability_segment	Table	Profit by merchant segment	F71	segment_name, date_id, revenue, cost, profit_margin	PK: (segment_name, date_id)	N/A
+D82	analytics	fact_network_score	Table	Network effect scoring	F72	date_id, user_count, connection_count, metcalfe_value	PK: date_id	N/A
+D83	analytics	fact_currency_mix	Table	Transaction volume by currency	F73	date_id, currency_code, volume_eur, transaction_count	PK: (date_id, currency_code)	N/A
+D84	analytics	fact_age_of_money	Table	Duration funds sit in wallets	F74	date_id, days_in_wallet, sum_amount	PK: (date_id, days_in_wallet)	N/A
+D85	analytics	fact_quantum_readiness	Table	Status of crypto migration	F75	component_id, algo_current, algo_target, readiness_pct	PK: component_id	N/A
+D86	analytics	fact_accessibility	Table	Accessibility feature usage	F76	date_id, feature_type (screen_reader), user_sessions	PK: date_id	N/A
+D87	analytics	fact_marketing_attribution	Table	Detailed attribution logs	F77	click_id, campaign_id, conversion_flag, tx_value	PK: click_id	N/A
+D88	analytics	fact_dcc_usage	Table	Dynamic Currency Conversion usage	F78	tx_id, original_currency, settled_currency, markup	PK: tx_id	N/A
+D89	analytics	fact_wallet_security	Table	Security posture of wallets	F79	date_id, has_2fa, has_biometric, wallet_count	PK: (date_id, has_2fa)	N/A
+D90	analytics	fact_bank_reconciliation	Table	Matches ledger to bank statements	F80	rec_id, date, ledger_balance, bank_balance, variance	PK: rec_id	N/A
+D91	analytics	fact_p2p_ratio	Table	Ratio of P2P to P2M	F81	date_id, p2p_volume, p2m_volume, ratio	PK: date_id	N/A
+D92	analytics	fact_retry_recovery	Table	Failed payment retry stats	F82	original_tx_id, retry_attempt, success_flag, time_to_retry	PK: original_tx_id	N/A
+D93	analytics	fact_b2b_efficiency	Table	B2B payment timing	F83	invoice_id, payment_date, due_date, days_outstanding	PK: invoice_id	N/A
+D94	analytics	fact_click_to_pay	Table	UX timing metric	F84	session_id, start_timestamp, pay_timestamp, duration_sec	PK: session_id	N/A
+D95	analytics	fact_qt_forecast	Table	Quarter-end tax forecasts	F85	forecast_date, quarter_end, predicted_vat, actual_vat	PK: forecast_date	N/A
+D96	analytics	fact_node_distribution	Table	Node locations and health	F86	node_id, region, latitude, longitude, load	PK: node_id	N/A
+D97	analytics	fact_schema_impact	Table	Impact of DB changes	F87	change_id, deployment_time, throughput_before, throughput_after	PK: change_id	N/A
+D98	analytics	fact_bug_bounty	Table	Vulnerability stats	F88	report_id, severity, bounty_paid, days_to_resolve	PK: report_id	N/A
+D99	analytics	fact_community_health	Table	GitHub/Forum activity	F89	date_id, platform, commits, issues_closed, sentiment	PK: (date_id, platform)	N/A
+D100	analytics	fact_sandbox_pilot	Table	Pilot region performance	F90	region_code, date_id, active_users, tx_volume	PK: (region_code, date_id)	N/A
+D101	analytics	fact_cbdc_readiness	Table	Checklist for CBDC	F91	requirement_id, description, status, completed_date	PK: requirement_id	N/A
+D102	analytics	fact_legacy_decommission	Table	Tracking reduction in old systems	F92	date_id, system_name, tx_volume, decline_rate	PK: (date_id, system_name)	N/A
+D103	analytics	fact_ticket_resolution	Table	Support ticket timing	F93	ticket_id, created_at, resolved_at, resolution_hours	PK: ticket_id	N/A
+D104	analytics	fact_data_egress	Table	Cloud egress costs and volume	F94	date_id, service, bytes_egressed, cost_eur	PK: (date_id, service)	N/A
+D105	analytics	fact_micro_donation	Table	Charity micro-donations	F95	charity_id, date_id, donation_count, total_amount	PK: (charity_id, date_id)	N/A
+D106	analytics	fact_replay_success	Table	DR event replay success	F96	replay_id, event_count, success_count, failure_count	PK: replay_id	N/A
+D107	analytics	fact_stress_test	Table	Liquidity stress test results	F97	test_id, demand_shock_pct, survival_time, passed	PK: test_id	N/A
+D108	analytics	fact_partner_adoption	Table	Active partner API usage	F98	partner_id, date_id, active_merchant_count	PK: (partner_id, date_id)	N/A
+D109	analytics	fact_arbitrage	Table	Cross-border fee analysis	F99	route_pair, fee_eur, volume_eur	PK: route_pair	N/A
+D110	analytics	fact_funnel_step	Table	User journey funnel drop-off	F100	step_name, date_id, entered_count, exited_count, drop_off_rate	PK: (step_name, date_id)	N/A
+D111	analytics	fact_receipt_interaction	Table	Digital receipt open rates	F101	receipt_id_anon, opened_flag, opened_at	PK: receipt_id_anon	N/A
+D112	analytics	fact_stablecoin_usage	Table	Stablecoin vs Fiat usage	F102	date_id, asset_type, volume_eur	PK: (date_id, asset_type)	N/A
+D113	analytics	fact_batch_runtime	Table	ETL job runtimes	F103	job_name, start_time, end_time, duration_sec	PK: (job_name, start_time)	N/A
+D114	analytics	fact_inapp_velocity	Table	Velocity of money within specific apps	F104	app_id, date_id, transfer_count, total_volume	PK: (app_id, date_id)	N/A
+D115	analytics	fact_real_fraud_loss	Table	Actual funds lost to fraud	F105	incident_id, date_id, amount_eur	PK: incident_id	N/A
+D116	analytics	fact_cert_rotation	Table	mTLS certificate rotation frequency	F106	cert_id, service, issued_at, expired_at, rotation_reason	PK: cert_id	N/A
+D117	analytics	fact_query_performance	Table	Slow query log analysis	F107	query_hash, exec_time_min, exec_time_avg, exec_time_max	PK: query_hash	N/A
+D118	analytics	fact_feature_exposure	Table	Traffic percentage per feature flag	F108	flag_name, date_id, traffic_pct	PK: (flag_name, date_id)	N/A
+D119	analytics	fact_dispute	Table	Merchant dispute records	F109	dispute_id, merchant_id, reason, status, amount	PK: dispute_id	N/A
+D120	analytics	fact_payment_link	Table	Payment link performance	F110	link_id_anon, created_at, first_view_at, paid_at	PK: link_id_anon	N/A
+D121	analytics	fact_hw_wallet	Table	Hardware wallet usage stats	F111	date_id, device_model, user_count	PK: (date_id, device_model)	N/A
+D122	analytics	fact_spoofing	Table	VPN/Proxy detection stats	F112	date_id, connection_type, tx_count, blocked_count	PK: date_id	N/A
+D123	analytics	fact_vat_refund	Table	Tourist VAT refund tracking	F113	refund_id, merchant_id, passport_hash, amount, status	PK: refund_id	N/A
+D124	analytics	fact_downtime_cost	Table	Financial loss estimation for downtime	F114	incident_id, duration_min, estimated_loss_eur	PK: incident_id	N/A
+D125	analytics	fact_dark_web	Table	Dark web mentions of PARI	F115	date_id, source, mention_count, risk_level	PK: date_id	N/A
+D126	analytics	fact_sustainability	Table	Grant project sustainability score	F116	project_id, date_id, runway_months, burn_rate	PK: (project_id, date_id)	N/A
+D127	analytics	fact_payment_method	Table	Method preference (QR, NFC, Link)	F117	date_id, method, count, amount	PK: (date_id, method)	N/A
+D128	analytics	fact_graph_density	Table	Complexity of transaction graph	F118	date_id, node_count, edge_count, density_score	PK: date_id	N/A
+D129	analytics	fact_fines_exposure	Table	Potential regulatory fine exposure	F119	regulation_id, risk_count, potential_fine_eur	PK: regulation_id	N/A
+D130	analytics	fact_energy_consumption	Table	Energy per transaction	F120	tx_id_anon, joules_consumed, carbon_g_co2	PK: tx_id_anon	N/A
+D131	analytics	fact_inventory_turnover	Table	Merchant inventory velocity proxy	F121	merchant_id, date_id, revenue, inventory_est, turnover_days	PK: (merchant_id, date_id)	N/A
+D132	analytics	fact_fx_income	Table	Revenue from FX spreads	F122	date_id, currency_pair, volume_eur, income_eur	PK: (date_id, currency_pair)	N/A
+D133	analytics	fact_sbom_coverage	Table	Dependency scanning stats	F123	scan_date, total_deps, scanned_deps, coverage_pct	PK: scan_date	N/A
+D134	analytics	fact_kyc_cost	Table	Cost per KYC verification	F124	date_id, verification_count, total_cost, cost_per_unit	PK: date_id	N/A
+D135	analytics	fact_cart_recovery	Table	Abandoned cart revenue recovery	F125	campaign_id, date_id, recovered_revenue	PK: (campaign_id, date_id)	N/A
+D136	analytics	fact_rtgs_link	Table	Central bank RTGS metrics	F126	link_id, latency_ms, message_count	PK: link_id	N/A
+D137	analytics	fact_social_buzz	Table	Social media volume	F127	date_id, platform, mention_count	PK: (date_id, platform)	N/A
+D138	analytics	fact_serverless_cold	Table	Serverless cold start metrics	F128	function_name, timestamp, init_duration_ms	PK: id	N/A
+D139	analytics	fact_ds_query	Table	Data scientist ad-hoc query log	F129	query_id, user_id, start_time, duration_sec, rows_scanned	PK: query_id	N/A
+D140	analytics	fact_pis_init	Table	Payment Initiation Service timing	F130	bank_id, timestamp, duration_ms	PK: id	N/A
+D141	analytics	fact_backup_restore	Table	Wallet backup restoration stats	F131	restore_id, success_flag, duration_sec	PK: restore_id	N/A
+D142	analytics	fact_batch_savings	Table	Cost savings of batching	F132	date_id, merchant_id, tx_count_batched, saved_eur	PK: (date_id, merchant_id)	N/A
+D143	analytics	fact_jurisdiction_arbitrage	Table	User migration for better rates	F133	old_jurisdiction, new_jurisdiction, user_count	PK: (old_jurisdiction, new_jurisdiction)	N/A
+D144	analytics	fact_api_deprecation	Table	Traffic on deprecated API versions	F134	api_version, date_id, request_count	PK: (api_version, date_id)	N/A
+D145	analytics	fact_cloud_cost_region	Table	Infrastructure spend by region	F135	region, date_id, cost_eur	PK: (region, date_id)	N/A
+D146	analytics	fact_chain_performance	Table	Metrics for merchant chains (aggregates)	F136	chain_id, date_id, store_count, total_gmv	PK: (chain_id, date_id)	N/A
+D147	analytics	fact_rail_availability	Table	Uptime of underlying rails	F137	rail_name (SEPA/SWIFT), date_id, uptime_pct	PK: (rail_name, date_id)	N/A
+D148	analytics	fact_fiscal_simulation	Table	Tax change simulation results	F138	simulation_id, tax_rate_change, rev_delta	PK: simulation_id	N/A
+D149	analytics	fact_zk_proof_gen	Table	ZK Proof generation performance	F139	tx_id, proof_size_bytes, gen_time_ms	PK: tx_id	N/A
+D150	analytics	fact_cac_cohort	Table	Customer Acquisition Cost over time	F140	date_id, channel, spend, new_users, cac	PK: (date_id, channel)	N/A
+D151	analytics	fact_ltv_cac_ratio	Table	Calculated LTV:CAC ratios	F141	cohort_month, ltv, cac, ratio	PK: cohort_month	N/A
+D152	analytics	fact_gmv_daily	Table	Daily Gross Merchandise Value	F142	date_id, gmv_eur	PK: date_id	N/A
+D153	analytics	fact_nmv_daily	Table	Daily Net Merchandise Value	F143	date_id, nmv_eur	PK: date_id	N/A
+D154	analytics	fact_ticket_stability	Table	Variance in ticket sizes	F144	date_id, avg_ticket, std_dev_ticket	PK: date_id	N/A
+D155	analytics	fact_failure_breakdown	Table	Breakdown of payment failures	F145	date_id, reason_code, count	PK: (date_id, reason_code)	N/A
+D156	analytics	fact_reg_latency	Table	Time to implement regulations	F146	regulation_id, published_date, implemented_date, days_taken	PK: regulation_id	N/A
+D157	analytics	fact_replication_lag	Table	DB replication lag metrics	F147	replica_name, timestamp, lag_bytes, lag_sec	PK: (replica_name, timestamp)	N/A
+D158	analytics	fact_key_rotation_age	Table	Age of encryption keys	F148	key_id, key_type, created_at, age_days	PK: key_id	N/A
+D159	analytics	fact_interop_coverage	Table	Percentage of certified partners	F149	date_id, total_partners, certified_partners, coverage_pct	PK: date_id	N/A
+D160	analytics	fact_social_impact_index	Table	Composite social impact score	F150	date_id, foss_score, tax_score, green_score, total_score	PK: date_id	N/A
+D161	analytics	vw_real_time_fraud	View	Real-time fraud alert dashboard	F105	alert_time, type, severity, estimated_impact	N/A	N/A
+D162	analytics	vw_merchant_comparison	View	Merchant vs Sector benchmark	F69	merchant_id, metric, merchant_val, sector_avg, delta	N/A	N/A
+D163	analytics	vw_system_load	View	Current system load and capacity	F13	component, current_load, max_capacity, utilization_pct	N/A	N/A
+D164	analytics	vw_financial_summary	View	Daily financial summary for CFO	F29	date, revenue, cost, profit, forecast_error	N/A	N/A
+D165	analytics	vw_risk_heatmap	View	Global risk heatmap by region	F62	region, operational_risk, fraud_risk, regulatory_risk	N/A	N/A
+D166	analytics	vw_developer_activity	View	FOSS developer contribution stats	F89	developer_id_anon, commits, reviews, prs_merged	N/A	N/A
+D167	analytics	vw_user_acquisition	View	Daily user acquisition funnel	F100	source, visits, signups, kyc_complete, active	N/A	N/A
+D168	analytics	vw_cloud_cost_trend	View	Monthly cloud cost trend	F135	month, compute_cost, storage_cost, network_cost	N/A	N/A
+D169	analytics	vw_partner_performance	View	Partner bank performance ranking	F55	partner_id, uptime, latency, error_rate, rank	N/A	N/A
+D170	analytics	vw_tax_gap_trend	View	Monthly tax gap trend	F27	month, jurisdiction, gap_eur, closure_rate	N/A	N/A
+D171	analytics	vw_green_impact	View	Environmental impact dashboard	F02, F120	month, cash_displaced_liters, co2_saved_kg, energy_saved_kwh	N/A	N/A
+D172	analytics	vw_subscription_health	View	Health of subscription payments	F47	cohort, month_1_ret, month_3_ret, month_6_ret	N/A	N/A
+D173	analytics	vw_incident_response	View	Incident response metrics (MTTR)	F114	incident_id, created, resolved, mttr_minutes	N/A	N/A
+D174	analytics	vw_feature_adoption	View	Adoption rate of new features	F108	feature_name, date, exposed_users, active_users, adoption_rate	N/A	N/A
+D175	analytics	vw_liquidity_forecast	View	30-day liquidity forecast	F97	date, projected_balance, min_balance, buffer_status	N/A	N/A
+D176	analytics	vw_marketing_romi	View	Return on marketing investment	F77	campaign, spend, revenue, romi_pct	N/A	N/A
+D177	analytics	vw_support_quality	View	Support ticket quality metrics	F93	agent, tickets_resolved, avg_resolution_time, satisfaction_score	N/A	N/A
+D178	analytics	vw_data_quality_score	View	Data quality health check	F103	table, row_count, nulls_pct, last_updated	N/A	N/A
+D179	analytics	vw_geo_revenue	View	Revenue by geographic region	F38	region, country, revenue, growth_mom	N/A	N/A
+D180	analytics	vw_merchant_lifecycle	View	Merchant lifecycle stages	F12	merchant_id, stage, stage_duration, churn_prob	N/A	N/A
+D181	analytics	enum_tx_status	Enum	Transaction status codes	D01	SUCCESS, FAILED, PENDING, REFUNDED	N/A	N/A
+D182	analytics	enum_jurisdiction_type	Enum	Jurisdiction categories	D12	EU, EEA, SWITZERLAND, UK, USA	N/A	N/A
+D183	analytics	enum_mcc_group	Enum	High-level merchant groups	D15	RETAIL, SERVICES, FOOD, TRAVEL, ENTERTAINMENT	N/A	N/A
+D184	analytics	enum_error_category	Enum	Error severity levels	D16	CRITICAL, WARNING, INFO	N/A	N/A
+D185	analytics	enum_risk_level	Enum	Merchant risk levels	D60	LOW, MEDIUM, HIGH, PROHIBITED	N/A	N/A
+D186	analytics	enum_auth_type	Enum	Authentication types	D61	BIOMETRIC, PIN, PATTERN, PASSWORD	N/A	N/A
+D187	analytics	enum_connection_type	Enum	Network connection types	D67	WIFI, 4G, 5G, ETHERNET	N/A	N/A
+D188	analytics	enum_feature_status	Enum	Feature flag statuses	D18	ENABLED, DISABLED, PERCENTAGE_ROLLOUT	N/A	N/A
+D189	analytics	enum_channel_type	Enum	Payment channels	D117	QR_CODE, NFC, LINK, IN_APP	N/A	N/A
+D190	analytics	enum_dispute_status	Enum	Dispute resolution statuses	D109	OPEN, INVESTIGATING, RESOLVED, CLOSED	N/A	N/A
+D191	analytics	enum_subscription_status	Enum	Subscription health	D47	ACTIVE, PAUSED, CANCELLED, PAST_DUE	N/A	N/A
+D192	analytics	sp_update_kpi_cache	Stored Procedure	Refreshes KPI cache tables	F23	N/A	Runs every 5 mins	N/A
+D193	analytics	sp_calculate_merchant_rank	Stored Procedure	Updates merchant risk/performance rank	F50	N/A	Runs nightly	N/A
+D194	analytics	sp_purge_pii_logs	Stored Procedure	Purges logs containing potential PII	F43	N/A	Runs weekly	N/A
+D195	analytics	sp_generate_daily_report	Stored Procedure	Generates daily PDF reports	F23	N/A	Runs daily	N/A
+D196	analytics	tr_audit_log_update	Trigger	Logs updates to fact tables	N/A	N/A	On Update	N/A
+D197	analytics	tr_dim_date_update	Trigger	Updates date dimension on new year	N/A	N/A	On Insert	N/A
+D198	analytics	fn_encrypt_payload	Function	Encrypts data for export	F11	N/A	Returns bytea	N/A
+D199	analytics	fn_mask_merchant_id	Function	Hashes merchant ID for reporting	F07	N/A	Returns varchar	N/A
+D200	analytics	fact_data_quality	Table	Tracks data quality metrics over time	F178	table_name, check_date, null_count, duplicate_count, completeness_score	PK: (table_name, check_date)	N/A
+D201	analytics	dim_data_owner	Table	Registry of owners responsible for specific data domains/metrics	F10	domain_name, owner_role, contact_email, department	PK: domain_name	N/A
+D202	analytics	fact_data_lineage	Table	Tracks data flow from source systems to analytics tables	F10	lineage_id, source_table, target_table, etl_job_id, last_updated	PK: lineage_id	N/A
+D203	analytics	fact_dq_rule_result	Table	Results of Data Quality checks run on fact tables	F12, F103	check_id, table_name, row_count_checked, failed_count, score_pct	PK: (check_id, table_name)	N/A
+D204	analytics	dim_dq_rule	Table	Definitions of data quality rules	F12	rule_id, rule_name, logic_sql, threshold, severity	PK: rule_id	N/A
+D205	analytics	fact_ml_model_training	Table	Logs of machine learning model training runs	F12, F61	run_id, model_name, algorithm, start_time, end_time, accuracy_score	PK: run_id	N/A
+D206	analytics	dim_ml_feature	Table	Catalog of features used in ML models	F12	feature_id, feature_name, source_table, data_type, description	PK: feature_id	N/A
+D207	analytics	fact_ml_churn_predictions	Table	Output of churn prediction models for merchants	F12	prediction_id, merchant_id, prediction_date, churn_prob, risk_label	PK: prediction_id	N/A
+D208	analytics	fact_ml_forecast_input	Table	Input features used for VAT/Volume forecasting	F13, F85	forecast_id, feature_name, feature_value, weight	PK: (forecast_id, feature_name)	N/A
+D209	analytics	fact_model_drift	Table	Tracks drift in ML model performance over time	F12	model_name, date, accuracy_drop, data_drift_score	PK: (model_name, date)	N/A
+D210	analytics	fact_fee_structure	Table	Breakdown of fees charged to merchants (Interchange, Scheme, PARI)	F03	merchant_id, fee_type, basis_points, fixed_fee, effective_date	PK: (merchant_id, fee_type)	N/A
+D211	analytics	fact_fx_realized	Table	Realized gain/loss on FX settlements	F122	settlement_id, currency_pair, rate_at_execution, mid_market_rate, pnl_eur	PK: settlement_id	N/A
+D212	analytics	fact_interchange_savings	Table	Savings comparison vs Legacy Card Interchange rates	F03	date_id, card_brand, merchant_segment, avg_interchange_pct, pari_fee_pct, savings_pct	PK: (date_id, card_brand)	N/A
+D213	analytics	fact_card_comparison	Table	Mock transactions to compare costs against Visa/MC	F03	comparison_id, amount_eur, visa_cost, mastercard_cost, pari_cost	PK: comparison_id	N/A
+D214	analytics	fact_cmmi_process_compliance	Table	Adherence to CMMI Level 5 process metrics	F18	process_id, date_id, adherence_pct, variance_notes	PK: (process_id, date_id)	N/A
+D215	analytics	fact_sprint_velocity	Table	Engineering sprint velocity correlated with feature delivery	F18	sprint_id, start_date, story_points_completed, business_value_delivered	PK: sprint_id	N/A
+D216	analytics	fact_deployment_frequency	Table	Frequency of production deployments (DORA metric)	F87	deployment_id, timestamp, environment, lead_time_minutes	PK: deployment_id	N/A
+D217	analytics	fact_change_failure_rate	Table	Rate of deployments causing incidents	F87	deployment_id, incident_flag, incident_severity, time_to_detect_min	PK: deployment_id	N/A
+D218	analytics	fact_incident_business_impact	Table	Financial impact quantification of incidents	F114	incident_id, affected_tx_count, estimated_lost_revenue, compensation_cost	PK: incident_id	N/A
+D219	analytics	dim_cmmi_process	Table	Definition of CMMI processes being measured	F18	process_id, process_name, specific_goal, practice_description	PK: process_id	N/A
+D220	analytics	fact_cohort_generic	Table	Generic cohort table for flexible analysis	F47, F61	cohort_id, cohort_type, period_number, population_size, metric_value	PK: (cohort_id, period_number)	N/A
+D221	analytics	fact_promo_redemption	Table	Merchant promotion/discount usage	F77	promo_id, date_id, redemption_count, discount_amount_eur	PK: (promo_id, date_id)	N/A
+D222	analytics	dim_promotion	Table	Details of active promotions	F77	promo_id, merchant_id, code, discount_type, start_date, end_date	PK: promo_id	N/A
+D223	analytics	fact_session_behavior	Table	Aggregated user session behavior (clicks, time)	F100, F101	session_date, app_id, avg_duration_sec, avg_clicks, bounce_rate	PK: (session_date, app_id)	N/A
+D224	analytics	fact_conversion_funnel_step	Table	Granular steps in conversion funnels	F100	funnel_id, step_name, step_order, date_id, user_count, drop_off_count	PK: (funnel_id, step_order)	N/A
+D225	analytics	dim_funnel	Table	Definitions of tracked funnels	F100	funnel_id, name, description, entry_event	PK: funnel_id	N/A
+D226	analytics	fact_report_access	Table	Audit log of who accessed which reports	F22, F24	access_id, report_name, user_role, timestamp, row_count_accessed	PK: access_id	N/A
+D227	analytics	fact_retention_schedule	Table	Schedule of data retention policies	F43	table_name, retention_years, archival_location, deletion_policy	PK: table_name	N/A
+D228	analytics	fact_gdpr_delete_log	Table	Log of GDPR "Right to be Forgotten" requests processed	F43	request_id, user_id_hash, tables_affected, deletion_timestamp, status	PK: request_id	N/A
+D229	analytics	dim_alert_channel	Table	Configuration for alert notification channels	F13	channel_id, type (email/sms/pager), endpoint, active_flag	PK: channel_id	N/A
+D230	analytics	fact_alert_history	Table	History of fired alerts	F13	alert_id, alert_type, channel_id, triggered_at, resolved_at	PK: alert_id	N/A
+D231	analytics	vw_merchant_fee_savings	View	Monthly savings summary for merchants	F03	merchant_id, month, total_fees_paid, estimated_legacy_fees, net_savings	N/A	N/A
+D232	analytics	vw_forecast_comparison	View	Actual vs Forecasted metrics comparison	F85	metric_name, date, actual_value, forecasted_value, variance_pct	N/A	N/A
+D233	analytics	vw_churn_risk_merchants	View	List of merchants with high churn probability	F12	merchant_id, name, churn_score, last_tx_date, risk_factors	N/A	N/A
+D234	analytics	vw_ml_model_registry	View	Current status of ML models in production	F12	model_name, version, last_trained, accuracy, status	N/A	N/A
+D235	analytics	vw_cmmi_dashboard	View	CMMI Level 5 process maturity indicators	F18	process_area, compliance_level, trend, last_audit	N/A	N/A
+D236	analytics	vw_dora_metrics	View	DevOps Research and Assessment (DORA) metrics	F87	metric_name, value, target, status (good/needs_improvement)	N/A	N/A
+D237	analytics	vw_data_quality_health	View	Overall health score of the analytics data warehouse	F103	table_name, completeness, uniqueness, validity, overall_score	N/A	N/A
+D238	analytics	vw_real_time_tx_map	View	Transaction data formatted for geographic map viz	F09, F38	latitude, longitude, amount, timestamp (last 5 mins)	N/A	N/A
+D239	analytics	vw_tax_gap_detail	View	Detailed breakdown of VAT gap by sector	F27	jurisdiction, sector, estimated_gap, digital_capture_rate	N/A	N/A
+D240	analytics	vw_cash_cycle_analysis	View	Analysis of cash-to-digital conversion	F02	region, week, cash_withdrawal_est, digital_deposit_est, net_displacement	N/A	N/A
+D241	analytics	vw_incident_economics	View	Economic cost of incidents per category	F114	incident_category, total_incidents, total_cost_eur, avg_cost_per_incident	N/A	N/A
+D242	analytics	vw_partner_profitability	View	Profitability analysis per banking partner	F55	partner_id, revenue, settlement_cost, integration_cost, net_profit	N/A	N/A
+D243	analytics	vw_sustainability_metrics	View	ESG metrics dashboard	F120	period, co2_saved, energy_saved, paper_saved	N/A	N/A
+D244	analytics	vw_foss_economy_ranking	View	Ranking of FOSS projects by funding	F04	project_name, platform, total_funded, rank, delta_last_week	N/A	N/A
+D245	analytics	vw_promo_effectiveness	View	ROI of merchant promotions	F77	promo_id, merchant_name, cost, revenue_lift, roi	N/A	N/A
+D246	analytics	vw_user_lifecycle_stages	View	Distribution of users across lifecycle stages	F44	stage_name, user_count, percentage, avg_time_in_stage	N/A	N/A
+D247	analytics	vw_subscription_revenue_arr	View	Annual Recurring Revenue from subscriptions	F47	month_id, arr_eur, new_arr, churned_arr	N/A	N/A
+D248	analytics	vw_compliance_matrix	View	Matrix of regulation vs implementation status	F146	regulation_id, requirement, implemented_date, status, owner	N/A	N/A
+D249	analytics	vw_forest_fire_plot	View	Data for forest fire plot of system errors	F21	x_coordinate, y_coordinate, error_type, intensity	N/A	N/A
+D250	analytics	vw_sankey_transactions	View	Flow data for Sankey diagram (Source -> Dest)	F81	source_type, dest_type, flow_volume, flow_value	N/A	N/A
+D251	analytics	sp_trigger_churn_model	Stored Procedure	Executes the churn prediction batch job	F12	N/A	Runs weekly	N/A
+D252	analytics	sp_retrain_vat_model	Stored Procedure	Retrains the VAT forecasting model	F85	N/A	Runs monthly	N/A
+D253	analytics	sp_update_dq_checks	Stored Procedure	Refreshes data quality scores	F103	N/A	Runs daily	N/A
+D254	analytics	sp_generate_cmmi_report	Stored Procedure	Generates the monthly CMMI compliance report	F18	N/A	Runs monthly	N/A
+D255	analytics	sp_archive_fact_tables	Stored Procedure	Moves data older than threshold to archive	F11, F43	N/A	Runs monthly	N/A
+D256	analytics	sp_calculate_nps	Stored Procedure	Calculates Net Promoter Score from surveys	F25	N/A	Runs on-demand	N/A
+D257	analytics	sp_rollup_hourly_to_daily	Stored Procedure	Aggregates hourly data to daily	F02	N/A	Runs every hour	N/A
+D258	analytics	sp_sync_dim_date	Stored Procedure	Extends date dimension by 1 year	F13	N/A	Runs once a year	N/A
+D259	analytics	fn_get_kpi_value	Function	Retrieves current value for a specific KPI ID	F17	N/A	Returns numeric	N/A
+D260	analytics	fn_anonymize_string	Function	Hashes strings for privacy-safe reporting	F07	N/A	Returns varchar	N/A
+D261	analytics	fn_convert_currency	Function	Converts amount using latest FX rate	F122	N/A	Returns numeric	N/A
+D262	analytics	fn_calculate_cohort_period	Function	Determines cohort period number based on dates	F47	N/A	Returns integer	N/A
+D263	analytics	tr_audit_fact_updates	Trigger	Records updates to key fact tables for lineage	F10	N/A	On Update	N/A
+D264	analytics	tr_update_modified_at	Trigger	Automatically updates updated_at columns	N/A	N/A	Before Insert/Update	N/A
+D265	analytics	fact_merchant_segmentation	Table	Clusters merchants into segments based on behavior	F50	merchant_id, segment_id, cluster_center_distance, assigned_date	PK: merchant_id	N/A
+D266	analytics	dim_segment	Table	Definitions of merchant segments	F50	segment_id, segment_name, description, typical_behaviors	PK: segment_id	N/A
+D267	analytics	fact_wallet_tenure	Table	Distribution of wallet ages	F61	date_id, age_in_days, wallet_count	PK: (date_id, age_in_days)	N/A
+D268	analytics	fact_top_merchants	Table	Pre-calculated list of top merchants by volume	F03	rank_date, merchant_id, rank, total_volume	PK: (rank_date, rank)	N/A
+D269	analytics	fact_anomaly_detection	Table	Outputs from anomaly detection algorithms	F10	anomaly_id, date_id, metric_name, value, z_score, is_anomaly	PK: anomaly_id	N/A
+D270	analytics	fact_liquidity_stress_test	Table	Detailed results of stress test scenarios	F97	test_id, scenario_name, shock_amount, liquidity_remaining, pass_fail	PK: test_id	N/A
+D271	analytics	dim_stress_scenario	Table	Definitions of stress test scenarios	F97	scenario_id, name, description, shock_parameters	PK: scenario_id	N/A
+D272	analytics	fact_regulatory_report	Table	Log of reports generated for regulators	F22	report_id, regulator, report_type, period_start, period_end, file_url	PK: report_id	N/A
+D273	analytics	fact_audit_trail_analytics	Table	Access logs specifically for the analytics module	F22	user_id, table_accessed, query_type, timestamp	PK: access_id	N/A
+D274	analytics	dim_data_sensitivity	Table	Classification of data sensitivity levels	F22	sensitivity_id, level (public/internal/confidential), description	PK: sensitivity_id	N/A
+D275	analytics	fact_cost_allocation	Table	Allocation of infrastructure costs to business units	F48	business_unit, cost_center, date_id, allocated_cost_eur	PK: (business_unit, date_id)	N/A
+D276	analytics	fact_revenue_recognition	Table	Recognized revenue according to accounting standards	F29	date_id, revenue_type, amount_eur, recognized_flag	PK: (date_id, revenue_type)	N/A
+D277	analytics	fact_merchant_lifecycle	Table	History of merchant status changes	F12	merchant_id, event_type (onboarded/suspended), event_date	PK: merchant_id	N/A
+D278	analytics	fact_ticket_volume	Table	Volume of support tickets by category	F93	date_id, category, volume, avg_handle_time	PK: (date_id, category)	N/A
+D279	analytics	dim_ticket_category	Table	Hierarchical categorization of support issues	F93	category_id, category_name, parent_category, severity_weight	PK: category_id	N/A
+D280	analytics	fact_agent_performance	Table	Performance metrics for support agents	F93	agent_id, date_id, tickets_closed, avg_csat	PK: (agent_id, date_id)	N/A
+D281	analytics	fact_survey_response	Table	Raw responses from user surveys	F25	response_id, survey_id, question_id, score, comment_text	PK: response_id	N/A
+D282	analytics	dim_survey	Table	Metadata for surveys conducted	F25	survey_id, name, target_audience, launch_date	PK: survey_id	N/A
+D283	analytics	fact_nps_trend	Table	Net Promoter Score over time	F25	date_id, promoters, detractors, passives, nps_score	PK: date_id	N/A
+D284	analytics	fact_feature_usage	Table	Usage statistics for specific product features	F108	feature_id, date_id, unique_users, total_calls	PK: (feature_id, date_id)	N/A
+D285	analytics	dim_feature	Table	Catalog of product features	F108	feature_id, name, category, release_date	PK: feature_id	N/A
+D286	analytics	fact_ab_test	Table	Results of A/B testing experiments	F77	experiment_id, variant_id, date_id, conversion_rate, uplift	PK: (experiment_id, variant_id, date_id)	N/A
+D287	analytics	dim_ab_experiment	Table	Details of A/B test experiments	F77	experiment_id, name, hypothesis, start_date, end_date	PK: experiment_id	N/A
+D288	analytics	fact_geo_wealth_index	Table	Aggregate wealth index of transaction regions	F38	region_code, date_id, avg_tx_value, income_proxy_index	PK: (region_code, date_id)	N/A
+D289	analytics	fact_transaction_hour_of_day	Table	Transaction volume by hour	F13	hour_of_day, date_id, count, sum_amount	PK: (hour_of_day, date_id)	N/A
+D290	analytics	fact_day_of_week_pattern	Table	Typical spending patterns by day of week	F13	day_of_week, week_number, avg_volume, deviation	PK: (day_of_week, week_number)	N/A
+D291	analytics	vw_peak_hours	View	Identification of peak transaction hours	F13	hour, avg_volume, status (Peak/Normal)	N/A	N/A
+D292	analytics	vw_slow_queries_top10	View	Top 10 slowest queries in analytics warehouse	F107	query_hash, avg_exec_time, call_count	N/A	N/A
+D293	analytics	vw_storage_growth	View	Growth of database storage over time	F48	table_name, date_id, size_gb, growth_gb	N/A	N/A
+D294	analytics	vw_cost_per_transaction	View	Operational cost per transaction	F29	date_id, total_ops_cost, total_tx_count, cost_per_tx	N/A	N/A
+D295	analytics	vw_merchant_health_card	View	Single view merchant health scorecard	F50	merchant_id, revenue_trend, risk_score, support_tickets, nps	N/A	N/A
+D296	analytics	vw_executive_summary_kpi	View	High-level KPIs for executive meetings	F14	kpi_name, value, target, variance, trend	N/A	N/A
+D297	analytics	vw_vat_collected_heatmap	View	Heatmap data for VAT collection by region/time	F01	region_code, month, vat_collected	N/A	N/A
+D298	analytics	sp_purge_anomaly_logs	Stored Procedure	Purges anomaly logs older than retention period	F269	N/A	Runs monthly	N/A
+D299	analytics	sp_compute_segmentation	Stored Procedure	Runs K-Means clustering for merchant segmentation	F265	N/A	Runs weekly	N/A
+D300	analytics	sp_export_regulatory_report	Stored Procedure	Exports data in required format (e.g., CSV/XML)	F272	N/A	Runs on demand	N/A
+D301	analytics	fact_mcc_performance	Table	Performance metrics broken down by Merchant Category Code	F23	mcc_code, date_id, tx_count, avg_ticket, dispute_rate	PK: (mcc_code, date_id)	N/A
+D302	analytics	fact_merchant_ranking	Table	Dynamic ranking of merchants by performance	F50	merchant_id, rank_date, rank, score	PK: (merchant_id, rank_date)	N/A
+D303	analytics	fact_settlement_speed	Table	Time taken for funds to settle vs SLA	F05	settlement_id, initiated_at, settled_at, sla_seconds, variance_seconds	PK: settlement_id	N/A
+D304	analytics	dim_settlement_method	Table	Methods of settlement (Instant, Batch, Wire)	F05	method_id, method_name, expected_latency	PK: method_id	N/A
+D305	analytics	fact_liquidity_utilization	Table	Usage of liquidity pools for settlements	F53	pool_id, date_id, utilization_pct, available_balance	PK: (pool_id, date_id)	N/A
+D306	analytics	fact_cross_border_volume	Table	Volume of payments crossing borders	F15	origin_country, dest_country, date_id, volume_eur, count	PK: (origin_country, dest_country, date_id)	N/A
+D307	analytics	fact_currency_volatility	Table	Daily volatility of supported currencies	F122	currency_code, date_id, volatility_index	PK: (currency_code, date_id)	N/A
+D308	analytics	fact_partner_latency	Table	API latency experienced by partners	F98	partner_id, date_id, avg_latency_ms, p99_latency_ms	PK: (partner_id, date_id)	N/A
+D309	analytics	fact_webhook_delivery	Table	Success rate of webhook deliveries to merchants	F07	merchant_id, date_id, sent_count, delivered_count, failed_count	PK: (merchant_id, date_id)	N/A
+D310	analytics	fact_sdk_usage	Table	Usage statistics for PARI SDKs	F04	sdk_platform (js/python), version, date_id, calls_count	PK: (sdk_platform, version, date_id)	N/A
+D311	analytics	fact_api_error_detail	Table	Detailed breakdown of API errors	F68	endpoint_path, error_code, date_id, count	PK: (endpoint_path, error_code, date_id)	N/A
+D312	analytics	fact_user_feedback	Table	Aggregated user feedback scores	F25	feedback_type, date_id, avg_score, count	PK: (feedback_type, date_id)	N/A
+D313	analytics	fact_marketing_channel_mix	Table	Effectiveness of different marketing channels	F140	channel, date_id, spend, leads, conversion_rate, cac	PK: (channel, date_id)	N/A
+D314	analytics	fact_retention_cohort_detail	Table	Detailed cohort retention matrix	F47	cohort_id, period_number, active_users, retention_pct	PK: (cohort_id, period_number)	N/A
+D315	analytics	fact_clv_model_input	Table	Features used for Customer Lifetime Value modeling	F61	user_id_anon, feature_name, value, extraction_date	PK: (user_id_anon, feature_name)	N/A
+D316	analytics	fact_forecast_vat_scenario	Table	Scenario-based VAT forecasts (Optimistic/Base/Pessimistic)	F85	scenario_id, date_id, forecast_vat	PK: (scenario_id, date_id)	N/A
+D317	analytics	fact_operational_risk	Table	Operational risk incidents and scores	F62	risk_id, date_id, category, likelihood, impact, risk_score	PK: risk_id	N/A
+D318	analytics	fact_third_party_dependency	Table	Health status of critical 3rd party APIs	F57	provider_name, service, status, uptime, last_error	PK: provider_name	N/A
+D319	analytics	dim_third_party_service	Table	Catalog of 3rd party services used	F57	service_id, provider, service_name, criticality_tier	PK: service_id	N/A
+D320	analytics	fact_rollback_frequency	Table	Frequency of production rollbacks	F87	deployment_id, rolled_back, reason_code, timestamp	PK: deployment_id	N/A
+D321	analytics	fact_deploy_lead_time	Table	Lead time for code deployment (Commit to Prod)	F87	deployment_id, commit_time, deploy_time, lead_time_hours	PK: deployment_id	N/A
+D322	analytics	fact_bug_age	Table	Age of open bugs in the backlog	F18	bug_id, severity, open_date, age_days	PK: bug_id	N/A
+D323	analytics	fact_sprint_burndown	Table	Daily sprint burndown data	F18	sprint_id, date_id, points_remaining	PK: (sprint_id, date_id)	N/A
+D324	analytics	vw_cmmi_trend	View	Trend of CMMI process adherence over time	F18	process_name, month, adherence_score	N/A	N/A
+D325	analytics	vw_forest_fire_errors	View	Visualization data for error density	F21	error_code, frequency, recency	N/A	N/A
+D326	analytics	vw_geo_revenue_choropleth	View	Data for choropleth map of revenue	F38	country_code, revenue_eur	N/A	N/A
+D327	analytics	vw_merchant_radar	View	Data for merchant performance radar chart	F50	merchant_id, metric_name, normalized_score	N/A	N/A
+D328	analytics	vw_sankey_user_flow	View	User flow data for Sankey diagram	F100	step_from, step_to, flow_count	N/A	N/A
+D329	analytics	vw_realtime_kpi_stream	View	Stream of real-time KPI updates	F14	kpi_name, value, timestamp	N/A	N/A
+D330	analytics	sp_cleanup_stale_sessions	Stored Procedure	Cleans up stale session data	F223	N/A	Runs daily	N/A
+D331	analytics	sp_analyze_table_stats	Stored Procedure	Updates table statistics for query optimizer	N/A	N/A	Runs nightly	N/A
+D332	analytics	fn_compute_cohort_date	Function	Computes cohort date (e.g., first of month)	F47	N/A	Returns date	N/A
+D333	analytics	fn_mask_email	Function	Masks email addresses for reporting	F07	N/A	Returns varchar	N/A
+D334	analytics	fn_get_ltv	Function	Calculates LTV for a specific user cohort	F61	N/A	Returns numeric	N/A
+D335	analytics	tr_update_fact_modified	Trigger	Updates updated_at on fact tables	N/A	N/A	Before Update	N/A
+D336	analytics	fact_content_monetization	Table	Tracking payments for digital content (articles, videos)	F04	content_id, date_id, payment_count, total_amount	PK: (content_id, date_id)	N/A
+D337	analytics	dim_content_platform	Table	Platforms where content is hosted	F04	platform_id, name, platform_type	PK: platform_id	N/A
+D338	analytics	fact_tipping_behavior	Table	Statistics on voluntary tipping	F04	date_id, avg_tip_amount, tip_frequency	PK: date_id	N/A
+D339	analytics	fact_subscription_churn	Table	Detailed churn events for subscriptions	F47	subscription_id, churn_date, reason_code, lifetime_value	PK: subscription_id	N/A
+D340	analytics	dim_churn_reason	Table	Standard reasons for subscription churn	F47	reason_code, description	PK: reason_code	N/A
+D341	analytics	fact_wallet_balance_distribution	Table	Distribution of wallet balances	F74	balance_range, date_id, wallet_count	PK: (balance_range, date_id)	N/A
+D342	analytics	fact_transaction_size_buckets	Table	Transaction volume grouped by size buckets	F32	bucket (micro/small/medium/large), date_id, count	PK: (bucket, date_id)	N/A
+D343	analytics	fact_peer_group_comparison	Table	Merchant comparison against defined peer groups	F69	merchant_id, peer_group_id, metric_id, merchant_value, group_avg	PK: (merchant_id, metric_id)	N/A
+D344	analytics	dim_peer_group	Table	Definitions of peer groups	F69	group_id, group_name, criteria_mcc, criteria_volume	PK: group_id	N/A
+D345	analytics	fact_atm_cash_withdrawal	Table	Estimated ATM cash withdrawals (proxy for cash demand)	F02	region_code, date_id, estimated_volume	PK: (region_code, date_id)	N/A
+D346	analytics	fact_digital_adoption_rate	Table	Rate of new users adopting digital payments	F44	date_id, region_code, new_digital_users, total_users	PK: (date_id, region_code)	N/A
+D347	analytics	fact_payment_link_sharing	Table	Sharing channels for payment links	F110	link_id_anon, channel (email/sms/social), share_count	PK: link_id_anon	N/A
+D348	analytics	fact_qr_scan_performance	Table	Success rate of QR code scans	F117	merchant_id, date_id, scanned_count, failed_scans, success_rate	PK: (merchant_id, date_id)	N/A
+D349	analytics	fact_nfc_transaction	Table	Specific metrics for NFC proximity payments	F117	date_id, tx_count, avg_time_to_pair, success_rate	PK: date_id	N/A
+D350	analytics	fact_in_app_purchase	Table	Transactions completed entirely within apps	F104	app_id, date_id, tx_count, total_revenue	PK: (app_id, date_id)	N/A
+D351	analytics	vw_merchant_fee_drilldown	View	Drilldown of fees for a specific merchant	F03	merchant_id, fee_type, amount, period	N/A	N/A
+D352	analytics	vw_realtime_fraud_map	View	Real-time map of fraud attempts	F105	latitude, longitude, fraud_type, timestamp	N/A	N/A
+D353	analytics	vw_vat_audit_trail	View	Audit trail of VAT calculations	F01	tx_id, vat_rate, base_amount, vat_amount, rule_applied	N/A	N/A
+D354	analytics	sp_recalculate_aggregates	Stored Procedure	Manually trigger recalc of aggregates	N/A	N/A	On Demand	N/A
+D355	analytics	sp_generate_export_csv	Stored Procedure	Generic CSV export for any table	N/A	N/A	On Demand	N/A
+D356	analytics	fn_check_data_quality	Function	Runs DQ check for a specific table	F103	N/A	Returns boolean	N/A
+D357	analytics	fn_calculate_z_score	Function	Calculates Z-score for anomaly detection	F269	N/A	Returns numeric	N/A
+D358	analytics	fact_user_engagement_score	Table	Composite score of user engagement	F25	user_id_anon, date_id, login_count, tx_count, engagement_score	PK: (user_id_anon, date_id)	N/A
+D359	analytics	fact_feature_request	Table	Aggregated feature requests from users	F150	feature_id, date_id, request_count, priority_score	PK: (feature_id, date_id)	N/A
+D360	analytics	dim_feature_request	Table	Registry of requested features	F150	feature_id, title, description, status	PK: feature_id	N/A

@@ -1,0 +1,530 @@
+
+15.	Module M15	Semantic Ontology Layer
+a.	Summary
+The Semantic Ontology Layer (Module M15) serves as the cognitive backbone of the Privacy Preserving Payment Anonymous Regulatory Insights (PARI) ecosystem. In a heterogeneous financial landscape where disparate stakeholders—banks, tax authorities, merchants, and open-source developers—utilize divergent terminologies to describe similar economic realities, M15 eliminates ambiguity. It acts as the universal translator and reasoning engine, ensuring that the concept of a "payment" is understood identically whether interpreted by a German tax auditor, an Italian e-invoicing system, or the internal cryptographic ledger.
+
+Unlike standard data dictionaries that merely define schema structures, M15 implements a rigorous knowledge graph using W3C standards (RDFS, OWL, SKOS, and JSON-LD). It captures not just data attributes, but the semantics and relationships between data entities. For instance, it formally defines the relationship between a "Blinded Coin" and a "Taxable Event," ensuring that while the payer remains cryptographically anonymous, the system can semantically infer the tax liability associated with the transaction without exposing Personally Identifiable Information (PII).
+
+This layer is critical for achieving PARI’s CMMI Level 5 goals of quantitative management and defect prevention. By enforcing a shared ontology, M15 reduces integration errors, automates regulatory mapping, and facilitates machine-to-machine communication. It enables the system to dynamically adapt to new regulatory requirements (e.g., changes in VAT definitions) by updating the semantic model rather than rewriting core application code. The ontology layer provides the reasoning capabilities required for complex compliance scenarios, such as cross-border tax calculations or sanctions screening, by linking data attributes to regulatory logic in a graph-based structure.
+
+Furthermore, M15 empowers advanced analytics and AI modules within PARI. Because the data is semantically tagged, machine learning models can reason over the graph to identify fraud patterns or optimize liquidity with higher accuracy. It ensures that PARI is not just a data processor, but an intelligent, reasoning financial utility. By standardizing concepts, enabling cross-system reasoning, and achieving semantic interoperability with EU tax systems, M15 transforms raw transaction logs into actionable, compliant, and globally coherent financial intelligence, thereby safeguarding the system against the costly risks of misinterpretation and regulatory non-compliance.
+b.	Scope
+
+The scope of Module M15 encompasses the design, storage, versioning, and dissemination of all semantic definitions used within the PARI ecosystem. This includes:
+
+     Ontology Engineering: Creation and maintenance of core financial, privacy, and regulatory ontologies using OWL/RDFS.
+     Terminology Management: Managing SKOS-based vocabularies for multilingual labels and synonyms.
+     Data Transformation: Serializing internal database records into standards-compliant JSON-LD for external exchange.
+     Mapping & Alignment: Defining and storing bidirectional mappings between PARI’s internal model and external standards (ISO 20022, UN/EDIFACT, national e-invoicing syntaxes).
+     Reasoning Services: Providing SPARQL endpoints and inference engines to validate complex business rules against the ontology.
+     Governance: Managing the lifecycle of semantic terms (proposal, review, approval, deprecation) to ensure consistency across versions.
+
+c.	Business Case
+
+The Cost of Ambiguity:
+In cross-border payments and regulatory reporting, ambiguity is expensive. Different jurisdictions define "taxable event," "settlement," and "originator" differently. Traditional systems rely on hard-coded adapters that break when regulations change, leading to failed transactions, regulatory fines, and expensive redevelopment cycles.
+
+The Semantic Advantage:
+M15 decouples the data from the meaning. By externalizing definitions into a formal ontology, PARI achieves:
+
+    Agility: Rapid adaptation to new tax laws or payment standards (e.g., PSD3) by updating ontology mappings rather than recompiling the core transaction engine.
+    Interoperability: Seamless integration with EU tax infrastructures (e.g., Italy’s SDI, Spain’s SII) because the system "understands" their specific data semantics natively.
+    Automation: Enables automated reasoning for complex compliance checks (e.g., "Is this transaction exempt under VAT Directive Article 143?"), reducing manual review costs.
+    Data Quality: Prevents "garbage-in, garbage-out" by enforcing semantic validation at the ingestion point (e.g., rejecting a transaction labeled as a "refund" if it lacks a reference to a previous "purchase").
+
+ROI Impact:
+Implementing M15 reduces integration maintenance costs by an estimated 40%, accelerates market entry into new jurisdictions by 60%, and significantly mitigates the risk of regulatory penalties due to misreported data. It transforms PARI from a monolithic application into a flexible, semantic-aware platform.
+
+d.	KPIs
+
+    Ontology Coverage: >95% of all database entities mapped to semantic classes.
+    Term Reuse Rate: Target <5% duplication of concepts; high preference for reusing existing standard terms (e.g., ISO 20022) over creating new ones.
+    Mapping Accuracy: >99.9% precision in translating internal transactions to external JSON-LD representations.
+    Inference Latency: <200ms for complex SPARQL reasoning queries over the active transaction graph.
+    Standards Alignment: 100% alignment with relevant EU and Global standards (W3C, ISO) for exchanged data.
+    Regulatory Adaptation Speed: <5 business days to update the ontology for a new minor regulatory change.
+
+e.	Stakeholder Insights
+
+Stakeholder	Concern	Implications
+Enterprise Architects	System Integration Complexity	Without a shared semantic model, integrating the Exchange Layer (M05) with the Tax Engine (M22) requires brittle point-to-point code. M15 provides a canonical data model.
+Regulatory Bodies	Data Interpretability	Regulators need to understand data exactly as intended. Ambiguous definitions lead to non-compliance. M15 provides legal, machine-readable definitions of terms.
+Developers (FOSS)	API Consistency	External developers integrating via SDKs need clear, documented data structures. M15 generates JSON-Schemas and API documentation automatically from the ontology.
+Data Scientists	Feature Extraction	Building ML models (Fraud Intelligence M03) requires understanding relationships between entities (e.g., Merchant vs. Bank). A knowledge graph enables graph-based feature engineering.
+Compliance Officers	Audit Trails	They need to prove that the system "knows" a transaction is taxable. M15 stores the semantic proof of logic applied to the transaction.
+
+
+f.	Knowledge Representation Graph (mermaid.js)
+
+graph TD
+    %% Core Classes
+    PariEntity[PariEntity]
+    FinancialTransaction[FinancialTransaction]
+    DigitalCoin[DigitalCoin]
+    LegalPerson[LegalPerson]
+
+    %% Subclasses
+    DigitalCoin -- rdfs:subClassOf --> PariEntity
+    FinancialTransaction -- rdfs:subClassOf --> PariEntity
+    LegalPerson -- rdfs:subClassOf --> PariEntity
+
+    BlindedCoin[BlindedCoin]
+    SignedCoin[SignedCoin]
+    BlindedCoin -- rdfs:subClassOf --> DigitalCoin
+    SignedCoin -- rdfs:subClassOf --> DigitalCoin
+
+    Payer[Payer]
+    Merchant[Merchant]
+    Payer -- rdfs:subClassOf --> LegalPerson
+    Merchant -- rdfs:subClassOf --> LegalPerson
+
+    %% Properties (Object/Data Properties)
+    FinancialTransaction -- schema:agent --> Payer
+    FinancialTransaction -- schema:recipient --> Merchant
+    FinancialTransaction -- pari:hasInstrument --> BlindedCoin
+
+    %% Regulatory Overlay
+    TaxableEvent[TaxableEvent]
+    TaxableEvent -- owl:equivalentClass --> FinancialTransaction
+    TaxableEvent -- pari:jurisdiction --> EUCountry[EUCountry]
+    TaxableEvent -- pari:vatRate --> VATRate[VATRate]
+
+    %% Standards Mapping
+    FinancialTransaction -- owl:sameAs --> ISO20022Tx[ISO20022_FIToFICustomerCreditTransfer]
+
+    %% Privacy Logic
+    BlindedCoin -- pari:anonymityLevel --> HighAnonymity[HighAnonymity]
+    SignedCoin -- pari:anonymityLevel --> PublicIdentity[PublicIdentity]
+
+    style PariEntity fill:#f9f,stroke:#333,stroke-width:2px
+    style TaxableEvent fill:#bbf,stroke:#333,stroke-width:2px
+    style BlindedCoin fill:#bfb,stroke:#333,stroke-width:2px
+
+g.	Comprehensive List of Features
+ID	Feature	Description & Business Case	AI/ML Algorithms	KPIs	Primary Users
+M15-F001	Core Ontology Repository	Centralized storage for RDFS/OWL models defining PARI entities (Payer, Merchant, Coin).	N/A	Availability 99.99%	Data Architects
+M15-F002	SKOS Vocabulary Management	Management of concept schemes for controlled vocabularies (e.g., CurrencyCodes, CountryCodes).	N/A	Concept retrieval <10ms	Tax Experts
+M15-F003	JSON-LD Framing Service	Automatic transformation of relational database rows into JSON-LD frames for API responses.	N/A	Transformation success 100%	API Developers
+M15-F004	SPARQL Query Endpoint	Federated query interface allowing external auditors to query the semantic graph.	N/A	Query response <500ms	Auditors
+M15-F005	ISO 20022 Semantic Mapper	Pre-built mapping tables linking PARI internal fields to ISO 20022 message elements.	Entity Resolution	Mapping accuracy 100%	Integration Specialists
+M15-F006	Dynamic Property Inference	Reasoner that infers new data based on logic (e.g., if Amount > 15000EUR -> Flag as HighValue).	Forward Chaining	Inference time <50ms	Compliance Engine
+M15-F007	Multilingual Label Support	Storage of skos:prefLabel and skos:altLabel in 24 official EU languages.	N/A	Translation coverage 100%	Localization Managers
+M15-F008	Ontology Version Control	Git-like versioning of the ontology graph to track changes over time for auditing.	N/A	Version diff time <5s	Governance Board
+M15-F009	Impact Analysis Tool	Visualizes which database tables or API contracts are affected by a change in an ontology class.	Graph Traversal	Deprecion detection 100%	Enterprise Architects
+M15-F010	SHACL Validation Engine	Validates transaction data against Shapes Constraints defined in the ontology.	N/A	Validation speed 10k TPS	Data Ingestion Pipeline
+M15-F011	Anonymity Semantics Definition	Formal definitions of privacy levels (Anonymous, Pseudonymous, Identified) linked to data assets.	N/A	Policy adherence 100%	Privacy Officers (DPO)
+M15-F012	Tax Rule Semantics	Encodes VAT logic as semantic triples (e.g., BookSale - exemptFrom -> VAT).	Logic Programming	Rule evaluation <20ms	Tax Authorities
+M15-F013	Sanctions List Mapping	Links merchant entities to semantic tags for sanctions screening (e.g., Entity - sanctionedIn - Region).	String Matching	Screening latency <100ms	Compliance Officers
+M15-F014	Inverse Property Management	Manages inverse relationships (e.g., paidBy vs paidFor) to ensure graph consistency.	N/A	Graph consistency check pass	DBAs
+M15-F015	Data Type Registry	Strict definition of data types (e.g., MonetaryAmount, HashString) preventing type coercion errors.	N/A	Type safety violations 0%	Backend Developers
+M15-F016	Historical State Reasoning	Allows querying the state of the ontology as it was at a specific past timestamp (Time-travel).	Temporal Logic	Historical query accuracy	Forensic Accountants
+M15-F017	Semantic Search Index	Full-text search over ontology definitions and concept labels to help developers find terms.	NLP (BM25)	Search relevance score >0.9	Developers
+M15-F018	External Standards Sync	Automated import of updated vocabularies from external bodies (ECB, ISO).	Change Detection	Sync frequency 24h	Standards Body Liaison
+M15-F019	Concept Hierarchy Visualization	Interactive graph visualization of class hierarchies for non-technical stakeholders.	Force-Directed Layout	Render time <2s	Product Managers
+M15-F020	Custom Namespace Management	Management of XML/RDF namespaces (pari:, tax:, iso:) to avoid URI collisions.	N/A	Namespace conflict 0%	System Admins
+M15-F021	Property Characteristic Definition	Defining characteristics (Functional, InverseFunctional, Symmetric, Transitive).	N/A	Logic validation 100%	Ontologists
+M15-F022	Semantic Diff Generator	Human-readable report comparing two versions of the ontology.	N/A	Report generation <10s	Release Managers
+M15-F023	Business Term Glossary	User-friendly glossary linking technical ontology terms to business definitions.	N/A	Glossary completeness	Business Analysts
+M15-F024	Equivalent Class Linking	Mapping PARI classes to external classes (owl:equivalentClass) for interoperability.	N/A	Mapping coverage >95%	Integration Architects
+M15-F025	Disjoint Class Axioms	Enforcing that two classes cannot share instances (e.g., Person vs Corporation).	N/A	Constraint violation 0	Reasoning Engine
+M15-F026	Cardinality Restriction Enforcement	Enforcing limits (e.g., a Transaction can have only 1 Merchant).	N/A	Validation error rate	Schema Validator
+M15-F027	RDF Stream Processing	Real-time semantic enrichment of Kafka event streams.	CEP (Complex Event Processing)	Stream latency <50ms	Data Engineers
+M15-F028	Semantic API Documentation	Auto-generation of OpenAPI specs including JSON-LD contexts.	N/A	Doc accuracy 100%	Developer Relations
+M15-F029	Class Instantiation Counter	Tracks how many database instances exist for each ontology class.	Statistical Analysis	Count accuracy	DBAs
+M15-F030	Orphan Term Detection	Identifies concepts or properties not linked to the main graph (dead code).	Graph Analysis	Orphan count = 0	Ontology Maintainers
+M15-F031	JSON-Schema Generator	Exports ontology sections as JSON-Schema for frontend validation.	N/A	Schema validity	Frontend Developers
+M15-F032	Regulatory Jurisdiction Taxonomy	Hierarchical list of countries, regions, and municipalities for compliance tagging.	N/A	Hierarchy depth	Compliance Officers
+M15-F033	Currency Unit Ontology	Detailed definitions of currencies, including minor units and historical symbols.	N/A	Data accuracy	Financial Controllers
+M15-F034	Error Code Semantics	Standardized error vocabulary (e.g., pari:InsufficientFunds) for machine-readable error handling.	N/A	Code consistency	API Consumers
+M15-F035	Semantic Audit Logger	Immutable log of who changed which ontology term and when.	N/A	Log integrity	Security Team
+M15-F036	Dependency Graph Extraction	Exports the full dependency graph of the ontology for risk analysis.	Graph Theory	Export time	Risk Managers
+M15-F037	Unit of Measure Conversion	Semantic conversion of units (e.g., KB to MB) based on defined relationships.	N/A	Conversion accuracy	Reporting Team
+M15-F038	Faceted Search Configuration	Enables faceted browsing of transaction data based on semantic properties.	N/A	Search performance	UI/UX Designers
+M15-F039	Role-Based Access to Ontology	Restricts editing of specific semantic branches (e.g., only Tax team edits tax: terms).	N/A	Authorization success	Admins
+M15-F040	Inconsistency Reporter	Automated detection of logical contradictions within the ontology model.	Description Logic	False positive rate <1%	Ontologists
+M15-F041	Annotation Property Management	Management of metadata (comments, versions, authors) attached to classes.	N/A	Metadata completeness	Documenters
+M15-F042	Datatype Facet Definition	Defining constraints on literals (e.g., xsd:string length, decimal precision).	N/A	Constraint adherence	DB Engineers
+M15-F043	Semantic Middleware Bridge	Translates SQL queries to SPARQL for unified data access.	Query Translation	Translation accuracy	Data Scientists
+M15-F044	Import/Export Manager	Support for various RDF serializations (Turtle, N-Triples, RDF/XML).	N/A	Format support 100%	ETL Developers
+M15-F045	Ontology Merge Strategy	Tools to merge updates from upstream standards without breaking local extensions.	Graph Diff	Merge conflict rate 0%	Integrators
+M15-F046	Label Normalization	Automated trimming and casing of labels to enforce consistency (e.g., CamelCase).	NLP	Normalization accuracy	Data Stewards
+M15-F047	Concept Derivation Rule	Rules to automatically create sub-concepts based on data patterns.	Clustering	Concept relevance	Taxonomists
+M15-F048	Spatial Relationship Ontology	Defines geo-spatial relations (within, adjacent) for location-based compliance.	Spatial Indexing	Geo-query speed	Logistics/Fraud Team
+M15-F049	Temporal Relation Ontology	Defines time relations (before, during, overlapping) for transaction history.	Interval Algebra	Temporal query accuracy	Auditors
+M15-F050	Proof of Validity Generation	Generates cryptographic proofs of semantic validity for external verification.	ZK-SNARKs	Proof generation time	Cryptographers
+M15-F051	Linked Data Connection	Automatic linking of terms to public datasets (DBpedia, Wikidata) for enrichment.	Entity Linking	Link accuracy	Data Analysts
+M15-F052	Semantic Cache Layer	Caches frequent inference results to reduce load on the reasoner.	Caching Strategies	Cache hit ratio >80%	Performance Engineers
+M15-F053	Business Language Translator	Translates business requirements into semantic constraints semi-automatically.	NLP (LLMs)	Translation precision	Business Analysts
+M15-F054	Ontology Testing Framework	Unit tests specifically for logical integrity of the model.	N/A	Test pass rate 100%	QA Engineers
+M15-F055	Class Usage Analytics	Tracks which ontology classes are used most frequently to identify bloat.	Statistical Analysis	Report frequency	Architects
+M15-F056	Batch Validation Mode	Validates large historical datasets against the current ontology.	MapReduce	Validation throughput	Data Migration Team
+M15-F057	RESTful RDF Proxy	Allows HTTP GET of ontology resources using Content Negotiation.	N/A	Uptime 99.9%	External Partners
+M15-F058	Semantic Change Notification	Alerts subscribers when specific ontology terms they rely on are modified.	Pub/Sub	Alert latency <5m	API Consumers
+M15-F059	Access Control Policy Linking	Links ontology attributes to ABAC policies (Module M09).	N/A	Policy sync time	Security Architects
+M15-F060	Data Lineage Graph	Tracks the transformation of data from raw event to semantic object.	DAG Traversal	Lineage completeness	Governance
+M15-F061	Synonym Ring Management	Groups terms that are synonyms for fuzzy search capabilities.	N/A	Synonym coverage	Search Engineers
+M15-F062	Partial Match Validator	Allows validation of transactions with incomplete semantic info (graceful degradation).	Probabilistic Logic	Match score	Transaction Core
+M15-F063	Ontology Partitioning	Divides large graphs into manageable modules (Core, Payment, Tax) for performance.	Graph Partitioning	Query latency improvement	DBAs
+M15-F064	Event Ontology	Specific semantic model for lifecycle events (Created, Settled, Refunded).	State Machine	State transition validity	Logic Engine
+M15-F065	Fee Structure Semantics	Defines fees as semantic properties with calculation rules attached.	N/A	Calc accuracy	Settlement Layer
+M15-F066	Limit and Threshold Ontology	Semantic definition of dynamic limits (daily, monthly) per user tier.	N/A	Limit enforcement	Risk Engine
+M15-F067	Merchant Category Ontology	Standardized MCC (Merchant Category Codes) mapping to local business types.	Classification	Classification accuracy	Fraud Team
+M15-F068	Product Semantics	Defines goods and services taxonomy for VAT determination.	Classification	VAT accuracy	Tax Engine
+M15-F069	Cross-border Trade Semantics	Specialized ontology for import/export declarations and customs codes.	N/A	Code validity	Trade Finance
+M15-F070	Identity Assurance Ontology	Semantic levels of identity verification (Low, Medium, High).	N/A	Level mapping	KYC/AML Team
+M15-F071	Device Fingerprint Ontology	Semantic model for device attributes (BrowserID, IP range).	N/A	Attribute consistency	Fraud Team
+M15-F072	Network Topology Ontology	Represents the PARI node structure (Exchange, Wallet, Merchant) semantically.	Graph Theory	Topology sync	DevOps
+M15-F073	Semantic Reconciliation	Merging of duplicate concepts identified during data integration.	Record Linkage	Deduplication rate	MDM Team
+M15-F074	Governance Workflow Embedding	Status field (Draft, Approved, Deprecated) on every semantic term.	N/A	Workflow compliance	Governance Board
+M15-F075	Stakeholder Commenting	Collaborative annotation system on ontology terms for feedback.	N/A	Usability	Community
+M15-F076	Export to Excel/CSV	Human-readable export of ontology for stakeholders without RDF tools.	N/A	Format fidelity	Business Users
+M15-F077	Bulk Import Tool	Importing large concept sets from spreadsheets via template.	Validation	Import error rate	Data Entry
+M15-F078	Smart Contract Mapping	Links semantic events to blockchain/smart contract execution logic (if applicable).	N/A	Mapping accuracy	Blockchain Devs
+M15-F079	Escrow Semantics	Defining states where funds are held in escrow semantically.	N/A	State consistency	Settlement Layer
+M15-F080	Dispute Reason Ontology	Standardized vocabulary for why a chargeback or dispute occurs.	N/A	Classification accuracy	Support Team
+M15-F081	Communication Preference Ontology	Semantic definition of user notification preferences (Email, SMS, Push).	N/A	Preference match	Notification Svc
+M15-F082	Financial Instrument Ontology	Definitions of various payment methods (Card, Bank Transfer, Coin).	N/A	Method clarity	Core Ledger
+M15-F083	Exchange Rate Semantics	Defining rates as time-bound properties with source attribution.	N/A	Rate accuracy	Forex Team
+M15-F084	Regulatory Report Type Ontology	Categorization of reports (SAR, AML, VAT) for automatic generation.	Classification	Report validity	Reporting Engine
+M15-F085	Penalty and Fine Ontology	Semantic definitions of rule violation consequences.	N/A	Calculation accuracy	Compliance Engine
+M15-F086	Schema.org Alignment	Mapping PARI entities to Schema.org for web visibility and SEO.	N/A	Alignment %	Marketing Web
+M15-F087	GDPR Right Execution Semantics	Mapping user rights (Erasure, Portability) to data actions.	N/A	Action completion	Privacy Team
+M15-F088	Consent Management Ontology	Standardizing consent types (Marketing, Operational, Legal).	N/A	Consent validity	Consent Mgr
+M15-F089	Data Residency Tagging	Semantic tags indicating where data must physically be stored.	N/A	Tag compliance	Infra Team
+M15-F090	Service Level Agreement (SLA) Ontology	Defining SLA terms semantically for automated enforcement.	N/A	Breach detection	Ops Team
+M15-F091	Incident Classification Ontology	Standardizing incident types (Security, Performance, Logic).	N/A	Classification speed	Incident Response
+M15-F092	Software Component Ontology	Mapping SBOM components to functional capabilities.	Dependency Analysis	Vulnerability tracking	DevSecOps
+M15-F093	Test Case Semantics	Linking test cases to specific ontology requirements for traceability.	N/A	Coverage analysis	QA Team
+M15-F094	User Story Mapping	Mapping Agile user stories to ontology changes.	N/A	Traceability	Product Owners
+M15-F095	Continuous Integration Semantic Check	Pre-commit hook to check if code changes align with ontology constraints.	Static Analysis	Check time	Developers
+M15-F096	Runtime Semantic Validation	Real-time checks in the transaction pipeline against current ontology.	Stream Processing	Latency impact <5%	Core Ledger
+M15-F097	Fallback Ontology	Read-only copy of the previous ontology version for use during rollbacks.	N/A	Rollback success	SREs
+M15-F098	Ontology Health Dashboard	Visual metrics on graph size, reasoning performance, and error rates.	N/A	Dashboard refresh	Ops Team
+M15-F099	Garbage Collection of Terms	Automated process to suggest deprecated terms for deletion.	Usage Analysis	Suggestion accuracy	Maintainers
+M15-F100	Graph Compression	Optimizing storage of frequently used triple patterns.	Compression Alg	Storage savings	DBAs
+M15-F101	Dynamic Class Creation	API to create ad-hoc classes for specific merchant integrations (sandbox).	N/A	Creation speed	Integration Team
+M15-F102	Semantic Web Service Discovery	Automatic discovery of services based on ontology descriptions.	UDDI/WSMO	Discovery accuracy	Enterprise Service Bus
+M15-F103	Message Header Semantics	Standard definitions for tracing and correlation IDs in message headers.	N/A	Trace continuity	Integration Layer
+M15-F104	Digital Signature Ontology	Defining signature algorithms and key usage semantically.	N/A	Crypto compliance	Security Team
+M15-F105	Hash Algorithm Ontology	Definitions of hash functions (SHA-3, etc.) and their versions.	N/A	Collision resistance	Crypto Team
+M15-F106	Certificate Ontology	Semantic modeling of x.509 certificate attributes.	N/A	Parsing accuracy	PKI Team
+M15-F107	Trust Framework Semantics	Modeling trust relationships between PARI nodes.	Graph Theory	Trust score validity	Network Layer
+M15-F108	Ledger Entry Semantics	Double-entry bookkeeping definitions in the graph.	Accounting Rules	Balance integrity	Accountants
+M15-F109	Reconciliation Rule Ontology	Defining how to match two disparate transaction streams.	Matching Logic	Match rate	Reconciliation Team
+M15-F110	Write-Off and Bad Debt Semantics	Accounting definitions for uncollectible funds.	N/A	Reporting accuracy	Finance Team
+M15-F111	Profit and Loss Semantics	High-level categorization of transaction impacts on P&L.	N/A	Aggregation speed	CFO Office
+M15-F112	Cash Flow Semantics	Defining Operating, Investing, Financing activities semantically.	N/A	Statement accuracy	Finance Team
+M15-F113	Budget Control Ontology	Linking spending to budget limits semantically.	N/A	Budget variance	Controllers
+M15-F114	Project Code Tagging	Semantic association of costs with internal projects.	N/A	Allocation accuracy	PMO
+M15-F115	Cost Center Hierarchy	Graph-based definition of organizational cost centers.	N/A	Roll-up accuracy	Finance
+M15-F116	Intercompany Transaction Ontology	Special semantics for moves between internal legal entities.	N/A	Elimination accuracy	Consolidation
+M15-F117	Dividend and Interest Ontology	Definitions for investment income types.	N/A	Tax withholding	Treasury
+M15-F118	Withholding Tax Semantics	Rules for tax deducted at source.	N/A	Calc accuracy	Tax Engine
+M15-F119	Tax Treaty Ontology	Modeling bilateral tax treaties to avoid double taxation.	N/A	Treaty application	International Tax
+M15-F120	Customs Duty Ontology	Semantic definitions for tariff codes and duties.	N/A	Code lookup	Trade Compliance
+M15-F121	Excise Tax Ontology	Specific definitions for goods like alcohol, tobacco, fuel.	N/A	Tracking accuracy	Excise Team
+M15-F122	Environmental Tax Semantics	Carbon tax and green levy definitions.	N/A	Calculation	Sustainability
+M15-F123	Digital Services Tax Ontology	Definitions for VAT on digital goods across borders.	N/A	Location accuracy	Tax Policy
+M15-F124	Crypto Asset Tax Semantics	Specific rules for taxing crypto-to-fiat events.	N/A	Event detection	Crypto Tax
+M15-F125	Liquidity Pool Semantics	Definitions for DeFi/Liquidity concepts (if used).	N/A	Valuation	Treasury
+M15-F126	Oracle Data Semantics	Defining how external data (price feeds) is represented.	N/A	Data freshness	Oracle Svc
+M15-F127	Smart Clause Logic	Encoding simple "if-then" legal clauses in the ontology.	Logic Programming	Execution accuracy	LegalTech
+M15-F128	Document Template Mapping	Linking ontology terms to placeholders in PDF/HTML templates.	Template Engine	Fill accuracy	Reporting
+M15-F129	Archive and Purge Semantics	Defining retention rules as semantic properties.	N/A	Retention compliance	DPO
+M15-F130	Privacy Impact Assessment Ontology	Modeling PIA processes and outcomes.	N/A	Assessment tracking	Privacy Team
+M15-F131	Security Control Ontology	Mapping NIST/ISO controls to technical implementations.	N/A	Control coverage	GRC
+M15-F132	Threat Model Ontology	Standardizing threat names (MITRE ATT&CK) in PARI context.	Classification	Detection rate	SecOps
+M15-F133	Vulnerability Semantics	Standardizing CVE and severity scoring.	Scoring	Prioritization	Patching Team
+M15-F134	Penetration Test Semantics	Modeling test cases and findings.	N/A	Remediation tracking	SecEng
+M15-F135	Business Continuity Ontology	Defining RPO/RTO and recovery plans semantically.	N/A	Plan alignment	BCM
+M15-F136	Disaster Recovery Drill Semantics	Logging drills and results against the ontology.	N/A	Drill readiness	Ops
+M15-F137	Capacity Planning Ontology	Defining resource limits and scaling triggers.	N/A	Auto-scaling	SRE
+M15-F138	Configuration Management Ontology	Modeling system settings and their dependencies.	N/A	Config validation	DevOps
+M15-F139	Feature Flag Semantics	Tying feature flags to ontology concepts for dynamic routing.	N/A	Toggle speed	Release Eng
+M15-F140	A/B Test Semantics	Defining test cohorts and success metrics.	Statistical Analysis	Test validity	Product Team
+M15-F141	Churn Prediction Semantics	Features used in ML models to predict user churn.	Random Forest/XGBoost	Prediction accuracy	Data Science
+M15-F142	Customer Lifetime Value Ontology	Definitions for CLV calculation variables.	Regression Analysis	Calc speed	Marketing
+M15-F143	Campaign Attribution Ontology	Tracking marketing touchpoints semantically.	Markov Chains	Attribution	Marketing
+M15-F144	Loyalty Program Semantics	Points, tiers, and reward definitions.	N/A	Balance accuracy	CRM
+M15-F145	Referral Program Semantics	Defining referral links and rewards.	N/A	Fraud detection	Growth
+M15-F146	Promo Code Semantics	Defining discounts and validity periods.	N/A	Redemption accuracy	Sales
+M15-F147	Bundle Product Semantics	Defining groups of products sold together.	N/A	Pricing accuracy	Catalog
+M15-F148	Subscription Ontology	Recurring billing and cycle definitions.	N/A	Renewal accuracy	Billing
+M15-F149	Installment Plan Semantics	Breaking payments into parts.	N/A	Schedule tracking	Billing
+M15-F150	Invoice Line Item Semantics	Detailed breakdown of charges.	N/A	Tax calc	Billing
+M15-F151	Credit Note Semantics	Definitions for negative invoices.	N/A	Reversal accuracy	Accounting
+M15-F152	Debit Note Semantics	Definitions for supplementary charges.	N/A	Justification	Accounting
+M15-F153	Payment Reminder Semantics	Workflow for dunning processes.	N/A	Timing	Collections
+M15-F154	Debt Collection Ontology	Handover to third-party agencies semantics.	N/A	Data privacy	Legal
+M15-F155	Bankruptcy Status Ontology	Legal status definitions for entities.	N/A	Status update	Compliance
+M15-F156	Merge & Acquisition Semantics	Handling entity changes due to M&A.	N/A	ID mapping	Master Data
+M15-F157	Stock Option Semantics	Employee equity definitions (internal use).	N/A	Vesting tracking	HR/Finance
+M15-F158	Expense Category Ontology	Operational expense classifications.	N/A	Reporting accuracy	Finance
+M15-F159	Travel and Expense Semantics	Specific rules for employee reimbursements.	N/A	Policy adherence	HR
+M15-F160	Per Diem Rate Ontology	Daily allowance definitions by region.	N/A	Calculation	HR/Travel
+M15-F161	Invoice Approval Workflow	Semantic definition of approval chains.	N/A	Audit trail	Procurement
+M15-F162	Purchase Order Semantics	B2B procurement definitions.	N/A	Matching accuracy	Procurement
+M15-F163	Goods Receipt Note Semantics	Confirming receipt of goods.	N/A	Timing	Logistics
+M15-F164	Asset Lifecycle Ontology	Depreciation and maintenance of assets.	N/A	Value tracking	Asset Mgmt
+M15-F165	Lease Agreement Semantics	Rental contracts (real estate, equipment).	N/A	Payment schedule	Admin
+M15-F166	Insurance Policy Semantics	Coverage and premium definitions.	N/A	Claim validation	Risk
+M15-F167	Claim Adjustment Ontology	Modifications to insurance claims.	N/A	Audit trail	Claims
+M15-F168	Warranty Ontology	Product warranty periods and terms.	N/A	Validity check	Support
+M15-F169	Return Merchandise Authorization	Return processing semantics.	N/A	RMA tracking	Logistics
+M15-F170	Inventory Semantics	Stock levels and location definitions.	N/A	Accuracy	Warehouse
+M15-F171	Supply Chain Event Ontology	Tracking goods in transit.	N/A	Visibility	Logistics
+M15-F172	Bill of Lading Semantics	Shipping document definitions.	N/A	Compliance	Freight
+M15-F173	Incoterms Ontology	Shipping responsibility definitions.	N/A	Risk allocation	Trade
+M15-F174	Letter of Credit Semantics	Trade finance definitions.	N/A	Compliance	Trade Finance
+M15-F175	Factoring Semantics	Selling receivables definitions.	N/A	Valuation	Treasury
+M15-F176	Supply Chain Finance Semantics	Financing based on inventory/AR.	N/A	Risk assessment	Treasury
+M15-F177	Dynamic Discounting Ontology	Early payment discounts.	N/A	Calc accuracy	Procurement
+M15-F178	E-Invoicing Signature Semantics	Requirements for digital signatures on invoices.	PKI	Validation	Tax
+M15-F179	Peppol Semantics	Specific mappings for the Pan-European Public Procurement On-Line.	Mapping	Interop	B2G
+M15-F180	UBL (Universal Business Language) Support	Mapping UBL documents to PARI ontology.	XSLT	Mapping	B2B
+M15-F181	ZUGFeRD Semantics	German e-invoicing standard support.	Mapping	Compliance	DE Market
+M15-F182	Chorus Pro Semantics	French public sector invoicing.	Mapping	Compliance	FR Market
+M15-F183	SDI (Italy) Semantics	Italian Exchange System mappings.	Mapping	Compliance	IT Market
+M15-F184	SII (Spain) Semantics	Immediate Information Supply mappings.	Mapping	Compliance	ES Market
+M15-F185	REST to RDF Gateway	Converting standard REST payloads to RDF for internal processing.	Middleware	Conversion	Integration
+M15-F186	GraphQL to SPARQL Translation	Allowing GraphQL clients to query the RDF store.	Query Translation	Usability	Frontend
+M15-F187	Subscription Based Semantic Updates	Pushing ontology changes to subscribed services.	WebSub	Latency	Architecture
+M15-F188	Semantic Router	Routing requests based on semantic content of payload.	Content-Based Routing	Performance	ESB
+M15-F189	Ontology Driven UI Generation	Creating forms based on ontology constraints (Schema-First UI).	Form Gen	Dev speed	Frontend
+M15-F190	Accessibility Semantics (A11y)	Mapping WCAG requirements to UI elements defined in ontology.	N/A	Compliance	UX
+M15-F191	Localization Context Semantics	Defining locale-specific formatting (dates, numbers) in ontology.	N/A	Formatting	i18n
+M15-F192	Timezone Semantics	Handling daylight savings and timezone conversions.	N/A	Accuracy	Scheduling
+M15-F193	Calendar Event Semantics	Defining holidays and non-working days per jurisdiction.	N/A	Settlement accuracy	Ops
+M15-F194	Working Day Calculation	Semantic rules for adding business days.	N/A	Date Calc	Settlement
+M15-F195	Cut-off Time Semantics	Defining same-day payment cut-offs.	N/A	Routing	Treasury
+M15-F196	Urgency Semantics	Prioritizing high-value or urgent transactions.	N/A	Latency	Core
+M15-F197	Batch Processing Semantics	Defining batch windows and aggregation rules.	N/A	Throughput	Batch
+M15-F198	Idempotency Key Semantics	Defining how idempotency keys are handled semantically.	N/A	Duplicate prevention	API
+M15-F199	Request Correlation Semantics	Linking logs across microservices.	N/A	Debugging	Observability
+M15-F200	End-to-End Trace Ontology	Defining the complete lifecycle trace of a payment.	N/A	Visibility	Monitoring
+M15-F201	Error Categorization Semantics	Grouping errors for dashboard metrics.	N/A	Alerting	Ops
+M15-F202	Latency Threshold Semantics	Defining acceptable latencies per operation type.	N/A	SLA	SRE
+M15-F203	Throughput Limit Semantics	Defining max TPS per service.	N/A	Throttling	API Gateway
+M15-F204	Circuit Breaker Semantics	Defining failure thresholds to trigger breakers.	N/A	Resilience	Resiliency
+M15-F205	Retry Policy Semantics	Exponential backoff and max retry definitions.	N/A	Storm reduction	Client SDKs
+M15-F206	Rate Limiting Semantics	Defining quotas per tenant/user.	N/A	Fairness	Security
+M15-F207	Quota Management Semantics	Tracking resource usage against limits.	N/A	Billing	Metering
+M15-F208	Cost Attribution Semantics	Assigning compute costs to specific transactions/features.	N/A	FinOps	Management
+M15-F209	Green Computing Semantics	Measuring energy consumption per transaction.	Metrics	Sustainability	Infra
+M15-F210	Carbon Footprint Ontology	Calculating CO2e for financial operations.	Calculation	Reporting	ESG Team
+
+
+
+h.	Comprehensive List of Database Objects
+
+ID	schema_name	object_name	object_type	description	feature_reference	column_names	constraints / notes	junction_tables
+M15-DB-001	sem	ont_classes	TABLE	Stores RDF/OWL Classes (Subjects) defining the core entities.	M15-F001	class_id (PK), uri (unique), local_name, base_class_id (FK), created_at, is_deprecated	uri must be valid URI format.	ont_class_properties
+M15-DB-002	sem	ont_properties	TABLE	Stores RDF/OWL Properties (Predicates) defining relationships.	M15-F001	property_id (PK), uri (unique), local_name, domain_id (FK), range_id (FK), property_type (Object/Data)	Property types: 'obj', 'data'.	ont_property_characteristics
+M15-DB-003	sem	ont_datatypes	TABLE	Defines allowed data types (xsd:string, xsd:integer, CustomMonetary).	M15-F015	datatype_id (PK), uri, base_type, regex_pattern, min_val, max_val	Validates literals.	N/A
+M15-DB-004	sem	skos_concepts	TABLE	SKOS concepts for controlled vocabularies (labels).	M15-F002	concept_id (PK), uri, scheme_id (FK), notation	notation unique per scheme.	skos_mappings
+M15-DB-005	sem	skos_labels	TABLE	Multilingual labels for concepts and classes.	M15-F007	label_id (PK), entity_uri, lang_code, label_text, label_type (pref/alt/hidden)	lang_code ISO 639-1.	N/A
+M15-DB-006	sem	ont_class_properties	TABLE	Junction: Many-to-Many between Classes and Properties.	M15-F001	class_id (FK), property_id (FK)	ON DELETE CASCADE.	N/A
+M15-DB-007	sem	ont_property_characteristics	TABLE	Defines logic (Functional, Transitive, Symmetric).	M15-F021	property_id (FK), characteristic (enum)	Characteristic Enum: 'Func', 'Trans', 'Sym'.	N/A
+M15-DB-008	sem	mapping_rules	TABLE	Maps internal URIs to external Standard URIs (ISO 20022).	M15-F005	rule_id (PK), source_uri, target_uri, standard_body, direction (in/out), transform_func	source_uri indexed.	N/A
+M15-DB-009	sem	ontology_versions	TABLE	Version control for the entire graph.	M15-F008	version_id (PK), version_hash, release_date, is_current, description	Only one is_current = true.	N/A
+M15-DB-010	sem	ontology_changes	TABLE	Audit log of specific term changes between versions.	M15-F008	change_id (PK), version_id (FK), term_uri, change_type (ADD/DEL/MOD), old_value, new_value	Linked to version.	N/A
+M15-DB-011	sem	shacl_shapes	TABLE	SHACL validation shapes for data integrity.	M15-F010	shape_id (PK), target_class_id (FK), severity (vio/warn), message	Stores SPARQL/SHACL logic.	N/A
+M15-DB-012	sem	shacl_property_constraints	TABLE	Constraints attached to SHACL shapes (minCount, maxCount).	M15-F010	constraint_id (PK), shape_id (FK), property_id (FK), min_count, max_count, node_kind	node_kind: Literal, BlankNode, IRI.	N/A
+M15-DB-013	sem	sparql_queries	TABLE	Stored library of complex SPARQL queries for reporting.	M15-F004	query_id (PK), query_name, query_text, created_by, is_public	query_text validated on insert.	N/A
+M15-DB-014	sem	inverse_properties	TABLE	Explicit inverse relationships (e.g., paidBy/pays).	M15-F014	direct_prop_id (FK), inverse_prop_id (FK)	Symmetric relationship ensured via trigger.	N/A
+M15-DB-015	sem	disjoint_classes	TABLE	Asserts two classes cannot share instances.	M15-F025	class_a_id (FK), class_b_id (FK)	Check constraint prevents A=B.	N/A
+M15-DB-016	sem	equivalent_classes	TABLE	Maps a PARI class to an external class.	M15-F024	local_class_id (FK), external_class_uri	Used for reasoning.	N/A
+M15-DB-017	sem	graph_snapshots	TABLE	Materialized snapshots of the graph for time-travel queries.	M15-F016	snapshot_id (PK), timestamp, storage_location (S3 path), checksum	Point-in-time recovery.	N/A
+M15-DB-018	sem	business_glossary	TABLE	Human-readable business definitions linked to terms.	M15-F023	term_uri, definition, owner, steward	term_uri unique.	N/A
+M15-DB-019	sem	semantic_dependencies	TABLE	Dependency graph of terms (A depends on B).	M15-F036	dependant_uri, dependency_uri	Used for impact analysis.	N/A
+M15-DB-020	sem	import_logs	TABLE	Logs of ontology imports from external standards bodies.	M15-F018	import_id (PK), source_url, status, row_count, import_date	Tracks updates.	N/A
+M15-DB-021	sem	namespaces	TABLE	RDF Namespace registry (prefixes).	M15-F020	prefix (PK), base_uri	prefix unique (e.g., 'pari', 'tax').	N/A
+M15-DB-022	sem	error_codes	TABLE	Standardized machine-readable error codes.	M15-F034	code_uri, http_status, short_desc, remediation	Used by API Gateway.	N/A
+M15-DB-023	sem	annotation_properties	TABLE	Metadata (comments, version notes) attached to classes.	M15-F041	prop_id (PK), subject_uri, predicate, object_value	Free-form metadata.	N/A
+M15-DB-024	sem	synonym_rings	TABLE	Groups of terms that are synonyms.	M15-F061	ring_id (PK), term_uri	Used for fuzzy search.	N/A
+M15-DB-025	sem	regulatory_jurisdictions	TABLE	Hierarchy of regions for compliance.	M15-F032	jurisdiction_id (PK), parent_id (FK), code (ISO 3166), name, level	Recursive hierarchy.	N/A
+M15-DB-026	sem	tax_categories	TABLE	Detailed tax categories mapped to ontology products.	M15-F068	cat_id (PK), code, description, jurisdiction_id (FK), vat_rate	Linked to tax_rules.	N/A
+M15-DB-027	sem	merchant_category_codes	TABLE	Standardized MCC codes with semantic tags.	M15-F067	mcc_id (PK), code, grouping, description	Primary key on code.	N/A
+M15-DB-028	sem	identity_assurance_levels	TABLE	Definitions of LoA (Low/Med/High).	M15-F070	level_id (PK), level_name, description, auth_requirements	Referenced by Compliance.	N/A
+M15-DB-029	sem	consent_types	TABLE	Standard consent definitions.	M15-F088	type_id (PK), uri, name, legal_basis	GDPR compliance.	N/A
+M15-DB-030	sem	access_policies	TABLE	Links ontology attributes to ABAC roles.	M15-F059	policy_id (PK), resource_uri, role_id, action	Dynamic security.	N/A
+M15-DB-031	sem	data_residency_tags	TABLE	Geographic storage requirements.	M15-F089	tag_id (PK), region_code, data_classification	Tagged to tables via metadata.	N/A
+M15-DB-032	sem	incident_types	TABLE	Semantic classification of incidents.	M15-F091	type_id (PK), severity, category, definition	Used by Alerting.	N/A
+M15-DB-033	sem	vulnerability_classes	TABLE	OWASP/CWE semantic mappings.	M15-F133	cwe_id, name, impact_level	Linked to SBOM.	N/A
+M15-DB-034	sem	test_case_traces	TABLE	Links test cases to ontology requirements.	M15-F093	test_id, requirement_uri, status	Requirements coverage.	N/A
+M15-DB-035	sem	feature_flags	TABLE	Flags linked to semantic concepts.	M15-F139	flag_id (PK), feature_uri, is_enabled, rollout_pct	Dynamic routing.	N/A
+M15-DB-036	sem	marketing_campaigns	TABLE	Semantic definitions of campaigns.	M15-F143	campaign_id (PK), attribution_model, start_date, end_date	Attribution logic.	N/A
+M15-DB-037	sem	loyalty_tiers	TABLE	Definitions of customer loyalty levels.	M15-F144	tier_id (PK), name, min_points, benefits_json	JSON stored for flexibility.	N/A
+M15-DB-038	sem	invoice_line_types	TABLE	Semantic breakdown of invoice components.	M15-F150	type_id (PK), code, description, tax_applicability	Used by Billing.	N/A
+M15-DB-039	sem	workflow_states	TABLE	Generic state machine definitions.	M15-F064	state_id (PK), workflow_name, state_name, is_terminal	Orchestration engine.	N/A
+M15-DB-040	sem	workflow_transitions	TABLE	Allowed transitions between states.	M15-F064	from_state_id (FK), to_state_id (FK), trigger_event	Prevents illegal moves.	N/A
+M15-DB-041	sem	approvals_chain	TABLE	Semantic approval hierarchies.	M15-F161	chain_id (PK), step_order, role_id, condition	Multi-tenant approval.	N/A
+M15-DB-042	sem	assets	TABLE	Definition of fixed assets for accounting.	M15-F164	asset_id (PK), asset_tag, class_id, depreciation_method	Linked to Finance.	N/A
+M15-DB-043	sem	supply_chain_events	TABLE	Tracking events (Ship, Receive, Customs).	M15-F171	event_id (PK), event_type, location, timestamp	Logistics tracking.	N/A
+M15-DB-044	sem	incoterms	TABLE	International commercial terms.	M15-F173	term_code (PK), description, risk_transfer_point	Trade compliance.	N/A
+M15-DB-045	sem	locales	TABLE	Detailed locale definitions beyond simple lang codes.	M15-F191	locale_id (PK), ietf_tag, date_format, number_format, currency_symbol	UI formatting.	N/A
+M15-DB-046	sem	holidays	TABLE	Non-working days by jurisdiction.	M15-F193	holiday_id (PK), date, jurisdiction_id (FK), name	Settlement calc.	N/A
+M15-DB-047	sem	cut_off_times	TABLE	Same-day payment cut-off definitions.	M15-F195	rule_id (PK), currency, time_of_day, days_active	Cron scheduling.	N/A
+M15-DB-048	sem	rate_limit_quotas	TABLE	Definitions of API limits.	M15-F206	quota_id (PK), tenant_id, endpoint_path, req_per_sec	Gateway enforcement.	N/A
+M15-DB-049	sem	carbon_factors	TABLE	CO2e factors for energy/ops.	M15-F209	factor_id (PK), resource_type, co2e_per_unit, source	Sustainability reporting.	N/A
+M15-DB-050	sem	v_tax_rules	VIEW	Recursive view for tax rule hierarchy.	M15-F012	rule_id, parent_id, rule_logic, jurisdiction	Aggregates tax_categories.	N/A
+M15-DB-051	sem	v_full_class_hierarchy	VIEW	Flattened hierarchy of all classes.	M15-F019	class_id, path, depth, root_id	For frontend trees.	N/A
+M15-DB-052	sem	v_orphan_terms	VIEW	Lists terms with no relationships.	M15-F030	term_uri, term_type	For cleanup.	N/A
+M15-DB-053	sem	v_semantic_audit_log	VIEW	Human-readable audit trail.	M15-F035	timestamp, user, action, term, details	Joins ontology_changes.	N/A
+M15-DB-054	sem	v_external_mappings	VIEW	Active mappings to external standards.	M15-F005	local_term, standard, external_term, confidence	For integrators.	N/A
+M15-DB-055	sem	v_compliance_coverage	VIEW	% of database columns covered by ontology.	M15-F004	table_name, col_name, is_mapped	KPI tracking.	N/A
+M15-DB-056	sem	p_validate_transaction	PROCEDURE	Validates a transaction JSON-LD payload against SHACL.	M15-F010	IN payload_json, OUT is_valid, OUT errors	Called by Ingestion Pipeline.	N/A
+M15-DB-057	sem	p_infer_new_facts	PROCEDURE	Runs reasoning engine to generate inferred triples.	M15-F006	IN transaction_id	Updates inference cache.	N/A
+M15-DB-058	sem	p_publish_graph_update	PROCEDURE	Notifies subscribers of ontology changes.	M15-F187	IN version_id	Triggers Webhooks.	N/A
+M15-DB-059	sem	p_check_impact	PROCEDURE	Calculates impact of deleting a term.	M15-F009	IN term_uri	Prevents breaking changes.	N/A
+M15-DB-060	sem	fn_normalize_uri	FUNCTION	Standardizes URI formatting.	M15-F046	IN uri_string, RETURNS text	Used for triggers.	N/A
+M15-DB-061	sem	fn_get_translation	FUNCTION	Retrieves label for a term in a specific language.	M15-F007	IN term_uri, IN lang, RETURNS text	Fallback logic included.	N/A
+M15-DB-062	sem	fn_is_business_day	FUNCTION	Checks if a date is a working day.	M15-F194	IN date, IN jurisdiction, RETURNS boolean	Checks holidays table.	N/A
+M15-DB-063	sem	enum_property_characteristics	ENUM	Types of property characteristics.	M15-F021	'Functional', 'InverseFunctional', 'Symmetric', 'Transitive', 'Asymmetric'	Used in ont_property_characteristics.	N/A
+M15-DB-064	sem	enum_node_kinds	ENUM	SHACL node kinds.	M15-F010	'Literal', 'BlankNode', 'IRI'	Used in shacl_property_constraints.	N/A
+M15-DB-065	sem	enum_change_type	ENUM	Types of ontology changes.	M15-F008	'ADD', 'DELETE', 'MODIFY', 'DEPRECATE'	Used in ontology_changes.	N/A
+M15-DB-066	sem	enum_severity	ENUM	SHACL validation severity.	M15-F010	'Violation', 'Warning', 'Info'	Used in shacl_shapes.	N/A
+M15-DB-067	sem	enum_direction	ENUM	Direction of mapping rules.	M15-F005	'INBOUND', 'OUTBOUND', 'BIDIRECTIONAL'	Used in mapping_rules.	N/A
+M15-DB-068	sem	enum_label_type	ENUM	SKOS label types.	M15-F007	'prefLabel', 'altLabel', 'hiddenLabel'	Used in skos_labels.	N/A
+M15-DB-069	sem	enum_jurisdiction_level	ENUM	Levels of jurisdiction hierarchy.	M15-F032	'Global', 'Continent', 'Country', 'State', 'Municipality'	Used in regulatory_jurisdictions.	N/A
+M15-DB-070	sem	enum_data_classification	ENUM	Sensitivity levels for data.	M15-F089	'Public', 'Internal', 'Confidential', 'Restricted'	Used in data_residency_tags.	N/A
+M15-DB-071	sem	enum_incident_severity	ENUM	Severity of operational incidents.	M15-F091	'P1', 'P2', 'P3', 'P4', 'P5'	Used in incident_types.	N/A
+M15-DB-072	sem	enum_workflow_status	ENUM	Status of workflow instances.	M15-F064	'Pending', 'Approved', 'Rejected', 'Cancelled'	Used in workflows.	N/A
+M15-DB-073	sem	enum_depreciation_method	ENUM	Accounting depreciation methods.	M15-F164	'StraightLine', 'DecliningBalance', 'SumOfYears'	Used in assets.	N/A
+M15-DB-074	sem	enum_incoterm_location	ENUM	Incoterm delivery points.	M15-F173	'ExWorks', 'FCA', 'CPT', 'CIP', 'DAP', 'DPU', 'DDP', 'FAS', 'FOB', 'CFR', 'CIF'	Used in incoterms.	N/A
+M15-DB-075	sem	enum_day_type	ENUM	Types of days for calendar.	M15-F193	'WEEKDAY', 'SATURDAY', 'SUNDAY', 'HOLIDAY'	Used in holidays.	N/A
+M15-DB-076	sem	ont_restriction_classes	TABLE	Anonymous classes defined by restrictions.	M15-F026	restriction_id (PK), on_property_id (FK), restriction_type, target_value	Complex OWL structures.	N/A
+M15-DB-077	sem	ont_individuals	TABLE	Instance-level data (if storing triples in SQL).	M15-F029	individual_id (PK), class_id (FK), uri	Usually in TripleStore, but cached here.	N/A
+M15-DB-078	sem	ont_literal_assertions	TABLE	Data property assertions for individuals.	M15-F029	assertion_id (PK), individual_id (FK), property_id (FK), value_literal	Caching layer.	N/A
+M15-DB-079	sem	ont_object_assertions	TABLE	Object property assertions for individuals.	M15-F029	assertion_id (PK), individual_id (FK), property_id (FK), target_individual_id (FK)	Caching layer.	N/A
+M15-DB-080	sem	semantic_stats	TABLE	Aggregated statistics on term usage.	M15-F055	stat_date, class_id, instance_count, query_count	For analytics.	N/A
+M15-DB-081	sem	term_locks	TABLE	Locks terms during editing to prevent conflicts.	M15-F074	lock_id (PK), term_uri, locked_by, locked_until	Optimistic concurrency.	N/A
+M15-DB-082	sem	external_standard_versions	TABLE	Tracks versions of imported standards (ISO 20022).	M15-F018	standard_id (PK), name, version, release_date	For mapping integrity.	N/A
+M15-DB-083	sem	mapping_validations	TABLE	Logs of mapping accuracy checks.	M15-F005	validation_id (PK), mapping_id (FK), sample_count, fail_count, timestamp	QA for mappings.	N/A
+M15-DB-084	sem	v_graph_health	VIEW	Dashboard view for ontology integrity.	M15-F098	metric, value, threshold	For Ops team.	N/A
+M15-DB-085	sem	spatial_regions	TABLE	Geo-spatial definitions for location logic.	M15-F048	region_id (PK), geometry_type, coordinates	PostGIS integration.	N/A
+M15-DB-086	sem	spatial_relations	TABLE	Topological relationships (within, touches).	M15-F048	region_a_id (FK), region_b_id (FK), relation_type	Spatial reasoning.	N/A
+M15-DB-087	sem	tax_treaties	TABLE	Bilateral tax treaties.	M15-F119	treaty_id (PK), country_a, country_b, effective_date, rate_reduction	Double taxation logic.	N/A
+M15-DB-088	sem	crypto_assets	TABLE	Definitions of supported crypto assets.	M15-F124	asset_id (PK), symbol, network, contract_address	Used for tax events.	N/A
+M15-DB-089	sem	smart_contracts	TABLE	Semantic definitions of contract logic.	M15-F127	contract_id (PK), address, abi_hash, standard (ERC-20/721)	Blockchain interaction.	N/A
+M15-DB-090	sem	document_templates	TABLE	Templates for reports (PDF/HTML).	M15-F128	template_id (PK), name, file_path, associated_class	Merges data into templates.	N/A
+M15-DB-091	sem	template_placeholders	TABLE	Variables in templates mapped to ontology.	M15-F128	placeholder_id (PK), template_id (FK), property_uri, default_value	Dynamic rendering.	N/A
+M15-DB-092	sem	retention_policies	TABLE	Data retention rules.	M15-F129	policy_id (PK), class_id (FK), retention_years, action_after (delete/archive)	GDPR Art. 17.	N/A
+M15-DB-093	sem	security_controls	TABLE	Mapping of NIST/ISO controls to ontology.	M15-F131	control_id (PK), control_ref, implementation_uri	Compliance evidence.	N/A
+M15-DB-094	sem	threat_mappings	TABLE	Maps ontology assets to threats.	M15-F132	asset_uri, threat_id (MITRE), mitigation_id	Threat modeling.	N/A
+M15-DB-095	sem	pen_test_results	TABLE	Semantic logging of penetration tests.	M15-F134	test_id (PK), date, tester, target_uri, result	Security tracking.	N/A
+M15-DB-096	sem	bc_plans	TABLE	Business Continuity Plan definitions.	M15-F135	plan_id (PK), process_uri, rpo_seconds, rto_seconds	Resilience metrics.	N/A
+M15-DB-097	sem	drills	TABLE	Disaster recovery drill records.	M15-F136	drill_id (PK), plan_id (FK), date, success, findings	Operational readiness.	N/A
+M15-DB-098	sem	config_settings	TABLE	Semantic definitions of system configuration.	M15-F138	key, value_type, default_val, description	Dynamic configuration.	N/A
+M15-DB-099	sem	ab_test_configs	TABLE	Configuration for A/B testing.	M15-F140	test_id (PK), name, target_segment, success_metric_uri	Experiment tracking.	N/A
+M15-DB-100	sem	ml_features	TABLE	Features extracted for ML models.	M15-F141	feature_id (PK), name, source_property, extraction_logic	Data Science context.	N/A
+M15-DB-101	sem	promo_codes	TABLE	Definitions of promotional offers.	M15-F146	code, discount_type, value, valid_from, valid_to	Marketing engine.	N/A
+M15-DB-102	sem	product_bundles	TABLE	Groupings of products.	M15-F147	bundle_id (PK), name, sku	Catalog management.	N/A
+M15-DB-103	sem	bundle_items	TABLE	Items in a bundle.	M15-F147	bundle_id (FK), product_uri, quantity	Junction table.	N/A
+M15-DB-104	sem	subscriptions	TABLE	Subscription definitions.	M15-F148	sub_id (PK), plan_name, cycle_months, grace_period_days	Billing logic.	N/A
+M15-DB-105	sem	installment_plans	TABLE	Definitions of installment logic.	M15-F149	plan_id (PK), num_months, interest_rate, fee	Lending logic.	N/A
+M15-DB-106	sem	credit_notes	TABLE	Logic for credit notes.	M15-F151	note_id (PK), invoice_id (FK), reason, amount	Refunds.	N/A
+M15-DB-107	sem	debit_notes	TABLE	Logic for debit notes.	M15-F152	note_id (PK), target_id (FK), reason, amount	Supplementary charges.	N/A
+M15-DB-108	sem	dunning_workflows	TABLE	Payment reminder workflows.	M15-F153	dunning_id (PK), level, days_overdue, action	Collections.	N/A
+M15-DB-109	sem	collection_agencies	TABLE	Third-party agencies for debt collection.	M15-F154	agency_id (PK), name, jurisdiction, commission_rate	Debt recovery.	N/A
+M15-DB-110	sem	legal_statuses	TABLE	Legal status of entities (Active, Bankrupt).	M15-F155	status_code (PK), description	KYC/AML.	N/A
+M15-DB-111	sem	entity_remaps	TABLE	Maps old entity IDs to new ones (M&A).	M15-F156	old_id, new_id, effective_date	Master Data Management.	N/A
+M15-DB-112	sem	expense_categories	TABLE	Operational expense classifications.	M15-F158	cat_id (PK), code, name, tax_deductible	Finance.	N/A
+M15-DB-113	sem	per_diems	TABLE	Daily allowance rates.	M15-F160	rate_id (PK), location_id, amount, currency	HR/Travel.	N/A
+M15-DB-114	sem	purchase_orders	TABLE	B2B PO definitions.	M15-F162	po_id (PK), supplier_uri, total_amount, status	Procurement.	N/A
+M15-DB-115	sem	goods_receipts	TABLE	Confirmation of goods receipt.	M15-F163	gr_id (PK), po_id (FK), date, quantity	Logistics.	N/A
+M15-DB-116	sem	leases	TABLE	Lease agreement definitions.	M15-F165	lease_id (PK), asset_id, lessor, monthly_payment	Real Estate/Admin.	N/A
+M15-DB-117	sem	insurance_policies	TABLE	Policy definitions.	M15-F166	policy_id (PK), type, coverage_amount, premium	Risk.	N/A
+M15-DB-118	sem	insurance_claims	TABLE	Claims against policies.	M15-F167	claim_id (PK), policy_id (FK), date, status	Claims management.	N/A
+M15-DB-119	sem	warranties	TABLE	Product warranties.	M15-F168	warranty_id (PK), product_uri, duration_months, terms	Support.	N/A
+M15-DB-120	sem	rmas	TABLE	Return Merchandise Authorizations.	M15-F169	rma_id (PK), order_id, reason, status	Reverse Logistics.	N/A
+M15-DB-121	sem	inventory_items	TABLE	Stock items.	M15-F170	sku (PK), location_id, quantity, reserved_qty	Warehouse.	N/A
+M15-DB-122	sem	bols	TABLE	Bill of Lading definitions.	M15-F172	bol_id (PK), carrier, origin, destination	Freight.	N/A
+M15-DB-123	sem	letters_of_credit	TABLE	LC definitions.	M15-F174	lc_id (PK), issuing_bank, beneficiary, expiry	Trade Finance.	N/A
+M15-DB-124	sem	factoring_contracts	TABLE	Factoring agreements.	M15-F175	contract_id (PK), invoice_id, factor, advance_rate	Treasury.	N/A
+M15-DB-125	sem	supply_chain_finance	TABLE	SCF programs.	M15-F176	program_id (PK), supplier_id, buyer_id, limit	Treasury.	N/A
+M15-DB-126	sem	dynamic_discounts	TABLE	Early payment discounts.	M15-F177	offer_id (PK), invoice_id, days_discount_percent	Procurement.	N/A
+M15-DB-127	sem	e_signatures	TABLE	Digital signature requirements.	M15-F178	doc_type, required_signatures, algorithm	Tax/Compliance.	N/A
+M15-DB-128	sem	peppol_mappings	TABLE	PEPPOL specific mappings.	M15-F179	local_code, peppol_code	B2G Integration.	N/A
+M15-DB-129	sem	ubl_mappings	TABLE	UBL specific mappings.	M15-F180	local_element, xpath	B2B Integration.	N/A
+M15-DB-130	sem	zugferd_mappings	TABLE	ZUGFeRD specific mappings.	M15-F181	local_code, zugferd_code	DE Integration.	N/A
+M15-DB-131	sem	chorus_mappings	TABLE	Chorus Pro specific mappings.	M15-F182	local_code, chorus_code	FR Integration.	N/A
+M15-DB-132	sem	sdi_mappings	TABLE	SDI specific mappings.	M15-F183	local_code, sdi_code	IT Integration.	N/A
+M15-DB-133	sem	sii_mappings	TABLE	SII specific mappings.	M15-F184	local_code, sii_field	ES Integration.	N/A
+M15-DB-134	sem	graphql_schemas	TABLE	GraphQL schema definitions derived from ontology.	M15-F186	type_name, field_name, semantic_type	API Gateway.	N/A
+M15-DB-135	sem	ui_form_configs	TABLE	UI form definitions generated from ontology.	M15-F189	form_id (PK), target_class, layout_json	Frontend.	N/A
+M15-DB-136	sem	a11y_attributes	TABLE	Accessibility attributes mapped to UI elements.	M15-F190	ui_element_id, wcag_attribute, value	Compliance.	N/A
+M15-DB-137	sem	tz_rules	TABLE	Timezone rules and transitions.	M15-F192	zone_id, utc_offset, dst_start, dst_end	Scheduling.	N/A
+M15-DB-138	sem	urging_rules	TABLE	Prioritization rules for transactions.	M15-F196	rule_id (PK), condition, priority_weight	Core Ledger.	N/A
+M15-DB-139	sem	batch_windows	TABLE	Definitions of batch processing windows.	M15-F197	window_name, start_time, duration	Batch Engine.	N/A
+M15-DB-140	sem	idempotency_store	TABLE	Stores idempotency keys for requests.	M15-F198	key (PK), request_hash, response_code, created_at	API Layer.	N/A
+M15-DB-141	sem	correlation_map	TABLE	Maps internal IDs to correlation IDs.	M15-F199	internal_id, correlation_id	Observability.	N/A
+M15-DB-142	sem	latency_thresholds	TABLE	SLA definitions for latency.	M15-F202	operation_name, p95_limit_ms, p99_limit_ms	SRE.	N/A
+M15-DB-143	sem	throughput_limits	TABLE	TPS limits per service.	M15-F203	service_name, max_tps	Load Balancer.	N/A
+M15-DB-144	sem	circuit_breaker_configs	TABLE	Circuit breaker settings.	M15-F204	service_name, failure_threshold, timeout_ms	Resiliency.	N/A
+M15-DB-145	sem	retry_policies	TABLE	Retry logic definitions.	M15-F205	policy_name, max_retries, backoff_base	Client SDKs.	N/A
+M15-DB-146	sem	resource_quotas	TABLE	Resource consumption quotas.	M15-F207	tenant_id, resource_type, limit	Metering.	N/A
+M15-DB-147	sem	cost_allocations	TABLE	Attribution of infrastructure costs.	M15-F208	transaction_type, cpu_cost, storage_cost	FinOps.	N/A
+M15-DB-148	sem	energy_metrics	TABLE	Energy consumption data.	M15-F209	timestamp, kwh, source	Green IT.	N/A
+M15-DB-149	sem	p_update_graph_stats	PROCEDURE	Recalculates graph statistics.	M15-F055	No args	Runs nightly.	N/A
+M15-DB-150	sem	p_sync_to_triplestore	PROCEDURE	Syncs SQL tables to external RDF Store.	M15-F029	IN batch_size	ETL Process.	N/A
+M15-DB-151	sem	p_export_subgraph	PROCEDURE	Exports a specific subgraph (e.g., for a module).	M15-F044	IN root_class, OUT file_path	Integration task.	N/A
+M15-DB-152	sem	p_import_standard	PROCEDURE	Imports a standard ontology file (RDF/XML).	M15-F018	IN file_path, IN namespace	Data ingestion.	N/A
+M15-DB-153	sem	p_validate_schema_integrity	PROCEDURE	Checks for broken references or orphans.	M15-F040	No args, OUT error_count	Health check.	N/A
+M15-DB-154	sem	p_propagate_deprecation	PROCEDURE	Marks dependents as deprecated if parent is.	M15-F030	IN term_uri	Dependency management.	N/A
+M15-DB-155	sem	p_generate_openapi	PROCEDURE	Generates OpenAPI spec from ontology classes.	M15-F028	OUT spec_json	Documentation.	N/A
+M15-DB-156	sem	p_check_cyclic_deps	PROCEDURE	Detects circular dependencies in the graph.	M15-F036	No args	Graph validation.	N/A
+M15-DB-157	sem	fn_expand_uri	FUNCTION	Expands CURIEs (prefix:local) to full URIs.	M15-F021	IN curie, RETURNS text	Query helper.	N/A
+M15-DB-158	sem	fn_curie_uri	FUNCTION	Compresses full URIs to CURIEs.	M15-F021	IN uri, RETURNS text	Query helper.	N/A
+M15-DB-159	sem	fn_get_class_hierarchy	FUNCTION	Returns ancestry path for a class.	M15-F019	IN class_id, RETURNS text[]	Reporting.	N/A
+M15-DB-160	sem	fn_resolve_mapping	FUNCTION	Finds external mapping for a local URI.	M15-F005	IN local_uri, IN standard, RETURNS text	Translation.	N/A
+M15-DB-161	sem	fn_calculate_settlement_date	FUNCTION	Calculates date based on business days.	M15-F194	IN trade_date, IN currency, RETURNS date	Finance logic.	N/A
+M15-DB-162	sem	v_audit_trail_report	VIEW	Report for auditors on ontology changes.	M15-F035	change_id, date, user, term, old, new	Compliance report.	N/A
+M15-DB-163	sem	v_taxonomy_tree	VIEW	Hierarchical tree for taxonomies.	M15-F002	node_id, parent_id, label, level	UI Widget.	N/A
+M15-DB-164	sem	v_transformation_rules	VIEW	List of active data transformation rules.	M15-F005	source, target, logic	Developer view.	N/A
+M15-DB-165	sem	v_data_dictionary	VIEW	Enterprise data dictionary view.	M15-F010	table_name, column_name, semantic_type, description	Documentation.	N/A
+M15-DB-166	sem	v_regulatory_gaps	VIEW	Identifies internal terms missing external mappings.	M15-F005	term_uri, class_name	Gap analysis.	N/A
+M15-DB-167	sem	v_deprecated_terms	VIEW	Lists deprecated terms still in use.	M15-F030	term_uri, deprecation_date, usage_count	Cleanup plan.	N/A
+M15-DB-168	sem	v_security_matrix	VIEW	Maps roles to ontology concepts.	M15-F059	role_name, concept_uri, permission	Security review.	N/A
+M15-DB-169	sem	v_term_popularity	VIEW	Most frequently queried terms.	M15-F004	term_uri, query_count, last_queried	Analytics.	N/A
+M15-DB-170	sem	v_integration_health	VIEW	Status of external standard syncing.	M15-F018	standard_name, last_sync, status	Ops Dashboard.	N/A
+M15-DB-171	sem	v_fiscal_calendar	VIEW	Fiscal periods based on ontology rules.	M15-F193	period_id, start_date, end_date, is_closed	Accounting.	N/A
+M15-DB-172	sem	v_risk_mitigation	VIEW	Threats and their mitigations.	M15-F132	threat_name, asset, mitigation	Risk Management.	N/A
+M15-DB-173	sem	v_test_coverage_matrix	VIEW	Ontology terms vs Test Cases.	M15-F093	term_uri, test_case_count, last_run	QA Report.	N/A
+M15-DB-174	sem	v_marketing_attribution	VIEW	Attribution model logic.	M15-F143	campaign_id, attribution_weight, rules	Marketing Report.	N/A
+M15-DB-175	sem	v_compliance_obligations	VIEW	Tax obligations per jurisdiction.	M15-F012	jurisdiction, tax_type, rule_source	Tax Report.	N/A
+M15-DB-176	sem	v_supply_chain_visibility	VIEW	Semantic view of supply chain.	M15-F171	event, product, location, status	Logistics View.	N/A
+M15-DB-177	sem	v_performance_sla	VIEW	Current performance against semantic SLAs.	M15-F202	metric, current, threshold, status	SRE Report.	N/A
+M15-DB-178	sem	v_cost_allocation	VIEW	FinOps cost allocation.	M15-F208	department, service, cost	Finance Report.	N/A
+M15-DB-179	sem	v_sustainability_kpis	VIEW	Green IT KPIs.	M15-F209	scope, metric, value, target	ESG Report.	N/A
+M15-DB-180	sem	v_change_impact	VIEW	Impact analysis for proposed changes.	M15-F009	change_candidate, affected_systems, risk_level	Change Board.	N/A
+M15-DB-181	sem	p_migrate_graph_data	PROCEDURE	Migrates data between ontology versions.	M15-F008	IN from_ver, IN to_ver	Migration tool.	N/A
+M15-DB-182	sem	p_backup_triplestore	PROCEDURE	Initiates backup of the RDF store.	M15-F017	OUT backup_id	Backup Agent.	N/A
+M15-DB-183	sem	p_restore_triplestore	PROCEDURE	Restores RDF store from backup.	M15-F017	IN backup_id	Recovery Agent.	N/A
+M15-DB-184	sem	v_pending_approvals	VIEW	Ontology changes awaiting governance approval.	M15-F074	change_id, requester, request_date, term	Governance UI.	N/A
+M15-DB-185	sem	p_notify_subscribers	PROCEDURE	Sends notifications of changes to webhooks.	M15-F187	IN change_id	Event Bus.	N/A
+M15-DB-186	sem	webhooks	TABLE	Registered webhook endpoints for changes.	M15-F187	webhook_id (PK), url, event_filter, secret	Pub/Sub mechanism.	N/A
+M15-DB-187	sem	v_data_quality_score	VIEW	Aggregates data quality metrics.	M15-F010	table_name, completeness, validity, consistency	DQ Dashboard.	N/A
+M15-DB-188	sem	p_prune_versions	PROCEDURE	Deletes old ontology versions (retention policy).	M15-F129	IN keep_last_n	Maintenance.	N/A
+M15-DB-189	sem	search_index	TABLE	Full-text search index for ontology terms.	M15-F017	term_uri, tsvector_content	GIN Index.	N/A
+M15-DB-190	sem	p_rebuild_search_index	PROCEDURE	Rebuilds the search index.	M15-F017	No args	Scheduled task.	N/A
+M15-DB-191	sem	v_schema_diff	VIEW	Compares current schema with previous version.	M15-F022	element, change_type, old_value, new_value	Release Notes.	N/A
+M15-DB-192	sem	v_api_compatibility	VIEW	Checks backward compatibility of API changes.	M15-F028	endpoint, breaking_change, severity	API Manager.	N/A
+M15-DB-193	sem	v_fraud_signals	VIEW	Semantic signals relevant to fraud.	M15-F141	transaction_id, signal_type, confidence	Fraud Engine.	N/A
+M15-DB-194	sem	v_regulatory_updates	VIEW	Recent updates from external standards bodies.	M15-F018	standard, version, release_date	Compliance Feed.	N/A
+M15-DB-195	sem	p_analyze_term_usage	PROCEDURE	Analyzes how often a term is used in the DB.	M15-F055	IN term_uri, OUT usage_count	Cleanup helper.	N/A
+M15-DB-196	sem	v_system_architecture	VIEW	Semantic view of system components.	M15-F072	component, interface, dependency	Architecture View.	N/A
+M15-DB-197	sem	p_generate_documentation	PROCEDURE	Generates HTML docs from ontology.	M15-F028	OUT html_path	Doc Generator.	N/A
+M15-DB-198	sem	v_deployment_readiness	VIEW	Checks if ontology is ready for deploy.	M15-F008	check_name, status, details	CI/CD Gate.	N/A
+M15-DB-199	sem	p_lock_term	PROCEDURE	Acquires a lock on a term for editing.	M15-F074	IN term_uri, IN user_id	Editor helper.	N/A
+M15-DB-200	sem	v_audit_log_summary	VIEW	High-level summary of audit logs.	M15-F035	date, total_changes, by_user	Dashboard summary.	N/A
+M15-DB-201	sem	term_aliases	TABLE	Stores alternative names or legacy codes for terms.	M15-F046	term_uri, alias	Search optimization.	N/A
+M15-DB-202	sem	p_merge_branch	PROCEDURE	Merges a branch of ontology changes to main.	M15-F045	IN branch_name	Workflow.	N/A
+M15-DB-203	sem	v_orphan_classes	VIEW	Classes with no instances.	M15-F030	class_uri	Maintenance.	N/A
+M15-DB-204	sem	v_mapping_conflicts	VIEW	Conflicts between mapping rules.	M15-F005	source_uri, conflicting_targets	QA.	N/A
+M15-DB-205	sem	p_validate_json_ld	PROCEDURE	Validates a JSON-LD document against context.	M15-F010	IN json_ld, OUT is_valid	API validation.	N/A
+M15-DB-206	sem	external_systems	TABLE	Registry of systems integrated via semantic layer.	M15-F005	system_id (PK), name, type, status	Inventory.	N/A
+M15-DB-207	sem	v_integration_matrix	VIEW	Matrix of terms mapped to external systems.	M15-F005	term_uri, system, mapped (bool)	Coverage analysis.	N/A
+M15-DB-208	sem	p_trigger_sync	PROCEDURE	Triggers sync to specific external system.	M15-F018	IN system_id	Manual sync.	N/A
+M15-DB-209	sem	v_term_lineage	VIEW	Tracks origin and history of a term.	M15-F016	term_uri, created_ver, modified_ver	Governance.	N/A
+M15-DB-210	sem	p_cleanup_unused_terms	PROCEDURE	Soft deletes terms not used in X days.	M15-F099	IN days_threshold	Maintenance.	N/A

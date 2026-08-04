@@ -1,0 +1,413 @@
+
+Module M25: Vendor Invoice Allocation (VIA) & Reconciliation Engine
+
+Summary
+The Vendor Invoice Allocation (VIA) system is a specialized, privacy-preserving sub-ledger and reconciliation engine within the PARI architecture. While PARI handles the anonymous transfer of funds, VIA bridges the gap between these cryptographic payments and the rigorous demands of B2B accounting, procurement, and tax compliance. It automates the 3-way matching of Purchase Orders (POs), Vendor Invoices, and PARI Payments, utilizing Zero-Knowledge Proofs (ZKPs) to verify that a payment obligation has been settled without exposing the underlying payer’s identity to unauthorized parties. VIA manages platform entitlements (e.g., Bloomberg, LSEG), stores critical contract metadata, and provides a direct integration layer for Accounts Payable (AP) systems like Concur. Engineered under CMMI Level 5 standards, VIA ensures data integrity, auditability, and fiscal traceability while respecting the core PARI tenet of payer anonymity.
+
+Scope
+The scope of Module M25 includes:
+
+     Ingestion: Automated ingestion of ISO 20022 (pacs.008/009), UBL 2.1, and PDF invoices via API/SFTP.
+     Parsing & Extraction: AI-driven extraction of line-item details, tax codes, and bank details.
+     Cryptographic Reconciliation: Linking blinded PARI transaction hashes to invoice hashes using ZK-Proofs of Payment.
+     3-Way Matching: Automated logic to match PO ↔
+     Invoice
+    ↔
+     Payment/Receipt with configurable tolerance rules.
+     Entitlement Management: Tracking software/data subscriptions (Bloomberg, Refinitiv) linked to vendor contracts.
+     Tax Compliance: Input VAT validation, Intrastat reporting, and cross-border tax rule application.
+     ERP Integration: Bi-directional sync with SAP, Oracle, and Concur for master data and journal entries.
+     Reporting: Executive dashboards for working capital, vendor performance, and accruals.
+
+
+Business Case
+
+Modern enterprises suffer from a "Procurement-Payment Disconnect." Traditional payment rails (SWIFT/SEPA) carry identifying data, creating privacy risks and security liabilities, while privacy-preserving cash or crypto lacks the structured metadata required for B2B accounting (tax deduction, reconciliation, audit). Manual reconciliation is slow (2-3 weeks), error-prone (up to 15% discrepancy rates), and expensive.
+
+VIA solves this by acting as a cryptographic translator. It allows a company to pay a vendor anonymously via PARI (protecting supply chain secrecy) while simultaneously generating a verifiable, audit-proof proof that settles the specific invoice in the ERP. This eliminates the privacy-tax trade-off. Furthermore, by automating the ingestion and 3-way matching, VIA reduces Days Sales Outstanding (DSO) and manual processing costs by over 70%. It ensures that VAT recoverability is never jeopardized by payment anonymity, a critical requirement for EU B2B commerce.
+
+
+KPIs
+     Invoice-Payment Match Rate: >98% automation without human intervention.
+     Reconciliation Latency: <1 minute from payment confirmation to ERP posting.
+     Input VAT Accuracy: ≥99.9% calculation correctness against local tax directives.
+     Cost Per Invoice: Reduced by 80% compared to manual AP processing.
+     Exception Rate: <2% of invoices requiring manual review.
+     Entitlement Audit Speed: Real-time visibility into license utilization vs. contract terms.
+
+
+Stakeholder Insights
+
+Stakeholder	Concern	Implications
+CFO / Head of Finance	Auditability & Cash Flow	Needs assurance that anonymous payments are legally valid expenses and that cash forecasts are based on real-time data.
+Procurement Officer	Contract Compliance	Requires proof that vendors are paid according to contract terms to ensure service continuity (e.g., Bloomberg terminals).
+Tax Authority (Local/EU)	VAT Fraud & Reporting	Demands proof that input VAT claims are backed by valid, settled transactions, even if the payer is anonymous.
+Vendor / Supplier	Payment Recognition	Must be able to identify which invoice a blinded PARI payment settles without demanding the customer's identity be revealed.
+AP Clerk	Error Resolution	Needs intuitive interfaces to resolve the <2% of exceptions that the AI engine flags.
+Compliance Officer (GDPR)	Data Minimization	Requires assurance that payer identity is not leaked during the invoice-to-payment matching process.
+
+Knowledge Representation Graph
+
+graph TD
+    subgraph PARI_Core
+        P[Payer Wallet]
+        E[Exchange Node]
+        M[Merchant Wallet]
+        TX[PARI Transaction - Blinded]
+    end
+
+    subgraph External_Entities
+        PO[ERP: Purchase Order]
+        INV[Vendor: ISO 20022 Invoice]
+        ENT[Platform: Bloomberg/LSEG]
+    end
+
+    subgraph M25_VIA_Engine
+        ING[Ingestion & OCR Parser]
+        ZKP[Zero Knowledge Proof Generator]
+        MATCH[3-Way Matching Engine]
+        VR[Validation & Tax Rules]
+        ERP_SYNC[ERP Integration Layer]
+        RPT[Reporting Dashboard]
+    end
+
+    PO -->|Reference Data| ING
+    INV -->|Structured Data| ING
+    P -->|Initiates| TX
+    TX -->|Settles| M
+
+    M -->|Payment Hash & Invoice Proof| ING
+    ING -->|Extracted Line Items| MATCH
+    ZKP -->|Verifies Tx covers Invoice| MATCH
+    VR -->|Validates VAT/Currency| MATCH
+
+    MATCH -->|Pass| ERP_SYNC
+    ERP_SYNC -->|Journal Entry| PO
+    MATCH -->|Exception| RPT
+    ENT -->|Usage Stats| ERP_SYNC
+
+Persona
+
+Persona	Who They Are	What They Do	Assumptions
+Eleanor Vance	Chief Financial Officer (CFO)	Oversees financial strategy, risk, and compliance. Reviews high-level cash positions and audit trails.	Assumes the system is compliant with GAAP/IFRS. Demands strict separation of duties.
+David Chen	Procurement Manager	Manages vendor relationships and contracts. Ensures the company has access to necessary tools (Bloomberg, LSEG).	Needs to know if a payment failed so vendor services aren't cut off. Unconcerned with cryptographic details.
+Sarah Al-Fayed	Senior AP Accountant	Handles exceptions, performs reconciliations for complex invoices, and manages tax reporting.	Prefers a UI that highlights discrepancies. Needs traceability from Invoice to Payment Hash.
+Marcus Thorne	Vendor/Supplier	External entity selling services/goods. Issues invoices and receives payments.	Wants to be paid anonymously for privacy but needs to reconcile his own books automatically.
+
+Comprehensive List of Features
+ID	Feature	Description	Business Case	AI/ML Algorithms	KPIs	Primary Users
+F01	ISO 20022 Ingestion Pipeline	Automated ingestion of ISO 20022 pain.001 (credit transfer) and pain.002 (status) messages linked to invoices.	Ensures seamless integration with global banking standards, reducing manual data entry errors.	N/A	Ingestion Success Rate (100%)	IT Admins
+F02	UBL 2.1 Invoice Parser	Parses Universal Business Language invoices into internal JSON schema for processing.	Supports open-standard e-invoicing mandates (e.g., EU, PEPPOL).	NLP (Entity Extraction)	Parse Accuracy (>99.5%)	System
+F03	PDF/OCR Invoice Extraction	Uses OCR and Layout Analysis to extract data from non-standard PDF invoices.	Allows processing of the 40% of invoices still sent as unstructured PDFs.	CNNs (ResNet), Transformers (LayoutLM)	Extraction F1 Score (>95%)	AP Clerks
+F04	3-Way Matching Engine	Core logic matching PO, Goods Receipt Note (GRN), and Invoice amounts/quantities.	Prevents overpayment and ensures goods were actually received before payment.	Rule-Based Logic	Match Auto-Approve Rate (>90%)	System
+F05	Blind Payment Verification	Verifies a PARI blinded transaction signature against the invoice hash without revealing identity.	Enables privacy-preserving payments while ensuring mathematical proof of settlement.	Zero-Knowledge Proofs (zk-SNARKs)	Verification Latency (<200ms)	System
+F06	Invoice Duplicate Detection	Identifies potential duplicate invoices using fuzzy matching on amount, vendor, and date.	Eliminates fraudulent double payments.	Random Forest, Locality Sensitive Hashing	False Positive Rate (<1%)	AP Clerks
+F07	Tolerance Configuration	Configure acceptable price/quantity variances (e.g., +/- 5% or €50) per vendor or category.	Allows flexibility for minor discrepancies without halting workflow.	N/A	Configuration Compliance	Managers
+F08	Input VAT Validation	Validates VAT IDs (VIES) and tax rates against local laws for input tax deduction.	Ensures company recovers valid VAT and avoids fines.	Deterministic Finite Automata (Regex)	VAT Validity (100%)	Tax Team
+F09	Currency & FX Revaluation	Converts foreign currency invoices to base currency using historical ECB rates for posting.	Accurate financial reporting in multi-entity environments.	Time-Series Interpolation	FX Diff Variance (<0.01%)	Accountants
+F10	Vendor Master Data Sync	Bi-directional sync of vendor details (bank accounts, tax IDs) from ERP (SAP/Oracle).	Prevents "Island of Data" problems where contact info is outdated.	Anomaly Detection (Data Drift)	Sync Error Rate (0%)	IT Admins
+F11	Cost Center Allocation	Automatically allocates invoice costs to specific cost centers based on PO or GL mapping.	Enables granular budget tracking and P&L reporting.	Classification (SVM)	Allocation Accuracy (>98%)	Finance
+F12	Concur Expense Integration	Imports expense reports from Concur and matches them against corporate card transactions (PARI).	Streamlines T&E reimbursement and prevents double booking.	clustering (DBSCAN)	Match Rate (>95%)	Employees
+F13	Bloomberg Entitlement Tracker	Tracks active seats, licenses, and data feeds for Bloomberg/LSEG terminals.	Ensures the company pays only for what is used and audits vendor bills.	Time-Series Analysis	Utilization vs. Cost Score	Procurement
+F14	LSEG Workspace Manager	Manages user access and billing tiers for Refinitiv/LSEG platforms.	Optimizes spend on financial data subscriptions.	Regression Analysis	License Reclamation Rate	Procurement
+F15	Contract Metadata Store	Stores full contract terms (payment periods, penalties, renewal dates) linked to vendors.	Provides context for disputes and automates renewal alerts.	NER (Named Entity Recognition)	Contract Coverage (100%)	Legal/Procurement
+F16	Dynamic Discounting	Offers vendors early payment in exchange for a discount, calculated via PARI settlement speed.	Improves working capital and reduces supply chain costs.	Optimization Algorithms	Savings Achieved	CFO
+F17	Payment Proposal Generator	Generates a batch file of payments (PARI blind signatures) for approved invoices.	Automates the execution step, moving from "approved" to "paid".	Linear Programming	Proposal Generation Time	AP Clerks
+F18	Anonymized Audit Trail	Immutable log of all reconciliation events, stripping payer identity where necessary.	Satisfies auditors without violating GDPR/PARI privacy principles.	Hashing (SHA-3)	Audit Completeness	Auditors
+F19	Exception Workflow UI	User interface for AP staff to investigate and resolve matching failures.	Drives efficiency in handling the minority of failed matches.	N/A	Avg Resolution Time (<5 min)	AP Clerks
+F20	GRN (Goods Receipt) Matching	Matches invoices against physical inventory receipts (Warehouse management system).	Crucial for manufacturing/retail to prevent paying for non-existent stock.	N/A	Inventory Accuracy	Warehouse Mgr
+F21	ZK-Proof Generation	Generates a cryptographic proof that "Payment X covers Invoice Y".	The core privacy layer allowing unlinkable reconciliation.	zk-SNARKs / zk-STARKs	Proof Size (<2KB)	System
+F22	Vendor Onboarding Portal	Self-service portal for vendors to submit bank details, W-9s, and tax certificates.	Reduces administrative overhead for new vendor setup.	OCR/Classification	Onboarding Time (<24 hrs)	Vendors
+F23	Sanctions List Screening	Screens vendors and payments against global sanctions lists (OFAC, UN, EU).	Prevents regulatory fines and reputational damage.	Fuzzy String Matching	Screening Latency (<2s)	Compliance
+F24	Payment Status Tracker	Real-time status of PARI payments (Pending, Settled, Expired) linked to invoices.	Provides visibility to cash managers and vendors.	Event Sourcing	Status Freshness (<1s)	All
+F25	Automated Accruals Engine	Calculates accruals for goods received but not yet invoiced (GR/IR).	Ensures P&L accuracy during month-end close.	Predictive Analytics	Accrual Variance (<2%)	Accountants
+F26	Invoice Splitting	Splits a single large invoice into multiple payments or GL lines.	Handles complex billing scenarios or budget limits.	Constraint Solving	Split Accuracy	AP Managers
+F27	Invoice Aggregation	Combines multiple small invoices into a single payment batch.	Reduces transaction fees on payment rails.	Bin Packing Algorithm	Fee Reduction %	Treasury
+F28	Multi-Ledger Support	Supports posting to multiple different ERP ledgers simultaneously.	Facilitates centralized AP for decentralized subsidiaries.	Distributed Transactions	Post Success Rate	IT Admins
+F29	Tax Jurisdiction Detector	Automatically determines tax jurisdiction based on ship-to/bill-to addresses.	Ensures correct VAT/GST/Sales tax application.	Geo-location Services	Tax Compliance Rate	Tax Team
+F30	Peer-to-Peer Invoice Correction	Secure messaging system between AP and Vendor to resolve invoice disputes.	Reduces email clutter and keeps context linked to the invoice.	N/A	Resolution Time	Vendors/AP
+F31	Early Payment Prediction	Predicts probability of invoice being paid early based on historical patterns.	Helps treasury forecast cash outflows more accurately.	LSTM (Time Series)	Prediction Accuracy (>85%)	Treasury
+F32	Fraud Score Engine	Scores invoices for fraud risk (e.g., abnormal amounts, new vendor).	Flags potential internal or external fraud schemes.	Isolation Forest	Fraud Detection Recall	Security
+F33	Approval Chain Routing	Dynamically routes invoices for approval based on amount, department, or policy.	Enforces Segregation of Duties (SoD).	Graph Algorithms	Route Accuracy	Managers
+F34	Electronic Signature Capture	Captures digital signatures for invoice approvals.	Provides non-repudiation for authorization.	Public Key Infrastructure	Signature Validity	Approvers
+F35	Remittance Advice Generator	Automatically sends remittance advice to vendors via email/API upon payment.	Helps vendors reconcile their books, reducing support calls.	N/A	Delivery Success Rate	System
+F36	General Ledger (GL) Mapping	Maps invoice line items to specific General Ledger codes.	Essential for financial reporting.	Decision Trees	Mapping Accuracy	Accountants
+F37	Budget Consumption Check	Checks real-time budget availability before approving an invoice.	Prevents overspending and enforces budget controls.	N/A	Budget Variance	Budget Owners
+F38	Reconciliation Dashboard	Visualizes open items, aging buckets, and matching status.	Provides executive overview of AP health.	Data Visualization	Data Freshness	CFO/Controller
+F39	Historical Data Archiver	Moves old reconciliation data to cold storage (S3/Glacier) per retention policy.	Reduces database load and storage costs.	N/A	Archive Success Rate	DBA
+F40	API Rate Limiting	Protects VIA APIs from abuse or overload.	Ensures system stability.	Token Bucket	Uptime (99.99%)	IT
+F41	Idempotency Keys	Ensures that retrying a failed invoice upload does not create duplicates.	Critical for distributed system reliability.	UUID Generation	Duplicate Prevention	Developers
+F42	Field-Level Encryption	Encrypts sensitive fields (bank account numbers) at rest.	Enhances security posture beyond PARI's transport layer privacy.	AES-256	Compliance Score	Security
+F43	Role-Based Access Control (RBAC)	Restricts access to financial data based on user roles.	Enforces internal security policies.	N/A	Access Violations	Admins
+F44	Change Data Capture (CDC)	Captures changes from ERP systems in real-time.	Ensures VIA is always in sync with the source of truth.	Log Parsing	Sync Latency (<1s)	IT
+F45	Custom Field Builder	Allows admin to define custom fields on invoices/vendors.	Adapts to unique business requirements without code changes.	N/A	Flexibility Score	Admins
+F46	Invoice Line Item Matching	Matches individual line items on PO, Receipt, and Invoice.	Higher precision than header-level matching.	Hungarian Algorithm	Line Match Accuracy	System
+F47	Unit of Measure (UoM) Converter	Converts UoMs (e.g., CS to EA) automatically for matching.	Handles discrepancies in how vendors vs. buyers list quantities.	Conversion Logic	Conversion Accuracy	System
+F48	Price Variance Analysis	Calculates and reports differences between PO price and Invoice price.	Identifies price hikes or errors.	Statistical Analysis	Alert Accuracy	Buyers
+F49	Quantity Variance Analysis	Compares ordered vs. invoiced vs. received quantities.	Prevents theft or billing errors.	Statistical Analysis	Alert Accuracy	Warehouse
+F50	Vendor Performance Scoring	Scores vendors on invoice accuracy, delivery speed, and pricing.	Informs sourcing decisions.	Weighted Average	Score Correlation	Procurement
+F51	Self-Healing Data	Automatically corrects common data entry errors (e.g., missing VAT ID).	Reduces manual touchpoints.	NLP / Grammar Correction	Auto-Heal Rate	System
+F52	Batch Valuation	Groups invoices for valuation in specific currencies (e.g., USD).	Helps in FX hedging strategies.	Monte Carlo Simulation	Valuation Error	Treasury
+F53	Withholding Tax Calculation	Automatically calculates withholding tax based on vendor status and jurisdiction.	Ensures compliance with tax deduction at source laws.	Rule Engine	Tax Accuracy	Tax Team
+F54	Negative Invoice Handling	Processes credit notes and refunds correctly.	Ensures returns and discounts are accounted for.	Sign Logic	Balance Accuracy	Accountants
+F55	Intercompany Reconciliation	Matches invoices between entities of the same parent company.	Eliminates intercompany balances for consolidated reporting.	Graph Matching	Elimination Rate	Consolidation
+F56	PARI Coin Selector	Selects the optimal blinded coins/denominations to settle an invoice.	Minimizes the number of transactions and fees.	Knapsack Algorithm	Fee Efficiency	System
+F57	Merchant Identity Verification	Verifies the merchant's public key matches the invoice issuer.	Prevents man-in-the-middle attacks on the invoice supply chain.	PKI (Web of Trust)	Verification Time	Security
+F58	Audit Log Export	Exports audit logs to SIEM tools (e.g., Splunk) for security monitoring.	Centralized security event management.	N/A	Export Success Rate	Security
+F59	Scheduled Maintenance Windows	Automates system maintenance tasks (indexing, vacuuming).	Ensures performance consistency.	Cron	Maintenance Impact	DBA
+F60	Dispute Ticketing Integration	Integrates with Jira/ServiceNow for complex dispute resolution.	Tracks long-running issues.	REST API	Integration Latency	Support
+F61	Supply Chain Finance Link	Sends approved invoices to SCF platforms for financing.	Helps vendors get paid early by third parties.	N/A	Financed Volume	Treasury
+F62	Sustainability Scoring	Scores vendors based on ESG metrics provided in invoices/metadata.	Supports corporate sustainability goals.	NLP (Sentiment)	ESG Data Coverage	CSR
+F63	Reconciliation Re-run	Allows re-running the matching engine for a specific period with new rules.	Fixes historical errors efficiently.	Temporal Queries	Re-run Success	Admins
+F64	Multi-Language Support	UI and document support for major languages (EN, DE, FR, ES).	Supports global operations.	N/A	Translation Accuracy	Global Users
+F65	Mobile Approval App	Allows managers to approve invoices via mobile device.	Reduces approval cycle times.	Biometric Auth	Mobile Adoption	Managers
+F66	Dark Mode Support	UI feature for reduced eye strain.	User experience improvement.	N/A	User Satisfaction	Users
+F67	Keyboard Shortcuts	Power-user features for data entry clerks.	Increases efficiency.	N/A	Task Completion Time	Clerks
+F68	Context-Sensitive Help	Embedded help documentation based on the user's current screen.	Reduces training costs.	N/A	Help Usage	Users
+F69	Data Export Wizard	Guided export of data to Excel/CSV.	Ad-hoc reporting capability.	N/A	Export Speed	Users
+F70	Printable Remittance Advice	Generates PDF remittance advice for physical mailing.	Backup for vendors with limited digital access.	PDF Generation	Render Time	AP Clerks
+F71	Reconciliation Comment Thread	Allows users to add notes to specific reconciliation events.	Knowledge retention and handover.	N/A	Comment Usage	Accountants
+F72	Alert Notification System	Sends alerts (Email/Slack) for critical events (failed payment, high variance).	Proactive management.	Event-Driven	Alert Latency	Users
+F73	Vendor Portal Dashboard	View status of invoices and payments for vendors.	Reduces vendor inquiries (calls/emails).	N/A	Portal Traffic	Vendors
+F74	Secure File Upload	Encrypted upload for invoices sent via vendor portal.	Security for sensitive documents.	TLS/Multipart	Upload Success	Vendors
+F75	Bulk Invoice Upload	Drag-and-drop multiple files for processing.	Efficiency for high-volume vendors.	Async Processing	Throughput	Vendors
+F76	Invoice Status Lookup	API for vendors to check payment status programmatically.	Enables vendor automation.	GraphQL	API Latency	Devs
+F77	Payment History Export	API for vendors to download their payment history.	Vendor reconciliation support.	CSV Generation	Download Time	Vendors
+F78	Vendor Self-Service Update	Allows vendors to update their contact info/bank details (with approval).	Reduces admin workload.	Workflow Engine	Approval Cycle	AP
+F79	Document Versioning	Stores history of changes to invoice/contract data.	Audit trail necessity.	Object Versioning	Version Integrity	System
+F80	Tagging System	Allows users to tag invoices/projects for custom filtering.	Flexible organization.	N/A	Tag Usage	Users
+F81	Advanced Search	Boolean search across all invoice fields and attachments.	Quick data retrieval.	Inverted Index	Search Time (<1s)	Users
+F82	Saved Searches	Users can save common search criteria.	Productivity booster.	N/A	Saved Count	Users
+F83	Pivot Table Builder	Allows finance users to create pivot reports on the fly.	Ad-hoc analysis without IT.	OLAP Engine	Render Time	Analysts
+F84	Drill-Down Capability	From summary dashboards down to individual invoice lines.	Root cause analysis.	N/A	Drill-Down Speed	Auditors
+F85	Trend Analysis Charts	Visualizes spending trends over time.	Strategic decision making.	Regression	Trend Accuracy	CFO
+F86	Vendor Spend Ranking	Ranks vendors by spend volume.	Negotiation leverage identification.	Sorting Algorithm	Ranking Accuracy	Procurement
+F87	Aging Report Generator	Standard accounts payable aging report.	Cash flow management.	N/A	Report Time	Controllers
+F88	Cash Requirement Forecast	Predicts cash needed for open invoices in the next 30/60/90 days.	Treasury planning.	Time Series Forecasting	Forecast Error	Treasury
+F89	VAT Reporting	Generates reports for VAT returns (e.g., EU Sales List).	Tax filing support.	Aggregation Logic	Report Accuracy	Tax
+F90	Intrastat Reporting	Generates reports for trade statistics between EU states.	Customs compliance.	Validation Rules	Compliance Score	Tax
+F91	Cost of Ownership Report	Calculates total cost of vendor relationships (TCO).	Strategic sourcing.	Summation Logic	TCO Accuracy	Procurement
+F92	Invoice Volume Metrics	Tracks number of invoices processed per day/week.	Capacity planning.	Time Series	Planning Accuracy	Ops
+F93	Cycle Time Tracking	Measures time from invoice receipt to payment.	Process efficiency monitoring.	Event Timestamps	Average Cycle Time	Managers
+F94	User Activity Log	Tracks all user actions in the system.	Security and productivity audit.	N/A	Log Completeness	Auditors
+F95	System Health Check	Dashboard showing CPU, memory, and DB status.	Operational monitoring.	N/A	Refresh Rate	DevOps
+F96	Error Queue Monitoring	Real-time view of failed processes.	Operational excellence.	N/A	Alert Threshold	DevOps
+F97	Database Connection Pooling	Efficient management of DB connections.	Performance scalability.	HikariCP	Connection Wait Time	System
+F98	Caching Layer (Redis)	Caches frequently accessed data (vendor lists, tax rates).	Sub-millisecond response times.	LRU Cache	Cache Hit Ratio	System
+F99	Asynchronous Processing	Heavy tasks (OCR, PDF generation) run in background.	UI responsiveness.	Message Queues	Task Queue Length	Users
+F100	Graceful Degradation	System remains partially functional during outages.	High availability.	Circuit Breakers	Availability %	Users
+F101	Data Anonymization	Anonymizes data for non-production environments.	GDPR compliance for dev/test.	K-Anonymity	Anonymization Strength	Privacy
+F102	Feature Flagging	Enables/disables features without deployment.	Continuous delivery safety.	N/A	Toggle Latency	Devs
+F103	A/B Testing Framework	Tests UI changes on subsets of users.	Data-driven UX improvements.	Statistical Analysis	Test Significance	Product
+F104	Performance Profiling	Identifies slow code paths.	Optimization.	APM Tools	Latency Reduction	Devs
+F105	Memory Leak Detection	Monitors for memory leaks in long-running processes.	Stability.	Heap Analysis	Leak Detection	Devs
+F106	Thread Dump Analysis	Analyzes thread states for deadlock.	Troubleshooting.	JVM Tools	Resolution Time	Devs
+F107	Dependency Management	Tracks software library versions.	Security patching.	SBOM	Vulnerability Count	Security
+F108	Container Orchestration	Manages deployment in Kubernetes.	Scalability and resilience.	K8s API	Deployment Time	DevOps
+F109	Secrets Management	Stores API keys and passwords securely.	Security best practice.	Vault	Access Attempts	Security
+F110	Log Aggregation	Centralizes logs from all microservices.	Debugging and monitoring.	ELK Stack	Index Rate	DevOps
+F111	Distributed Tracing	Tracks requests across microservices.	Latency analysis.	Jaeger/Zipkin	Trace Completeness	Devs
+F112	Synthetic Monitoring	Simulates user transactions to check uptime.	Proactive availability.	Selenium/Puppeteer	Uptime %	DevOps
+F113	Chaos Engineering	Intentionally breaks parts of the system to test resilience.	Improves fault tolerance.	Gremlin	Recovery Time	DevOps
+F114	Incident Response Playbooks	Automated steps for common incidents.	Faster MTTR.	Runbooks	Execution Accuracy	Ops
+F115	Post-Mortem Analysis	Structured review of incidents.	Blameless learning.	N/A	Report Completion	Ops
+F116	Backup Verification	Automated testing of backup restores.	Disaster recovery readiness.	Cron	Restore Success	DBA
+F117	Failover Testing	Tests switching to secondary data center.	Business continuity.	DNS Failover	Cutover Time	Ops
+F118	Capacity Planning	Predicts hardware needs based on growth.	Prevents performance degradation.	Linear Regression	Forecast Accuracy	Ops
+F119	Cost Monitoring	Tracks cloud spend (AWS/Azure).	Budget adherence.	CloudWatch	Cost Variance	Finance
+F120	SLO/SLI Dashboard	Visualizes Service Level Objectives and Indicators.	Reliability engineering.	SLO Calculation	Error Budget	SREs
+F121	Error Budget Consumption	Calculates remaining error budget based on incidents.	Release gating.	Time Series	Budget Accuracy	SREs
+F122	Change Management Calendar	Schedules deployments and maintenance windows.	Coordination.	N/A	Conflict Rate	Release Mgr
+F123	Compliance Checklist	Automated checks for regulatory compliance (SOX, GDPR).	Audit readiness.	Checklist Engine	Check Pass Rate	Compliance
+F124	Data Retention Policy	Auto-deletes data after legal retention period expires.	Legal compliance.	Cron	Retention Accuracy	Legal
+F125	Data Residency Control	Ensures data stays within specific geographic borders.	Sovereignty compliance.	Geo-Fencing	Violation Count	Compliance
+
+
+
+Comprehensive List of Tables
+ID	schema_name	object_name	object_type	Description	Business Case	Feature Reference	column_names	constraints / notes	junction_tables	who_they_are	what_they_do	KPI
+T01	via_core	vendor_master	Table	Central repository for all vendor/supplier information.	Single source of truth for vendor data, enabling accurate payments and compliance.	F10, F22	vendor_id (PK), tax_id, legal_name, country_code, status	UNIQUE(tax_id, country_code)	N/A	System	Stores vendor identity	Data Accuracy
+T02	via_core	vendor_bank_details	Table	Stores bank account details for payments.	Securely handles payment routing while enabling PARI blind address mapping.	F17	bank_id (PK), vendor_id (FK), iban, bic, is_blind_pari_addr	CHECK(iban_valid)	N/A	Payment Engine	Routes funds	Routing Success
+T03	via_core	invoice_header	Table	Main table for invoice records.	Core entity for the AP process, capturing high-level fiscal data.	F02, F03	invoice_id (PK), vendor_id (FK), invoice_num, invoice_date, total_amt, currency, status	UNIQUE(vendor_id, invoice_num)	N/A	System	Tracks invoices	Integrity
+T04	via_core	invoice_line_items	Table	Detailed line items for each invoice.	Enables granular matching, GL coding, and inventory verification.	F46	line_id (PK), invoice_id (FK), product_code, description, qty, unit_price, vat_rate	FK(invoice_id)	N/A	System	Breaks down costs	Line Accuracy
+T05	via_core	purchase_order	Table	Purchase Orders issued by the company.	Commitment against which invoices are matched (3-way match).	F04	po_id (PK), vendor_id (FK), po_num, issue_date, total_amt, status	UNIQUE(vendor_id, po_num)	N/A	Procurement	Defines obligation	PO Coverage
+T06	via_core	po_line_items	Table	Line items for Purchase Orders.	Reference point for quantity and price matching.	F20	po_line_id (PK), po_id (FK), sku, qty, unit_price, gl_code	FK(po_id)	N/A	Procurement	Specifies order	Match Rate
+T07	via_core	goods_receipt	Table	Record of goods physically received.	The "Receipt" in the 3-way match.	F20	gr_id (PK), po_id (FK), receipt_date, qty_received	FK(po_id)	N/A	Warehouse	Confirms delivery	Inventory Accuracy
+T08	via_core	payment_batch	Table	Groups of payments prepared for execution.	Enables batch execution for efficiency and tracking.	F17	batch_id (PK), execution_date, total_amt, status, created_by	CHECK(total_amt > 0)	N/A	Treasury	Manages payouts	Batch Success
+T09	via_core	payment_instructions	Table	Individual payment records within a batch.	Links specific invoices to specific PARI transactions.	F17	payment_id (PK), batch_id (FK), invoice_id (FK), amount, blind_coin_hash	FK(invoice_id)	N/A	Payment Engine	Settles debt	Execution Time
+T10	via_core	reconciliation_log	Table	Audit trail of matching attempts and results.	Critical for auditors to see why an invoice was paid or held.	F04, F05	log_id (PK), invoice_id (FK), match_type, status, timestamp, zkp_proof	INDEX(timestamp)	N/A	Auditors	Tracks decisions	Audit Completeness
+T11	via_core	tax_rates	Table	Stores valid tax rates by jurisdiction.	Ensures VAT is calculated correctly per local law.	F08	tax_rate_id (PK), jurisdiction_code, rate_pct, valid_from, valid_to	CHECK(rate_pct >= 0)	N/A	System	Calculates Tax	Tax Accuracy
+T12	via_core	cost_center	Table	Organizational cost centers.	Allocation target for expenses.	F11	cost_center_id (PK), code, manager_id, budget_limit	UNIQUE(code)	N/A	Finance	Budgets spend	Budget Variance
+T13	via_core	cost_allocation	Table	Allocates invoice amounts to cost centers.	Splits costs for shared services or cross-dept charges.	F11	alloc_id (PK), invoice_id (FK), cost_center_id (FK), amount_pct	FK(invoice_id)	N/A	Accountants	Assigns costs	Allocation Accuracy
+T14	via_core	exchange_rates	Table	Daily FX rates.	Used for revaluing foreign invoices.	F09	rate_id (PK), from_curr, to_curr, rate, date_set	UNIQUE(from_curr, to_curr, date_set)	N/A	Treasury	Converts currency	FX Diff
+T15	via_core	entitlement_contract	Table	Contracts for data platforms (Bloomberg, LSEG).	Stores terms for usage-based billing verification.	F13, F14	contract_id (PK), vendor_id (FK), platform_name, start_date, end_date, seat_limit	FK(vendor_id)	N/A	Procurement	Defines licenses	License Compliance
+T16	via_core	entitlement_usage	Table	Daily usage stats for entitlements.	Actual usage data matched against invoices.	F13	usage_id (PK), contract_id (FK), report_date, active_seats, api_calls	FK(contract_id)	N/A	System	Tracks usage	Utilization Rate
+T17	via_core	exception_queue	Table	Invoices that failed automated processing.	Worklist for AP clerks.	F19	exception_id (PK), invoice_id (FK), error_code, assigned_to, priority	INDEX(priority)	N/A	AP Clerk	Manages failures	Resolution Time
+T18	via_core	approval_workflow	Table	Defines approval chains.	Enforces Segregation of Duties.	F33	workflow_id (PK), department_id, amount_threshold, sequence	UNIQUE(sequence)	N/A	Compliance	Enforces rules	SoD Compliance
+T19	via_core	approval_history	Table	Log of approval actions.	Non-repudiation of authorization.	F33	history_id (PK), invoice_id (FK), approver_id, action, timestamp, comment	FK(invoice_id)	N/A	Auditors	Tracks approvals	Audit Trail
+T20	via_core	general_ledger	Table	Target GL codes for posting.	Chart of Accounts mapping.	F36	gl_code (PK), description, account_type, balance_sheet_item	UNIQUE(gl_code)	N/A	Finance	Defines CoA	Posting Accuracy
+T21	via_core	invoice_gl_mapping	Table	Maps invoices/lines to GL codes.	Generates journal entries.	F36	map_id (PK), invoice_id (FK), line_id (FK), gl_code, debit_amt, credit_amt	FK(gl_code)	N/A	Accountant	Prepares entries	Posting Speed
+T22	via_core	audit_log	Table	Immutable log of system changes.	CMMI Level 5 traceability.	F18, F94	audit_id (PK), table_name, operation, user_id, timestamp, row_hash	CHECK(row_hash IS NOT NULL)	N/A	Security	Monitors access	Security Score
+T23	via_core	user_roles	Table	RBAC definitions.	Access control.	F43	role_id (PK), role_name, permissions	UNIQUE(role_name)	N/A	Admin	Manages access	Access Violations
+T24	via_core	user_role_assignment	Table	Maps users to roles.	User permissions.	F43	user_id (PK), role_id (FK)	FK(role_id)	N/A	Admin	Grants rights	Security
+T25	via_core	duplicate_check_log	Table	Results of duplicate detection AI.	Fraud prevention.	F06	check_id (PK), invoice_id (FK), potential_dup_id, similarity_score	INDEX(similarity_score)	N/A	System	Prevents fraud	Fraud Rate
+T26	via_core	attachments	Table	Stores metadata for files (PDFs).	Document management.	F03	attach_id (PK), invoice_id (FK), file_path, file_hash, upload_ts	FK(invoice_id)	N/A	System	Stores files	Retrieval Speed
+T27	via_core	payment_channel	Table	Supported payment methods (PARI, SEPA, SWIFT).	Routing logic.	F01	channel_id (PK), name, is_anonymous, processing_days	UNIQUE(name)	N/A	Treasury	Defines rails	Availability
+T28	via_core	vendor_performance	Table	Scores vendors.	Procurement analytics.	F50	score_id (PK), vendor_id (FK), period, quality_score, delivery_score	FK(vendor_id)	N/A	Procurement	Evaluates vendors	Score Accuracy
+T29	via_core	dynamic_discount	Table	Offers for early payment.	Working capital optimization.	F16	offer_id (PK), invoice_id (FK), discount_pct, deadline	FK(invoice_id)	N/A	Treasury	Manages terms	Savings %
+T30	via_core	sanctions_screening	Table	Screening results.	AML compliance.	F23	screen_id (PK), invoice_id (FK), vendor_id (FK), list_name, match_status, ts	INDEX(ts)	N/A	Compliance	Checks laws	Screening Latency
+T31	via_core	zkp_proof_store	Table	Stores Zero Knowledge Proofs.	Privacy layer.	F05, F21	proof_id (PK), invoice_id (FK), payment_id (FK), proof_blob, verification_status	FK(invoice_id)	N/A	Crypto	Verifies privacy	Proof Validity
+T32	via_core	remittance_advice	Table	Generated remittance documents.	Vendor communication.	F35	advice_id (PK), payment_id (FK), generation_ts, delivery_status	FK(payment_id)	N/A	System	Notifies vendors	Delivery Rate
+T33	via_core	erp_sync_log	Table	Status of ERP integration.	System health.	F10	sync_id (PK), erp_system, object_type, direction, status, ts	INDEX(ts)	N/A	IT Admin	Monitors ERP	Sync Success
+T34	via_core	accruals	Table	Calculated accruals (GR/IR).	Month-end close support.	F25	accrual_id (PK), invoice_id (FK), estimated_amt, period	FK(invoice_id)	N/A	Accountant	Estimates cost	Accrual Variance
+T35	via_core	fiscal_year	Table	Defines fiscal periods.	Reporting backbone.	F36	fiscal_year_id (PK), year, start_date, end_date, is_closed	CHECK(end_date > start_date)	N/A	Finance	Defines time	Period Accuracy
+T36	via_core	currency	Table	Valid ISO 4217 currencies.	Data validation.	F09	currency_code (PK), name, symbol	UNIQUE(currency_code)	N/A	System	Validates money	Validation Rate
+T37	via_core	budget	Table	Departmental budgets.	Cost control.	F37	budget_id (PK), cost_center_id (FK), fiscal_year_id (FK), limit_amt	FK(cost_center_id)	N/A	Finance	Limits spend	Budget Adherence
+T38	via_core	invoice_comment	Table	User comments on invoices.	Collaboration.	F71	comment_id (PK), invoice_id (FK), user_id (FK), text, ts	FK(invoice_id)	N/A	Users	Communicates	Collaboration Rate
+T39	via_core	notification_queue	Table	Pending alerts.	User engagement.	F72	notify_id (PK), user_id (FK), message, status, ts	INDEX(status)	N/A	System	Sends alerts	Alert Latency
+T40	via_core	data_retention	Table	Retention policies.	Legal compliance.	F124	policy_id (PK), object_type, retention_years, action	UNIQUE(object_type)	N/A	Legal	Manages data	Compliance Score
+T41	via_core	uom_conversion	Table	Unit of Measure conversion factors.	Matching accuracy.	F47	from_uom, to_uom, factor	PRIMARY KEY(from_uom, to_uom)	N/A	System	Converts units	Conversion Accuracy
+T42	via_core	invoice_tag	Table	Tags for categorization.	Flexible reporting.	F80	tag_id (PK), label, color	UNIQUE(label)	N/A	Users	Organizes data	Usage Count
+T43	via_core	invoice_tag_map	Table	Mapping of tags to invoices.	Many-to-many relationship.	F80	invoice_id (FK), tag_id (FK)	FK(invoice_id)	N/A	Users	Links tags	Link Integrity
+T44	via_core	recurring_invoice	Table	Template for recurring charges.	Automation.	F01	recurring_id (PK), vendor_id (FK), amount, interval, next_run_date	FK(vendor_id)	N/A	System	Automates billing	Automation Rate
+T45	via_core	credit_note	Table	Credit notes (negative invoices).	Returns management.	F54	cn_id (PK), invoice_id (FK), amount, reason	FK(invoice_id)	N/A	System	Handles returns	Balance Accuracy
+T46	via_core	intercompany_map	Table	Maps intercompany entities.	Consolidation.	F55	entity_a, entity_b, clearing_gl_code	UNIQUE(entity_a, entity_b)	N/A	Consolidation	Eliminates trade	Elimination %
+T47	via_core	scf_offers	Table	Supply Chain Finance offers.	Financing.	F61	offer_id (PK), invoice_id (FK), funder_id, rate	FK(invoice_id)	N/A	Treasury	Funds invoices	Financed Volume
+T48	via_core	esg_metrics	Table	ESG data from vendors.	Sustainability.	F62	metric_id (PK), invoice_id (FK), co2e, water_usage	FK(invoice_id)	N/A	CSR	Tracks impact	Data Coverage
+T49	via_core	withholding_tax	Table	Tax deduction rules.	Compliance.	F53	wt_id (PK), jurisdiction_code, vendor_type, rate_pct	UNIQUE(jurisdiction_code, vendor_type)	N/A	Tax	Deducts tax	Accuracy
+T50	via_core	api_keys	Table	API authentication keys.	Security.	F76	key_id (PK), user_id (FK), key_hash, scope	UNIQUE(key_hash)	N/A	System	Authenticates	Security Score
+T51	via_core	failed_jobs	Table	Background job failures.	Reliability.	F99	job_id (PK), job_type, payload, error_msg, failed_at	INDEX(failed_at)	N/A	DevOps	Tracks errors	Retry Success
+T52	via_core	scheduled_jobs	Table	Cron job definitions.	Automation.	F99	job_id (PK), name, cron_expr, last_run, next_run	UNIQUE(name)	N/A	System	Schedules tasks	Uptime
+T53	via_core	feature_flags	Table	Toggles for features.	CI/CD.	F102	flag_id (PK), flag_name, is_enabled, description	UNIQUE(flag_name)	N/A	DevOps	Controls rollout	Toggle Latency
+T54	via_core	performance_metrics	Table	APM data.	Monitoring.	F104	metric_id (PK), endpoint, avg_dur, p99_dur, ts	INDEX(ts)	N/A	DevOps	Tracks speed	Latency
+T55	via_core	error_budget	Table	SLO Error Budgets.	SRE.	F121	budget_id (PK), service_name, budget_target, current_consumed	UNIQUE(service_name)	N/A	SRE	Manages reliability	Uptime
+T56	via_core	incident_log	Table	Incidents and responses.	Post-mortems.	F114	incident_id (PK), severity, start_ts, end_ts, root_cause	INDEX(start_ts)	N/A	Ops	Tracks outages	MTTR
+T57	via_core	deployment_log	Table	Deployment history.	Change Mgmt.	F122	deploy_id (PK), version, env, deployer, ts	INDEX(ts)	N/A	DevOps	Tracks changes	Success Rate
+T58	via_core	secrets_vault	Table	Encrypted secrets.	Security.	F109	secret_id (PK), name, encrypted_value, version	UNIQUE(name)	N/A	Security	Protects keys	Access Logs
+T59	via_core	backup_manifest	Table	Backup records.	DR.	F116	backup_id (PK), date, location, checksum, restore_verified	CHECK(restore_verified IN (T,F))	N/A	DBA	Manages backups	Recovery Time
+T60	via_core	capacity_plan	Table	Future resource needs.	Planning.	F118	plan_id (PK), resource_type, forecast_date, projected_capacity	INDEX(forecast_date)	N/A	Ops	Plans scale	Forecast Error
+T61	via_core	cloud_cost	Table	Cloud spend data.	FinOps.	F119	cost_id (PK), service_name, cost_amt, date	INDEX(date)	N/A	Finance	Tracks spend	Cost Variance
+T62	via_core	compliance_checklist	Table	Audit checklists.	Compliance.	F123	check_id (PK), framework, control_id, status	UNIQUE(framework, control_id)	N/A	Compliance	Manages audits	Pass Rate
+T63	via_core	data_geofencing	Table	Data residency rules.	Sovereignty.	F125	rule_id (PK), data_type, allowed_region	UNIQUE(data_type)	N/A	Legal	Restricts data	Violation Count
+T64	via_core	vendor_contact	Table	Contact persons at vendors.	Communication.	F22	contact_id (PK), vendor_id (FK), name, email, role	FK(vendor_id)	N/A	AP	Stores contacts	Contact Accuracy
+T65	via_core	invoice_line_gl_map	Table	Direct line-to-GL mapping.	Precision accounting.	F36	map_id (PK), line_id (FK), gl_code (FK)	FK(line_id)	N/A	Accountant	Posts lines	Posting Speed
+T66	via_core	approval_delegation	Table	Temp approval delegation.	Continuity.	F33	delegator_id, delegate_id, start_date, end_date	CHECK(end_date > start_date)	N/A	Manager	Delegates power	Coverage %
+T67	via_core	payment_terms	Table	Standard payment terms (Net 30, etc.).	Calculation.	F01	terms_id (PK), name, days_net	UNIQUE(name)	N/A	Finance	Sets due dates	Accuracy
+T68	via_core	vendor_terms_map	Table	Overrides specific terms per vendor.	Flexibility.	F01	vendor_id (FK), terms_id (FK)	FK(vendor_id)	N/A	Finance	Customizes terms	Adherence
+T69	via_core	early_payment_calc	Table	Stored calculations for dynamic discounting.	Performance.	F16	calc_id (PK), invoice_id (FK), discount_amt, saved_amt	FK(invoice_id)	N/A	Treasury	Computes savings	Savings %
+T70	via_core	invoice_image_cache	Table	Pre-rendered images of invoices.	UI Performance.	F19	cache_id (PK), invoice_id (FK), image_url	FK(invoice_id)	N/A	System	Speeds UI	Load Time
+T71	via_core	user_preferences	Table	UI settings for users.	UX.	F66	user_id (PK), theme, language, notifications_enabled	UNIQUE(user_id)	N/A	Users	Stores settings	Sat Score
+T72	via_core	dashboard_config	Table	Custom dashboard layouts.	Personalization.	F38	dash_id (PK), user_id (FK), layout_json	FK(user_id)	N/A	Users	Configures UI	Usage
+T73	via_core	search_index	Table	Full text search index.	Search.	F81	doc_id (PK), content_tsv	GIN(content_tsv)	N/A	System	Enables search	Search Time
+T74	via_core	pivot_report_def	Table	Saved pivot report definitions.	Reporting.	F83	report_id (PK), user_id (FK), definition_json	FK(user_id)	N/A	Analysts	Saves reports	Creation Time
+T75	via_core	aging_bucket	Table	Definitions of aging buckets (0-30, 31-60).	Reporting.	F87	bucket_id (PK), name, days_min, days_max	CHECK(days_max > days_min)	N/A	Finance	Defines aging	Report Accuracy
+T76	via_core	forecast_history	Table	History of cash forecasts.	Variance analysis.	F88	forecast_id (PK), date_generated, total_outlay, model_ver	INDEX(date_generated)	N/A	Treasury	Tracks accuracy	Variance %
+T77	via_core	vat_return_summary	Table	Aggregated VAT data.	Tax filing.	F89	return_id (PK), period, output_vat, input_vat, net_vat	UNIQUE(period)	N/A	Tax	Prepares returns	Filing Speed
+T78	via_core	intrastat_summary	Table	Aggregated trade data.	Customs.	F90	summary_id (PK), period, dest_country, shipment_value	INDEX(period)	N/A	Tax	Prepares trade data	Error Rate
+T79	via_core	tco_calculations	Table	Total Cost of Ownership data.	Procurement.	F91	tco_id (PK), vendor_id (FK), period, purchase_cost, service_cost	FK(vendor_id)	N/A	Procurement	Measures TCO	Accuracy
+T80	via_core	volume_metrics	Table	Invoice volume history.	Ops.	F92	metric_id (PK), date, count_processed	UNIQUE(date)	N/A	Ops	Tracks volume	Count Accuracy
+T81	via_core	cycle_time_log	Table	Timestamps for each stage of AP.	Process metrics.	F93	log_id (PK), invoice_id (FK), stage_name, ts	FK(invoice_id)	N/A	Managers	Measures speed	Cycle Time
+T82	via_core	health_check_status	Table	Recent health check results.	Ops.	F95	check_id (PK), service, status, ts	INDEX(ts)	N/A	Ops	Monitors health	Uptime
+T83	via_core	error_rate_stats	Table	Aggregated error rates.	Ops.	F96	stat_id (PK), window_start, error_count, total_count	UNIQUE(window_start)	N/A	Ops	Tracks errors	MTTR
+T84	via_core	connection_pool_stats	Table	DB connection metrics.	Ops.	F97	stat_id (PK), ts, active_connections, idle_connections	INDEX(ts)	N/A	DBA	Tracks pool	Pool Efficiency
+T85	via_core	cache_stats	Table	Redis cache metrics.	Ops.	F98	stat_id (PK), ts, hit_count, miss_count	INDEX(ts)	N/A	System	Tracks cache	Hit Ratio
+T86	via_core	thread_dump	Table	Stored thread dumps.	Troubleshooting.	F107	dump_id (PK), ts, content	INDEX(ts)	N/A	Devs	Debugs deadlocks	Resolution Time
+T87	via_core	dependency_vulnerabilities	Table	Known CVEs in dependencies.	Security.	F107	dep_id (PK), library_name, version, cve_id, severity	INDEX(severity)	N/A	Security	Tracks risks	Patch Time
+T88	via_core	pod_status	Table	Kubernetes pod status.	Ops.	F108	pod_id (PK), name, status, node_name	INDEX(status)	N/A	DevOps	Tracks pods	Restart Count
+T89	via_core	trace_spans	Table	Distributed trace data.	Monitoring.	F111	span_id (PK), trace_id, parent_span_id, service_name	INDEX(trace_id)	N/A	Devs	Traces requests	Trace Depth
+T90	via_core	synthetic_results	Table	Results of synthetic tests.	Monitoring.	F112	test_id (PK), test_name, success, latency	INDEX(test_name)	N/A	Ops	Checks uptime	Uptime %
+T91	via_core	chaos_experiment	Table	Chaos engineering logs.	Resilience.	F113	exp_id (PK), name, fault_type, impact_score	INDEX(exp_id)	N/A	DevOps	Tests resilience	Recovery Time
+T92	via_core	post_mortem	Table	Incident reviews.	Learning.	F115	pm_id (PK), incident_id (FK), lessons_learned, action_items	FK(incident_id)	N/A	Ops	Documents learning	Completion %
+T93	via_core	geoip_data	Table	GeoIP lookup cache.	Compliance.	F125	ip_range_start, ip_range_end, country_code	PRIMARY KEY(ip_range_start, ip_range_end)	N/A	System	Checks location	Lookup Speed
+T94	via_core	invoice_corrections	Table	History of manual corrections to invoices.	Audit.	F51	corr_id (PK), invoice_id (FK), field_name, old_val, new_val	FK(invoice_id)	N/A	Auditors	Tracks changes	Audit Trail
+T95	via_core	merged_invoices	Table	Records of invoices merged for payment.	Optimization.	F27	merge_id (PK), parent_invoice_id (FK), child_invoice_id (FK)	FK(parent_invoice_id)	N/A	Treasury	Tracks merges	Merge Accuracy
+T96	via_core	split_invoices	Table	Records of invoices split for payment.	Optimization.	F26	split_id (PK), original_invoice_id (FK), new_invoice_id (FK)	FK(original_invoice_id)	N/A	Treasury	Tracks splits	Split Accuracy
+T97	via_core	withholding_payment	Table	Actual tax payments to authority.	Settlement.	F53	payment_id (PK), period, amount, authority_id	UNIQUE(period, authority_id)	N/A	Tax	Pays tax	Payment Success
+T98	via_core	vendor_self_service	Table	Vendor portal login data.	Access.	F73	login_id (PK), vendor_id (FK), last_login, password_hash	FK(vendor_id)	N/A	Vendors	Authenticates	Login Success
+T99	via_core	vendor_document	Table	Documents uploaded by vendor (W9, Certs).	Compliance.	F73	doc_id (PK), vendor_id (FK), doc_type, file_path	FK(vendor_id)	N/A	Vendors	Stores files	Retrieval Speed
+T100	via_core	subscription_event	Table	Events from entitlement platforms (Bloomberg).	Billing.	F13	event_id (PK), platform_name, event_type, ts, payload_json	INDEX(ts)	N/A	System	Captures events	Event Count
+T101	via_core	invoice_link_pari_tx	Table	Junction table linking Invoice to PARI Transaction Hash.	The core privacy-preserving link.	F05	link_id (PK), invoice_id (FK), pari_tx_hash, blinded_signature	UNIQUE(invoice_id)	N/A	System	Links Payment	Link Validity
+T102	via_core	anonymized_view	Table	Materialized view for auditors (stripped IDs).	Privacy.	F18	vendor_hash, amount_range, date_jittered	READ ONLY	N/A	Auditors	Views data	Anonymization Score
+T103	via_core	approval_rules	Table	Complex rule definitions for routing.	Workflow Engine.	F33	rule_id (PK), condition_json, action_json	UNIQUE(rule_id)	N/A	Admin	Defines flow	Rule Accuracy
+T104	via_core	pending_approval	Table	Current pending approvals cache.	Performance.	F33	approval_id (PK), invoice_id (FK), current_role	INDEX(current_role)	N/A	System	Lists tasks	Latency
+T105	via_core	vendor_termination	Table	History of terminated vendors.	Risk Mgmt.	F50	term_id (PK), vendor_id (FK), reason, date	FK(vendor_id)	N/A	Procurement	Tracks exits	Exit Rate
+T106	via_core	spend_category	Table	High-level spend categories (SaaS, Hardware).	Reporting.	F85	cat_id (PK), name	UNIQUE(name)	N/A	Finance	Groups spend	Classification Acc
+T107	via_core	vendor_category_map	Table	Maps vendors to categories.	Reporting.	F85	vendor_id (FK), cat_id (FK)	FK(vendor_id)	N/A	Finance	Classifies	Mapping Rate
+T108	via_core	budget_consumption	Table	Real-time budget tracking.	Control.	F37	budget_id (PK), consumed_amt, remaining_amt	UNIQUE(budget_id)	N/A	Finance	Tracks budget	Variance
+T109	via_core	cash_flow_forecast	Table	Detailed forecast line items.	Treasury.	F88	line_id (PK), date, amount, type (in/out)	INDEX(date)	N/A	Treasury	Predicts flow	Forecast Error
+T110	via_core	system_alerts	Table	Active system alerts.	Ops.	F72	alert_id (PK), severity, message, is_resolved	INDEX(severity)	N/A	Ops	Shows alerts	Clear Time
+T111	via_core	user_session	Table	Active user sessions.	Security.	F76	session_id (PK), user_id (FK), ip_address, expiry_ts	INDEX(expiry_ts)	N/A	System	Manages login	Session Timeout
+T112	via_core	api_rate_limit	Table	Rate limit counters.	Stability.	F40	client_id, endpoint, count, window_start	PRIMARY KEY(client_id, endpoint)	N/A	System	Throttles	Limit Accuracy
+T113	via_core	background_job_lock	Table	Distributed locks for jobs.	Concurrency.	F99	lock_name, acquired_by, acquired_ts	PRIMARY KEY(lock_name)	N/A	System	Prevents dupes	Lock Wait Time
+T114	via_core	invoice_hash_chain	Table	Cryptographic chain of hashes for integrity.	Security.	F05	chain_id (PK), invoice_id (FK), prev_hash, current_hash	FK(invoice_id)	N/A	Security	Ensures integrity	Chain Length
+T115	via_core	reconciliation_snapshot	Table	Daily snapshot of open items.	Reporting.	F04	snapshot_id (PK), date, open_count, open_amt	UNIQUE(date)	N/A	Finance	Tracks state	Snapshot Accuracy
+T116	via_core	vendor_blacklist	Table	Blocked vendors.	Risk Mgmt.	F23	vendor_id (PK), reason, blocked_date	UNIQUE(vendor_id)	N/A	Compliance	Blocks payments	Block Accuracy
+T117	via_core	erp_mapping_config	Table	Field mappings between VIA and ERP.	Integration.	F10	map_id (PK), via_field, erp_field, erp_table	UNIQUE(via_field, erp_table)	N/A	IT Admin	Defines maps	Sync Accuracy
+T118	via_core	invoice_validation_errors	Table	Specific errors from validation step.	Debugging.	F12	error_id (PK), invoice_id (FK), error_code, error_msg	INDEX(error_code)	N/A	Admin	Shows errors	Fix Time
+T119	via_core	document_ocr_text	Table	Extracted text from PDFs.	Searchable data.	F03	doc_id (PK), invoice_id (FK), page_num, text_content	FK(invoice_id)	N/A	System	Stores text	Extraction Acc
+T120	via_core	anomaly_score	Table	ML anomaly scores for invoices.	Fraud.	F32	score_id (PK), invoice_id (FK), anomaly_score, features_json	INDEX(anomaly_score)	N/A	Security	Flags risk	Recall
+T121	via_core	retention_archive	Table	Pointers to archived data.	Storage.	F39	archive_id (PK), table_name, primary_key_value, s3_location	UNIQUE(table_name, primary_key_value)	N/A	DBA	Finds old data	Retrieval Time
+T122	via_core	user_kpis	Table	User performance metrics.	HR/Ops.	F93	user_id (PK), period, invoices_processed, avg_time	UNIQUE(user_id, period)	N/A	Managers	Rates users	Productivity
+T123	via_core	communication_log	Table	Emails/Sent messages to vendors.	Audit.	F35	comm_id (PK), invoice_id (FK), channel, status	FK(invoice_id)	N/A	System	Tracks msgs	Delivery Rate
+T124	via_core	tax_jurisdiction	Table	Legal tax jurisdictions.	Compliance.	F08	jurisdiction_code (PK), name, vat_required	UNIQUE(jurisdiction_code)	N/A	Tax	Defines laws	Compliance
+T125	via_core	license_entitlement	Table	Specific licenses purchased (Bloomberg Terminal ID).	Asset Mgmt.	F13	entitlement_id (PK), contract_id (FK), license_key, user_assigned	UNIQUE(license_key)	N/A	Procurement	Tracks assets	Utilization
+T126	via_core	e_invoice_status	Enum	Valid states for an invoice (Draft, Received, Approved, Paid, Rejected).	Ensures data integrity and consistent state management across the application.	F01, F04	VALUES ('DRAFT', 'RECEIVED', 'MATCHING', 'APPROVED', 'PAID', 'VOIDED')	N/A	N/A	System	Enforces State Machine	State Consistency
+T127	via_core	e_match_result	Enum	Results of the 3-way matching engine (Pass, QtyVariance, PriceVariance, Fail).	Standardizes error handling and routing logic for exceptions.	F04	VALUES ('THREE_WAY_PASS', 'TWO_WAY_PASS', 'QTY_VARIANCE', 'PRICE_VARIANCE', 'NO_MATCH')	N/A	N/A	System	Classifies Exceptions	Routing Accuracy
+T128	via_core	e_payment_status	Enum	States for payment execution (Pending, Signed, Submitted, Settled, Failed).	Tracks the lifecycle of a PARI payment from proposal to blockchain settlement.	F17, F05	VALUES ('PROPOSED', 'BLIND_SIGNED', 'SUBMITTED', 'SETTLED', 'EXPIRED')	N/A	N/A	Treasury	Tracks Settlement	Status Accuracy
+T129	via_core	v_aging_report	View	Aggregates open invoices by vendor into aging buckets (0-30, 31-60, 61-90, 90+).	Provides the standard AP aging report required for cash flow management and financial statements.	F87	vendor_id, bucket_0_30, bucket_31_60, bucket_61_90, bucket_90_plus	REFRESH MATERIALIZED VIEW CONCURRENTLY	N/A	Finance	Calculates Aging	Report Speed
+T130	via_core	v_vendor_performance	View	Aggregates vendor scoring data (on-time delivery, invoice accuracy).	Enables procurement teams to make data-driven decisions about vendor relationships.	F50	vendor_id, avg_score, rank	REFRESH MATERIALIZED VIEW	N/A	Procurement	Evaluates Vendors	Score Accuracy
+T131	via_core	p_execute_3way_match	Procedure	Stored procedure triggering the matching engine for a specific batch of invoices.	Encapsulates complex matching logic, ensuring efficient batch processing and database-level consistency.	F04	batch_id (IN), processed_count (OUT), exception_count (OUT)	AUTONOMOUS TRANSACTION / EXCEPTION HANDLING	N/A	System	Runs Matching	Throughput
+T132	via_core	p_verify_zkp_payment	Procedure	Verifies a Zero-Knowledge Proof against the invoice hash and PARI ledger.	Centralized cryptographic verification to ensure payments mathematically settle specific invoices without revealing identity.	F05, F21	invoice_id (IN), proof_blob (IN), is_valid (OUT)	CRYPTOGRAPHIC VALIDATION	N/A	Payment Engine	Verifies Proof	Verification Time
+T133	via_core	bank_statement_line	Table	Imported lines from physical bank statements or SWIFT MT940 files.	Required for the final step of reconciliation: matching the movement of funds in the bank to the internal payment record.	F17	line_id (PK), statement_date, amount, currency, reference_text	CHECK(amount <> 0)	N/A	Treasury	Imports Bank Data	Import Success
+T134	via_core	cash_reconciliation	Table	Matches internal payments to bank statement lines.	Ensures the "books" match the actual bank balance, identifying discrepancies or delays in payment rails.	F17	recon_id (PK), payment_id (FK), bank_line_id (FK), variance_amt, status	UNIQUE(payment_id, bank_line_id)	N/A	Accountant	Balances Books	Recon Accuracy
+T135	via_core	invoice_dispute_record	Table	Detailed records of invoice disputes raised by vendors or internal staff.	Provides a structured workflow for tracking disagreements over quantity, quality, or price.	F30	dispute_id (PK), invoice_id (FK), reason_code, status, raised_by	UNIQUE(invoice_id) IF OPEN	N/A	AP Manager	Tracks Disputes	Resolution Time
+T136	via_core	dispute_evidence	Table	Stores uploaded evidence (photos, emails) linked to disputes.	Crucial for resolving conflicts and maintaining an audit trail of the decision process.	F30	evidence_id (PK), dispute_id (FK), file_path, uploaded_by	FK(dispute_id)	N/A	System	Stores Files	Retrieval Speed
+T137	via_core	supplier_diversity	Table	Tracks diversity certifications (Woman-Owned, Minority-Owned) for vendors.	Supports corporate ESG goals and compliance with government supplier diversity mandates.	F62	vendor_id (FK), certification_type, cert_number, expiry_date	UNIQUE(vendor_id, certification_type)	N/A	Procurement	Tracks Diversity	Diversity Spend %
+T138	via_core	subscription_usage_raw	Table	Raw data dumps from entitlement APIs (Bloomberg API, Refinitiv).	Staging area for granular usage data before aggregation into billing summaries.	F13, F14	usage_id (PK), platform, timestamp, user_id, action_type	INDEX(timestamp)	N/A	System	Ingests Usage	Ingestion Rate
+T139	via_core	v_tax_liability	View	Calculates current tax liability (VAT/GST) based on approved but unpaid invoices.	Provides real-time visibility into tax obligations for cash flow planning.	F89	jurisdiction_code, tax_type, total_liability	REFRESH MATERIALIZED VIEW	N/A	Tax	Estimates Tax	Liability Acc
+T140	via_core	p_sync_to_erp	Procedure	Pushes approved invoice/payment data to the external ERP (SAP/Oracle).	Ensures the sub-ledger (VIA) is reflected in the general ledger (ERP) accurately.	F10, F36	erp_system (IN), object_type (IN), batch_json (IN)	RETRY LOGIC / ERROR HANDLING	N/A	IT Admin	Posts to ERP	Sync Success
+T141	via_core	prepayment_header	Table	Tracks prepayments (deposits) made to vendors.	Manages liability for prepayments and facilitates the allocation of these payments to future invoices.	F17	prepay_id (PK), vendor_id (FK), amount, date	CHECK(amount > 0)	N/A	Treasury	Manages Deposits	Allocation Acc
+T142	via_core	prepayment_allocation	Table	Links prepayments to specific invoices as they are received.	Automatically reduces the payable amount of an invoice by applying the available prepayment.	F17	alloc_id (PK), prepay_id (FK), invoice_id (FK), amount_applied	FK(invoice_id)	N/A	AP Clerk	Applies Credits	Usage Rate
+T143	via_core	milestone_billing	Table	Tracks progress billing schedules for long-term projects.	Allows partial invoicing based on project completion percentage rather than full delivery.	F03	milestone_id (PK), project_id, completion_pct, invoice_trigger_date	CHECK(completion_pct <= 100)	N/A	Project Mgr	Tracks Progress	Billing Acc
+T144	via_core	write_off_log	Table	Records small invoice balances written off to avoid chasing immaterial amounts.	Streamlines the AP close process by eliminating manual work for insignificant variances.	F51	write_off_id (PK), invoice_id (FK), amount, reason, approved_by	FK(invoice_id)	N/A	Controller	Cleans Books	Write-off %
+T145	via_core	exchange_rate_variance	Table	Tracks gains or losses due to FX rate changes between PO and Payment.	Essential for accurate P&L reporting in multi-currency environments.	F09	variance_id (PK), invoice_id (FK), payment_id (FK), original_rate, settlement_rate, variance_amt	FK(invoice_id)	N/A	Accountant	Calculates FX	Variance Acc
+T146	via_core	credit_memo_application	Table	Tracks how vendor credit notes are applied to open invoices.	Ensures that credit memos are not double-counted and correctly reduce liabilities.	F54	app_id (PK), credit_memo_id (FK), invoice_id (FK), amount_applied	FK(invoice_id)	N/A	Accountant	Applies Credits	Balance Accuracy
+T147	via_core	legal_hold	Table	Flags documents/invoices that cannot be archived due to litigation or audit.	Ensures compliance with legal preservation orders (Preservation of Evidence).	F115	hold_id (PK), invoice_id (FK), case_reference, release_date	UNIQUE(invoice_id)	N/A	Legal	Preserves Data	Compliance Score
+T148	via_core	contract_renewal_reminder	Table	Tracks upcoming contract renewals based on end dates.	Prevents service lapses and aids in negotiations by providing early notice.	F15	reminder_id (PK), contract_id (FK), reminder_date, status	FK(contract_id)	N/A	Procurement	Alerts Renewal	Renewal Rate
+T149	via_core	p_archive_old_data	Procedure	Moves data older than retention policy to cold storage and updates pointers.	Reduces primary database size and improves query performance while meeting compliance.	F39, F124	cutoff_date (IN), archive_location (OUT)	TRANSACTION CONTROL	N/A	DBA	Archives Data	Storage Reduction
+T150	via_core	e_approval_decision	Enum	Decisions in approval workflow (Approve, Reject, Request Info, Delegate).	Standardizes the outcomes of the approval routing process.	F33	VALUES ('APPROVE', 'REJECT', 'REQUEST_INFO', 'DELEGATE')	N/A	N/A	System	Routes Workflows	Decision Consistency
+T151	via_core	api_rate_limit_rule	Table	Configuration for API rate limiting per user or API key.	Prevents abuse and ensures fair usage of system resources.	F40	rule_id (PK), user_id (FK), requests_per_minute, burst_limit	FK(user_id)	N/A	IT Admin	Throttles API	Uptime
+T152	via_core	distributed_lock	Table	Advisory locks for background jobs to prevent duplicate execution across nodes.	Ensures data consistency in a clustered microservices environment.	F99	lock_key (PK), acquired_at, node_id, ttl	EXPIRES AT (ttl)	N/A	DevOps	Coordinates Jobs	Lock Safety
+T153	via_core	v_unmatched_invoices	View	Lists invoices that failed 3-way match and are pending resolution.	Primary worklist for the AP exception team.	F19	invoice_id, vendor_name, amount, error_reason, exception_age_days	REFRESH MATERIALIZED VIEW	N/A	AP Clerk	Shows Exceptions	Queue Size
+T154	via_core	saml_assertion	Table	Stores SAML SSO assertions for audit trails.	Provides non-repudiation for login events in high-security environments.	F43	assertion_id (PK), user_id (FK), response_xml, created_at	FK(user_id)	N/A	Security	Audits Logins	Log Integrity
+T155	via_core	notification_preference	Table	User preferences for alert types (Email, Slack, SMS, In-App).	Ensures users are notified via their preferred channel for critical events.	F72	user_id (FK), notification_type, channel, is_enabled	UNIQUE(user_id, notification_type)	N/A	Users	Sets Alerts	Opt-in Rate
+T156	via_core	ml_feature_store	Table	Stores features extracted for ML models (e.g., vendor payment history length).	Central repository for data science teams to train and improve fraud/duplicate detection models.	F06, F32	feature_id (PK), invoice_id (FK), feature_name, feature_value	INDEX(feature_name)	N/A	Data Scientist	Trains AI	Model Accuracy
+T157	via_core	payment_discount	Table	Tracks payment discounts taken (early payment) vs lost.	Analyzes the effectiveness of dynamic discounting programs.	F16	discount_id (PK), invoice_id (FK), discount_amt, is_taken	FK(invoice_id)	N/A	Treasury	Measures Savings	Savings Rate
+T158	via_core	capex_project	Table	Capital expenditure project definitions.	Allows segregation of OpEx and CapEx spending for depreciation and asset management.	F180	project_id (PK), name, asset_class, budget_cap	UNIQUE(name)	N/A	Finance	Tracks Assets	Capital Accuracy
+T159	via_core	invoice_capex_map	Table	Maps invoices to CapEx projects.	Ensures large purchases are capitalized correctly on the balance sheet.	F180	map_id (PK), invoice_id (FK), project_id (FK), percentage	FK(project_id)	N/A	Accountant	Builds Assets	Depreciation Acc
+T160	via_core	p_calculate_vat	Procedure	Calculates VAT based on line items and shipping address.	Centralizes tax logic to ensure consistency and easy updates to tax laws.	F08	invoice_id (IN), total_vat (OUT)	LOOKUP (tax_rates)	N/A	System	Computes Tax	Tax Accuracy
+T161	via_core	audit_log_redacted	Table	Audit trail for data that has been deleted/anonymized (GDPR Art. 17).	Proves that user requests for data deletion were honored while retaining security logs.	F101	redaction_id (PK), table_name, record_id, redacted_ts, reason	UNIQUE(table_name, record_id)	N/A	Privacy	Tracks Deletion	GDPR Compliance
+T162	via_core	crypto_key_rotation	Table	Schedule and history of encryption key rotations.	Security best practice and CMMI Level 5 requirement for data protection.	F109	rotation_id (PK), key_id, old_version, new_version, rotated_by	INDEX(rotated_ts)	N/A	Security	Manages Keys	Rotation Age
+T163	via_core	email_template	Table	HTML templates for notifications (Remittance, Approval, Password Reset).	Allows customization of communications without code changes.	F72	template_id (PK), name, subject, body_html	UNIQUE(name)	N/A	Admin	Formats Emails	Delivery Rate
+T164	via_core	v_cash_position	View	Real-time view of cash on bank vs. pending disbursements.	Critical dashboard for Treasury to manage liquidity.	F88	bank_balance, outgoing_pending, net_position	REFRESH MATERIALIZED VIEW	N/A	CFO	Shows Cash	Position Acc
+T165	via_core	edi_transmission_log	Table	Log of EDI (Electronic Data Interchange) transmissions.	Essential for B2B integration with large enterprise ERPs that use ANSI X12 or EDIFACT.	F146	transmission_id (PK), doc_type, partner_id, status, ts	INDEX(ts)	N/A	IT Admin	Tracks EDI	Delivery Success
+T166	via_core	vendor_questionnaire	Table	Due diligence questions sent to vendors during onboarding.	Standardizes the collection of risk, compliance, and ESG data.	F22	question_id (PK), category, question_text, is_required	UNIQUE(question_id)	N/A	Compliance	Screens Risk	Completion Rate
+T167	via_core	vendor_response	Table	Vendor answers to onboarding questionnaires.	Stores the risk profile of the vendor.	F22	response_id (PK), vendor_id (FK), question_id (FK), answer_text, attachment_url	FK(question_id)	N/A	Compliance	Stores Answers	Review Speed
+T168	via_core	p_check_sanctions	Procedure	Real-time check against internal and external sanctions lists.	Prevents illegal transactions with sanctioned entities.	F23	vendor_id (IN), is_clean (OUT)	HTTP REQUEST (External API)	N/A	Compliance	Blocks Risk	Block Rate
+T169	via_core	e_disposition	Enum	Disposition of an exception (Resolved, Ignored, Escalated).	Tracks how exceptions are closed out.	F19	VALUES ('RESOLVED', 'IGNORED', 'ESCALATED')	N/A	N/A	System	Classifies Fixes	Fix Rate
+T170	via_core	carbon_emission_factor	Table	Factors for calculating CO2 emissions based on spend category.	Enables the ESG metadata tagging feature for Green Finance.	F62	spend_category (PK), co2_per_currency_unit, unit_type	UNIQUE(spend_category)	N/A	ESG Officer	Estimates Carbon	Carbon Acc
+T171	via_core	index_usage_stats	Table	Statistics on how often database indexes are used.	Allows DBAs to drop unused indexes to improve write performance.	T184	index_id, index_name, table_name, idx_scan, idx_tup_read	REFRESH FROM pg_stat_user_indexes	N/A	DBA	Optimizes DB	Write Speed
+T172	via_core	p_generate_zkp	Procedure	Generates a Zero-Knowledge Proof for a specific invoice-payment pair.	The cryptographic engine that creates the privacy layer.	F05, F21	invoice_id (IN), payment_id (IN), zkp_blob (OUT)	CRYPTOGRAPHIC GENERATION	N/A	System	Creates Proof	Generation Time
+T173	via_core	vendor_hierarchy	Table	Parent-Child relationships for corporate vendors (Global HQ vs Local Subsidiary).	Enables consolidated reporting and "One-Vendor" views for global supply chains.	F10	parent_id (FK), child_id (FK), relationship_type	UNIQUE(parent_id, child_id)	N/A	Procurement	Maps Grouping	Hierarchy Acc
+T174	via_core	e_currency	Enum	Supported currencies.	Data validation and type safety.	F36	VALUES ('USD', 'EUR', 'GBP', 'CHF', 'JPY', 'CAD')	N/A	N/A	System	Validates Money	Validation Rate
+T175	via_core	p_reconcile_intracompany	Procedure	Automates the netting of intercompany payables/receivables.	Reduces the actual flow of funds between subsidiaries, saving transaction costs.	F55	period (IN), netting_journal_id (OUT)	AGGREGATE BALANCES	N/A	Consolidator	Nets Balances	Netting Acc
+T176	via_core	invoice_line_tax_detail	Table	Detailed tax breakdown per line item.	Required for complex tax jurisdictions (e.g., US Sales Tax by city/county).	F08	line_id (FK), jurisdiction_code, tax_rate, tax_amt	FK(line_id)	N/A	Tax	Details Tax	Tax Detail Acc
+T177	via_core	subscription_invoice_match	Table	Matches subscription usage to the vendor's invoice for validation.	Ensures that the bill from Bloomberg matches the actual API usage logs.	F13	match_id (PK), usage_agg_id (FK), invoice_line_id (FK), variance_pct	FK(invoice_line_id)	N/A	System	Audits Bills	Bill Accuracy
+T178	via_core	v_esg_compliance	View	Dashboard for ESG metrics (Diversity spend, Carbon footprint).	Provides executives with a high-level view of sustainability and social impact.	F62	metric_name, current_value, target_value	REFRESH MATERIALIZED VIEW	N/A	Executives	Shows Impact	Metric Acc
+T179	via_core	project_accounting	Table	Links invoices to internal projects/departments for P&L tracking.	Goes beyond Cost Center to specific Project (e.g., "Building New HQ").	F180	project_code (PK), name, manager, budget_code	UNIQUE(project_code)	N/A	PMO	Tracks Projects	Budget Var
+T180	via_core	invoice_project_map	Table	Allocates invoice costs to projects.	Allows precise profitability analysis per project.	F180	map_id (PK), invoice_id (FK), project_code (FK), amount	UNIQUE(invoice_id)	N/A	Accountant	Allocates Cost	Allocation Acc
+T181	via_core	retention_config	Table	Dynamic retention periods based on document type and region.	Implements the flexible data governance required for multi-jurisdictional operation.	F124	doc_type, jurisdiction, years_to_keep, action	UNIQUE(doc_type, jurisdiction)	N/A	Legal	Sets Policy	Policy Accuracy
+T182	via_core	p_purge_archived_data	Procedure	Physically deletes data that has passed its retention period.	The final step in the data lifecycle management.	F124	cutoff_date (IN), rows_deleted (OUT)	BULK DELETE	N/A	DBA	Deletes Data	Storage Freed
+T183	via_core	feature_flag_user_group	Table	Maps user groups to specific feature flags.	Allows phased rollout of features (e.g., Beta testers vs All users).	F102	flag_id (FK), group_name	UNIQUE(flag_id, group_name)	N/A	Product	Controls Rollout	Adoption Rate
+T184	via_core	table_bloat_stats	Table	Statistics on table bloat (dead space) in PostgreSQL.	Helps DBAs schedule maintenance (VACUUM/REINDEX) to prevent performance degradation.	T184	table_name, dead_tuple_count, bloat_bytes	REFRESH FROM pgstattuple	N/A	DBA	Monitors Health	DB Health
+T185	via_core	connection_latency_stats	Table	Latency metrics between microservices.	Monitors network performance and identifies bottlenecks in the integration layer.	T111	source_service, dest_service, avg_latency_ms, p99_latency_ms	INDEX(source_service)	N/A	DevOps	Monitors Net	Latency Score

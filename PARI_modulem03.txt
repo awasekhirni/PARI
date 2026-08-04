@@ -1,0 +1,624 @@
+
+3.	Module M03	Fraud Intelligence & Dispute Resolution
+a.	Summary
+Module M03, the Fraud Intelligence & Dispute Resolution subsystem, represents a paradigm shift in digital transaction security, fundamentally re-engineering the antiquated "chargeback" model into a proactive, cryptographically secure, and privacy-preserving mechanism. In legacy financial systems, fraud detection is often reactionary, relying heavily on exposing personally identifiable information (PII) and resulting in costly, manual dispute processes that can take weeks to resolve. These traditional systems force merchants to absorb the costs of fraud via chargeback fees, typically ranging from 0.5% to 1.5% of revenue, creating a friction-heavy environment that stifles commerce.
+
+PARI’s M03 module eliminates these inefficiencies by leveraging the unique architectural properties of the PARI ecosystem—specifically the separation of payer identity (anonymous) from payee identity (known) and the use of blinded digital coins. At the heart of the module is the deployment of advanced Artificial Intelligence and Machine Learning (AI/ML) algorithms, specifically Long Short-Term Memory (LSTM) networks, to analyze transaction sequences in real-time. Unlike static rule-based systems, LSTMs can learn complex temporal patterns of spending behavior, identifying anomalies that deviate from a user's historical norm without ever needing to know who the user is. To ensure strict adherence to GDPR and privacy standards, this analysis is augmented with Differential Privacy, injecting calibrated noise into the dataset so that the ML model can learn fraud patterns without retaining the capacity to reconstruct individual user profiles or transaction histories.
+
+Furthermore, M03 integrates a robust Dispute Resolution framework built on cryptographically signed JSON-LD contracts. In the PARI system, every transaction generates a immutable, verifiable digital receipt—a "smart contract" between customer and merchant signed via SHA-3 hashes. If a dispute arises, the cryptographic evidence is irrefutable. This allows for the automation of dispute resolution, cutting resolution times from days to seconds. Crucially, the module introduces a novel "Blinded Refund" workflow. In traditional systems, a refund requires the merchant to "pull" funds back from the customer's account, necessitating knowledge of the customer's identity. In PARI, the merchant can push a refund to the specific "blinded" coin used in the original transaction. The Exchange (licensed financial institution) verifies the signature and unblinds the credit to the user's wallet, completing the refund without the merchant ever accessing the user's PII.
+
+By removing the possibility of "friendly fraud" (false claims of non-receipt) through cryptographic proof and detecting malicious activity early through privacy-preserving AI, M03 protects the integrity of the entire payment rail. This module is not merely a defensive shield but an active financial governance tool that reduces merchant fees, ensures tax compliance by validating transaction legitimacy, and fosters trust between anonymous citizens and regulated merchants. It transforms dispute resolution from a source of revenue loss into a streamlined, automated utility, aligning perfectly with the CMMI Level 5 goals of defect prevention and quantitative process management.
+b.	Scope
+The scope of Module M03 encompasses the full lifecycle of fraud detection, prevention, evidence management, and dispute resolution within the PARI ecosystem. It includes:
+
+     Real-Time Transaction Scoring: Intercepting transaction authorization requests to apply risk scores before settlement.
+     AI/ML Inference Engine: Running LSTM models and anomaly detection algorithms on streaming event data (via Kafka).
+     Privacy-Preserving Analytics: Implementing differential privacy mechanisms to ensure ML training data does not compromise user anonymity.
+     Digital Contract Management: Generation, signing (SHA-3), and storage of JSON-LD transaction records as immutable evidence.
+     Automated Dispute Workflow: Handling the lifecycle of a customer claim, including evidence submission, automated validation, and status updates.
+     Blinded Refund Processing: executing the cryptographic protocols required to refund blinded coins without payer re-identification.
+     Fraud Reporting & Dashboarding: Providing real-time visualization of fraud metrics, model performance, and dispute trends to internal SREs and external auditors.
+
+
+Exclusions: Core payment processing (M01), initial KYC/AML screening (M02/M05), and the physical storage of fiat funds (M05).
+
+
+c.	Business Case
+
+The primary business case for Module M03 is the drastic reduction of operational costs and revenue leakage associated with electronic payment fraud.
+
+    Elimination of Chargebacks: Traditional credit card processors penalize merchants for fraud (chargebacks). PARI’s cryptographic proof of receipt (via JSON-LD contracts) makes "friendly fraud" mathematically impossible. If the blockchain/ledger shows the merchant signed the coin, the product/service was digitally delivered. This saves merchants an estimated 0.5–1.5% of gross revenue.
+    Operational Efficiency: Manual dispute resolution requires significant human intervention. M03 automates >90% of disputes through smart contract verification, reducing operational overhead (OPEX) for Payment Processors and Banks.
+    Trust & Adoption: High fraud rates are a barrier to entry for digital payments. By guaranteeing cryptographically secure transactions, PARI encourages adoption among risk-averse merchants and privacy-conscious users.
+    Regulatory Compliance: With strict GDPR requirements, standard fraud detection (which profiles users) is legally risky. M03’s use of Differential Privacy allows PARI to detect fraud while remaining fully compliant with EU data protection laws, avoiding potential fines of up to 4% of global turnover.
+
+d.	KPIs
+
+     Fraud Detection Recall: >95% (Percentage of actual fraud cases successfully identified).
+     False Positive Rate: <0.1% (Percentage of legitimate transactions incorrectly blocked).
+     Dispute Resolution Time: Target <5 seconds (Automated) vs Industry Avg 45 days.
+     Fraud Loss Reduction: ≥75% reduction in fraudulent transaction value compared to baseline implementations.
+     Model Inference Latency: P99 < 50ms (Time taken to score a transaction).
+     Refund Success Rate: >99.9% (Success of blinded refunds reaching the correct wallet).
+     Cost of Fraud: <0.05% of Total Transaction Volume (TTV).
+
+e.	Stakeholder Insights
+Stakeholder	Concern	Implications
+Merchants	Revenue loss due to chargebacks and false claims of non-delivery.	M03 eliminates "friendly fraud" via cryptographic proof, guaranteeing payment finality and protecting revenue.
+Payment Processors	High cost of manual dispute investigation teams and call centers.	Automation reduces headcount needs and operational complexity; faster settlements improve cash flow.
+Citizens (Payers)	Fear of profiling, frozen assets due to false positives, and data misuse.	Differential privacy ensures no user profiling; blinded refunds ensure right to refund without surveillance.
+Regulators	Need to monitor systemic financial crime without violating civil liberties.	M03 provides anonymized aggregate data and forensic evidence (JSON-LD) for audit trails without mass surveillance.
+Auditors	Inability to verify the legitimacy of disputed transactions transparently.	Immutable, signed JSON-LD contracts provide a verifiable "single source of truth" for every dispute.
+
+
+f.	Knowledge Representation Graph (mermaid.js)
+
+graph TD
+    subgraph "PARI Payment Context"
+        Payer[Payer (Anonymous)]
+        Merchant[Merchant (Known)]
+        Exchange[Exchange (Regulated)]
+    end
+
+    subgraph "Module M03: Fraud & Dispute"
+        TC[Transaction Context]
+        AE[Anomaly Engine (LSTM)]
+        DP[Differential Privacy Layer]
+        SC[Smart Contract Gen (JSON-LD)]
+        DS[Dispute Service]
+        BR[Blinded Refund Logic]
+    end
+
+    subgraph "Data Layer"
+        EventLog[Kafka Event Stream]
+        FraudDB[(Fraud Intelligence DB)]
+        EvidenceStore[(Immutable Object Store)]
+    end
+
+    Payer --"Initiates Payment"--> TC
+    Merchant --"Receives Payment"--> TC
+    TC --"Publishes Event"--> EventLog
+    EventLog --"Ingest"--> AE
+    DP --"Protects Privacy"--> AE
+    AE --"Calculates Risk Score"--> TC
+
+    TC --"Triggers Contract Signing"--> SC
+    SC --"Stores SHA-3 Hash"--> EvidenceStore
+    SC --"Links Evidence"--> FraudDB
+
+    Payer --"Lodges Dispute"--> DS
+    DS --"Retrieves Contract"--> EvidenceStore
+    DS --"Validates Proof"--> AE
+
+    Merchant --"Approves Refund"--> BR
+    BR --"Blinded Coin Logic"--> Exchange
+    Exchange --"Credits Wallet"--> Payer
+
+    DS --"Updates Case Status"--> FraudDB
+
+g.	Comprehensive List of Features
+
+
+id	Feature	Description & Business Case	AI/ML Algorithms	KPIs	Primary Users
+F001	Real-Time Transaction Interception	Intercepts payment requests via Kafka topics to perform pre-processing fraud checks before the Exchange commits funds.	N/A	Latency < 10ms	System
+F002	LSTM Anomaly Detection Engine	Utilizes Long Short-Term Memory networks to analyze temporal sequences of user spending to detect outliers.	LSTM (Recurrent Neural Network)	Recall > 95%	Data Scientists
+F003	Differential Privacy Noise Injection	Adds calibrated statistical noise (Laplace/Gaussian mechanism) to input features to prevent re-identification of users in the ML model.	Differential Privacy (ε-delta)	Privacy Loss ε < 0.5	Compliance Officers
+F004	Velocity Rule Engine	Enforces static business rules (e.g., max amount per hour, distinct merchant count) as a first-line filter.	Rule-Based	Execution time < 5ms	Fraud Ops
+F005	Device Fingerprinting Anonymization	Generates a stable hash of device attributes (fingerprint) without storing raw device data to detect device-based fraud.	Hashing (SHA-256)	Match Accuracy	Fraud Analysts
+F006	Geolocation Velocity Check	Calculates the speed of movement between transaction coordinates to flag impossible travel scenarios.	Heuristic Algorithm	False Positive Rate < 0.1%	Fraud Ops
+F007	JSON-LD Contract Generation	Automatically constructs a cryptographically signed digital receipt containing all terms, amounts, and timestamps.	N/A	Generation time < 20ms	Payment Processor
+F008	SHA-3 Evidence Hashing	Creates a unique, immutable fingerprint of the transaction contract for evidentiary integrity.	SHA-3 (Keccak)	Collision resistance 0	System
+F009	Merchant Fraud Risk Profiling	Aggregates fraud metrics by Merchant ID to identify high-risk partners or compromised terminals.	Clustering (K-Means)	Risk Score Update Freq	Acquirers
+F010	Automated Dispute Creation	Allows users to initiate a dispute via the Wallet UI, automatically linking the JSON-LD evidence.	N/A	Submission Success Rate	Customers
+F011	Smart Contract Validation	Automatically verifies the cryptographic signature of the JSON-LD contract to prove receipt of funds/goods.	Elliptic Curve Cryptography	Validation Time < 5ms	Dispute Agents
+F012	Blinded Refund Request Protocol	Enables merchants to issue a refund to a blinded coin index, ensuring funds return to the anonymous payer.	Blind Signatures (Chaum)	Refund Success Rate	Merchants
+F013	Refund Signature Verification	The Exchange verifies that the refund request is signed by the legitimate private key of the merchant.	ECDSA Verification	Verification Time < 10ms	Exchange
+F014	Fraud Score Orchestration	Combines scores from LSTM, Rule Engine, and External Lists into a single composite risk score (0-100).	Weighted Ensemble	Score Correlation	Fraud Ops
+F015	Kafka Consumer Group Management	Manages consumer lag and partition balancing to ensure high-throughput ingestion of transaction events.	N/A	Consumer Lag < 100ms	SREs
+F016	Feature Store Integration	Writes extracted feature vectors (time of day, amount, location) to a low-latency feature store for model inference.	N/A	Write Latency < 5ms	Data Engineers
+F017	Model Versioning & A/B Testing	Deploys multiple versions of the LSTM model simultaneously to compare performance and safely roll out updates.	A/B Testing	Deployment Freq	ML Engineers
+F018	Cold Start User Handling	Applies default conservative risk scores for new users with insufficient historical data.	Heuristic Rules	False Positive Rate	Onboarding Team
+F019	Suspicious Activity Reporting (SAR)	Automatically generates formatted SARs for regulators when fraud probability exceeds legal thresholds.	N/A	Report Accuracy	Compliance Officers
+F020	Blacklist/Whitelist Management	Manages dynamic lists of blocked coin hashes, merchant IDs, or device fingerprints.	N/A	Cache Hit Ratio	Fraud Ops
+F021	Chargeback Prevention API	Provides merchants with an API to pre-validate transaction details to prevent future disputes.	N/A	API Availability	Merchants
+F022	Dispute Evidence Upload	Allows secure upload of supplementary documents (photos, emails) linked to the dispute case ID.	N/A	Storage Integrity	Dispute Agents
+F023	Automated Case Routing	Routes disputes to specific queues based on type (Product not received vs. Fraud) and value.	Decision Tree	Routing Accuracy	Support Managers
+F024	Merchant Response Portal	A secure web interface for merchants to respond to disputes with evidence before automated escalation.	N/A	Response Time < 24h	Merchants
+F025	Time-Based One-Time Password (TOTP) for Refunds	Requires 2FA verification for merchants issuing high-value refunds to prevent compromised account refunds.	N/A	Authentication Rate	Merchants
+F026	Fraud Model Drift Detection	Monitors model performance metrics over time to detect degradation due to changing fraud patterns.	KL Divergence	Drift Alert Latency	ML Engineers
+F027	Adaptive Threshold Tuning	Dynamically adjusts blocking thresholds based on system load and historical false positive rates.	Control Theory	Threshold Stability	Fraud Ops
+F028	Peer-to-Peer (P2P) Fraud Monitor	Monitors P2P transfers for money laundering patterns (e.g., rapid circular transfers).	Graph Neural Networks (GNN)	Circular Flow Detection	AML Officers
+F029	IP Reputation Scoring	Enriches transactions with IP intelligence (proxy, VPN, Tor exit node) to assess anonymity risk.	External Lookup API	Lookup Latency	Fraud Ops
+F030	Transaction Linkability Analysis	Detects attempts to link multiple transactions to de-anonymize a user (attack detection).	Graph Analysis	Attack Detection Rate	Security Team
+F031	Biometric Transaction Confirmation	Optional step for high-risk transactions requiring wallet biometric confirmation (TouchID/FaceID).	Pattern Matching	Confirmation Rate	Users
+F032	Composite Fraud Dashboard	Real-time visualization of fraud attempts, blocks, and losses across the globe.	N/A	UI Refresh Rate	Executives
+F033	Real-Time Alerting System	Sends SMS/Webhook alerts to fraud ops teams when critical systemic fraud events are detected.	N/A	Alert Delivery Time	Fraud Ops
+F034	Audit Trail Logging	Logs every access, modification, and decision within the fraud module for compliance.	N/A	Log Completeness	Auditors
+F035	GDPR Right to be Forgotten	Ensures that when a user requests deletion, their historical training data features are purged or anonymized.	N/A	Deletion Confirmation	DPO
+F036	Refund Expiry Enforcement	Enforces time limits on refund capabilities (e.g., refunds only valid within 90 days).	N/A	Expiry Accuracy	System
+F037	Multi-Currency Fraud Logic	Handles fraud detection nuances across different currencies (e.g., micro-targeting high-risk fiat regions).	Random Forest	Currency-wise Accuracy	International Fraud
+F038	Sandbox Fraud Simulation	Provides a testing environment for developers to simulate fraud attacks against the model.	N/A	Simulation Fidelity	DevOps
+F039	Merchant Chargeback Ratio Monitoring	Tracks merchant chargeback (dispute) ratios to flag deteriorating merchant behavior.	Statistical Process Control	Ratio Accuracy	Acquirers
+F040	Behavioral Biometrics (Passive)	Analyzes typing speed, gyroscope movement during transaction to verify user identity passively.	Anomaly Detection (Isolation Forest)	Match Rate	Users
+F041	Network Traffic Analysis	Inspects request headers and patterns to identify bot attacks or scripting abuse.	WAF Heuristics	Bot Block Rate	Security Team
+F042	Batch Processing of Historical Data	Retroactively scans historical transactions for missed fraud patterns upon model retraining.	LSTM (Batch)	Processing Throughput	Data Engineers
+F043	Collaborative Fraud Intelligence	Shares anonymized fraud signatures (hashes of malicious scripts/IDs) with partner banks without leaking data.	Homomorphic Encryption	Sharing Success	Consortium
+F044	Dispute Status Notifications	Sends real-time updates to users and merchants via Wallet/Merchant Backend as the dispute progresses.	N/A	Notification Latency	Users/Merchants
+F045	Escalation Workflow Manager	Defines rules for auto-escalating complex disputes to human investigators based on value or uncertainty.	Expert System	Escalation Accuracy	Support Leads
+F046	Refund Reversal Logic	Allows the reversal of a blinded refund if it was sent in error (within a specific window).	N/A	Reversal Success	Exchange
+F047	Merchant Wallet Whitelisting	Allows users to whitelist specific merchants to bypass strict friction for trusted recurring payments.	N/A	Whitelist Hit Rate	Users
+F048	Dark Web Monitoring Integration	Monitors for leaked PII or merchant credentials that could fuel fraud on the platform.	NLP / Scraping	Threat Intel Latency	SecOps
+F049	Synthetic Identity Detection	Uses ML to detect patterns indicative of synthetic identities (bots creating fake accounts).	Graph Analytics	Detection Rate	AML Officers
+F050	Graceful Degradation Mode	Switches to rule-only mode if the LSTM inference service fails, ensuring payment continuity.	N/A	Failover Time	SREs
+F051	Feature Importance Extraction	Uses SHAP/LIME values to explain why a transaction was flagged (for explainability).	SHAP / LIME	Explanation Accuracy	Compliance Officers
+F052	Dispute Arbitration Queue	Manages the workflow for third-party arbitration when automated resolution fails.	N/A	Queue Depth	Arbitrators
+F053	Merchant Identity Verification (KYB) Sync	Syncs with M21 to ensure merchant business status is valid before allowing refunds to avoid refund scams.	N/A	Sync Latency	Compliance
+F054	Transaction Value Limiting	Dynamically adjusts transaction limits based on the real-time confidence score of the fraud model.	Reinforcement Learning	Limit Adjustment Speed	Risk Managers
+F055	Customer Dispute History Tracking	Tracks the frequency of disputes per user to flag "abusive complainers".	Frequency Analysis	Flag Accuracy	Fraud Ops
+F056	JSON-LD Schema Validation	Strictly validates that all generated contracts adhere to the W3C JSON-LD schema for interoperability.	JSON Schema Validator	Validation Pass Rate	System
+F057	Replay Attack Prevention	Detects if a signed transaction contract is being submitted twice (double-spending attempt).	Nonce / Timestamp Check	Prevention Rate	Exchange
+F058	Social Graph Analysis	Builds a graph of payments to detect fraud rings (multiple users paying one central mule account).	Community Detection (Louvain)	Ring Identification	AML Officers
+F059	Merchant ROI Calculator	Calculates the savings generated for the merchant by M03 vs. traditional card processing.	Arithmetic Calculation	Reporting Accuracy	Merchants
+F060	Refund Fee Structure	Automates the deduction of dispute processing fees from the refund amount if the merchant loses.	N/A	Fee Accuracy	Settlement
+F061	Fraud Feedback Loop	Incorporates confirmed fraud cases back into the training set for the LSTM model (Active Learning).	Active Learning	Model Improvement Rate	Data Scientists
+F062	High-Frequency Payment Filtering	Identifies and throttles bot-driven micro-payment attacks.	Time-Series Analysis	Throttle Latency	System
+F063	Cross-Jurisdiction Rule Loading	Loads specific fraud rules based on the merchant or user's jurisdiction (e.g., stricter limits for EU).	ABAC	Rule Load Time	Policy Engine
+F064	Customer Sentiment Analysis	Analyzes dispute notes for sentiment to prioritize unhappy customers.	NLP (Sentiment Analysis)	Sentiment Score	Support Team
+F065	Proof of Reserves Verification	Verifies that the Exchange has sufficient liquidity to cover pending blinded refunds.	Audit Logic	Check Frequency	Auditors
+F066	Instant Refund Fast-Track	Flagged low-risk transactions allow for "Instant Refund" without manual review.	Decision Tree	Fast-Track Accuracy	Merchants
+F067	Fraud Typology Taxonomy	Categorizes every blocked transaction into a specific fraud type (e.g., Account Takeover, Friendly Fraud).	Classification Taxonomy	Categorization Rate	Analysts
+F068	Secure Multi-Party Computation (SMPC)	Uses SMPC for collaborative fraud scoring between banks without sharing raw customer data.	SMPC Protocols	Compute Latency	Researchers
+F069	Dispute Document Redaction	Automatically redacts sensitive PII from evidence documents before sharing with external auditors.	NER / Regex	Redaction Accuracy	Privacy Team
+F070	Mobile App Integrity Check	Checks if the Wallet App has been rooted or jailbroken before processing payment.	Mobile Security SDK	Integrity Check Time	Security Team
+F071	Location Spoofing Detection	Uses GPS/WiFi triangulation to detect if the user's location is being faked.	Heuristics	Detection Accuracy	Fraud Ops
+F072	Blinded Coin Double-Spend Check	Ensures the specific blinded coin being refunded hasn't already been spent or refunded elsewhere.	Ledger Lookup	Lookup Latency	Exchange
+F073	API Rate Limiting	Prevents brute-force attacks on the dispute initiation endpoint.	Token Bucket	Limit Enforcement Time	API Gateway
+F074	Fraud Case Assignment	Automatically assigns dispute cases to specific agents based on workload and expertise.	Load Balancing	Assignment Efficiency	Support Managers
+F075	Merchant Settlement Adjustments	Automatically deducts fraud liability from merchant daily settlements.	Accounting Logic	Settlement Accuracy	Finance
+F076	Model Explainability UI	Visualizes feature contributions for a specific fraud score for internal agents.	Visualization	UI Render Time	Fraud Agents
+F077	Voice Note Evidence	Allows users to submit voice notes as evidence for disputes.	N/A	Storage Success	Users
+F078	Blockchain Anchor Hash	Anchors the JSON-LD contract hash to a public blockchain for immutable timestamping.	Blockchain Interaction	Anchor Confirmation	Architects
+F079	Zero-Knowledge Proof of Solvency	Generates ZK-Proofs to prove the system has funds to cover refunds without revealing balances.	ZK-SNARKs	Proof Gen Time	Crypto Team
+F080	Fraud Heatmap Generator	Generates a visual heatmap of fraud origins by geographic region.	Geospatial Clustering	Map Load Time	Analysts
+F081	Dynamic Risk Questioning	Inserts dynamic friction steps (CAPTCHAs, quizzes) only when risk score is medium.	Decision Tree	Friction Trigger Time	Users
+F082	Dispute Pre-Filling	Auto-fills dispute forms using transaction data to reduce user effort.	N/A	Form Complete Time	Users
+F083	Merchant Fraud Insurance Integration	Calculates premiums for merchants based on their risk profile generated by M03.	Actuarial Models	Premium Accuracy	Insurers
+F084	Email Header Analysis	Analyzes email headers for evidence provided in disputes to detect phishing.	Regex / SPF/DKIM checks	Analysis Speed	Agents
+F085	Recurring Payment Anomaly Detection	specifically monitors subscription/recurring payments for sudden changes in merchant behavior.	ARIMA	Prediction Accuracy	Users
+F086	Sim Swap Detection	Checks telecom APIs to detect if a user's SIM has been swapped (preventing SMS interception fraud).	External API	API Response Time	Security
+F087	In-App Fraud Reporting Widget	A discreet widget within the Wallet app to report suspicious transactions immediately.	N/A	Widget Load Time	Users
+F088	Dispute Data Encryption	Encrypts all sensitive dispute data at rest using AES-256.	Encryption	Encryption Latency	DB Admins
+F089	Fraud Model Governance	Maintains a registry of approved model versions and their ethical approval status.	N/A	Governance Compliance	ML Ops
+F090	Automated Defund Logic	Automatically triggers the "defund" (refund) command when a merchant loses a dispute.	N/A	Execution Time	System
+F091	Transaction Merging for Analysis	Merges split transactions to detect structuring (smurfing) below limits.	Graph Algorithms	Merge Accuracy	AML
+F092	Merchant Category Code (MCC) Risk Scoring	Applies different risk thresholds based on the MCC (e.g., High risk for Jewelry, Low for Groceries).	Risk Weighting	Score Accuracy	Risk Mgrs
+F093	Fraud Tutorial for Merchants	Interactive guide for merchants on how to use evidence to win disputes.	N/A	User Engagement	Merchants
+F094	API Disaster Recovery	Ensures fraud API endpoints failover to a secondary region during outages.	Geo-DNS	Failover Time	SREs
+F095	Consent Management for Analytics	Manages user consent for using their data in fraud model training (Opt-in/Opt-out).	N/A	Consent Storage	DPO
+F096	Real-Time Fraud Chatbot	A bot that guides users through the dispute process 24/7.	NLP (Chatbot)	CSAT Score	Users
+F097	Evidence Version Control	Tracks versions of evidence files to prevent tampering during the dispute process.	Git-like Logic	Version Integrity	Auditors
+F098	Statistical Outlier Detection (Z-Score)	Uses simple statistical Z-Scores for rapid anomaly filtering on raw amounts.	Statistics	Calculation Time	System
+F099	Merchant Geo-Fencing	Allows merchants to restrict sales to specific geographic zones to prevent cross-border fraud.	Geolocation	Filter Accuracy	Merchants
+F100	Partial Refund Support	Logic to handle refunds for partial amounts of the original blinded coin (requires change logic).	Cryptographic Protocol	Change Calc Accuracy	Exchange
+F101	Dark Pattern Detection	Detects if the merchant website is using dark patterns to trick users into non-consensual payments.	Computer Vision / DOM Analysis	Detection Rate	Compliance
+F102	Refund Transaction Idempotency	Ensures that retrying a refund request does not result in multiple refunds.	Idempotency Keys	Idempotency Rate	System
+F103	Fraud Alert Subscription	Allows merchants to subscribe to real-time webhooks for high-risk transactions affecting them.	Webhooks	Delivery Rate	Merchants
+F104	Customer Age Verification	Validates age based on wallet attributes for restricted goods.	Attribute Verification	Verification Speed	Merchants
+F105	Dispute Escalation Timer	Automatically closes dispute if merchant does not respond within SLA (e.g., 7 days).	Cron Job	SLA Adherence	System
+F106	Knowledge Base Integration	Links specific fraud errors to a support knowledge base for immediate resolution.	Search Engine	Result Relevance	Support
+F107	Biased Model Detection	Monitors model predictions for bias against specific demographic groups (Fairness ML).	Fairness Metrics	Bias Score	Ethics Board
+F108	Transaction Fee Fraud Check	Ensures transaction fees match the agreed protocol, preventing fee manipulation attacks.	Arithmetic Validation	Check Speed	Exchange
+F109	Secure File Transfer Protocol	Uses SFTP/AS2 for exchanging large evidence files with external partners securely.	Secure Transfer	Transfer Success	B2B Team
+F110	Fraud Simulation Dashboard	A "what-if" tool for risk managers to see how changing thresholds affects rejection rates.	Simulation Engine	Calculation Speed	Risk Mgrs
+F111	Digital Receipt QR Code	Generates a QR code containing the JSON-LD contract hash for easy dispute initiation.	QR Gen	Gen Speed	Users
+F112	Merchant Health Score	A composite score of fraud, disputes, and operational health for the merchant.	Weighted Average	Score Refresh Rate	Acquirers
+F113	Automated Penetration Testing	Runs daily automated scans on the dispute portal to find vulnerabilities.	Security Scanners	Vulnerability Count	SecOps
+F114	User Transaction Limits	Enforces per-user, per-day, and per-transaction limits configurable by risk profile.	Rules Engine	Enforce Latency	Risk
+F115	Refund Reason Codes	Standardized list of refund reasons (e.g., "Item Not Received") for better analytics.	Taxonomy	Code Usage	Analysts
+F116	Multi-Language Support	Supports fraud and dispute interfaces in all supported PARI languages.	i18n	Translation Coverage	Global Users
+F117	Fraud Case Deduplication	Merges duplicate fraud reports related to the same transaction.	Levenshtein Distance	Dedupe Accuracy	Analysts
+F118	Merchant Watchlist	Internal list of merchants under special surveillance for fraud.	N/A	List Update Time	Compliance
+F119	Payment Session Tokenization	Uses short-lived tokens for payment sessions to prevent replay attacks on the fraud API.	JWT	Token Expiry	Security
+F120	Fraud Cost Attribution	Attributes the exact cost of fraud (fees, lost goods, fines) to specific transactions.	Cost Accounting	Attribution Accuracy	Finance
+F121	Anonymous Feedback Loop	Allows users to flag false positives without revealing identity to improve the model.	Anonymous Proxy	Feedback Volume	Data Science
+F122	Smart Contract Clause Library	Pre-written legal clauses for JSON-LD contracts for different industry verticals.	N/A	Clause Usage	Legal
+F123	Evidence Tamper Alert	Alerts admins if evidence file hashes change post-submission.	File Integrity Watcher	Alert Latency	Security
+F124	Voice Biometrics for Disputes	Uses voice print to verify the caller during phone-based dispute resolution.	Voice Matching	Match Rate	Support
+F125	Graph Database Integration	Uses Neo4j or similar for efficient storage and querying of transaction relationships.	Graph DB	Query Latency	Data Engineers
+F126	Real-time SLA Monitoring	Monitors whether dispute resolutions are happening within the promised timeframes.	Time-Series	SLA Breach Count	Ops
+F127	Fraud Prediction API	Exposes a risk score API for external partners (e.g., other banks) to query.	REST API	API Uptime	Partners
+F128	Third-party Evidence Integration	Allows importing tracking info from shippers (DHL, FedEx) as dispute evidence.	API Integration	Sync Success	Merchants
+F129	Blinded Coin Refresh	Logic to handle refreshed coins (change) in the context of a refund.	Cryptographic Logic	Logic Accuracy	Exchange
+F130	Suspicious Login Correlation	Correlates suspicious logins (from Identity Provider) with high-risk payment attempts.	Correlation Engine	Correlation Accuracy	Security
+F131	Dynamic CAPTCHA	Uses interactive challenges only when the IP/device reputation is low.	CAPTCHA Engine	Solve Rate	Users
+F132	Fraud Report Generation	Generates PDF/Excel reports of monthly fraud activities for stakeholders.	Reporting Engine	Gen Time	Managers
+F133	Machine Learning Pipeline Orchestration	Orchestrates the ETL and training steps using tools like Airflow/Kubeflow.	Workflow Engine	Pipeline Success	ML Ops
+F134	Custom Rule Builder UI	Allows fraud ops to write and deploy simple rules without code deployment.	UI/Logic Engine	Rule Deploy Time	Ops
+F135	Dispute Life-Cycle Visualization	Visual timeline of the dispute journey for transparency.	Frontend	UI Render	Users
+F136	Merchant Batch Refund	Allows merchants to upload a CSV of blinded coins for bulk refunds (e.g., recall scenario).	Batch Processing	Batch Duration	Merchants
+F137	Fraud Model Retraining Trigger	Automates the trigger for model retraining when drift exceeds a threshold.	Event Trigger	Retrain Freq	ML Ops
+F138	Zero Trust Network Access	Enforces ZTNA for all internal tools accessing sensitive fraud data.	ZTNA Policy	Access Latency	IT Security
+F139	Immutable WORM Storage	Stores final fraud evidence in WORM (Write Once Read Many) storage for legal hold.	Storage Tech	Write Success	Legal
+F140	Customer Risk Tiering	Assigns users to risk tiers (Low, Medium, High) based on historical fraud behavior.	Classification	Tier Assignment	Risk
+F141	Peer Group Benchmarking	Benchmarks a merchant's fraud rate against their peer group (industry/size).	Statistical Analysis	Benchmark Accuracy	Merchants
+F142	Transaction Narrative Analysis	NLP analysis of free-text descriptions in transactions for fraud keywords.	NLP	Keyword Match	AML
+F143	Refund Fraud Detection	Detects merchants abusing the refund system to move funds illicitly.	Pattern Recognition	Detection Rate	Compliance
+F144	Webhook Signature Validation	Validates signatures of incoming webhooks from external partners to prevent spoofing.	HMAC Validation	Validation Speed	Integration
+F145	Dispute Closure Feedback	Asks users for feedback on the dispute resolution process to improve CSAT.	Survey System	Response Rate	Product
+F146	Automated Evidence Collection	Screenshots webpages or emails automatically if user provides URL/headers.	Headless Browser	Collection Success	System
+F147	Fraud Hotline Integration	Integrates phone systems with the case system for call logging.	CTI Integration	Log Sync Rate	Support
+F148	Merchant Settlement Currency Conversion	Handles currency conversion during refunds if the merchant balance is in a different currency.	FX Conversion	Rate Accuracy	Finance
+F149	Data Loss Prevention (DLP)	Scans dispute notes and evidence for accidental leakage of credit card numbers or PII.	Regex/DLP Engine	Scan Speed	Security
+F150	PARI Ecosystem Fraud Map	A global view of fraud across all PARI modules (Banking, Wallet, etc.) in one dashboard.	Data Aggregation	Map Refresh	Executives
+F151	Quantum-Resistant Evidence Storage	Stores evidence hashes in a format preparatory for quantum-resistant verification chains.	Post-Quantum Crypto	Storage Format	Crypto Team
+F152	User Behavioral Baseline Calibration	Periodically recalibrates the "normal" behavior baseline for users as their habits change.	Clustering	Calibration Freq	ML Ops
+F153	Smart Contract Abi Standardization	Ensures JSON-LD contracts follow a strict ABI for parser compatibility.	Standardization	Compliance Rate	Architects
+F154	Fraud Risk Insurance Payout Calculation	Calculates automated insurance payouts for transactions covered by fraud insurance.	Actuarial Logic	Payout Accuracy	Finance
+F155	Merchant Dispute Win Rate Leaderboard	Gamification element to encourage merchants to maintain good practices and provide evidence.	Gamification	Leaderboard Accuracy	Merchants
+F156	API Quota Management	Manages API usage limits for external partners accessing the fraud detection API.	Rate Limiting	Limit Accuracy	Platform
+F157	Legacy System Data Import	Allows importing historical fraud data from legacy payment systems for model warm-up.	ETL	Import Success	Migration Team
+F158	Real-time Collaboration on Cases	Allows multiple agents to work on a complex fraud case simultaneously with locking.	Collaborative Software	Lock Latency	Support
+F159	Fraud Model Shadow Mode	Runs new models in shadow mode (parallel to live) to test performance before production.	A/B Testing	Shadow Accuracy	ML Engineers
+F160	Dispute Evidence Canonicalization	Converts diverse evidence formats (images, docs) into a standard PDF/A format for archiving.	Document Conversion	Conversion Success	Archivist
+
+
+h.	Comprehensive List of Database Objects
+
+id	schema_name	object_name	object_type	description	feature_reference	column_names	constraints / notes	junction_tables
+T001	fraud	transaction_scores	TABLE	Stores real-time fraud scores for every transaction.	F001, F014	score_id (PK), transaction_hash, composite_score, lstm_score, rule_score, created_at	CHECK (composite_score BETWEEN 0 AND 100)	N/A
+T002	fraud	lstm_model_versions	TABLE	Metadata for deployed LSTM models.	F017, F089	model_id (PK), version, path, trained_at, active_from, active_to, accuracy_metric	CHECK (active_from < active_to)	N/A
+T003	fraud	anomaly_features	TABLE	Feature vectors used for ML inference (ephemeral or short-term retention).	F016, F039	feature_id (PK), transaction_hash, feature_vector (JSONB), is_anomaly	Feature vector retention policy: 7 days	N/A
+T004	fraud	velocity_rules	TABLE	Configuration for velocity-based fraud checks.	F004	rule_id (PK), entity_type (user/merchant), limit_amount, limit_count, window_sec	N/A	N/A
+T005	fraud	device_fingerprints	TABLE	Anonymous hashes of device attributes.	F005	fingerprint_id (PK), device_hash, first_seen, last_seen, risk_score	UNIQUE (device_hash)	N/A
+T006	fraud	geolocation_events	TABLE	Logs location data for velocity checks.	F006	geo_id (PK), transaction_hash, lat, long, timestamp, accuracy_m	CHECK (lat BETWEEN -90 AND 90)	N/A
+T007	contract	jsonld_contracts	TABLE	Stores the canonical JSON-LD digital receipts.	F007, F011	contract_id (PK), transaction_hash, jsonld_document (JSONB), sha3_hash, created_at	UNIQUE (sha3_hash)	N/A
+T008	contract	contract_signatures	TABLE	Stores cryptographic signatures linked to contracts.	F008	sig_id (PK), contract_id (FK), signer_role (merchant/exchange), signature_value (BYTEA), algo	N/A	N/A
+T009	dispute	cases	TABLE	Master table for all dispute/fraud cases.	F010, F045	case_id (PK), transaction_hash (FK), status, reason_code, amount, created_at, updated_at	STATUS ENUM (open,under_review,resolved,closed)	N/A
+T010	dispute	case_evidence	TABLE	Stores files and documents attached to cases.	F022, F146	evidence_id (PK), case_id (FK), file_uri, file_hash, uploaded_by, mime_type	CHECK (file_size > 0)	N/A
+T011	refund	blinded_refunds	TABLE	Tracks requests for refunds to blinded coins.	F012, F072	refund_id (PK), original_coin_hash, blinded_refund_coin, merchant_id (FK), status	STATUS ENUM (pending,authorized,rejected,executed)	N/A
+T012	refund	refund_signatures	TABLE	Stores merchant signatures authorizing refunds.	F013	sig_id (PK), refund_id (FK), signature_value (BYTEA), timestamp	N/A	N/A
+T013	fraud	risk_profiles	TABLE	Aggregated risk scores for entities (Users/Merchants).	F009, F140	entity_id (PK), entity_type, risk_tier, score_30day_avg, last_updated	RISK_TIER ENUM (low,medium,high,critical)	N/A
+T014	fraud	blacklist_entries	TABLE	Dynamic blacklist for coins, devices, or IPs.	F020	entry_id (PK), type, value, reason, added_at, expires_at	UNIQUE (type, value)	N/A
+T015	audit	fraud_audit_log	TABLE	Immutable audit trail for all fraud module actions.	F034, F178	log_id (PK), actor_id, action_type, target_id, details (JSONB), timestamp	Index on (target_id, timestamp)	N/A
+T016	ml	training_data	TABLE	Anonymized dataset for model training.	F061, F095	data_id (PK), features (JSONB), label (fraud/legit), model_version, ingestion_date	APPLYING DIFFERENTIAL PRIVACY	N/A
+T017	fraud	sar_reports	TABLE	Suspicious Activity Reports for regulators.	F019	sar_id (PK), case_id (FK), report_format, status, submission_date	N/A	N/A
+T018	dispute	case_notes	TABLE	Internal notes on cases.	F024	note_id (PK), case_id (FK), author_id, note_text, is_internal	CHECK (is_internal IS TRUE OR author_id IS NOT NULL)	N/A
+T019	fraud	fraud_typelogy	TABLE	Reference table for fraud categories.	F067	type_id (PK), category, subcategory, description	N/A	N/A
+T020	system	feature_flags	TABLE	Toggles for specific fraud features.	F050	flag_id (PK), feature_name, is_enabled, config (JSONB)	UNIQUE (feature_name)	N/A
+E001	common	status_type	ENUM	Common statuses for cases and refunds.	N/A	'open', 'pending', 'approved', 'rejected', 'closed'	N/A	N/A
+E002	common	entity_type	ENUM	Types of entities (User/Merchant).	N/A	'customer', 'merchant', 'exchange'	N/A	N/A
+E003	common	fraud_reason	ENUM	Standardized reasons for disputes.	N/A	'fraud', 'item_not_received', 'unauthorized', 'duplicate'	N/A	N/A
+E004	contract	signature_algo	ENUM	Algorithms used for signing.	N/A	'ecdsa_secp256k1', 'rsa_4096', 'ed25519'	N/A	N/A
+V001	fraud	v_high_risk_merchants	VIEW	Lists merchants with high fraud ratios.	F009, F112	merchant_id, name, fraud_ratio, total_tx	Filtered WHERE fraud_ratio > 0.05	N/A
+V002	dispute	v_open_cases_dashboard	VIEW	Dashboard view for open disputes.	F032	case_id, amount, merchant_name, days_open	Filtered WHERE status = 'open'	N/A
+V003	ml	v_model_performance	VIEW	Aggregates model accuracy metrics.	F026	model_id, precision, recall, f1_score, date	Group by model_id, date	N/A
+SP001	fraud	sp_calculate_risk_score	PROCEDURE	Main orchestration proc to calculate score.	F014	IN transaction_hash, OUT score	Calls LSTM and Rule engines	N/A
+SP002	fraud	sp_insert_feature_vector	PROCEDURE	Ingests features into the store.	F016	IN transaction_hash, IN features_json	Idempotent	N/A
+SP003	dispute	sp_create_dispute_case	PROCEDURE	Creates a new case and generates case ID.	F010	IN transaction_hash, IN reason_code, OUT case_id	Validates transaction exists	N/A
+SP004	refund	sp_validate_refund_sig	PROCEDURE	Checks merchant signature on refund.	F013	IN refund_id, IN signature_bytes	Returns boolean valid	N/A
+SP005	ml	sp_retrain_model	PROCEDURE	Triggers model retraining pipeline.	F137	IN model_type	Asynchronous execution	N/A
+SP006	fraud	sp_check_velocity	PROCEDURE	Checks velocity rules for an entity.	F004	IN entity_id, IN entity_type, IN amount	Returns boolean blocked	N/A
+SP007	contract	sp_generate_jsonld	PROCEDURE	Generates the JSON-LD document.	F007	IN transaction_hash, OUT jsonld_content	Includes SHA-3 hash generation	N/A
+SP008	dispute	sp_assign_case	PROCEDURE	Auto-assigns case to agent.	F074	IN case_id	Logic: Least load agent	N/A
+SP009	fraud	sp_update_sar	PROCEDURE	Updates status of a Suspicious Activity Report.	F019	IN sar_id, IN new_status	N/A	N/A
+SP010	system	sp_toggle_feature_flag	PROCEDURE	Updates feature flags.	F050	IN feature_name, IN is_enabled	N/A	N/A
+T021	fraud	ip_reputation	TABLE	Cached IP reputation scores.	F029	ip_address (PK), score, provider, last_checked	UNIQUE (ip_address)	N/A
+T022	fraud	user_behavior_baseline	TABLE	Stores baseline metrics for "normal" user behavior.	F152	user_hash (PK), avg_tx_amt, tx_frequency, favorite_merchants (JSONB)	N/A	N/A
+T023	fraud	social_graph_edges	TABLE	Graph edges for money flow analysis.	F028, F125	edge_id (PK), source_node, target_node, weight, timestamp	Index on (source_node, target_node)	N/A
+T024	dispute	case_history	TABLE	Status change history for cases.	F097	history_id (PK), case_id (FK), old_status, new_status, changed_by, timestamp	N/A	N/A
+T025	refund	refund_history	TABLE	Status change history for refunds.	T011	history_id (PK), refund_id (FK), old_status, new_status, changed_by, timestamp	N/A	N/A
+T026	fraud	feedback_loop	TABLE	Stores user feedback on false positives (anonymized).	F121	feedback_id (PK), session_id, was_false_positive (bool), comments	Anonymized session_id only	N/A
+T027	contract	contract_clauses	TABLE	Library of legal clauses for JSON-LD.	F122	clause_id (PK), text, category, vertical	N/A	N/A
+T028	contract	contract_clause_junction	TABLE	Links contracts to specific clauses.	F122	contract_id (FK), clause_id (FK)	Composite PK (contract_id, clause_id)	N/A
+T029	fraud	bot_signals	TABLE	Signals indicating bot activity.	F041, F062	signal_id (PK), transaction_hash (FK), signal_type (header_inconsistency, speed), confidence	N/A	N/A
+T030	fraud	merchant_dispute_ratios	TABLE	Materialized cache of merchant performance.	F039	merchant_id (PK), disputes_total, disputes_won, ratio, last_calculated	Refreshed daily	N/A
+T031	dispute	external_evidence	TABLE	Evidence from external shippers.	F128	evidence_id (PK), case_id (FK), tracking_number, carrier, status_json	N/A	N/A
+T032	fraud	p2p_circular_flows	TABLE	Detected circular transaction chains.	F028	flow_id (PK), start_node, end_node, hop_count, detected_at	N/A	N/A
+T033	fraud	sim_swap_events	TABLE	Logs SIM swap check results.	F086	user_hash, swap_detected, checked_at	N/A	N/A
+T034	ml	feature_importance	TABLE	SHAP values for model explainability.	F051	importance_id (PK), model_id, feature_name, importance_value	N/A	N/A
+T035	dispute	refunds_issued	TABLE	Log of executed refunds.	F090	refund_log_id (PK), refund_id (FK), amount, executed_at	N/A	N/A
+T036	fraud	chargeback_savings	TABLE	Tracks savings calculation.	F059	merchant_id, period, estimated_loss, actual_loss, savings	N/A	N/A
+T037	fraud	high_risk_batches	TABLE	Flags batch uploads from merchants.	F136	batch_id (PK), merchant_id, upload_time, risk_score	N/A	N/A
+T038	fraud	bias_metrics	TABLE	Model fairness metrics per group.	F107	metric_id (PK), model_id, demographic_attribute, disparity_score	N/A	N/A
+T039	contract	blockchain_anchors	TABLE	Records of contract hashes on external blockchains.	F078	anchor_id (PK), contract_hash, tx_hash, network, block_number	UNIQUE (contract_hash, network)	N/A
+T040	fraud	dynamic_throttles	TABLE	Current throttle limits for IPs/Users.	F062	entity_key, max_requests, window_sec	Time-to-live (TTL) based	N/A
+T041	fraud	geo_fences	TABLE	Merchant defined geo-fences.	F099	fence_id (PK), merchant_id, polygon_coords (JSONB)	N/A	N/A
+T042	dispute	sentiment_analysis	TABLE	Results of NLP sentiment on notes.	F064	note_id (FK), sentiment_score, sentiment_label (positive/negative)	N/A	N/A
+T043	fraud	watchlist	TABLE	Internal watchlist for entities.	F118	entity_id, type, reason, added_by	N/A	N/A
+T044	fraud	smart_contract_clauses	TABLE	Clauses specific to smart contract execution.	F153	clause_id (PK), abi_signature, logic_hash	N/A	N/A
+T045	ml	shadow_mode_results	TABLE	Comparison of shadow model vs live model.	F159	comparison_id (PK), tx_hash, live_score, shadow_score, ground_truth	N/A	N/A
+T046	fraud	forensic_snapshots	TABLE	Screenshots/HTML snapshots of webpages.	F146	snapshot_id (PK), case_id (FK), storage_path, timestamp	N/A	N/A
+T047	system	api_usage	TABLE	Tracks API usage for quotas.	F156	api_key_id, endpoint, request_count, window_start	UNIQUE (api_key_id, window_start)	N/A
+T048	fraud	legacy_import_map	TABLE	Maps legacy IDs to PARI IDs.	F157	legacy_id, legacy_system, pari_id, import_date	N/A	N/A
+T049	dispute	case_locks	TABLE	Row-level locks for collaborative case work.	F158	case_id (PK), locked_by, locked_at	UNIQUE (case_id)	N/A
+T050	fraud	quantum_prepared_keys	TABLE	Test keys for quantum-resistant crypto.	F151	key_id (PK), algo_type, public_key_blob	N/A	N/A
+T051	fraud	user_risk_history	TABLE	Historical tracking of user risk tier changes.	T013	history_id (PK), user_hash, old_tier, new_tier, changed_at	N/A	N/A
+T052	dispute	evidence_redactions	TABLE	Logs of redactions made to evidence.	F069	redaction_id (PK), evidence_id (FK), redacted_by, redaction_coords	N/A	N/A
+T053	contract	canonical_documents	TABLE	PDF/A versions of evidence.	F160	doc_id (PK), original_evidence_id (FK), pdf_storage_path	N/A	N/A
+T054	fraud	merchant_leagueboard	TABLE	Pre-calculated leaderboard stats.	F155	merchant_id, rank, score, period	N/A	N/A
+T055	ml	model_drift_alerts	TABLE	Logs of drift detection events.	F026	alert_id (PK), model_id, drift_metric, threshold, timestamp	N/A	N/A
+T056	dispute	webhooks_delivered	TABLE	Log of webhook delivery attempts.	F103	webhook_id (PK), case_id, url, status, http_code, attempt_count	N/A	N/A
+T057	fraud	refund_abuse_patterns	TABLE	Patterns of merchants abusing refunds.	F143	pattern_id (PK), merchant_id, pattern_type, frequency	N/A	N/A
+T058	fraud	insurance_claims	TABLE	Claims made against fraud insurance.	F154	claim_id (PK), transaction_hash, claim_amount, status, payout_id	N/A	N/A
+T059	fraud	currency_conversion_rates	TABLE	Cache of FX rates for refunds.	F148	from_curr, to_curr, rate, timestamp	UNIQUE (from_curr, to_curr, timestamp)	N/A
+T060	security	dlp_violations	TABLE	Logs of DLP scans on disputes.	F149	violation_id (PK), evidence_id, violation_type, pii_found	N/A	N/A
+T061	fraud	voice_prints	TABLE	Stores voice biometrics hashes.	F124	print_id (PK), user_hash, voice_hash, created_at	N/A	N/A
+T062	fraud	merchant_health_scores	TABLE	Composite health score for merchants.	F112	merchant_id, health_score, components (JSONB), calculated_at	N/A	N/A
+T063	dispute	satisfaction_surveys	TABLE	Feedback on dispute resolution.	F145	survey_id (PK), case_id, rating, comments	CHECK (rating BETWEEN 1 AND 5)	N/A
+T064	fraud	spam_keywords	TABLE	Keywords for narrative analysis.	F142	keyword_id (PK), keyword, risk_weight	N/A	N/A
+T065	contract	contract_permissions	TABLE	Access control for contracts.	F002	contract_id, party_role, can_view, can_sign	N/A	N/A
+T066	fraud	training_schedule	TABLE	Schedule for automated model training.	F133	schedule_id, model_type, cron_expression, last_run	N/A	N/A
+T067	fraud	anomaly_alerts	TABLE	Alerts generated by anomaly detection.	F033	alert_id (PK), transaction_hash, anomaly_type, severity	N/A	N/A
+T068	dispute	automated_actions	TABLE	Logs of actions taken by the automation engine.	F045, F090	action_id (PK), case_id, action_type, result, timestamp	N/A	N/A
+T069	ml	dataset_partitions	TABLE	Metadata for data partitions (train/val/test).	F016	partition_id (PK), model_id, partition_type, row_count	N/A	N/A
+T070	fraud	captcha_challenges	TABLE	Captcha sessions.	F131	session_id (PK), challenge_hash, solved, ip_address	N/A	N/A
+T071	fraud	dark_web_monitoring	TABLE	Alerts from dark web scans.	F048	alert_id (PK), keyword, source_url, found_at	N/A	N/A
+T072	fraud	device_integrity	TABLE	Results of app integrity checks.	F070	device_hash, is_rooted, app_signature_valid, checked_at	N/A	N/A
+T073	fraud	transaction_links	TABLE	Links related transactions (e.g., splits).	F091	parent_tx, child_tx, link_type	N/A	N/A
+T074	dispute	communication_logs	TABLE	Logs of emails/SMS sent to users/merchants.	F044	log_id (PK), case_id, channel, recipient, message_id	N/A	N/A
+T075	fraud	peer_benchmarks	TABLE	Industry benchmarks for fraud rates.	F141	industry_code, avg_fraud_rate, percentile_25, percentile_75	N/A	N/A
+T076	fraud	location_spoofs	TABLE	Detected location spoofing events.	F071	spoof_id (PK), transaction_hash, reported_loc, verified_loc	N/A	N/A
+T077	contract	abi_definitions	TABLE	ABI definitions for smart contracts.	F153	abi_id (PK), name, version, definition_json	UNIQUE (name, version)	N/A
+T078	fraud	rule_audit	TABLE	Audit trail for rule changes.	F134	rule_id, changed_by, old_value, new_value, timestamp	N/A	N/A
+T079	ml	hyperparameters	TABLE	Hyperparameters for model runs.	F002	run_id, param_name, param_value	N/A	N/A
+T080	dispute	refund_transactions	TABLE	Financial ledger entries for refunds.	F090	tx_id (PK), refund_id, debit_account, credit_account, amount	N/A	N/A
+T081	fraud	synthetic_id_signals	TABLE	Signals for synthetic identity detection.	F049	signal_id (PK), user_hash, signal_type, risk_contribution	N/A	N/A
+T082	fraud	periodic_limits	TABLE	Limits per period (daily/weekly).	F115	limit_id (PK), entity_id, period_type, max_amount, current_amount	N/A	N/A
+T083	fraud	recurring_payments	TABLE	Metadata for recurring subscriptions.	F085	sub_id (PK), merchant_id, user_hash, amount, interval	N/A	N/A
+T084	fraud	dark_patterns	TABLE	Detected dark patterns on merchant sites.	F101	pattern_id (PK), merchant_url, pattern_type, detected_at	N/A	N/A
+T085	fraud	fraud_costs	TABLE	Detailed breakdown of fraud costs.	F120	cost_id (PK), transaction_hash, cost_type (fee,goods), amount	N/A	N/A
+T086	ml	active_learning_queue	TABLE	Data points labeled for active learning.	F061	queue_id (PK), transaction_hash, predicted_label, uncertainty_score	N/A	N/A
+T087	dispute	partial_refunds	TABLE	Logic for change in partial refunds.	F100	refund_id, original_amount, refund_amount, change_amount	N/A	N/A
+T088	fraud	transaction_narratives	TABLE	Full text search index for narratives.	F142	tx_hash, narrative_text, tsvector	N/A	N/A
+T089	fraud	api_keys	TABLE	API keys for external fraud partners.	F127	key_id (PK), api_key_hash, partner_name, permissions	UNIQUE (api_key_hash)	N/A
+T090	system	maintenance_windows	TABLE	Scheduled maintenance for fraud systems.	F094	window_id, start_time, end_time, affected_components	N/A	N/A
+T091	fraud	fraud_maps	TABLE	Data for fraud heatmaps.	F080	region_code, fraud_count, total_count, date	N/A	N/A
+T092	fraud	wallet_security_events	TABLE	Security events from wallet app.	F030	event_id (PK), user_hash, event_type, details	N/A	N/A
+T093	ml	model_artifacts	TABLE	Storage locations for model files.	F133	artifact_id (PK), model_id, storage_uri, type (weights,config)	N/A	N/A
+T094	dispute	escalation_rules	TABLE	Rules for auto-escalating cases.	F045	rule_id (PK), condition (JSONB), escalation_level	N/A	N/A
+T095	fraud	session_risks	TABLE	Risk associated with a specific session.	F119	session_id (PK), risk_score, anomalies_detected	N/A	N/A
+T096	contract	external_contract_refs	TABLE	References to external contract systems.	F122	ref_id, external_system, external_id, pari_contract_id	UNIQUE (external_system, external_id)	N/A
+T097	fraud	fraudster_profiles	TABLE	Aggregated profiles of known fraudsters.	F009	profile_id (PK), moniker, known_moa, risk_score	N/A	N/A
+T098	fraud	email_headers	TABLE	Parsed headers from evidence emails.	F084	header_id (PK), evidence_id, header_name, header_value	N/A	N/A
+T099	ml	retraining_jobs	TABLE	Async jobs for model training.	F133	job_id (PK), status, start_time, end_time, model_id	N/A	N/A
+T100	system	configuration_history	TABLE	History of config changes for feature flags.	F050	config_id, flag_name, old_value, new_value, changed_by	N/A	N/A
+T101	dispute	dispute_templates	TABLE	Templates for dispute responses.	F024	template_id (PK), language, category, content_text	N/A	N/A
+T102	fraud	voice_records	TABLE	Storage refs for voice notes.	F077	record_id (PK), case_id, storage_path, duration_sec	N/A	N/A
+T103	fraud	merchant_categories	TABLE	Mapping of merchants to MCC codes.	F092	merchant_id, mcc_code, description	N/A	N/A
+T104	fraud	risk_thresholds	TABLE	Dynamic thresholds for blocking.	F027	threshold_id (PK), risk_tier, min_score_for_block, effective_date	N/A	N/A
+T105	dispute	refund_reasons	TABLE	Detailed reason codes mapping.	F115	code_id (PK), code, description, category	N/A	N/A
+T106	fraud	smpc_keys	TABLE	Keys for Secure Multi-Party Computation.	F068	key_id, party_id, public_share	N/A	N/A
+T107	fraud	identity_providers	TABLE	Config for IdP verification (e.g., SIM swap).	F086	provider_id, name, api_endpoint, auth_token	N/A	N/A
+T108	contract	contract_states	TABLE	State transitions for contracts.	F153	state_id, contract_id, from_state, to_state, timestamp	N/A	N/A
+T109	fraud	carrier_integration	TABLE	Config for shipping carriers.	F128	carrier_id, name, tracking_api_url	N/A	N/A
+T110	ml	ground_truth_labels	TABLE	Human-verified labels for transactions.	F159	tx_hash, label (fraud/legit), verified_by, verified_at	N/A	N/A
+T111	fraud	device_whitelist	TABLE	Whitelisted devices for users.	F047	user_hash, device_hash	N/A	N/A
+T112	dispute	case_tags	TABLE	Tagging system for cases.	F097	case_id, tag	N/A	N/A
+T113	fraud	fraud_trends	TABLE	Aggregated fraud trends over time.	F080	date, fraud_type, count, total_volume	N/A	N/A
+T114	ml	feature_drift	TABLE	Drift metrics for specific features.	F026	feature_name, distribution_metric, date	N/A	N/A
+T115	fraud	suspicious_logins	TABLE	Correlation of login and payment anomalies.	F130	login_id, user_hash, risk_score, payment_link (bool)	N/A	N/A
+T116	dispute	automated_responses	TABLE	Auto-generated responses for disputes.	F096	response_id, case_id, template_id, generated_text	N/A	N/A
+T117	fraud	fraud_network_nodes	TABLE	Nodes for graph analysis.	F125	node_id, node_type, entity_hash, risk_score	N/A	N/A
+T118	system	health_checks	TABLE	Results of system health pings.	F094	check_id, service_name, status, latency_ms, timestamp	N/A	N/A
+T119	fraud	transaction_limits	TABLE	Dynamic transaction limits.	F054	entity_id, limit_type, max_value	N/A	N/A
+T120	dispute	external_case_refs	TABLE	References to external legal/case systems.	F052	pari_case_id, external_system, external_case_id	N/A	N/A
+T121	ops	chaos_experiments	TABLE	Records of chaos engineering attacks on M03 to test resilience.	F038	experiment_id (PK), target_service, attack_type, fault_injected, result, timestamp	CHECK (result IN ('success','failure','timeout'))	N/A
+T122	ops	test_case_executions	TABLE	Logs of automated test cases for fraud rules and models.	F155	execution_id (PK), test_suite_id, test_name, status, duration_ms, failure_reason	N/A	N/A
+T123	ops	deployment_pipelines	TABLE	Tracks the deployment history of fraud microservices.	F017	pipeline_id (PK), service_name, version, environment, deployed_by, deployment_status	STATUS ENUM (pending,success,failed,rollback)	N/A
+T124	sec	spiffe_identities	TABLE	SPIFFE/SPIRE identities for Zero-Trust mTLS authentication within M03.	F017, M17	identity_id (PK), spiffe_id, service_account, trust_domain, expiry_date	UNIQUE (spiffe_id)	N/A
+T125	sec	hsm_audit_trail	TABLE	Logs every key operation performed within the Hardware Security Module.	F008, F013	hsm_log_id (PK), operation_type, key_id, user_id, success, timestamp	N/A	N/A
+T126	legal	gdpr_deletion_queue	TABLE	Queue for processing "Right to be Forgotten" requests relevant to fraud data.	F035	deletion_id (PK), user_hash, status, requested_at, completed_at	CHECK (status IN ('queued','processing','done'))	N/A
+T127	compliance	sanction_screening_results	TABLE	Results of real-time sanctions screening (OFAC/UN) linked to transactions.	F019, M05	screen_id (PK), transaction_hash, list_name, match_score, hit (bool), timestamp	Index on hit status	N/A
+T128	compliance	dpia_assessments	TABLE	Data Protection Impact Assessment logs for new fraud features.	F107	dpia_id (PK), feature_name, risk_score, mitigation_plan, approved_by	N/A	N/A
+T129	legal	contract_legal_reviews	TABLE	Tracks internal legal reviews of specific contract clauses or disputes.	F122	review_id (PK), contract_id, reviewer_id, verdict, review_notes	N/A	N/A
+T130	ml	synthetic_data_catalog	TABLE	Metadata for synthetic datasets generated for training without privacy risks.	F130	dataset_id (PK), source_model, generator_params, rows_count, storage_path	N/A	N/A
+T131	ml	model_rollback_history	TABLE	History of model rollbacks due to degradation or bugs.	F017	rollback_id (PK), model_id, from_version, to_version, reason, timestamp	N/A	N/A
+T132	data	data_lineage_graph	TABLE	Graph representation of data flow from ingestion to feature store.	M10, F016	node_id (PK), source_type, destination_type, transform_logic	N/A	N/A
+T133	notify	sms_delivery_logs	TABLE	Detailed logs of SMS delivery for fraud alerts and 2FA.	F033, F025	sms_id (PK), phone_hash, provider, message_id, status, delivered_at	STATUS ENUM (sent,delivered,failed)	N/A
+T134	notify	push_notification_registrations	TABLE	Stores device tokens for push notifications related to disputes.	F044	token_id (PK), user_hash, device_token, platform (ios/android), active	UNIQUE (device_token)	N/A
+T135	notify	email_bounce_handler	TABLE	Tracks bounced emails for dispute notifications to clean lists.	F044	bounce_id (PK), email_hash, bounce_type, diagnostic_code, timestamp	N/A	N/A
+T136	notify	in_app_messages	TABLE	Stores in-app notifications for users regarding their disputes.	F135	msg_id (PK), user_hash, title, body, read_status, expires_at	CHECK (read_status IS TRUE OR read_status IS FALSE)	N/A
+T137	sec	merchant_credential_rotations	TABLE	Audit log of API key rotations for merchant integrations.	F112	rotation_id (PK), merchant_id, old_key_hash, new_key_hash, rotated_by	N/A	N/A
+T138	integration	iso20022_message_store	TABLE	Raw or parsed ISO 20022 messages for payment tracking and disputes.	F127, M07	msg_id (PK), msg_type, business_area, raw_xml, parsed_json, ingestion_time	N/A	N/A
+T139	integration	e_invoice_linkages	TABLE	Links disputes to specific e-invoices from national systems (e.g., SDI).	F128, M22	linkage_id (PK), case_id (FK), e_invoice_id, invoice_date, tax_amount	UNIQUE (e_invoice_id)	N/A
+T140	fraud	ato_signals	TABLE	Account Takeover (ATO) specific signals and risk indicators.	F130	signal_id (PK), user_hash, login_velocity, new_device_count, password_reset_attempts	N/A	N/A
+T141	fraud	promo_abuse_tracking	TABLE	Tracks usage of promotional codes to detect abuse patterns.	F140, F155	promo_id (PK), code_hash, user_hash, usage_count, suspicious_flag	N/A	N/A
+T142	fraud	loyalty_fraud_events	TABLE	Events related to loyalty points manipulation linked to payments.	F085	event_id (PK), transaction_hash, points_delta, fraud_score	N/A	N/A
+T143	fraud	card_testing_patterns	TABLE	Identifies patterns indicative of card testing attacks.	F062	pattern_id (PK), merchant_id, declined_rate, small_amt_frequency	N/A	N/A
+T144	fraud	refund_request_throttles	TABLE	Tracks throttling of refund requests from specific IPs or merchants.	F073, F136	throttle_key, request_count, window_start, blocked (bool)	N/A	N/A
+T145	storage	archive_manifest	TABLE	Manifest for data archived to cold storage (S3/Glacier).	F011, M11	manifest_id (PK), table_name, date_range, archive_id, checksum	UNIQUE (table_name, date_range)	N/A
+T146	storage	cold_storage_retrieval	TABLE	Logs of retrieval requests from cold storage.	F011	retrieval_id (PK), archive_id, requested_by, status, restore_expiry	STATUS ENUM (initiated,completed,expired)	N/A
+T147	perf	cache_invalidation_queue	TABLE	Queue for invalidating Redis cache entries upon updates.	F015	inv_id (PK), cache_key, action (invalidate/update), queued_at	N/A	N/A
+T148	db	deadlock_monitor	TABLE	Logs of database deadlocks for analysis.	F149	deadlock_id (PK), involved_queries (TEXT), victim_process, timestamp	N/A	N/A
+T149	db	background_job_locks	TABLE	Advisory locks for distributed background workers.	F003	job_name, locked_at, locked_by_worker, ttl	UNIQUE (job_name)	N/A
+T150	ops	metric_alerts	TABLE	Configuration for Prometheus/Grafana alerts on KPIs.	F032, F026	alert_id (PK), metric_name, threshold, condition, severity, notification_channel	UNIQUE (metric_name)	N/A
+T151	prod	feature_usage_stats	TABLE	Aggregated statistics on feature usage within M03.	F050	stat_id (PK), feature_name, usage_count, unique_users, date	UNIQUE (feature_name, date)	N/A
+T152	onboarding	merchant_onboarding_stages	TABLE	Tracks specific stages of onboarding related to fraud setup.	F021, M21	stage_id (PK), merchant_id, stage_name, completed_at	N/A	N/A
+T153	finance	settlement_exceptions	TABLE	Financial adjustments made to settlements due to fraud disputes.	F075	exception_id (PK), settlement_batch_id, amount, reason, approved_by	N/A	N/A
+T154	finance	chargeback_representments	TABLE	Logs of representments (fighting a chargeback) though rare in PARI, kept for legacy bridge.	F007	rep_id (PK), case_id, reason_code, document_id, outcome	N/A	N/A
+T155	qa	fraud_rule_tests	TABLE	Unit and integration tests for fraud rules.	F038, F134	test_id (PK), rule_id, input_payload, expected_output, actual_output	N/A	N/A
+T156	bi	kpi_snapshots	TABLE	Daily snapshots of key performance indicators.	F032, F001	snapshot_date, total_tx, fraud_blocked, avg_score, disputes_open	UNIQUE (snapshot_date)	N/A
+T157	audit	audit_report_subscriptions	TABLE	Manages subscriptions to automated audit reports for merchants.	F006	sub_id (PK), merchant_id, report_type, frequency, last_sent_at	N/A	N/A
+T158	risk	third_party_risk_scores	TABLE	Risk scores derived from external credit bureaus or intel providers.	F009, F048	entity_id, provider_name, risk_score, category, last_updated	UNIQUE (entity_id, provider_name)	N/A
+T159	policy	compliance_policy_versions	TABLE	Versioning of ABAC policies used for regulatory enforcement.	F063	policy_id (PK), policy_name, version, content (JSONB), active_from	UNIQUE (policy_name, version)	N/A
+T160	privacy	user_consent_logs	TABLE	Granular logs of user consent for analytics vs. operational processing.	F095	consent_id (PK), user_hash, consent_type (analytics,fraud), granted (bool), timestamp	N/A	N/A
+T161	knowledge	ontology_mappings	TABLE	Maps internal fraud terms to public ontology standards (SKOS).	M15	internal_term, uri, ontology_name, language	UNIQUE (internal_term, ontology_name)	N/A
+T162	knowledge	concept_relationships	TABLE	Defines relationships between ontology concepts.	M15	subject_uri, predicate_uri, object_uri	N/A	N/A
+T163	incident	incident_tickets	TABLE	Links fraud cases to broader security incident tickets.	M20	ticket_id (PK), external_ticket_id, case_id (FK), severity, status	N/A	N/A
+T164	incident	threat_model_findings	TABLE	Findings from threat modeling exercises (STRIDE).	M20	finding_id (PK), component_id, threat_type, mitigation_status	N/A	N/A
+T165	ml	pat_logs	TABLE	Process Action Team (PAT) logs for continuous improvement (CMMI).	M18, F026	pat_id (PK), meeting_date, topic, decision, action_items	N/A	N/A
+T166	ml	monte_carlo_simulations	TABLE	Results of Monte Carlo risk simulations for release planning.	M18	sim_id (PK), scenario_id, run_id, outcome_metric, confidence_interval	N/A	N/A
+T167	fraud	refund_reason_aggregates	TABLE	Pre-aggregated table for reporting on refund reasons by merchant.	F115	merchant_id, reason_code, count, amount, period	UNIQUE (merchant_id, reason_code, period)	N/A
+T168	fraud	device_risk_history	TABLE	Historical changes in device risk scores.	T005	history_id (PK), device_hash, old_score, new_score, change_reason	N/A	N/A
+T169	dispute	dispute_escrow_ledger	TABLE	Tracks funds held in escrow during high-value dispute resolution.	F045	escrow_id (PK), case_id, amount, release_condition, status	N/A	N/A
+T170	ops	service_dependencies	TABLE	Maps dependencies between M03 and other services (M01, M05).	F017	service_id, dependency_id, type (sync/async), required	UNIQUE (service_id, dependency_id)	N/A
+T171	api	rate_limit_quotas	TABLE	Configuration for API rate limits per tier.	F073	tier_name, requests_per_minute, requests_per_hour	UNIQUE (tier_name)	N/A
+T172	sec	certificate_inventory	TABLE	Inventory of TLS certificates used for internal/external communication.	F017, M17	cert_id (PK), common_name, issuer, expiry_date, status	CHECK (status IN ('active','revoked','expired'))	N/A
+T173	audit	data_access_requests	TABLE	Logs requests by auditors to access sensitive dispute data.	F006	request_id (PK), auditor_id, requested_table, justification, access_granted (bool)	N/A	N/A
+T174	fraud	behavioral_biometric_raw	TABLE	Raw telemetry for behavioral biometrics (accelerometer, touch).	F040	telemetry_id (PK), session_id, sensor_type, data_blob, timestamp	Time-series partitioning	N/A
+T175	ml	biometric_templates	TABLE	Stored templates for passive behavioral authentication.	F040	template_id (PK), user_hash, template_vector, model_version	N/A	N/A
+T176	ops	canary_releases	TABLE	Tracks canary deployments of new fraud models.	F017	canary_id (PK), version, traffic_percentage, start_time, end_time	N/A	N/A
+T177	ops	feature_flag_audits	TABLE	Audit trail for changes to feature flags.	F050	audit_id (PK), flag_name, changed_by, old_value, new_value, timestamp	N/A	N/A
+T178	fraud	money laundering_alerts	TABLE	Alerts specifically triggered for AML patterns (structuring).	F091	alert_id (PK), related_tx_hashes (ARRAY), suspicious_pattern, reporter_id	N/A	N/A
+T179	integration	webhooks_subscriptions	TABLE	Manages webhook endpoints for merchant dispute notifications.	F103	sub_id (PK), merchant_id, url, secret_hash, active	UNIQUE (merchant_id, url)	N/A
+T180	sec	brute_force_attempts	TABLE	Tracks failed login attempts to detect brute force attacks.	F073	attempt_id (PK), username_or_ip, timestamp, success (bool)	N/A	N/A
+T181	integration	api_mapping_rules	TABLE	Maps external fraud provider fields to internal schema.	F029, F048	rule_id (PK), external_provider, external_field, internal_field	N/A	N/A
+T182	storage	file_storage_quota	TABLE	Monitors storage usage for evidence files per tenant.	T010	tenant_id, used_bytes, limit_bytes, warning_threshold	N/A	N/A
+T183	ops	maintenance_logs	TABLE	Logs of scheduled maintenance activities and their impacts.	F094	log_id (PK), start_time, end_time, description, impact_level	N/A	N/A
+T184	fraud	refund_velocity_limits	TABLE	Limits on refund volume to prevent rapid fire refund fraud.	F136	merchant_id, max_refund_per_hour, current_refund_count, window_start	N/A	N/A
+T185	compliance	regulator_correspondence	TABLE	Logs correspondence with tax authorities or regulators regarding cases.	F019	correspondence_id (PK), regulator_id, case_id (FK), direction (in/out), content_ref	N/A	N/A
+T186	ml	model_metadata_registry	TABLE	Central registry of all model metadata for governance (MLOps).	F089	model_id, owner, description, input_features, output_variables, ethical_constraints	N/A	N/A
+T187	dispute	arbitration_awards	TABLE	Details of arbitration awards for escalated disputes.	F052	award_id (PK), case_id, amount, payer_liability, payee_liability	CHECK (amount >= 0)	N/A
+T188	knowledge	glossary_terms	TABLE	Business glossary defining terms used in fraud/dispute context.	M10	term_id (PK), term, definition, source, steward	UNIQUE (term)	N/A
+T189	sec	penetration_test_reports	TABLE	Stores summaries of external penetration tests.	M20, F113	report_id (PK), vendor, test_date, high_risk_findings, status	N/A	N/A
+T190	ops	sla_breach_details	TABLE	Detailed breakdown of SLA breaches for root cause analysis.	F126	breach_id (PK), sla_type, target_value, actual_value, duration_sec	N/A	N/A
+T191	fraud	merchant_clusters	TABLE	Clusters merchants based on fraud behavior similarity.	F009	cluster_id (PK), merchant_id (FK), cluster_label, confidence	N/A	N/A
+T192	integration	openbanking_tokens	TABLE	Stores OAuth tokens for Open Banking integrations (PSD2).	M07	token_id (PK), merchant_id, access_token, refresh_token, expires_at	UNIQUE (merchant_id)	N/A
+T193	ops	configuration_backups	TABLE	Backups of system configurations.	F050	backup_id (PK), config_snapshot (JSONB), created_by, restored_at	N/A	N/A
+T194	fraud	identity_verification_logs	TABLE	Logs of identity verification checks (eIDAS) for high value refunds.	F104, M09	verification_id (PK), user_hash, verification_method, provider, result	CHECK (result IN ('pass','fail','indeterminate'))	N/A
+T195	ml	hyperparameter_tuning_runs	TABLE	Logs of hyperparameter optimization runs.	F133	run_id (PK), model_id, params (JSONB), final_score, timestamp	N/A	N/A
+T196	db	query_performance_stats	TABLE	Tracks slow queries in the fraud module.	F149	query_id (PK), query_hash, exec_time_ms, calls_count, timestamp	N/A	N/A
+T197	ops	incident_commander_log	TABLE	Logs actions taken by the Incident Commander during major outages.	M19	log_id (PK), incident_id, commander_id, action, timestamp	N/A	N/A
+T198	fraud	referral_program_abuse	TABLE	Tracks potential abuse of referral or loyalty programs.	F140	abuse_id (PK), referrer_hash, referee_hash, relationship_type, risk_score	N/A	N/A
+T199	contract	smart_contract_executions	TABLE	Logs of execution steps for complex smart contracts.	F153	exec_id (PK), contract_id, step_name, input_data, output_data, gas_used	N/A	N/A
+T200	storage	backup_verification_logs	TABLE	Logs verification of backup integrity (checksums).	F145	verify_id (PK), backup_id, verification_method, checksum_match, timestamp	N/A	N/A
+T201	security	access_session_logs	TABLE	Detailed logs of user/admin sessions in the Fraud Console.	F006	session_id (PK), user_id, login_time, logout_time, ip_address	N/A	N/A
+T202	fraud	synthetic_identity_components	TABLE	Breakdown of signals indicating a synthetic identity.	F049	signal_id (PK), user_hash, signal_type (ip_mismatch, name_mismatch), risk_contribution	N/A	N/A
+T203	ops	cron_job_history	TABLE	History of scheduled cron job executions.	F105	job_id (PK), job_name, run_status, start_time, end_time, output_log	N/A	N/A
+T204	ml	training_data_distribution	TABLE	Statistical distribution of training data to detect drift at source.	F026	stat_id (PK), feature_name, mean, variance, dataset_version	N/A	N/A
+T205	integration	partner_sla_metrics	TABLE	Tracks SLA performance of external fraud data providers.	F029, F048	partner_id, uptime_pct, response_time_p99, period	UNIQUE (partner_id, period)	N/A
+T206	fraud	scam_reports	TABLE	User-reported scam instances that didn't result in a transaction yet.	F087	report_id (PK), reporter_hash, scammer_details, context, status	N/A	N/A
+T207	ops	disaster_recovery_tests	TABLE	Results of DR drills and failover tests.	F019	test_id (PK), test_date, rto_target, rpo_target, rto_actual, rpo_actual	N/A	N/A
+T208	dispute	mediation_notes	TABLE	Notes recorded during mediation sessions for disputes.	F052	note_id (PK), case_id, mediator_id, summary, recording_ref	N/A	N/A
+T209	ml	model_explanations_cache	TABLE	Cached SHAP explanations for specific transactions to avoid re-computation.	F051	cache_id (PK), transaction_hash, explanation_json, created_at	TTL: 30 Days	N/A
+T210	security	key_derivation_events	TABLE	Logs of cryptographic key derivation events for wallets.	F012	event_id (PK), parent_key_id, child_key_id, derivation_path, purpose	N/A	N/A
+V004	fraud	v_dispute_fraud_ratio	VIEW	Calculates the ratio of disputes caused by fraud vs. customer error.	F067	merchant_id, fraud_disputes, total_disputes, fraud_ratio	N/A	N/A
+V005	ops	v_model_latency_p99	VIEW	Rolling P99 latency for model inference.	F001	date, hour, p99_latency_ms	N/A	N/A
+SP011	ops	sp_rotate_keys	PROCEDURE	Automated procedure to rotate API keys for merchants.	F137	IN merchant_id	N/A	N/A
+SP012	ml	sp_update_model_drift	PROCEDURE	Calculates and updates the drift status of the active model.	F026	N/A	Updates T055	N/A
+SP013	storage	sp_archive_old_cases	PROCEDURE	Moves cases older than 7 years to cold storage.	F011, M11	IN cutoff_date	Updates T145	N/A
+SP014	audit	sp_generate_sar_report	PROCEDURE	Generates the PDF/XML SAR report for regulators.	F019	IN sar_id	Returns file_path	N/A
+SP015	fraud	sp_link_e_invoice	PROCEDURE	Attempts to link a dispute to an e-invoice via tax ID.	F128	IN case_id, IN tax_id	Updates T139	N/A
+E005	ops	incident_severity	ENUM	Severity levels for incidents.	M20	'low', 'medium', 'high', 'critical'	N/A	N/A
+E006	ops	job_status	ENUM	Status of background jobs.	F133	'pending', 'running', 'completed', 'failed'	N/A	N/A
+T211	ml	feature_binning_configs	TABLE	Configuration for binning continuous variables into discrete buckets for WOE encoding.	F016	config_id (PK), feature_name, bin_edges (JSONB), created_by	N/A	N/A
+T212	ml	model_training_epochs	TABLE	Detailed metrics (loss, accuracy) per training epoch for model debugging.	F002	epoch_id (PK), training_run_id, epoch_num, train_loss, val_loss, timestamp	FK to T099	N/A
+T213	fraud	account_takeover_attempts	TABLE	Specific tracking of ATO attempts distinct from general transaction fraud.	F130	ato_id (PK), user_hash, source_ip, success (bool), method (credential_stuffing, phishing)	N/A	N/A
+T214	fraud	triangulation_fraud_events	TABLE	Tracks triangulation patterns (Buyer -> Mule -> Fraudster merchant).	F091	event_id (PK), mule_account, fraudster_merchant_id, buyer_tx_id	N/A	N/A
+T215	fraud	carding_attack_vectors	TABLE	Logs patterns indicative of card testing (authorization attacks).	F062	vector_id (PK), merchant_id, payment_method_prefix, attack_velocity	N/A	N/A
+T216	dispute	dispute_workflow_states	TABLE	State machine definition for the dispute lifecycle.	F045, F105	state_id (PK), state_name, allowed_transitions (JSONB), timeout_minutes	N/A	N/A
+T217	dispute	escalation_matrix	TABLE	Defines the matrix for escalating disputes based on value and type.	F045	matrix_id (PK), dispute_type, value_range (NUMRANGE), escalation_level, assigned_role	N/A	N/A
+T218	ops	circuit_breaker_states	TABLE	Tracks the state of circuit breakers protecting the fraud detection API.	F017	service_name, state (closed, open, half_open), failure_count, last_failure_time	UNIQUE (service_name)	N/A
+T219	sec	service_mesh_policies	TABLE	Stores IAM/Service Mesh policies for M03 microservices.	F017, M17	policy_id (PK), service_name, ingress_rules (JSONB), egress_rules (JSONB), version	N/A	N/A
+T220	ml	prediction_explanations	TABLE	Detailed SHAP/LIME explanations stored for specific high-value transactions.	F051	explanation_id (PK), transaction_hash, feature_contributions (JSONB), model_version	N/A	N/A
+T221	fraud	promo_abuse_events	TABLE	Logs specific abuse of promotional codes or coupons.	F141	event_id (PK), promo_code_hash, user_hash, usage_count, fraud_indicator	N/A	N/A
+T222	fraud	merchant_velocity_limits	TABLE	Custom velocity limits applied to specific merchants based on negotiation.	F004, F112	limit_id (PK), merchant_id, max_tx_per_sec, max_vol_per_hour	UNIQUE (merchant_id)	N/A
+T223	dispute	mediation_sessions	TABLE	Records of mediation sessions held for complex disputes.	F052	session_id (PK), case_id (FK), mediator_id, start_time, end_time, outcome	N/A	N/A
+T224	ops	dependency_health_map	TABLE	Real-time health status of M03 dependencies (Kafka, Redis, Postgres).	F094	dependency_id (PK), name, status, latency_ms, last_checked	N/A	N/A
+T225	ml	hyperparameter_search_space	TABLE	Defines the search space for automated hyperparameter tuning.	F133	param_id (PK), model_id, param_name, min_val, max_val, scale (log/linear)	N/A	N/A
+T226	ops	blue_green_deployment_status	TABLE	Tracks the status of blue/green deployments for zero-downtime updates.	F017	deployment_id, env_color (blue/green), active_traffic_pct, status	UNIQUE (deployment_id, env_color)	N/A
+T227	fraud	behavioral_biomarkers	TABLE	Anonymized biomarkers used for passive biometric authentication.	F040	biomarker_id (PK), user_group, marker_type, mean_value, std_dev	N/A	N/A
+T228	dispute	auto_response_templates	TABLE	Templates for automated responses to common dispute reasons.	F024, F116	template_id (PK), reason_code_match, language_code, response_text, active	N/A	N/A
+T229	sec	certificate_transparency_logs	TABLE	Logs of Certificate Transparency checks for internal TLS certs.	F172	ct_log_id (PK), cert_id, sct_list, validation_status	N/A	N/A
+T230	fraud	money_mule_networks	TABLE	Identified networks of accounts used as money mules.	F091	network_id (PK), mule_account_ids (ARRAY), confidence_score, detected_at	N/A	N/A
+T231	fraud	geo_risk_zones	TABLE	Definitions of high-risk geographic zones for insurance/rating.	F029, F091	zone_id (PK), country_code, region_risk_level, reason	N/A	N/A
+T232	ops	capacity_planning_metrics	TABLE	Historical metrics used for capacity planning (CPU, IO, TPS).	F094	metric_id (PK), timestamp, service_name, cpu_pct, tps, storage_gb	N/A	N/A
+T233	ml	feature_correlation_matrix	TABLE	Stores correlation coefficients between features to reduce multicollinearity.	F016	feat_a, feat_b, correlation_coefficient, last_updated	UNIQUE (feat_a, feat_b)	N/A
+T234	dispute	settlement_freezes	TABLE	Records of funds frozen due to ongoing disputes.	F045	freeze_id (PK), merchant_id, amount, case_id, released_at	N/A	N/A
+T235	fraud	device_reputation_cache	TABLE	Temporary cache of external device reputation lookups.	F005	device_hash, reputation_score, provider, cached_at	TTL: 1 hour	N/A
+T236	audit	superuser_access_logs	TABLE	High-security audit log for superuser (root) access to the fraud DB.	F006	access_id (PK), admin_id, command, reason, timestamp	N/A	N/A
+T237	sec	key_rotation_schedule	TABLE	Schedule for automated rotation of cryptographic keys.	F137	schedule_id (PK), key_type, last_rotated, next_rotation, owner	N/A	N/A
+T238	ops	anomaly_detection_jobs	TABLE	Logs of unsupervised anomaly detection jobs on system metrics.	F038, F126	job_id (PK), target_metric, anomaly_score, threshold	N/A	N/A
+T239	ml	training_data_sampling	TABLE	Logs of how datasets were sampled (stratified, random) to ensure fairness.	F107	sample_id (PK), model_id, sampling_method, strata_columns	N/A	N/A
+T240	fraud	transaction_morphology	TABLE	Stores the "shape" of a transaction (time, freq, amount) for clustering.	F009	tx_id, morphology_vector (JSONB), cluster_id	N/A	N/A
+T241	dispute	legal_hold_notices	TABLE	Places a legal hold on evidence/deletion of specific cases.	F011, F035	hold_id (PK), case_id, issued_by, description, release_date	N/A	N/A
+T242	ops	feature_rollout_phases	TABLE	Manages phased rollout of new fraud features (canary, prod).	F050	phase_id (PK), feature_name, percentage, start_time, end_time	N/A	N/A
+T243	fraud	voice_auth_attempts	TABLE	Logs of voice biometric authentication attempts.	F124	attempt_id (PK), user_hash, voice_hash, match_score, result	N/A	N/A
+T244	sec	ip_whitelists	TABLE	Whitelisted IP ranges for merchant API callbacks.	F005, F112	range_id (PK), merchant_id, ip_range (INET), description	CHECK (ip_range << '0.0.0.0/0')	N/A
+T245	ml	model_deployment_drift	TABLE	Tracks the drift between training environment and production data.	F026	drift_id (PK), model_id, feature_name, train_dist, prod_dist, distance_metric	N/A	N/A
+T246	fraud	refund_split_details	TABLE	Details of refunds split across multiple original transactions (basket refund).	F100	refund_parent_id, original_tx_id, amount_refunded	N/A	N/A
+T247	dispute	communication_templates	TABLE	Master templates for SMS/Email communications with users.	F044	template_id (PK), channel, locale, subject, body_template, variables	N/A	N/A
+T248	ops	container_image_registries	TABLE	Audit of container images deployed for M03 services.	F017	image_id (PK), service_name, image_hash, registry_url, security_scan_date	N/A	N/A
+T249	fraud	social_media_handles	TABLE	Anonymized social media handles linked to accounts for OSINT fraud checks.	F048	handle_id (PK), user_hash, platform, handle_hash	N/A	N/A
+T250	sec	jwt_revocation_list	TABLE	List of revoked JWT tokens for immediate session invalidation.	F119	jti (PK), user_hash, revoked_at, expiry	Index on (user_hash, revoked_at)	N/A
+T251	ops	latency_histogram_buckets	TABLE	Configurable buckets for histogram-based latency monitoring.	F001	bucket_id (PK), metric_name, upper_bound_le, count	N/A	N/A
+T252	fraud	merchant_compliance_scores	TABLE	Scores derived from compliance (AML/KYC) feeds affecting fraud risk.	F009, M21	merchant_id, compliance_score, last_audit_date, deficiencies	N/A	N/A
+T253	ml	ensemble_weights	TABLE	Current weights assigned to models in an ensemble (LSTM + Random Forest).	F014	ensemble_id (PK), model_id, weight, effective_date	N/A	N/A
+T254	dispute	refund_settlement_batches	TABLE	Groups refunds into financial settlement batches.	F075	batch_id (PK), settlement_date, total_amount, status, bank_ref	N/A	N/A
+T255	ops	api_gateway_routes	TABLE	Definitions of API routes mapped to internal M03 services.	F103	route_id (PK), path_pattern, target_service, rate_limit_ref	UNIQUE (path_pattern)	N/A
+T256	ml	active_learning_uncertainty	TABLE	Stores uncertainty scores for data points selected for human labeling.	F061	sample_id (PK), transaction_hash, model_prediction, uncertainty_score, labeled	N/A	N/A
+T257	fraud	phishing_intel	TABLE	Intelligence feeds of known phishing URLs targeting the platform.	F048	url_hash, discovered_at, threat_level, active	UNIQUE (url_hash)	N/A
+T258	sec	failed_login_locations	TABLE	Tracks failed login attempts with location data for geo-fencing.	F130	attempt_id (PK), user_hash, lat, long, timestamp	N/A	N/A
+T259	ops	alert_escalation_paths	TABLE	Defines how alerts escalate from Ops -> Engineering -> Executives.	F033	alert_type, level_1_recipient, level_2_recipient, max_wait_minutes	N/A	N/A
+T260	fraud	user_anonymity_metrics	TABLE	Tracks the size of the anonymity set for users (privacy metric).	F003	user_hash, set_size, timestamp	N/A	N/A
+T261	ops	distributed_traces	TABLE	Stores trace IDs for cross-service request tracking (Jaeger/Zipkin).	F001	trace_id (PK), service_name, operation, start_time, duration_ms	N/A	N/A
+T262	dispute	third_party_arbitrators	TABLE	Approved third-party arbitrators for high-value disputes.	F052	arbitrator_id (PK), name, jurisdiction, contact_info, active	N/A	N/A
+T263	fraud	transaction_chain_analysis	TABLE	Pre-computed chain analysis results for deep forensic investigations.	F091, F125	chain_id (PK), start_tx, end_tx, hop_count, total_amount	N/A	N/A
+T264	sec	salt_values	TABLE	Manages salt values for hashing sensitive identifiers.	F005	salt_id (PK), purpose, salt_value, created_at	N/A	N/A
+T265	ml	feature_statistics_cache	TABLE	Cached statistics (mean, std) for real-time feature normalization.	F016	feature_name, mean, variance, sample_count, last_updated	UNIQUE (feature_name)	N/A
+T266	ops	environment_variables	TABLE	Secure storage of environment variable configurations (encrypted).	F050	env_id (PK), service_name, var_name, encrypted_value	N/A	N/A
+T267	audit	data_export_requests	TABLE	Logs of requests to export data (e.g., for auditors).	F006	request_id (PK), requester_id, tables_requested, status, export_path	CHECK (status IN ('pending','approved','rejected','completed'))	N/A
+T268	fraud	bin_range_risk	TABLE	Risk associated with specific card BIN/IIN ranges.	F009	bin_range (PK), risk_level, issuer_country, card_type	CHECK (card_type IN ('credit','debit','prepaid'))	N/A
+T269	ops	cron_job_statistics	TABLE	Statistics of cron job execution times (min, max, avg).	F105	job_name, run_count, avg_duration_sec, last_run_status	N/A	N/A
+T270	dispute	settlement_exceptions_log	TABLE	Log of exceptions during financial settlement processing.	F075	exception_id (PK), batch_id, refund_id, error_message, retry_count	N/A	N/A
+T271	fraud	smart_contracts_code	TABLE	Actual code/logic references for smart contracts used in disputes.	F153	contract_ref, code_snippet, version_hash, language	N/A	N/A
+T272	ops	health_check_history	TABLE	Historical log of health check endpoints for uptime calculation.	F094	check_id (PK), endpoint, status_code, response_time_ms, timestamp	N/A	N/A
+T273	ml	model_decommission_log	TABLE	Log of models that have been retired and why.	F017	model_id, decommissioned_by, reason, replaced_by_model_id	N/A	N/A
+T274	sec	ip_threat_intelligence	TABLE	Aggregated threat intel for IP addresses.	F029	ip_address, threat_types (ARRAY), confidence, last_seen	N/A	N/A
+T275	fraud	friendly_fraud_signals	TABLE	Specific signals indicating potential friendly fraud (e.g., repeat claims).	F067	signal_id (PK), user_hash, merchant_id, claim_frequency, time_delta	N/A	N/A
+T276	ops	service_dependencies_audit	TABLE	Auditable log of changes to service dependencies.	F170	dependency_id, change_type (add/remove), old_value, new_value, changed_at	N/A	N/A
+T277	dispute	communication_preferences	TABLE	User/Merchant preferences for dispute notifications.	F044	entity_id, channel_preference (email/sms/push), frequency, language	UNIQUE (entity_id)	N/A
+T278	ml	feature_interactions	TABLE	Stores discovered significant feature interactions for polynomial features.	F016	interaction_id (PK), feature_a, feature_b, interaction_strength	N/A	N/A
+T279	ops	backup_validation_jobs	TABLE	Jobs that validate backup integrity via restoration testing.	F145	job_id (PK), backup_id, test_db_instance_id, result, timestamp	N/A	N/A
+T280	fraud	transaction_notes	TABLE	Free text notes added by fraud analysts to transactions.	F033	note_id (PK), transaction_hash, analyst_id, note_text, timestamp	N/A	N/A
+T281	sec	api_authentication_logs	TABLE	Logs of every API key authentication attempt.	F103	auth_id (PK), api_key_hash, endpoint, success, timestamp	N/A	N/A
+T282	ops	deployment_rollback_history	TABLE	History of rollbacks triggered by feature flags or alerts.	F050	rollback_id (PK), deployment_id, trigger_reason, triggered_by, timestamp	N/A	N/A
+T283	fraud	fraud_network_community	TABLE	Communities detected within the transaction graph (Louvain algo).	F125	community_id (PK), member_entities (ARRAY), detection_date	N/A	N/A
+T284	dispute	auto_resolution_rules	TABLE	Rule logic for automatically resolving specific dispute types.	F090	rule_id (PK), condition_json, action, priority, active	N/A	N/A
+T285	ops	sla_credit_history	TABLE	Tracks SLA credits issued to merchants due to system failures.	F126	credit_id (PK), merchant_id, amount, reason, issued_date	N/A	N/A
+T286	sec	privileged_session_requests	TABLE	Requests for elevated privileges within the Fraud Ops console.	F009	request_id (PK), user_id, requested_role, justification, approved_by	N/A	N/A
+T287	ml	model_serving_configs	TABLE	Configuration for model serving (batch size, threads, timeout).	F133	config_id (PK), model_id, max_batch_size, timeout_ms, accelerator (cpu/gpu)	N/A	N/A
+T288	audit	query_change_log	TABLE	Logs changes to stored procedures or queries.	F149	change_id (PK), object_type, object_name, change_type, changed_by	N/A	N/A
+T289	fraud	merchant_chargeback_rights	TABLE	Defines merchant rights regarding chargebacks/fightbacks.	F154	merchant_id, can_represent, max_represent_time_hours	UNIQUE (merchant_id)	N/A
+T290	ops	incident_impact_analysis	TABLE	Post-incident analysis of impact on users/merchants.	F197	analysis_id (PK), incident_id, affected_users_count, financial_impact	N/A	N/A
+T291	ml	training_pipeline_dags	TABLE	Definitions of DAGs for ML training pipelines (Airflow/Kubeflow).	F133	dag_id (PK), dag_name, schedule_interval, json_definition	N/A	N/A
+T292	fraud	device_software_version	TABLE	Logs software version of the device app for correlation with bugs.	F070	device_hash, app_version, os_version, first_seen	N/A	N/A
+T293	dispute	refund_reconciliation	TABLE	Matches internal refund logs with bank settlement files.	F090	recon_id (PK), refund_id, settlement_ref, amount_match (bool)	N/A	N/A
+T294	ops	feature_flag_targeting	TABLE	Specific targeting rules for feature flags (user ID, geography).	F050	rule_id (PK), flag_name, target_attribute, operator, value	N/A	N/A
+T295	fraud	vpn_detection_logs	TABLE	Logs of IP addresses identified as VPN/Proxy exits.	F029	ip_address, vpn_provider, type (openvpn/ssh), last_seen	N/A	N/A
+T296	ml	data_quality_metrics	TABLE	Metrics tracking the quality of training data (missing values, outliers).	F012	metric_id (PK), dataset_id, completeness_score, outlier_ratio	N/A	N/A
+T297	ops	chaos_scenarios	TABLE	Library of chaos engineering scenarios to execute.	F038	scenario_id (PK), name, description, fault_definition (JSONB)	N/A	N/A
+T298	dispute	legal_document_requests	TABLE	Tracks requests for legal documents (affidavits) from users.	F022	request_id (PK), case_id, doc_type, status, received_at	N/A	N/A
+T299	sec	session_hijack_attempts	TABLE	Logs of attempts to hijack active user sessions.	F119	attempt_id (PK), session_id, ip_address, user_agent, success (bool)	N/A	N/A
+T300	ops	telemetry_sampling_rates	TABLE	Dynamic configuration for telemetry sampling (traces/metrics).	F001	telemetry_type, sampling_rate, effective_from	N/A	N/A
+T301	fraud	user_risk_questions	TABLE	Questions asked to users during high-risk checkout (Step-up auth).	F081	question_id (PK), risk_score_min, question_text, options	N/A	N/A
+T302	audit	data_masking_rules	TABLE	Rules for masking PII in logs and non-prod environments.	F069	rule_id (PK), table_name, column_name, mask_function	N/A	N/A
+T303	ops	cost_allocation_tags	TABLE	Tags for allocating cloud infrastructure costs to specific teams/features.	F017	resource_id, tag_key, tag_value	N/A	N/A
+T304	fraud	social_graph_communities	TABLE	Updates on community detection within the fraud graph.	F125	run_id, community_id, node_count, dominant_edge_type	N/A	N/A
+T305	ml	model_bias_audit	TABLE	Results of periodic audits on model bias across demographics.	F107	audit_id (PK), model_id, demographic_group, disparate_impact_score	N/A	N/A
+T306	dispute	complex_dispute_hierarchy	TABLE	Represents hierarchy of cases (e.g., one case splitting into multiple).	F045	parent_case_id, child_case_id, relationship_type	UNIQUE (parent_case_id, child_case_id)	N/A
+T307	ops	release_notes	TABLE	Release notes associated with specific deployments.	F017	deployment_id, version, summary, breaking_changes	N/A	N/A
+T308	fraud	scammer_blacklist	TABLE	Global blacklist of known scammer wallet IDs/aliases.	F048, F118	scammer_id, wallet_hash, alias, source_list	UNIQUE (wallet_hash)	N/A
+T309	sec	brute_force_ip_bans	TABLE	Temporary bans on IPs due to brute force attempts.	F073	ip_address, ban_start, ban_end, attempts_count	N/A	N/A
+T310	ml	model_interpretability_dashboard	TABLE	Pre-aggregated data for the explainability dashboard.	F051	dashboard_id (PK), metric_name, value, slice_dimension	N/A	N/A
+V006	fraud	v_fraud_heatmap_data	VIEW	Aggregates fraud events for heatmap visualization.	F080	country_code, city, fraud_count, risk_level	GROUP BY country_code, city	N/A
+V007	ops	v_model_performance_trend	VIEW	Shows trend of model precision/recall over last 30 days.	F026	date, precision, recall, f1_score	WHERE date >= NOW() - INTERVAL '30 days'	N/A
+V008	dispute	v_merchant_dispute_workload	VIEW	Estimates workload for merchants based on open cases.	F024	merchant_id, open_cases, total_disputed_amount, avg_case_age	N/A	N/A
+V009	ops	v_slow_transactions	VIEW	Lists transactions taking longer than P99 threshold.	F001	transaction_hash, processing_time_ms, timestamp	WHERE processing_time_ms > 500	N/A
+V010	security	v_failed_auth_aggregation	VIEW	Aggregates failed auth attempts by IP to trigger alerts.	F073, F119	ip_address, attempt_count, unique_users	GROUP BY ip_address HAVING count > 10	N/A
+SP016	fraud	sp_calculate_merchant_risk	PROCEDURE	Recalculates merchant risk score based on recent activity.	F009	IN merchant_id, OUT new_score	Updates T013	N/A
+SP017	dispute	sp_expire_abandoned_cases	PROCEDURE	Auto-closes cases that have been idle for too long.	F105	IN idle_days	Updates T009 status	N/A
+SP018	ops	sp_trigger_model_retrain	PROCEDURE	Wrapper to call the retraining pipeline via Airflow API.	F133	IN model_name	N/A	N/A
+SP019	ops	sp_purge_old_anonymized_data	PROCEDURE	Securely deletes anonymized data past retention.	F035	IN retention_period	N/A	N/A
+SP020	fraud	sp_update_feature_statistics	PROCEDURE	Updates the feature statistics cache from recent data.	F016, F265	IN feature_name	Updates T265	N/A
+SP021	dispute	sp_execute_refund	PROCEDURE	Executes the financial logic for a blinded refund.	F090, F012	IN refund_id	Calls Exchange API	N/A
+SP022	ops	sp_rotate_encryption_keys	PROCEDURE	Rotates TDE or column-level encryption keys.	F137	IN key_id	N/A	N/A
+SP023	security	sp_ban_ip_address	PROCEDURE	Adds an IP to the brute force ban list.	F309	IN ip_address, IN duration_minutes	Inserts into T309	N/A
+SP024	ml	sp_log_model_prediction	PROCEDURE	Logs a model prediction asynchronously for audit/analysis.	F001	IN transaction_hash, IN model_id, IN prediction, IN score	N/A	N/A
+SP025	audit	sp_mask_export_data	PROCEDURE	Applies masking rules before exporting data to auditors.	F267, F302	IN export_id	N/A	N/A
+E007	fraud	device_type	ENUM	Types of devices used for transactions.	F005	'mobile', 'desktop', 'tablet', 'iot', 'kiosk'	N/A	N/A
+E008	ops	component_status	ENUM	Status of M03 components.	F094	'healthy', 'degraded', 'down', 'maintenance'	N/A	N/A
+E009	ml	target_type	ENUM	Types of ML targets.	F002	'binary', 'multiclass', 'regression', 'anomaly'	N/A	N/A
+E010	dispute	resolution_method	ENUM	Methods used to resolve disputes.	F052	'automated', 'manual_agent', 'mediation', 'arbitration'	N/A	N/A
+E011	security	auth_method	ENUM	Authentication methods.	F104	'password', 'totp', 'biometric', 'webauthn', 'eidas'	N/A	N/A
+E012	integration	file_format	ENUM	Formats for evidence/data exchange.	F128	'pdf', 'json', 'csv', 'xml', 'jpg', 'png'	N/A	N/A

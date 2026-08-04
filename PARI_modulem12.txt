@@ -1,0 +1,597 @@
+
+
+12.	Module M12	Data Quality & Validation Framework
+a.	Summary
+The Data Quality & Validation Framework (Module M12) serves as the immune system of the Privacy Preserving Payment Anonymous Regulatory Insights (PARI) infrastructure. In a financial ecosystem where the anonymity of the payer must coexist with the absolute accountability of the payee, the integrity of data is not merely a technical requirement—it is a foundational pillar of trust and regulatory survival. M12 operates as a rigorous, gatekeeping layer that sits at the ingestion points of the system, ensuring that every byte of data entering the PARI ecosystem adheres to strict structural, semantic, and regulatory standards before it is persisted to the PostgreSQL database or propagated via the event streams (Kafka).
+
+Driven by CMMI Level 5 principles, M12 transcends simple "if/then" validation logic. It implements a quantitatively managed, statistically controlled process for data hygiene. Its primary objective is to achieve a "Zero-Defect" ingestion state, where malformed transactions—whether arising from client-side bugs, malicious API probing, or integration errors—are identified and rejected instantaneously. By enforcing ISO 4217 currency standards, ISO 20022 message structures, and precise CHECK constraints (e.g., ensuring transaction amounts are strictly positive), M11 prevents the "Garbage In, Garbage Out" syndrome that plagues legacy payment systems, which in turn corrupts tax reporting (M22) and undermines fraud detection (M03).
+
+The framework leverages PostgreSQL’s advanced type system and the pg_jsonb capabilities to perform deep inspection of complex nested data structures, such as the JSON-LD contracts used in PARI’s anonymous transactions. It employs a combination of deterministic rule engines (for syntax validation) and adaptive anomaly detection algorithms (for semantic validation). For instance, while a CHECK constraint ensures an IBAN has the correct length, the framework utilizes machine learning models to flag IBANs that pass syntactical checks but fail probabilistic checks against known issuing ranges.
+
+Furthermore, M12 is designed for high-throughput, low-latency environments. It utilizes schema-first design and pre-compiled validation rules to ensure that the added layer of security does not degrade the sub-5-second transaction user experience. It provides real-time feedback to API consumers, offering specific error codes that guide developers (M04, M07) toward correct implementation, thereby acting as a force multiplier for ecosystem adoption. The module also maintains a comprehensive audit trail of all validation failures, feeding into the Enterprise Data Dictionary (M10) and Operational Analytics (M08) to allow system architects to identify systemic integration issues across the merchant or banking network.
+
+Ultimately, M12 ensures that the PARI platform remains a reliable source of truth for Tax Authorities and Auditors. By guaranteeing that the underlying data is pristine, immutable, and semantically consistent, the platform enables automated fiscal reporting without the need for costly, error-prone manual data cleansing downstream. This aligns perfectly with the PARI vision of reducing the VAT gap through automated, real-time reporting, ensuring that the insights derived from the data are as accurate as the cryptographic proofs securing the transactions themselves.
+b.	Scope
+The scope of Module M12 encompasses the entire data lifecycle from the moment a request hits the API Gateway until the commit instruction is issued to the database.
+
+     Ingestion Validation: Real-time validation of REST, gRPC, and WebSocket payloads at the edge.
+     Schema Enforcement: Automatic validation of JSON-LD bodies against registered schemas in the Semantic Ontology Layer (M15).
+     Database Constraint Management: definition and deployment of SQL-level CHECK, FOREIGN KEY, UNIQUE, and EXCLUDE constraints across all 63+ tables.
+     Reference Data Integrity: Continuous synchronization and validation against ISO standards (ISO 20022, ISO 4217, ISO 3166).
+     Error Handling & Feedback: Standardized generation of RFC 7807 (Problem Details for HTTP APIs) error responses.
+     Monitoring & Metrics: Real-time tracking of data rejection rates, latency introduced by validation, and specific rule violation frequencies.
+     Exclusions: M12 handles data structure and validity, not business logic authorization (e.g., does the user have enough balance?). Authorization is handled by M09 and M01.
+
+c.	Business Case
+Dirty data is the silent killer of digital payment platforms. In a traditional fintech setup, malformed data leads to failed transactions, chargebacks, and incorrect ledger entries. In the PARI ecosystem, the stakes are higher. The system promises automated VAT calculation and real-time reporting to tax authorities. If transaction amounts, currency codes, or merchant identifiers are corrupted, tax reports become inaccurate, leading to regulatory fines, legal liability, and a loss of license to operate.
+
+The financial impact of poor data quality is profound. Industry studies suggest that bad data costs organizations an average of 15-25% of revenue. For a payment system targeting millions of transactions, this translates to billions in potential exposure. By implementing M12, PARI eliminates this risk at the source. The module prevents costly "re-work" where customer support teams must manually intervene to fix broken payment records. It also protects the integrity of the fraud detection models (M03); if input features are noisy, fraud detection accuracy degrades, leading to higher false positives and lost legitimate revenue.
+
+Moreover, M12 accelerates market entry. Different jurisdictions have varying data mandates (e.g., specific VAT ID formats). M12’s configurable validation engine allows PARI to onboard new countries instantly by simply loading a new validation rule set, rather than rewriting code. This agility reduces the technical debt associated with regulatory fragmentation and ensures that the platform remains scalable and interoperable (M07) across borders.
+d.	KPIs
+     Data Rejection Rate: Percentage of incoming API requests rejected due to validation failures (Target: <0.1%).
+     Constraint Violation Count: Total number of database-level constraint violations prevented per day (Target: 0 in production).
+     Validation Latency (P99): Time taken to validate a complex transaction payload (Target: <20ms).
+     False Positive Rate: Percentage of valid data incorrectly rejected by the anomaly detection models (Target: <0.01%).
+     Schema Coverage: Percentage of database tables protected by enforced CHECK constraints (Target: 100%).
+     Corrective Feedback Loop Time: Time between a new data error pattern emerging and a new validation rule being deployed (Target: <4 hours).
+
+e.	Stakeholder Insights
+Stakeholder	Concern	Implications
+Data Engineers	ETL pipeline failures due to schema drift.	M12 ensures上游 data quality, reducing pipeline maintenance and ensuring analytics reliability.
+Tax Authorities	Inaccuracy of reported tax figures due to calculation errors on bad data.	M12 guarantees that only mathematically and structurally valid data enters the reporting stream (M22), ensuring trust.
+Merchants	Failed transactions due to formatting errors in their integration.	M12 provides fast, precise error messages, allowing merchants to debug integrations quickly and minimize revenue loss.
+Auditors	Inability to reconstruct financial history due to corrupted records.	Immutable, validated data ensures a perfect audit trail for forensic analysis.
+Product Managers	User friction from overly strict validation.	M12 balances strictness with user-friendly error context to minimize drop-off rates.
+
+f.	Knowledge Representation Graph (mermaid.js)
+graph TD
+    subgraph "Ingestion Layer"
+        API[API Gateway / SDKs]
+        KAFKA[Apache Kafka Stream]
+    end
+
+    subgraph "Module M12: Data Quality & Validation"
+        VAPI[API Payload Validator]
+        SCHEMA[JSON-LD Schema Registry]
+        RULE[Rule Engine ABAC]
+        ML[Anomaly Detection AI]
+        DBVAL[Database Constraint Checker]
+    end
+
+    subgraph "Core Systems"
+        CORE[M01: Crypto Core]
+        DB[(PostgreSQL Database)]
+        TAX[M22: Tax Engine]
+    end
+
+    subgraph "Governance"
+        CMMI[CMMI Level 5 Metrics]
+        LOG[Validation Logs]
+    end
+
+    API -->|Raw Request| VAPI
+    VAPI -->|Syntax Check| RULE
+    RULE -->|Verify| SCHEMA
+    SCHEMA -->|Semantic Check| CORE
+    RULE -->|Anomaly Score| ML
+    ML -->|Valid/Invalid| VAPI
+    VAPI -->|Clean Data| KAFKA
+    KAFKA -->|Persist| DBVAL
+    DBVAL -->|Enforce| DB
+    DB -->|Trigger| TAX
+
+    VAPI -.->|Log Rejection| LOG
+    LOG -.->|Analyze| CMMI
+    CMMI -.->|Tune Rules| RULE
+
+g.	Comprehensive List of Features
+
+id	Feature	Description & Business Case	AI/ML Algorithms	KPIs	Primary Users
+F001	Automatic VARCHAR Truncation Detection	Scans all VARCHAR columns to ensure inputs do not exceed defined lengths, preventing DB truncation errors.	None	Truncation attempts blocked	Data Engineers
+F002	ISO 4217 Currency Code Enforcement	Validates that all currency fields strictly adhere to active ISO 4217 alphabetic codes.	Regex Classification	Invalid currency code rate	Developers
+F003	Positive Amount Constraint	Enforces CHECK (amount > 0) on all financial transaction tables to prevent negative entries.	Rule Based	Constraint violation count	Accountants
+F004	JSON-LD Schema Validation	Validates incoming JSON payloads against registered JSON-LD contexts to ensure semantic correctness.	Schema Matching	JSON validation failures	API Consumers
+F005	Email Syntax RFC 5322 Validation	Strict regex-based validation for user email addresses to ensure deliverability format.	NLP Regex	Email bounce rate reduction	Marketing/Users
+F006	IBAN Modulo-97 Check	Performs the mathematical checksum validation on IBANs before payment processing.	Deterministic Algo	Invalid IBAN rejection	Banks
+F007	UUID Version 4 Validation	Ensures all generated IDs are valid UUIDv4 to prevent collision or injection attacks.	Pattern Matching	Invalid ID errors	Backend Devs
+F008	Timestamp Range Validation	Ensures timestamps fall within acceptable windows (e.g., not in the distant future or past).	Outlier Detection	Timestamp errors	Systems
+F009	ISO 3166-1 Alpha-2 Country Code Check	Validates country codes against official ISO standards.	Lookup Table	Invalid country rejections	Compliance
+F010	Phone Number E.164 Validation	Formats and validates phone numbers for SMS 2FA delivery.	Libphonenumber Algo	SMS delivery fail rate	Security
+F011	Merchant Category Code (MCC) Validation	Checks that MCCs are valid 4-digit numeric codes per ISO 18245.	Classification	Invalid MCC errors	Merchants
+F012	VAT ID Format Validator	Validates VAT ID syntax based on specific country logic (e.g., MOD 11 for UK).	Country Specific Rules	VAT ID validation rate	Tax Auths
+F013	URL Safe String Sanitization	Ensures URL parameters are stripped of malicious injection characters.	Heuristic Analysis	XSS attempts blocked	Security
+F014	Postcode Regex Validation	Validates postal codes based on country-specific regex patterns.	Regex Engine	Shipping errors	Logistics
+F015	Username Policy Enforcement	Enforces complexity, length, and banned-word lists for user usernames.	NLP Profanity Filter	Registration rejections	Users
+F016	Transaction ID Uniqueness Pre-check	Checks cache/DB for existing transaction IDs to prevent replays before DB commit.	Caching Layer	Replay attempts blocked	Fraud
+F017	Decimal Precision Scaling	Enforces that financial amounts respect specific decimal scales (e.g., 2 for EUR, 8 for crypto).	Type Casting	Rounding errors	Accountants
+F018	Enum Value Constraint Check	Ensures no values outside defined ENUMs are inserted into status/type columns.	Rule Based	Data integrity violations	DB Admins
+F019	Date Logic Consistency	Validates logical date sequences (e.g., maturity_date >= issue_date).	Logic Rules	Logic error count	Risk Mgmt
+F020	ASCII/UTF-8 Encoding Validation	Ensures all text fields are valid UTF-8 to prevent DB encoding errors.	Encoding Scanners	Encoding error rate	DB Admins
+F021	Array Length Limits	Validates that JSONB arrays do not exceed maximum allowed size.	Counter	Overflow prevention	Backend Devs
+F022	Required Field Presence Check	Ensures all NOT NULL columns are present at ingestion.	Structural Check	Missing field errors	API Consumers
+F023	IP Address Whitelist/Blacklist Check	Validates source IPs against allowed/blocked lists for admin functions.	IP Matching	Unauthorized access attempts	SecOps
+F024	Credit Card Luhn Algorithm (Offline)	Validates card numbers via Luhn check before sending to processor.	Luhn Algo	Invalid card auths	Merchants
+F025	Base64 String Integrity Check	Validates that strings marked as Base64 are decodable.	Decoding Check	Decoding failures	Integration
+F026	HTTP Header Validation	Validates presence and format of critical headers (Content-Type, Authorization).	RFC Compliance	Bad requests	API Gateway
+F027	Request Body Size Limit	Enforces max payload size to prevent DoS via huge uploads.	Size Counter	DoS attempts blocked	Infra
+F028	SQL Injection Pattern Detection	Scans inputs for common SQLi patterns (' OR 1=1, --, etc.).	Signature Matching	SQLi attempts blocked	Security
+F029	XSS Payload Sanitization	Strips dangerous HTML/JS tags from user-generated content fields.	HTML Sanitizer	XSS exploits prevented	Frontend
+F030	File MIME Type Verification	Validates that uploaded files match the claimed MIME type extension.	Magic Bytes	Malware uploads	Users
+F031	Latitude/Longitude Range Check	Ensures geo-coordinates are valid (-90 to 90, -180 to 180).	Range Check	Geo errors	Logistics
+F032	Hex Color Code Validation	Validates color codes for UI theming components.	Regex	UI rendering errors	Frontend
+F033	Semantic Version Validation	Validates version strings (x.y.z) for software components.	Regex	Deployment failures	DevOps
+F034	Non-Empty String Validation	Checks that text fields are not just whitespace.	String Trimming	Empty content errors	UX
+F035	Boolean Type Strictness	Rejects non-boolean values (e.g., "yes"/"no") in boolean columns.	Type Casting	Data type errors	DB Admins
+F036	Foreign Key Existence Pre-check	Soft-checks FK existence to provide better error messages than DB errors.	Lookup	Referential integrity	Devs
+F037	Checksum Validation for CSV Uploads	Validates CSV file integrity using provided checksums.	Hashing	Import failures	Merchants
+F038	Duplicate Record Detection	Identifies duplicate entries based on unique logical keys before insert.	Hash Map	Duplicate record rate	Data Stewards
+F039	Age Restriction Validation	Validates user age against birthdate for restricted services.	Date Calculation	Compliance violations	Compliance
+F040	Rate Limit Header Validation	Parses and validates X-RateLimit-* headers to avoid throttling.	Integer Parsing	Throttling errors	API Consumers
+F041	Unicode Normalization (NFC)	Normalizes unicode strings to prevent canonicalization issues.	Unicode Normalizer	Search index errors	Search
+F042	BIC/SWIFT Code Format Validation	Validates 8 or 11 character BIC codes.	Regex	Wire transfer errors	Banks
+F043	Routing Number Check Digit	Validates ABA routing numbers using the standard algorithm.	Mod 10 Algo	ACH failures	US Banks
+F044	Tax Rate Percentage Range	Ensures tax rates are between 0 and 100.	Range Check	Tax calc errors	Tax Auths
+F045	Invoice Number Uniqueness	Ensures invoice numbers are unique per merchant.	Index Lookup	Duplicate invoicing	Merchants
+F046	SSL Certificate Serial Validation	Validates format of SSL cert serials in pinning lists.	Hex Validation	Security errors	Security
+F047	JWT Claim Structure Validation	Validates presence of iss, sub, exp, aud in JWTs.	RFC Standards	Auth failures	Security
+F048	Password Hash Strength Check	Verifies that password hashes meet current algorithm requirements.	Regex	Security downgrade risk	Security
+F049	Hardware ID Format Validation	Validates device IDs/IMEI formats.	Regex/Luhn	Device tracking errors	Fraud
+F050	Language Code IETF Validation	Validates language tags (e.g., en-US) per BCP 47.	Regex	Localization errors	Localization
+F051	Timezone IANA Validation	Validates timezone strings (e.g., Europe/Berlin).	Lookup	Scheduling errors	UX
+F052	DNS Record Format Validation	Validates format of DNS records before submission.	Regex	DNS propagation errors	Network Ops
+F053	ASN (Autonomous System Number) Validation	Validates ASN format for IP filtering rules.	Integer Check	Firewall errors	NetSec
+F054	MAC Address Format Validation	Validates colon/hyphen separated MAC addresses.	Regex	Device filtering	NetOps
+F055	Color Contrast Accessibility Check	Validates hex codes meet WCAG contrast ratios against background.	Color Algo	Accessibility issues	UX Designers
+F056	Response Time Threshold Validation	Validates that SLA response times are within logical limits.	Integer Range	Config errors	Ops
+F057	Priority Level Enum Validation	Ensures priority levels (High/Med/Low) are valid.	Enum Check	Queuing errors	Backend
+F058	Data Retention Period Validation	Ensures retention days are positive integers.	Integer Check	Compliance risk	Compliance
+F059	Regular Expression Safety Check	Validates that user-provided regexes are safe from ReDoS.	Regex Analysis	Service crashes	Admins
+F060	Fingerprint Hash Validation	Validates format of data fingerprint hashes (SHA-256).	Regex/Length	Forensic errors	Auditors
+F061	Smart Contract Address Validation	Validates checksummed Ethereum addresses (0x...).	EIP-55	Crypto transfer errors	Users
+F062	Block Height/Hash Validation	Validates format of blockchain references.	Regex	Sync errors	Blockchain
+F063	QR Code Payload Validation	Validates content inside QR codes matches expected format.	String Parsing	Scan failures	Users
+F064	Bech32 Address Validation	Validates SegWit address format (bc1...).	Checksum Algo	Crypto errors	Users
+F065	Ed25519 Public Key Validation	Validates 32-byte hex representation of Ed25519 keys.	Length/Hex	Crypto errors	Security
+F066	Secure Element ID Validation	Validates format of SE identifiers.	Alphanumeric	HSM errors	Infra
+F067	TPM Attestation Format Validation	Validates structure of TPM quote responses.	Schema Parsing	Hardware trust errors	Security
+F068	PDF/A Compliance Check	Validates that uploaded PDFs meet PDF/A archival standards.	Parser	Legal validity errors	Legal
+F069	XML Signature Validation	Validates XML-DSig structure for invoicing.	XML Parsing	E-invoice rejections	Tax Auths
+F070	UBL Invoice Structure Validation	Validates Universal Business Language invoice schema.	XSD Validation	B2B errors	Merchants
+F071	PEPPOL Identifier Validation	Validates participant identifiers for PEPPOL network.	Regex	Network rejection	Merchants
+F072	ZKP Proof Format Validation	Validates structure of Zero-Knowledge Proofs.	Schema	Crypto verification fails	Verifiers
+F073	Blind Coin Serial Validation	Validates format of blinded coin serial numbers.	Range/Hex	Minting errors	Exchange
+F074	Reserve Signature Validation	Validates format of digital reserve signatures.	Crypto Verify	Transfer errors	Exchange
+F075	Refresh Commitment Validation	Validates format of refresh commitment hashes.	Hash Check	Anonymity break risks	Exchange
+F076	Denomination Key Validation	Validates that public keys match active denominations.	Lookup	Double spend risks	Wallet
+F077	Wire Transfer Subject Validation	Validates format of wire transfer subject lines (restrict length/chars).	Regex	Payment errors	Banks
+F078	Exchange Base URL Validation	Validates that exchange URLs are HTTPS and reachable.	URL Parser	Phishing risks	Wallet
+F079	Merchant Public Key Validation	Validates format of merchant platform keys.	Key Parser	Integration errors	Merchants
+F080	Contract Terms Hash Validation	Validates SHA-3 hash of contract terms.	Hash Match	Contract disputes	Legal
+F081	Refund Permission Validation	Validates that refund permissions match original contract.	Logic	Fraud prevention	Merchants
+F082	Wire Fee JSON Validation	Validates structure of wire fee JSON aggregates.	JSON Schema	Fee calculation errors	Users
+F083	Global Fee JSON Validation	Validates structure of global fee config.	JSON Schema	Revenue loss risks	Exchange
+F084	Account Restriction Flag Validation	Validates flags (e.g., SHADOW) on accounts.	Enum Check	Compliance breaches	Compliance
+F085	Know Your Customer (KYC) Checksum Validation	Validates checksums of hashed KYC documents.	Hash	Doc integrity errors	Compliance
+F086	Anti-Money Laundering (AML) Score Range	Validates AML scores are 0-100 or similar range.	Range Check	Scoring errors	Compliance
+F087	Sanctions List Match Format	Validates format of hits from sanctions screening APIs.	JSON/Regex	Screening failures	Compliance
+F088	Travel Rule Info Validation	Validates structure of Travel Rule payload fields.	JSON Schema	Regulatory breach	Banks
+F089	PSD2 SCA Exemption Validation	Validates exemption codes are valid per PSD2.	Lookup	Auth errors	Banks
+F090	OpenID Connect Token Validation	Validates JWT signature and issuer for OIDC tokens.	JWKS	Identity theft	Security
+F091	eIDAS Attribute Validation	Validates eIDAS attribute names/values.	Schema	ID rejection	Govt
+F092	S.I.G.N. Digital Signature Validation	Validates French specific digital signature formats.	Crypto Parser	Local compliance	French Banks
+F093	Nordics BankID Validation	Validates structure of BankID responses.	Schema	ID rejection	Nordics Banks
+F094	Blik Alias Validation	Validates Polish Blik payment alias codes.	Regex	Payment failures	Polish Users
+F095	Swish Number Validation	Validates Swedish mobile numbers for Swish.	E.164	Payment failures	Swedish Users
+F096	Vipps Mobile Number Validation	Validates Norwegian numbers.	E.164	Payment failures	Norwegian Users
+F097	SEPA Creditor ID Validation	Validates SEPA Creditor ID format.	Regex	Direct Debit fail	Merchants
+F098	SEPA Mandate ID Validation	Validates SEPA mandate reference format.	Regex	Direct Debit fail	Merchants
+F099	SIC ID Validation	Validates Swiss Interbank Clearing ID.	Regex	Swiss Payments	Swiss Banks
+F100	QR-IBAN Validation	Validates Swiss QR-IBAN specific range.	Range Check	Swiss Payments	Swiss Users
+F101	Fedwire Routing Validation	Validates US Fedwire routing format.	Regex	US Payments	US Banks
+F102	CHIPs UID Validation	Validates Clearing House UID format.	Regex	US Payments	US Banks
+F103	IFSC Code Validation	Validates Indian IFSC code format (11 chars).	Regex	Indian Payments	Indian Banks
+F104	Sort Code Validation	Validates UK sort code format.	Regex	UK Payments	UK Banks
+F105	Account Number Modulus Check	Validates UK account number modulus.	Mod Algo	UK Payments	UK Banks
+F106	Australian BSB Validation	Validates Bank-State-Branch number.	Regex	AU Payments	AU Banks
+F107	Canadian Transit Number Validation	Validates Canadian routing number.	Regex	CA Payments	CA Banks
+F108	Mexican CLABE Validation	Validates 18-digit CLABE number (Mod 11).	Mod 11 Algo	MX Payments	MX Banks
+F109	CBU Validation (Argentina)	Validates Clave Bancaria Uniforme.	Mod 10 Algo	AR Payments	AR Banks
+F110	PIX Key Validation (Brazil)	Validates CPF/CNPJ/Phone/Email/Random key.	Multi-Regex	BR Payments	BR Banks
+F111	SPEI Account Validation	Validates account for SPEI system.	Regex	MX Payments	MX Banks
+F112	NUBAN Validation (Nigeria)	Validates Nigerian Uniform Bank Account Number.	Mod 10 Algo	NG Payments	NG Banks
+F113	Sort Code & Account Combo Check	Validates valid pairs for UK institutions.	Table Lookup	UK Payments	UK Banks
+F114	PAN (Primary Account Number) Luhn	Re-validates card PAN.	Luhn	Card Payments	Processors
+F115	Expiry Date Future Check	Validates card expiry is not in past.	Date Logic	Card Payments	Users
+F116	CVV Length Validation	Validates 3 or 4 digit CVV.	Length	Card Payments	Users
+F117	MII (Major Industry Identifier) Check	Validates first digit of card matches industry type.	Range Check	Card Processing	Processors
+F118	Card Brand Identification	Identifies Visa/Mastercard/Amex from IIN/Ranges.	Range Check	Routing	Processors
+F119	3DS Version Validation	Validates 3DS protocol version (1.0 vs 2.x).	Enum	Auth Errors	Banks
+F120	EMV Cryptogram Validation	Validates format of EMV cryptograms (ARQC/ARPC).	Hex/Length	POS Errors	Terminals
+F121	NFC Data Exchange Format (NDEF) Validation	Validates NDEF payload structure for tap-to-pay.	Parser	Contactless errors	Terminals
+F122	Loyalty Card Number Validation	Validates proprietary loyalty card formats.	Algo	Loyalty Errors	Merchants
+F123	Gift Card PIN Validation	Validates gift card PIN format.	Numeric	Fraud prevention	Merchants
+F124	Voucher Code Pattern Validation	Validates promo/voucher code patterns.	Alphanumeric	Promo Abuse	Marketing
+F125	Receipt Hash Validation	Validates SHA-256 hash of digital receipts.	Hash	Disputes	Customers
+F126	Timestamp Synchronization Drift Check	Validates client timestamp is not too far from server time.	Delta	Replay attacks	Security
+F127	Request IDempotency Key Validation	Validates idempotency key format (UUID).	UUID	Duplicate charges	Wallets
+F128	Pagination Token Validation	Validates cursor/token for API pagination.	Base64	API Errors	Developers
+F129	Sort Order Parameter Validation	Validates sort keys are allowed columns (prevent SQLi via sort).	Whitelist	Security	API Gateway
+F130	Field Filter Projection Validation	Validates fields requested in sparse fieldsets.	Whitelist	Security	API Gateway
+F131	Webhook URL Validation	Validates webhook URLs are HTTPS and not localhost.	URL Parser	Data Leaks	Merchants
+F132	Webhook Signature Validation	Validates HMAC signature of webhook payload.	HMAC	Spoofing	Merchants
+F133	API Key Scope Validation	Validates that API key has permission for endpoint.	RBAC	Unauthorized access	Security
+F134	Quota Limit Validation	Validates quota limits (daily/monthly) before processing.	Counter	Billing errors	Billing
+F135	Tenant ID Validation	Validates multi-tenant Tenant ID in headers.	UUID	Data leakage	Platform
+F136	Trace ID Validation	Validates distributed tracing ID format.	UUID	Observability	DevOps
+F137	Parent Span ID Validation	Validates span ID format for tracing.	Hex	Observability	DevOps
+F138	Log Level Validation	Validates log level strings (DEBUG, INFO, etc.).	Enum	Logging errors	Ops
+F139	Metric Name Validation	Validates metric names for Prometheus/StatsD format.	Regex	Monitoring	SRE
+F140	Alert Severity Validation	Validates alert severity (Info/Warning/Critical).	Enum	Alerting	SRE
+F141	Config JSON Schema Validation	Validates application configuration JSON at boot.	JSON Schema	Startup failures	DevOps
+F142	Feature Flag Key Validation	Validates feature flag names.	Alphanumeric	Config errors	Product
+F143	A/B Test Bucket Validation	Validates user bucket for A/B testing.	Hash	Testing errors	Product
+F144	Experiment Cohort Validation	Validates experiment cohort assignment.	UUID	Analysis errors	Data Science
+F145	User Agent String Validation	Basic sanity check on User-Agent headers.	Regex	Bot detection	Security
+F146	Content Language Validation	Validates Accept-Language header.	Regex	Localization	Frontend
+F147	Accept Encoding Validation	Validates Accept-Encoding header.	Regex	Compression	Backend
+F148	Cache Control Header Validation	Validates Cache-Control directives.	Regex	Caching	CDN
+F149	ETag Validation	Validates ETag format (weak/strong).	Regex	Caching	API
+F150	Last-Modified Date Validation	Validates Last-Modified date format.	RFC 1123	Caching	API
+F151	If-Match/If-None-Match Validation	Validates conditional request headers.	ETag	Concurrency	API
+F152	Content-Disposition Validation	Validates filename encoding in header.	RFC 5987	Downloads	Users
+F153	Cookie Attribute Validation	Validates HttpOnly, Secure, SameSite attributes.	Enum	Security	Frontend
+F154	CORS Origin Validation	Validates Origin header against whitelist.	URL Parser	Security	API
+F155	X-Forwarded-For Validation	Validates IP chain in proxy header.	IP Chain	Security	Load Balancer
+F156	Real Client IP Extraction	Logic to find real IP behind proxies.	IP Parsing	Geolocation accuracy	Analytics
+F157	DNT (Do Not Track) Validation	Validates DNT header value (0/1).	Enum	Privacy	Analytics
+F158	Sec-CH-UA Validation	Validates Client Hints headers.	String	Browser ID	Frontend
+F159	Download Token Validation	Validates one-time download tokens.	Hash	Security	Users
+F160	Upload Chunk Offset Validation	Validates offset in resumable uploads.	Integer	Storage	Backend
+F161	Manifest File Validation	Validates web app manifest JSON.	Schema	PWA Install	Frontend
+F162	Service Worker Scope Validation	Validates SW script URL scope.	URL Parser	PWA	Frontend
+F163	Push Subscription Validation	Validates Push API subscription object.	Schema	Notifications	Frontend
+F164	Media Type Negotiation Validation	Validates client accepts server response type.	Negotiation	406 Errors	API
+F165	GraphQL Query Complexity Validation	Validates depth/cost of GraphQL queries.	AST Analysis	DoS Protection	API
+F166	GraphQL Argument Type Validation	Validates input types in GraphQL args.	Type Check	400 Errors	API
+F167	GraphQL Mutation Validation	Validates mutation payload structure.	Schema	Data Errors	API
+F168	gRPC Message Size Validation	Validates protobuf message size limits.	Binary Parser	DoS Protection	Backend
+F169	gRPC Metadata Key Validation	Validates ASCII keys in metadata.	ASCII	Protocol Errors	Backend
+F170	WebSocket Subprotocol Validation	Validates Sec-WebSocket-Protocol.	String	Handshake Errors	Realtime
+F171	MQTT Topic Filter Validation	Validates MQTT topic wildcards (+/#).	Regex	IoT Errors	IoT
+F172	AMQP Routing Key Validation	Validates AMQP routing key patterns.	Regex	Messaging	Integration
+F173	Kafka Topic Name Validation	Validates Kafka topic naming rules.	Regex	Streaming	Infra
+F174	Avro Schema ID Validation	Validates schema ID in Avro payload.	Lookup	Deserialization	Streaming
+F175	Protobuf Descriptor Validation	Validates protobuf descriptor set.	Binary	Serialization	Backend
+F176	Flatbuffers Buffer Validation	Validates FlatBuffers identifier.	Magic Byte	Performance	Backend
+F177	Cap'n Proto Message Validation	Validates Cap'n Proto struct pointer.	Pointer Check	Performance	Backend
+F178	MessagePack Data Validation	Validates MessagePack bin/ext formats.	Binary	Serialization	Backend
+F179	CBOR Data Validation	Validates CBOR tag/data types.	Tag Check	IoT	IoT
+F180	ASN.1 Structure Validation	Validates ASN.1 encoded data (X.509).	DER Parser	Security	PKI
+F181	DER Encoding Validation	Validates Distinguished Encoding Rules syntax.	BER/DER	Security	PKI
+F182	PEM Certificate Validation	Validates PEM header/footer boundaries.	Regex	TLS	Security
+F183	CRL Distribution Point Validation	Validates CRL URL in certificates.	URL Parser	Revocation	PKI
+F184	OCSP Response Validation	Validates OCSP response status.	ASN.1	Revocation	PKI
+F185	TLS Version Validation	Validates TLS 1.2/1.3 usage.	Protocol	Security	Network
+F186	Cipher Suite Validation	Validates approved cipher suites.	Enum	Security	Network
+F187	Certificate Fingerprint Validation	Matches cert fingerprint against known value.	Hash	Pinning	Security
+F188	DNSSEC Signature Validation	Validates RRSIG records in DNS.	Crypto	DNS Security	DNS
+F189	DANE TLSA Record Validation	Validates TLSA records for DANE.	Cert Matching	SMTP/DNS	Mail
+F190	SSH Host Key Validation	Validates SSH host key fingerprint.	Known Hosts	Security	Ops
+F191	GPG Signature Validation	Validates GPG/PGP signature clearsign.	Crypto	Identity	Devs
+F192	JAR Signature Validation	Validates signed JAR files (Java).	Security	Deployment	Java
+F193	APK Signature Validation	Validates Android APK signature v2/v3.	APK Parser	Mobile	Mobile
+F194	IPA Provisioning Profile Validation	Validates iOS provisioning profiles.	Security	Mobile	Mobile
+F195	Windows Authenticode Validation	Validates Authenticode signatures on EXE/MSI.	WinVerify	Desktop	Desktop
+F196	Docker Image Digest Validation	Validates image digest sha256.	Hash	Container Security	DevOps
+F197	Docker Manifest Validation	Validates OCI image manifest.	JSON Schema	Registry	DevOps
+F198	Helm Chart Values Validation	Validates values.yaml structure.	JSON Schema	Kubernetes	DevOps
+F199	Kubernetes Label Validation	Validates K8s label key/value syntax.	Regex	K8s	DevOps
+F200	Terraform State Validation	Validates Terraform state file checksum.	Hash	IaC	DevOps
+F201	CloudFormation Template Validation	Validates CFN template structure.	JSON/YAML	AWS	DevOps
+F202	ARM Template Validation	Validates Azure Resource Manager template.	JSON Schema	Azure	DevOps
+F203	SAM Policy Validation	Validates AWS SAM policy syntax.	JSON Schema	Lambda	AWS
+F204	Serverless Framework Validation	Validates serverless.yml syntax.	YAML Schema	Serverless	Devs
+F205	OpenAPI Spec Validation	Validates OpenAPI/Swagger spec.	Schema	Documentation	Devs
+F206	AsyncAPI Spec Validation	Validates AsyncAPI spec for events.	Schema	Eventing	Devs
+F207	GraphQL Schema Validation	Validates GraphQL SDL definition.	SDL	API	Devs
+F208	RAML Spec Validation	Validates RESTful API Modeling Language spec.	Schema	API	Devs
+F209	API Blueprint Validation	Validates API Blueprint markdown.	Parser	Documentation	Devs
+F210	JSON Schema Draft 7 Validation	Validator supports JSON Schema Draft 7.	Spec	Config	Devs
+F211	JSON Schema Draft 2020 Validation	Validator supports latest JSON Schema.	Spec	Config	Devs
+F212	XML Schema (XSD) Validation	Validates XML against XSD definitions.	XSD	Legacy	Integration
+F213	DTD Validation	Validates XML against Document Type Definition.	DTD	Legacy	Integration
+F214	RelaxNG Validation	Validates XML against RelaxNG.	RelaxNG	Legacy	Integration
+F215	Schematron Validation	Validates XML using Schematron rules.	Pattern	Business Rules	Integration
+F216	CSV Schema Validation	Validates CSV headers/types against definition.	Header Check	Migration	Data Eng
+F217	Fixed Width File Validation	Validates column positions in flat files.	Position	Legacy	Data Eng
+F218	EDI X12 Segment Validation	Validates EDI X12 segments (ISA, GS, etc.).	Standard	B2B	Supply Chain
+F219	EDIFACT Message Validation	Validates UN/EDIFACT messages.	Standard	Int'l Trade	Logistics
+F220	HL7 FHIR Validation	Validates FHIR resource structures.	FHIR Spec	Healthcare	Health Tech
+F221	DICOM Data Validation	Validates DICOM medical image headers.	Standard	Healthcare	Health Tech
+F222	FIX Protocol Validation	Validates FIX financial messages.	Tags	Trading	Finance
+F223	ISO 8583 Message Validation	Validates card transaction messages.	Bitmap	Payments	Processing
+F224	NACHA File Validation	Validates US ACH file format.	Standard	Banking	US Banks
+F225	ISO 20022 Message Validation	Validates MX/PACs messages.	Schema	Global Payments	Banks
+F226	SWIFT MT Message Validation	Validates SWIFT MT text fields.	FIN	Banking	Correspondent
+F227	REALT validation (France)	Validates French REALT transfers.	National	French Banks	France
+F228	COR1 Validation (Germany)	Validates German instant payments.	National	German Banks	Germany
+F229	SCT Inst Validation	Validates SEPA Instant Credit Transfer.	Rule	Eurozone	EPC
+F230	Request for Pay (RfP) Validation	Validates ISO 20022 RfP messages.	Schema	Open Banking	Banks
+F231	Payment Initiation Validation (PIS)	Validates Open Banking PIS requests.	OIDC/Schema	Fintech	TPPs
+F232	Account Information Validation (AIS)	Validates Open Banking AIS requests.	Scope	Fintech	TPPs
+F233	Bulk Payment Validation	Validates batch file structures.	Schema	Payroll	Enterprise
+F234	Payroll File Validation	Validates payroll specific formats (e.g., payroll CSV).	Custom	HR	Enterprise
+F235	Pension Contribution Validation	Validates pension payment data.	Gov Spec	Gov	Pensions
+F236	Tax Submission Validation	Validates submission to tax authorities (SII, etc.).	Gov Schema	Tax	Gov
+F237	Customs Declaration Validation	Validates customs export/import data.	WCO	Logistics	Trade
+F238	Insurance Claim Validation	Validates ACORD XML messages.	Standard	Insurance	InsurTech
+F239	Healthcare Claim Validation (FHIR/CDA)	Validates medical claim formats.	Standard	Insurance	Health
+F240	Geospatial Geometry Validation	Validates GeoJSON/WKT geometry.	OGC	Logistics	Mapping
+F241	Elevation Data Validation	Validates height/altitude data.	Range	Logistics	Mapping
+F242	Polygon Closure Validation	Validates that polygons are closed rings.	Geometry	Mapping	GIS
+F243	Tile Coordinate Validation	Validates Map tile coordinates (XYZ).	Range	Mapping	Frontend
+F244	Geohash Validation	Validates Geohash string format.	Base32	Location	Backend
+F245	Plus Code Validation	validates Open Location Code (Plus Code).	Alphanumeric	Address	Google
+F246	What3Words Validation	Validates w3w address format.	Custom	Address	Emergency
+F247	Shipping Container ID Validation	Validates ISO 6346 container numbers.	Check Digit	Logistics	Freight
+F248	VIN (Vehicle ID) Validation	Validates Vehicle Identification Number.	Transliteration	Automotive	Auto
+F249	License Plate Validation	Validates format per jurisdiction.	Regex	Parking	Gov
+F250	ISBN Validation	Validates book identifiers (10/13).	Mod Check	Retail	Books
+F251	EAN/UPC Validation	Validates product barcodes.	Mod Check	Retail	POS
+F252	SKU Format Validation	Validates Stock Keeping Unit formats.	Regex	Inventory	Retail
+F253	HS Code Validation	Validates Harmonized System codes.	Customs	Trade	Customs
+F254	Tariff Code Validation	Validates import/export tariff codes.	Customs	Trade	Customs
+F255	Certificate of Origin Validation	Validates CoO document numbers.	Regex	Trade	Customs
+F256	Bill of Lading Validation	Validates B/L numbers.	Regex	Freight	Shipping
+F257	Air Waybill Validation	Validates AWB numbers.	Mod 7	Freight	Airlines
+F258	Flight Number Validation	Validates IATA/ICAO flight codes.	Regex	Travel	Airlines
+F259	PNR Validation	Validates Passenger Name Record locator.	Alphanumeric	Travel	Airlines
+F260	Ticket Number Validation	Validates airline ticket stock numbers.	Algo	Travel	Airlines
+F261	Passport MRZ Validation	Validates Machine Readable Zone on passports.	Check Digit	Border	Gov
+F262	Driver License Number Validation	Validates DL number formats by state/country.	Regex	Identity	Gov
+F263	National ID Validation	Validates generic national ID formats.	Multi-Regex	Identity	Global
+F264	Social Security Number Validation	Validates SSN format (and range).	Regex/Range	Gov	US Gov
+F265	NHS Number Validation	Validates UK NHS number (Mod 11).	Mod 11	Health	UK Health
+F266	HIN (Health Identifier) Validation	Validates Australian HIN/IHI.	Luhn/Mod	Health	Aus Health
+F267	Tax File Number (TFN) Validation	Validates Australian TFN.	Algo	Tax	Aus Tax
+F268	INSEE Number Validation	Validates French INSEE codes.	Algo	Gov	France
+F269	Codice Fiscale Validation	Validates Italian tax code.	Algo	Tax	Italy
+F270	Burgerservicenummer (BSN) Validation	Validates Dutch citizen service number.	Mod 11	Gov	Netherlands
+F271	Kennitala Validation	Validates Icelandic ID.	Format	Gov	Iceland
+F272	OIB Validation	Validates Croatian personal ID.	ISO 7064	Gov	Croatia
+F273	PESEL Validation	Validates Polish PESEL.	Mod 10/11	Gov	Poland
+F274	RID Validation	Validates Romanian ID.	Check	Gov	Romania
+F275	SSN Validation (Finland)	Validates Finnish SSN.	Date/Check	Gov	Finland
+F276	Personnummer Validation	Validates Swedish/Swedish personal ID.	Luhn	Gov	Scandinavia
+F277	Fødselsnummer Validation	Validates Norwegian personal ID.	Mod 11	Gov	Norway
+F278	CPR Number Validation	Validates Danish CPR number.	Mod 11	Gov	Denmark
+F279	NIF Validation	Validates Spanish NIF/DNI.	Mod Check	Gov	Spain
+F280	NIE Validation	Validates Spanish foreigner ID.	Mod Check	Gov	Spain
+F281	NIF Validation (Portugal)	Validates Portuguese NIF.	Mod 11	Gov	Portugal
+F282	Numéro de Sécu Validation	Validates French social security number.	Mod 97	Gov	France
+F283	Stuurmann Validation	Validates Dutch bank account (pre-IBAN).	11-test	Legacy	Netherlands
+F284	Postgiro Validation	Validates Swedish Postgiro numbers.	Algo	Legacy	Sweden
+F285	Bankgiro Validation	Validates Swedish Bankgiro numbers.	Mod	Banking	Sweden
+F286	Plusgiro Validation	Validates Swedish Plusgiro numbers.	Mod	Banking	Sweden
+F287	Kontonummer Validation (Denmark)	Validates traditional Danish account numbers.	Mod	Banking	Denmark
+F288	Roll Number Validation (Ireland)	Validates Irish roll numbers.	Alphanumeric	Banking	Ireland
+F289	Sort Code Validation (Ireland)	Validates Irish sort codes.	Regex	Banking	Ireland
+F290	Account Number Validation (Italy)	Checks Italian ABI/CAB/account combo.	Algo	Banking	Italy
+F291	Codice ABI Validation	Validates Italian Bank ABI code.	Regex	Banking	Italy
+F292	Codice CAB Validation	Validates Italian Bank CAB code.	Regex	Banking	Italy
+F293	Bankleitzahl (BLZ) Validation	Validates German bank sort code.	Regex	Banking	Germany
+F294	Kontonummer Validation (Germany)	Validates German account number logic.	Algo	Banking	Germany
+F295	Identificazione Conto Validation	Validates generic EU account IDs.	Regex	SEPA	EU
+F296	CLABE Validation (Mexico) - Recheck	Confirms 18-digit numeric string.	Regex	Banking	Mexico
+F297	CBU Validation (Argentina) - Recheck	Confirms 22-digit numeric string.	Regex	Banking	Argentina
+F298	SPID Code Validation	Validates Italian SPID code format.	Alphanumeric	Identity	Italy
+F299	CIE Auth Validation	Validates Italian CIE (Carta d'Identità Elettronica).	Cert	Identity	Italy
+F300	Mittelstand Validation	Validates German Mittelstand digital ID.	OIDC	Identity	Germany
+
+
+h.	Comprehensive List of Database Objects
+
+id	schema_name	object_name	object_type	description	feature_reference	column_names	constraints / notes	junction_tables
+T001	core	validation_rules	TABLE	Stores active validation rules for fields.	F001-F300	id, rule_name, field_path, rule_type, params, is_active	PK: id, UNIQUE: (field_path, rule_type)
+T002	core	validation_rule_history	TABLE	Audit history of changes to validation rules.	F001-F300	id, rule_id, changed_by, changed_at, old_params, new_params	PK: id, FK: rule_id
+T003	core	iso_4217_currencies	TABLE	Reference table for ISO 4217 currency codes.	F002	alphabetic_code, numeric_code, minor_unit, currency_name	PK: alphabetic_code
+T004	core	iso_3166_countries	TABLE	Reference table for ISO 3166 country codes.	F009	alpha_2, alpha_3, numeric_code, name, region	PK: alpha_2
+T005	core	validation_errors_log	TABLE	Logs all validation failures for analysis.	F001-F300	id, timestamp, source_ip, payload_hash, field_path, error_code, message	PK: id, Index: timestamp
+T006	core	error_codes_registry	TABLE	Master registry of standardized error codes.	F001-F300	code, http_status, message_template, severity	PK: code
+T007	core	json_schemas_registry	TABLE	Stores registered JSON-LD and JSON schemas.	F004	schema_id, version, schema_json, description	PK: (schema_id, version)
+T008	core	regex_patterns	TABLE	Stores reusable regex patterns.	F002, F005	pattern_id, name, pattern, description	PK: pattern_id
+T009	core	check_constraints_audit	TABLE	Tracks DB check constraints definition.	F003, F018	table_name, constraint_name, definition, is_active	PK: (table_name, constraint_name)
+T010	core	data_type_mappings	TABLE	Maps abstract types to DB specific types.	F001	abstract_type, db_type, max_length	PK: abstract_type
+T011	core	email_blacklist	TABLE	Domains blocked for registration/disposable emails.	F005	domain, reason, added_at	PK: domain
+T012	core	phone_whitelist	TABLE	Allowed phone number prefixes/countries.	F010	country_code, is_allowed	PK: country_code
+T013	core	iban_registry	TABLE	Valid IBAN lengths and check digit info per country.	F006	country_code, iban_length, bban_pattern	PK: country_code
+T014	core	swift_bic_registry	TABLE	Reference data for valid BIC codes.	F042	bic_code, bank_name, country_code	PK: bic_code
+T015	core	merchant_category_codes	TABLE	ISO 18245 MCC codes.	F011	mcc, description, group_id	PK: mcc
+T016	core	vat_id_formats	TABLE	Regex and logic for VAT ID validation per country.	F012	country_code, regex_template, modulus_rule	PK: country_code
+T017	core	banned_usernames	TABLE	Profanity or reserved usernames.	F015	username, reason	PK: username
+T018	core	known_sql_injections	TABLE	Signatures of known SQL injection strings.	F028	signature, pattern_type	PK: signature
+T019	core	xss_signatures	TABLE	Known XSS script signatures.	F029	signature, category	PK: signature
+T020	core	allowed_mime_types	TABLE	Mapping of file extensions to MIME types.	F030	extension, mime_type	PK: extension
+T021	core	magic_bytes	TABLE	File magic numbers for deep validation.	F030	extension, hex_signature, offset	PK: extension
+T022	core	geo_fence_rules	TABLE	Rules for valid coordinate ranges.	F031	boundary_name, lat_min, lat_max, lon_min, lon_max	PK: boundary_name
+T023	core	semantic_version_policy	TABLE	Allowed version increments/validity.	F033	component, major_min, minor_min, patch_min	PK: component
+T024	core	unicode_normalization_forms	TABLE	Config for normalization (NFC, NFD, etc.).	F041	form_id, name, description	PK: form_id
+T025	core	dns_record_types	TABLE	Valid DNS record types (A, AAAA, CNAME, etc.).	F052	type_code, description	PK: type_code
+T026	core	wcag_contrast_ratios	TABLE	Contrast requirements for text sizes.	F055	font_size_category, aa_ratio, aaa_ratio	PK: font_size_category
+T027	core	priority_levels	TABLE	Valid priority levels.	F057	level, rank	PK: level
+T028	core	data_retention_policies	TABLE	Retention periods per data type.	F058	data_type, retention_days, legal_basis	PK: data_type
+T029	core	regex_dos_prevention	TABLE	Timeouts and complexity limits for regexes.	F059	max_steps, max_time_ms	PK: id (Singleton)
+T030	core	crypto_algorithms_whitelist	TABLE	Allowed hashing/signing algos.	F065, F075	algo_name, type (hash/sign), is_deprecated	PK: algo_name
+T031	core	smart_contract_abis	TABLE	Valid ABIs for blockchain interactions.	F061	contract_address, abi_json, chain_id	PK: (contract_address, chain_id)
+T032	core	blinded_coin_denominations	TABLE	Valid denomination public keys.	F073	denom_pub_hash, value, currency, expire_start, expire_end	PK: denom_pub_hash
+T033	core	merchant_public_keys	TABLE	Registered merchant platform keys.	F079	merchant_id, key_id, public_key, revoked_at	PK: (merchant_id, key_id)
+T034	core	exchange_wire_fees	TABLE	Structure for exchange wire fee configs.	F082	exchange_url, start_date, end_date, fees_jsonb	PK: (exchange_url, start_date)
+T035	core	account_restriction_flags	TABLE	Definition of restriction flags (SHADOW, FROZEN).	F084	flag_name, description, requires_kyc_level	PK: flag_name
+T036	core	aml_score_thresholds	TABLE	Thresholds for AML action triggers.	F086	score_min, score_max, action (block/review)	PK: id (Range)
+T037	core	sanctions_lists	TABLE	Cached data from sanctions screening APIs.	F087	list_name, entry_id, data_jsonb, last_updated	PK: (list_name, entry_id)
+T038	core	psd2_sca_exemptions	TABLE	Valid SCA exemption codes.	F089	exemption_code, description, conditions	PK: exemption_code
+T039	core	oidc_providers	TABLE	Registered OpenID Connect providers.	F090	issuer_url, client_id, jwks_endpoint	PK: issuer_url
+T040	core	eidas_attributes	TABLE	Allowed eIDAS attributes.	F091	attribute_name, friendly_name, is_required	PK: attribute_name
+T041	core	specific_bank_formats	TABLE	Validator logic for specific national bank IDs.	F093-F110	country_code, format_name, validation_regex	PK: (country_code, format_name)
+T042	core	card_bin_ranges	TABLE	IIN ranges for card brand identification.	F118	bin_start, bin_end, brand, card_type	PK: bin_start (Range)
+T043	core	emv_tags	TABLE	Valid EMV tags and formats.	F120	tag_number, name, format	PK: tag_number
+T044	core	payment_methods	TABLE	Allowed payment methods and their validation rules.	F114	method_id, name, validation_module	PK: method_id
+T045	core	promo_codes	TABLE	Valid promo/voucher codes and logic.	F124	code, discount_type, value, max_uses, expires_at	PK: code
+T046	core	webhook_endpoints	TABLE	Registered webhooks and secrets.	F131	url, secret_hash, events	PK: url
+T047	core	api_keys	TABLE	API keys and scopes.	F133	key_hash, scopes, quota_limit	PK: key_hash
+T048	core	tenants	TABLE	Multi-tenant configuration.	F135	tenant_id, name, settings_jsonb	PK: tenant_id
+T049	core	feature_flags	TABLE	Feature toggles.	F142	flag_key, is_enabled, rollout_percentage	PK: flag_key
+T050	core	experiment_configs	TABLE	A/B test configurations.	F143	experiment_name, bucket_count, targeting_rule	PK: experiment_name
+T051	core	bot_signatures	TABLE	User-Agent signatures for bots.	F145	signature, bot_name	PK: signature
+T052	core	cors_origins	TABLE	Allowed CORS origins.	F154	origin_pattern	PK: origin_pattern
+T053	core	tls_versions	TABLE	Allowed TLS versions for internal services.	F185	version_name, is_active	PK: version_name
+T054	core	cipher_suites	TABLE	Allowed TLS cipher suites.	F186	suite_name, security_score	PK: suite_name
+T055	core	certificate_pinning	TABLE	Known certificate fingerprints.	F187	domain, pin_hash, expires_at	PK: domain
+T056	core	docker_image_registry	TABLE	Allowed Docker registries and images.	F196	registry_url, image_name, digest	PK: (registry_url, image_name, digest)
+T057	core	kubernetes_namespaces	TABLE	Valid K8s namespaces.	F199	namespace_name, environment	PK: namespace_name
+T058	core	terraform_state_buckets	TABLE	Allowed S3 buckets for Terraform state.	F200	bucket_name, region	PK: bucket_name
+T059	core	cloudformation_stacks	TABLE	Tracked CFN stacks.	F201	stack_name, region, template_url	PK: (stack_name, region)
+T060	core	graphql_persisted_queries	TABLE	Valid persisted GraphQL queries.	F165	query_id, query_hash, query_text	PK: query_id
+T061	core	api_rate_limits	TABLE	Rate limit definitions per endpoint.	F134	endpoint, method, requests_per_minute	PK: (endpoint, method)
+T062	core	request_id_tracking	TABLE	Tracks request IDs for idempotency.	F127	request_id, response_hash, expiry	PK: request_id, TTL Index
+T063	core	validation_metrics	TABLE	Daily aggregates of validation stats.	F08	date, total_requests, rejected_count, rejection_reason	PK: date
+T064	core	data_quality_scorecards	TABLE	Scores per data domain.	F08	domain_name, score, timestamp	PK: (domain_name, timestamp)
+T065	core	address_validation_rules	TABLE	Rules for parsing/formatting addresses.	F014	country_code, required_fields, format_template	PK: country_code
+T066	core	company_identifiers	TABLE	Reference for Company Registration Numbers.	F093-F110	country_code, identifier_name, regex	PK: (country_code, identifier_name)
+T067	core	identity_documents	TABLE	Supported ID document types.	F262-F276	country_code, doc_type, is_primary	PK: (country_code, doc_type)
+T068	core	transaction_types	TABLE	Valid transaction types (CREDIT, DEBIT, REFUND).	F019	type_code, description	PK: type_code
+T069	core	currencies_active	TABLE	Subset of ISO 4217 currently active in system.	F002	currency_code, is_crypto	PK: currency_code
+T070	core	locale_settings	TABLE	Localization settings per locale.	F050	locale_code, date_format, number_format	PK: locale_code
+T071	core	timezone_mappings	TABLE	IANA to Windows timezone mappings.	F051	iana_zone, windows_zone	PK: iana_zone
+T072	core	notification_channels	TABLE	Config for push/notification validation.	F163	channel_type, validation_requirements	PK: channel_type
+T073	core	file_storage_buckets	TABLE	Allowed S3 buckets for user uploads.	F160	bucket_name, max_file_size_mb, allowed_types	PK: bucket_name
+T074	core	o_auth_clients	TABLE	Registered OAuth2 clients.	F090	client_id, redirect_uris, grant_types	PK: client_id
+T075	core	saml_providers	TABLE	SAML IDP metadata.	F093	provider_id, metadata_url, cert	PK: provider_id
+T076	core	bank_routing_directories	TABLE	Aggregator for routing numbers.	F042-F110	routing_code, bank_name, country, address	PK: routing_code
+T077	core	exchange_rates	TABLE	Cached reference rates for amount validation context.	F003	source_currency, target_currency, rate, timestamp	PK: (source_currency, target_currency, timestamp)
+T078	core	validation_test_cases	TABLE	Test cases for validation rules (QA).	F001-F300	rule_id, input_payload, expected_result	PK: id
+T079	core	anomaly_detection_config	TABLE	Config for ML-based validation.	F087	model_name, threshold, sensitivity	PK: model_name
+T080	core	data_governance_policies	TABLE	Policies linking data classification to validation.	F011	sensitivity_level, validation_level	PK: sensitivity_level
+T081	core	pii_classification	TABLE	Definition of PII fields.	F087	field_path, is_pii, masking_rule	PK: field_path
+T082	core	audit_trail_config	TABLE	Config for audit logging of valid data.	F087	table_name, is_audited	PK: table_name
+T083	core	encryption_keys	TABLE	Metadata for keys used in data validation (e.g., verifying HMAC).	F132	key_id, key_usage, status	PK: key_id
+T084	core	api_specifications	TABLE	Stored OpenAPI/Swagger specs.	F205	spec_name, version, spec_json	PK: (spec_name, version)
+T085	core	service_discovery	TABLE	Internal service endpoints for validation.	F135	service_name, endpoint_url, health_check	PK: service_name
+T086	core	load_balancer_config	TABLE	Config for validating load behind proxies.	F155	lb_name, trusted_ip_range	PK: lb_name
+T087	core	cache_invalidation_rules	TABLE	Rules for cache invalidation.	F002	table_name, trigger_event	PK: id
+T088	core	database_shards	TABLE	Mapping of logical shards to physical.	F001	shard_id, db_host, db_name	PK: shard_id
+T089	core	connection_pools	TABLE	Validation of DB pool settings.	F001	pool_name, max_connections, timeout	PK: pool_name
+T090	core	partition_schemes	TABLE	Table partition definitions.	F001	table_name, partition_key, interval	PK: table_name
+T091	core	index_usage_stats	TABLE	Stats for unused/valid indexes.	F001	index_name, usage_count, last_used	PK: index_name
+T092	core	lock_definitions	TABLE	Advisory locks for distributed validation.	F038	lock_key, acquired_by, expiry	PK: lock_key
+T093	core	scheduled_jobs	TABLE	Validation of cron job configs.	F038	job_name, cron_expression, timeout	PK: job_name
+T094	core	background_tasks	TABLE	Validation of async task payloads.	F038	task_id, payload_jsonb, status	PK: task_id
+T095	core	message_queue_topics	TABLE	Valid Kafka topics.	F173	topic_name, partitions, replication_factor	PK: topic_name
+T096	core	consumer_groups	TABLE	Valid consumer group offsets.	F173	group_id, topic_name, lag	PK: (group_id, topic_name)
+T097	core	schema_evolution_history	TABLE	History of DB schema changes.	F001	migration_id, applied_at, checksum	PK: migration_id
+T098	core	view_dependencies	TABLE	Dependency graph for materialized views.	F001	view_name, dependent_on	PK: (view_name, dependent_on)
+T099	core	trigger_definitions	TABLE	Validation of trigger logic.	F001	trigger_name, table_name, function_name	PK: trigger_name
+T100	core	stored_procedures	TABLE	Registry of stored procedures.	F001	proc_name, input_params, return_type	PK: proc_name
+V001	core	v_active_validation_rules	VIEW	View of currently active rules.	T001, T002	SELECT * FROM validation_rules WHERE is_active = true
+V002	core	v_recent_validation_errors	VIEW	Aggregated view of recent errors.	T005	SELECT error_code, COUNT(*) FROM validation_errors_log GROUP BY error_code
+V003	core	v_country_specific_validators	VIEW	Validators grouped by country.	T041, T004	SELECT * FROM specific_bank_formats JOIN iso_3166_countries
+V004	core	v_merchant_kyc_status	VIEW	Merchant validation status.	T011, T033	SELECT m.*, k.status FROM merchants m JOIN kyc k
+V005	core	v_transaction_integrity	VIEW	Checks transaction validity.	T001, T068	SELECT * FROM transactions WHERE amount > 0
+E001	core	enum_currency_code	ENUM	Enum for ISO currency codes.	F002	'EUR', 'USD', 'CHF', ...
+E002	core	enum_country_code	ENUM	Enum for ISO country codes.	F009	'US', 'GB', 'FR', ...
+E003	core	enum_language_code	ENUM	Enum for ISO 639-1 language codes.	F050	'en', 'de', 'fr', ...
+E004	core	enum_error_severity	ENUM	Severity of validation errors.	T006	'CRITICAL', 'HIGH', 'MEDIUM', 'LOW'
+E005	core	enum_check_constraint_type	ENUM	Types of DB constraints.	F018	'CHECK', 'NOT NULL', 'UNIQUE', 'EXCLUDE'
+E006	core	enum_data_type	ENUM	Abstract data types.	F001	'STRING', 'INTEGER', 'DECIMAL', 'BOOLEAN', 'JSON'
+E007	core	enum_mcc_group	ENUM	MCC Groupings.	F011	'RETAIL', 'RESTAURANT', 'SERVICE', ...
+E008	core	enum_card_brand	ENUM	Credit Card Brands.	F118	'VISA', 'MASTERCARD', 'AMEX', ...
+E009	core	enum_kyc_level	ENUM	Levels of KYC.	F084	'ANONYMOUS', 'LIGHT', 'FULL'
+E010	core	enum_psuedonymization_type	ENUM	Methods of hashing.	F087	'SHA256', 'BLAKE2B', 'ARGON2'
+P001	core	sp_validate_iban	PROCEDURE	Validates IBAN format and checksum.	F006	IN p_iban TEXT, OUT p_is_valid BOOLEAN	PLPGSQL
+P002	core	sp_validate_vat	PROCEDURE	Validates VAT ID based on country.	F012	IN p_country TEXT, IN p_vat TEXT, OUT p_is_valid BOOLEAN	PLPGSQL
+P003	core	sp_check_constraint_violation	PROCEDURE	Checks if data violates constraints.	F003	IN p_table_name TEXT, IN p_data JSONB	PLPGSQL
+P004	core	sp_normalize_unicode	PROCEDURE	Normalizes text to NFC.	F041	INOUT p_text TEXT	PLPGSQL
+P005	core	sp_validate_json_schema	PROCEDURE	Validates JSONB against schema.	F004	IN p_json JSONB, IN p_schema_id TEXT, OUT p_valid BOOLEAN	PLPGSQL
+P006	core	sp_log_validation_error	PROCEDURE	Logs validation failure.	F005	IN p_field TEXT, IN p_error_code TEXT, IN p_payload_hash TEXT	PLPGSQL
+P007	core	sp_check_sql_injection	PROCEDURE	Checks string for SQLi patterns.	F028	IN p_input TEXT, OUT p_is_malicious BOOLEAN	PLPGSQL
+P008	core	sp_check_xss	PROCEDURE	Checks string for XSS patterns.	F029	IN p_input TEXT, OUT p_is_malicious BOOLEAN	PLPGSQL
+P009	core	sp_validate_luhn	PROCEDURE	Generic Luhn algo check.	F006, F024	IN p_number TEXT, OUT p_is_valid BOOLEAN	PLPGSQL
+P010	core	sp_validate_email_syntax	PROCEDURE	RFC 5322 email validation.	F005	IN p_email TEXT, OUT p_is_valid BOOLEAN	PLPGSQL
+P011	core	sp_is_disposable_email	PROCEDURE	Checks if domain is disposable.	F005	IN p_email TEXT, OUT p_is_disposable BOOLEAN	PLPGSQL
+P012	core	sp_validate_credit_card	PROCEDURE	Validates card number, expiry, CVV.	F024, F115, F116	IN p_pan TEXT, IN p_exp TEXT, IN p_cvv TEXT, OUT p_is_valid BOOLEAN	PLPGSQL
+P013	core	sp_get_currency_decimals	PROCEDURE	Returns minor units for currency.	F003, F017	IN p_currency_code TEXT, OUT p_decimals INT	PLPGSQL
+P014	core	sp_check_regex_complexity	PROCEDURE	Checks regex for ReDoS risk.	F059	IN p_regex TEXT, OUT p_is_safe BOOLEAN	PLPGSQL
+P015	core	sp_validate_phone_number	PROCEDURE	Validates phone number to E.164.	F010	IN p_phone TEXT, IN p_country TEXT, OUT p_is_valid BOOLEAN	PLPGSQL
+P016	core	sp_validate_postcode	PROCEDURE	Validates postcode by country.	F014	IN p_postcode TEXT, IN p_country TEXT, OUT p_is_valid BOOLEAN	PLPGSQL
+P017	core	sp_validate_timestamp_range	PROCEDURE	Checks if timestamp is valid.	F008	IN p_timestamp TIMESTAMP, OUT p_is_valid BOOLEAN	PLPGSQL
+P018	core	sp_generate_uuidv4	FUNCTION	Generates UUID v4.	F007	RETURNS UUID	SQL
+P019	core	sp_validate_date_sequence	PROCEDURE	Checks Start Date <= End Date.	F019	IN p_start DATE, IN p_end DATE, OUT p_is_valid BOOLEAN	PLPGSQL
+P020	core	sp_sanitize_string	FUNCTION	Removes unsafe chars.	F029	IN p_str TEXT, RETURNS TEXT	PLPGSQL
+P021	core	sp_validate_mime_type	PROCEDURE	Checks file type against magic bytes.	F030	IN p_file_bytea BYTEA, IN p_expected_mime TEXT, OUT p_is_valid BOOLEAN	PLPGSQL
+P022	core	sp_validate_geo_point	PROCEDURE	Validates Lat/Lon ranges.	F031	IN p_lat NUMERIC, IN p_lon NUMERIC, OUT p_is_valid BOOLEAN	PLPGSQL
+P023	core	sp_check_duplicate_record	PROCEDURE	Checks for logical duplicates.	F038	IN p_table_name TEXT, IN p_check_columns TEXT[], IN p_values TEXT[], OUT p_exists BOOLEAN	PLPGSQL
+P024	core	sp_validate_age_restriction	PROCEDURE	Checks if user meets age limit.	F039	IN p_dob DATE, IN p_required_age INT, OUT p_is_valid BOOLEAN	PLPGSQL
+P025	core	sp_validate_url_scheme	PROCEDURE	Ensures URL is HTTPS.	F131	IN p_url TEXT, OUT p_is_valid BOOLEAN	PLPGSQL
+P026	core	sp_verify_hmac	PROCEDURE	Verifies HMAC signature.	F132	IN p_payload BYTEA, IN p_signature TEXT, IN p_secret TEXT, OUT p_is_valid BOOLEAN	PLPGSQL
+P027	core	sp_check_quota_limit	PROCEDURE	Checks quota usage against limit.	F134	IN p_api_key TEXT, IN p_endpoint TEXT, OUT p_within_limit BOOLEAN	PLPGSQL
+P028	core	sp_validate_jwk	PROCEDURE	Validates JSON Web Key structure.	F090	IN p_jwk JSONB, OUT p_is_valid BOOLEAN	PLPGSQL
+P029	core	sp_validate_jws	PROCEDURE	Validates JSON Web Signature.	F090	IN p_jws TEXT, OUT p_is_valid BOOLEAN	PLPGSQL
+P030	core	sp_validate_jwt_claims	PROCEDURE	Validates standard JWT claims.	F090	IN p_payload JSONB, OUT p_is_valid BOOLEAN	PLPGSQL
+P031	core	sp_validate_swift_bic	PROCEDURE	Validates BIC8/BIC11.	F042	IN p_bic TEXT, OUT p_is_valid BOOLEAN	PLPGSQL
+P032	core	sp_validate_aba_routing	PROCEDURE	Validates US ABA routing.	F043	IN p_routing TEXT, OUT p_is_valid BOOLEAN	PLPGSQL
+P033	core	sp_validate_iban_registry	PROCEDURE	Checks IBAN against registry rules.	F006	IN p_iban TEXT, OUT p_is_valid BOOLEAN	PLPGSQL
+P034	core	sp_validate_modulus_11	FUNCTION	Generic Mod 11 check.	F006, F093	IN p_number TEXT, RETURNS BOOLEAN	PLPGSQL
+P035	core	sp_validate_modulus_10	FUNCTION	Generic Mod 10 check.	F105, F114	IN p_number TEXT, RETURNS BOOLEAN	PLPGSQL
+P036	core	sp_validate_modulus_97	FUNCTION	Generic Mod 97 check.	F006, F099	IN p_number TEXT, RETURNS BOOLEAN	PLPGSQL
+P037	core	sp_validate_clabe	PROCEDURE	Validates Mexican CLABE.	F043	IN p_clabe TEXT, OUT p_is_valid BOOLEAN	PLPGSQL
+P038	core	sp_validate_cbu	PROCEDURE	Validates Argentine CBU.	F043	IN p_cbu TEXT, OUT p_is_valid BOOLEAN	PLPGSQL
+P039	core	sp_validate_pix_key	PROCEDURE	Validates Brazilian PIX key types.	F110	IN p_key_type TEXT, IN p_key_value TEXT, OUT p_is_valid BOOLEAN	PLPGSQL
+P040	core	sp_validate_nuban	PROCEDURE	Validates Nigerian NUBAN.	F112	IN p_account_number TEXT, OUT p_is_valid BOOLEAN	PLPGSQL
+P041	core	sp_validate_ifsc	PROCEDURE	Validates Indian IFSC.	F103	IN p_ifsc TEXT, OUT p_is_valid BOOLEAN	PLPGSQL
+P042	core	sp_validate_sort_code	PROCEDURE	Validates UK sort code.	F104	IN p_sort_code TEXT, OUT p_is_valid BOOLEAN	PLPGSQL
+P043	core	sp_validate_uk_account	PROCEDURE	Validates UK account number.	F105	IN p_account_number TEXT, OUT p_is_valid BOOLEAN	PLPGSQL
+P044	core	sp_validate_bsb	PROCEDURE	Validates Australian BSB.	F106	IN p_bsb TEXT, OUT p_is_valid BOOLEAN	PLPGSQL
+P045	core	sp_validate_canadian_transit	PROCEDURE	Validates Canadian transit number.	F107	IN p_transit TEXT, OUT p_is_valid BOOLEAN	PLPGSQL
+P046	core	sp_validate_sic	PROCEDURE	Validates Swiss SIC ID.	F099	IN p_sic_id TEXT, OUT p_is_valid BOOLEAN	PLPGSQL
+P047	core	sp_validate_qr_iban	PROCEDURE	Validates Swiss QR-IBAN.	F100	IN p_iban TEXT, OUT p_is_valid BOOLEAN	PLPGSQL
+F048	core	sp_validate_fedwire	PROCEDURE	Validates Fedwire routing.	F101	IN p_routing TEXT, OUT p_is_valid BOOLEAN	PLPGSQL
+F049	core	sp_validate_chips_uid	PROCEDURE	Validates CHIPS UID.	F102	IN p_uid TEXT, OUT p_is_valid BOOLEAN	PLPGSQL
+F050	core	sp_validate_pan_luhn	PROCEDURE	Validates Primary Account Number (Luhn).	F024	IN p_pan TEXT, OUT p_is_valid BOOLEAN	PLPGSQL
+F051	core	sp_check_card_brand	FUNCTION	Determines card brand from PAN.	F118	IN p_pan TEXT, RETURNS TEXT	PLPGSQL
+F052	core	sp_validate_mii	FUNCTION	Validates Major Industry Identifier.	F117	IN p_pan TEXT, RETURNS BOOLEAN	PLPGSQL
+F053	core	sp_validate_sepa_creditor_id	PROCEDURE	Validates SEPA Creditor ID.	F097	IN p_ci TEXT, OUT p_is_valid BOOLEAN	PLPGSQL
+F054	core	sp_validate_sepa_mandate	PROCEDURE	Validates SEPA Mandate Ref.	F098	IN p_mandate TEXT, OUT p_is_valid BOOLEAN	PLPGSQL
+F055	core	sp_validate_sct_inst	PROCEDURE	Validates SCT Inst data.	F229	IN p_message JSONB, OUT p_is_valid BOOLEAN	PLPGSQL
+F056	core	sp_validate_nacha	PROCEDURE	Validates NACHA file lines.	F224	IN p_line TEXT, OUT p_is_valid BOOLEAN	PLPGSQL
+F057	core	sp_validate_iso20022	PROCEDURE	Validates ISO 20022 XML.	F225	IN p_xml XML, IN p_message_type TEXT, OUT p_is_valid BOOLEAN	PLPGSQL
+F058	core	sp_validate_swift_mt	PROCEDURE	Validates SWIFT MT fields.	F226	IN p_field TEXT, IN p_tag TEXT, OUT p_is_valid BOOLEAN	PLPGSQL
+F059	core	sp_validate_geojson	PROCEDURE	Validates GeoJSON structure.	F240	IN p_geojson JSONB, OUT p_is_valid BOOLEAN	PLPGSQL
+F060	core	sp_validate_geohash	FUNCTION	Validates Geohash string.	F244	IN p_geohash TEXT, RETURNS BOOLEAN	SQL
+F061	core	sp_validate_plus_code	FUNCTION	Validates Open Location Code.	F245	IN p_code TEXT, RETURNS BOOLEAN	PLPGSQL
+F062	core	sp_validate_isbn	FUNCTION	Validates ISBN 10/13.	F250	IN p_isbn TEXT, RETURNS BOOLEAN	PLPGSQL
+F063	core	sp_validate_ean	FUNCTION	Validates EAN/UPC barcode.	F251	IN p_ean TEXT, RETURNS BOOLEAN	PLPGSQL
+F064	core	sp_validate_vin	PROCEDURE	Validates Vehicle Identification Number.	F248	IN p_vin TEXT, OUT p_is_valid BOOLEAN	PLPGSQL
+F065	core	sp_validate_passport_mrz	PROCEDURE	Validates Passport MRZ checksums.	F261	IN p_mrz TEXT, OUT p_is_valid BOOLEAN	PLPGSQL
+F066	core	sp_validate_ssn	PROCEDURE	Validates US SSN (range check).	F264	IN p_ssn TEXT, OUT p_is_valid BOOLEAN	PLPGSQL
+F067	core	sp_validate_nhs_number	PROCEDURE	Validates UK NHS Number.	F265	IN p_nhs TEXT, OUT p_is_valid BOOLEAN	PLPGSQL
+F068	core	sp_validate_hin	PROCEDURE	Validates Australian HIN.	F266	IN p_hin TEXT, OUT p_is_valid BOOLEAN	PLPGSQL
+F069	core	sp_validate_codice_fiscale	PROCEDURE	Validates Italian Tax Code.	F269	IN p_cf TEXT, OUT p_is_valid BOOLEAN	PLPGSQL
+F070	core	sp_validate_pesel	PROCEDURE	Validates Polish PESEL.	F273	IN p_pesel TEXT, OUT p_is_valid BOOLEAN	PLPGSQL
+F071	core	sp_validate_cpr	PROCEDURE	Validates Danish CPR.	F278	IN p_cpr TEXT, OUT p_is_valid BOOLEAN	PLPGSQL
+F072	core	sp_validate_bsn	PROCEDURE	Validates Dutch BSN.	F270	IN p_bsn TEXT, OUT p_is_valid BOOLEAN	PLPGSQL
+J001	core	junction_rule_error_codes	TABLE	Maps rules to specific error codes.	T001, T006	rule_id, error_code	PK: (rule_id, error_code)
+J002	core	junction_table_columns	TABLE	Maps rules to specific table columns.	T001, T010	rule_id, table_name, column_name	PK: (rule_id, table_name, column_name)
+J003	core	junction_regex_countries	TABLE	Maps regex patterns to countries.	T008, T004	pattern_id, country_code	PK: (pattern_id, country_code)
+J004	core	junction_mcc_groups	TABLE	Maps MCCs to business groups.	T015	mcc, group_id	PK: mcc
+J005	core	junction_api_keys_tenants	TABLE	Assigns API keys to tenants.	T047, T048	key_hash, tenant_id	PK: (key_hash, tenant_id)
+J006	core	junction_user_roles	TABLE	Assigns validation roles to users.	T087	user_id, role	PK: (user_id, role)
+J007	core	junction_feature_flags_tenants	TABLE	Enables features per tenant.	T049, T048	flag_key, tenant_id	PK: (flag_key, tenant_id)
+J008	core	junction_pii_data	TABLE	Links PII fields to data objects.	T081, T001	field_path, table_name	PK: (field_path, table_name)
+J009	core	junction_kyc_documents	TABLE	Links KYC checks to document types.	T067, F084	kyc_level, doc_type	PK: (kyc_level, doc_type)
+J010	core	junction_sanctions_lists	TABLE	Aggregates multiple sanctions lists.	T087	list_name, entry_id	PK: (list_name, entry_id)
+J011	core	junction_exchange_currencies	TABLE	Defines supported currencies per exchange.	T034, T069	exchange_url, currency_code	PK: (exchange_url, currency_code)
+J012	core	junction_merchant_currencies	TABLE	Defines accepted currencies per merchant.	T033, T069	merchant_id, currency_code	PK: (merchant_id, currency_code)
+J013	core	junction_card_brands_mcc	TABLE	Associates card brands with MCC categories.	F118, F011	brand, mcc	PK: (brand, mcc)
+J014	core	junction_translation_errors	TABLE	Translations for error messages.	T006, T070	error_code, locale_code, message	PK: (error_code, locale_code)
+J015	core	junction_trigger_history	TABLE	History of trigger execution.	T099, T002	trigger_name, execution_time, status	PK: id

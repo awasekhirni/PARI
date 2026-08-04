@@ -1,0 +1,448 @@
+
+10.	Module M10	Enterprise Data Dictionary
+a.	Summary
+
+The Enterprise Data Dictionary (EDD) for the PARI system serves as the single, immutable source of truth for all semantic, structural, and regulatory definitions governing the platform’s data assets. In a complex ecosystem where financial privacy must coexist with absolute fiscal accountability, the EDD is not merely a static documentation repository but a dynamic, governable, and active database component. It functions as the "Brain" of the PARI architecture, ensuring that every byte of data—whether it is a blinded coin transaction, a merchant tax record, or an audit log—is semantically defined, lineage-tracked, and mapped to specific regulatory frameworks (GDPR, ISO 20022, national VAT laws). By rigorously cataloging the 63 core operational tables, the EDD bridges the gap between technical database schemas and business logic, enabling disparate stakeholders, from DBAs to Tax Auditors, to interpret data consistently without ambiguity.
+
+Operating under CMMI Level 5 principles, the EDD transforms data governance from a manual, ad-hoc process into a quantitatively managed engineering discipline. It enforces strict data standardization policies, ensuring that "Citizen ID" in one module is not misinterpreted as "Payer Identity" in another, a critical distinction for maintaining payer anonymity. The dictionary actively manages the lifecycle of data objects, enforcing the "Privacy-by-Design" mandate by tagging Personally Identifiable Information (PII) and associating it with automated retention and deletion policies (e.g., cryptographic erasure after 7 years). Furthermore, it serves as the integration backbone for the Regulatory Policy Engine (Module M02), providing the metadata necessary to dynamically generate ISO 20022 compliant messages and enforce cross-jurisdictional tax reporting rules without requiring code changes.
+
+The EDD also underpins the platform’s robust auditability and corruption resistance. By maintaining a comprehensive change history of every schema modification, business definition update, and ownership transfer, it creates an immutable chain of custody for the data structure itself. This allows independent auditors to reconstruct the exact state of the system at any point in the past, a requirement for forensic analysis in financial disputes. Additionally, the EDD facilitates advanced AI-driven operations by providing a structured ontology that machine learning models can leverage for anomaly detection, semantic querying, and automated impact analysis. When a new regulation is introduced—such as a change in the EU VAT directive—the EDD allows system architects to instantly visualize which tables, columns, and business processes are affected, drastically reducing the risk of non-compliance. Ultimately, the Enterprise Data Dictionary ensures that PARI’s data infrastructure is as resilient, scalable, and trustworthy as the cryptographic protocols that secure its transactions.
+b.	Scope
+The scope of Module M10 encompasses the centralized management, definition, and governance of all metadata within the PARI ecosystem. This includes the structural definition of all 63+ production database tables, columns, data types, and constraints across the Wallet, Exchange, Merchant, and Audit subsystems. It covers the semantic mapping of these technical artifacts to business glossaries, regulatory codes (ISO 20022, SWIFT, national tax codes), and internal KPI frameworks. The module is responsible for maintaining the lineage of data elements, tracking their journey from ingestion (via M13) through transformation (Analytics) to archival (M11). It defines and enforces data ownership, stewardship, and access control policies at a granular attribute level. Additionally, the EDD scope includes the management of database change history, versioning of DDL scripts, and the synchronization of metadata between the development environments and the production Kubernetes clusters.
+
+c.	Business Case
+In the absence of a unified Enterprise Data Dictionary, large-scale financial platforms suffer from "semantic fragmentation," where different departments define critical terms like "Revenue," "Transaction Date," or "User ID" inconsistently. In PARI, where payer anonymity is paramount, such ambiguity could lead to catastrophic privacy leaks or regulatory fines. For instance, misclassifying a "blinded payer hash" as "Personal Data" could trigger unnecessary GDPR deletion requests, destroying audit trails, while failing to classify a "Merchant Legal Name" correctly could lead to tax evasion. The EDD eliminates this risk by enforcing a standardized vocabulary. It significantly accelerates the integration of new regulatory modules (M02), allowing the PARI system to expand into new jurisdictions with zero friction. From a CMMI Level 5 perspective, the EDD reduces the defect density in database deployments by ensuring that schema changes are validated against a central gold standard before execution. It automates the generation of regulatory reports, saving hundreds of man-hours annually in manual reconciliation and audit preparation. By providing clear data ownership and lineage, it simplifies root cause analysis during production incidents, reducing Mean Time To Recover (MTTR).
+d.	KPIs
+     Metadata Completeness: 100% (All 63 tables and columns fully defined with business descriptions).
+     Lineage Traceability Score: >98% (Ability to trace data from source to destination across 4+ hops).
+     Schema-to-Definition Sync Latency: < 5 minutes (Time for a code change to reflect in the Dictionary).
+     Automated Compliance Rule Coverage: 100% (All columns tagged with relevant GDPR/Tax attributes).
+     Impact Analysis Accuracy: >99% (Precision in identifying affected objects during schema changes).
+     Data Stewardship Assignment Rate: 100% (Every critical data element has an assigned owner).
+
+
+
+e.	Stakeholder Insights
+Stakeholder	Concern	Implications
+Data Governance Officers (DGOs)	Semantic Ambiguity & Compliance Risk	Without a unified dictionary, DGOs cannot guarantee that "Anonymized ID" is treated differently from "Legal Name," leading to potential GDPR violations and heavy fines.
+Database Administrators (DBAs)	Uncontrolled Schema Drift	Lack of central control leads to ad-hoc schema changes causing downtime and data integrity issues during deployments.
+Regulatory Auditors	Data Provenance & Accountability	Auditors require an immutable record of who defined what data and when. Missing metadata makes the system unauditable.
+Business Analysts	Self-Service Reporting Inaccuracy	Analysts relying on guesswork to build KPIs (e.g., VAT collected) will produce incorrect financial reports, misleading executives.
+Software Developers	Integration Complexity	Developers need clear API contracts and data type definitions to integrate modules M01-M09 correctly. Ambiguity slows down development velocity.
+CISO / Security Team	Data Leakage & Classification	Security policies (RBAC/ABAC) depend on accurate data classification (e.g., Public vs. Confidential). Poor metadata leads to over-exposure of sensitive data.
+
+
+f.	Knowledge Representation Graph (mermaid.js)
+graph TD
+    subgraph "PARI System Context"
+        M01[M01: Crypto Core]
+        M02[M02: Regulatory Engine]
+        M13[M13: Ingestion Pipeline]
+        M22[M22: Tax Reporting]
+    end
+
+    subgraph "M10: Enterprise Data Dictionary Core"
+        DD[(Central Metadata Repository)]
+        DEF[Business Glossary]
+        TECH[Technical Schema Registry]
+        ISO[ISO 20022 / Tax Mapping]
+        LINEAGE[Data Lineage Graph]
+        VERSION[Change History / Versioning]
+        OWNER[Data Stewardship]
+    end
+
+    subgraph "Outputs & Governance"
+        AUDIT[Audit Reports]
+        API[Metadata API]
+        DOCS[Living Documentation]
+    end
+
+    %% Relationships
+    M01 -->|Ingests Schema| TECH
+    M13 -->|Populates| LINEAGE
+    DD -->|Defines| TECH
+    DD -->|Standardizes| DEF
+    TECH -->|Maps to| ISO
+    DEF -->|Managed by| OWNER
+    TECH -->|Versioned in| VERSION
+    LINEAGE -->|Traced via| TECH
+
+    %% Value Flow
+    ISO -->|Enables| M22
+    TECH -->|Validates| M02
+    DD -->|Exposes| API
+    VERSION -->|Generates| AUDIT
+    DEF -->|Publishes| DOCS
+
+    style DD fill:#f9f,stroke:#333,stroke-width:4px
+    style ISO fill:#bbf,stroke:#333,stroke-width:2px
+
+
+g.	Comprehensive List of Features
+
+id	Feature	Description	Business Case	AI/ML Algorithms	KPIs	Primary Users
+F-101	Centralized Entity Registry	Master catalog of all 63 database tables including physical names, schemas, and creation timestamps.	Prevents shadow databases and ensures full asset visibility.	None	Entity Registration Count (100%)	System Architects
+F-102	Attribute-Level Definition	Detailed dictionary entry for every column (data type, length, nullable, default value).	Ensures developers use correct data types, preventing truncation/corruption.	None	Attribute Coverage (100%)	DBAs
+F-103	Business Glossary Mapping	Links technical column names (e.g., usr_id_hash) to business terms (e.g., "Payer Anonymous Token").	Allows non-technical stakeholders to understand database content.	NLP - Word2Vec Similarity	Glossary Linkage %	Business Analysts
+F-104	ISO 20022 Field Alignment	Direct mapping of local DB fields to ISO 20022 message elements (e.g., TxId -> AppHdr.MsgId).	Automates generation of compliant SWIFT/ISO messages for M05.	Schema Matching Transformers	ISO Compliance Accuracy	Integration Specialists
+F-105	GDPR PII Classification	Auto-tagging of columns containing PII (Direct, Indirect, Pseudonymized) per GDPR definitions.	Critical for enforcing access control (RBAC) and Right to be Forgotten (GDPR Art. 17).	Named Entity Recognition (NER)	PII Detection Recall	Data Protection Officer
+F-106	Data Stewardship Assignment	Workflow to assign a "Data Owner" and "Data Steward" to every table and critical column.	Ensures accountability for data quality and definition maintenance.	None	Stewardship Assignment Rate	Data Governance Lead
+F-107	Lineage Tracking - Upstream	Visual and data-based tracking of data sources (e.g., Kafka Topic -> Table).	Facilitates impact analysis when source systems change.	Graph Traversal (BFS/DFS)	Lineage Coverage %	Data Engineers
+F-108	Lineage Tracking - Downstream	Tracking of where data is consumed (e.g., Table -> View -> Tax Report API).	Identifies downstream consumers affected by schema changes.	Graph Traversal (BFS/DFS)	Lineage Coverage %	Data Engineers
+F-109	Schema Version Control Integration	Git-based integration to sync DDL changes with the dictionary automatically.	Maintains synchronization between code repos and metadata.	Diff Algorithms	Sync Latency (<5m)	DevOps Engineers
+F-110	Change History Auditing	Immutable log of every modification to a data definition (Who, What, When, Why).	Required for forensic audits and root cause analysis.	None	Audit Log Integrity	Compliance Auditors
+F-111	Impact Analysis Simulator	"What-If" tool to predict effects of dropping a column or changing a data type.	Prevents production outages caused by breaking changes.	Dependency Graph Analytics	Accuracy of Impact Prediction	DBAs
+F-112	Automated Business Documentation	Generation of human-readable Data Dictionary PDF/HTML docs from metadata.	Saves manual effort in keeping documentation up to date.	Template Generation (LLM)	Doc Generation Frequency	Business Analysts
+F-113	Data Quality Rule Binding	Repository for validation rules (e.g., Regex for IBAN, Check digit for VAT).	Centralizes quality logic for use by M12 (Data Quality).	None	Rule Coverage %	Data Engineers
+F-114	Cross-Jurisdictional Mapping	Mapping fields to specific legal requirements (e.g., "Spanish VAT Rate" vs. "German VAT Rate").	Supports M02 modular regulatory engine.	None	Mapping Completeness	Compliance Officers
+F-115	Synonym Management	Handling of database synonyms and aliases to ensure unique resolution.	Prevents ambiguity in SQL queries and reporting.	None	Synonym Conflict Rate (0%)	DBAs
+F-116	Reference Data Registry	Catalog of all lookup/enumeration tables (e.g., Currencies, Countries, Error Codes).	Ensures consistency in reference data across microservices.	None	Reference Data Consistency	Developers
+F-117	KPI Data Source Binding	Mapping KPI formulas (from M14) to specific underlying table columns.	Ensures KPI calculations are transparent and traceable.	None	KPI Traceability (100%)	Product Managers
+F-118	Index Strategy Metadata	Tracking of index definitions, types (B-Tree, GIN), and usage statistics.	Optimizes query performance and identifies redundant indexes.	Anomaly Detection on Usage	Index Efficiency Score	Performance Engineers
+F-119	Partition Key Definition	Metadata defining table partitioning strategy (e.g., by Date, Jurisdiction).	Essential for M03 scalability and pruning.	None	Partition Strategy Adherence	DBAs
+F-120	View Definition Registry	Central storage of SQL View logic to prevent "Voodoo Views".	Ensures complex logic is versioned and reviewed.	SQL Parsing	View Version Control	Data Analysts
+F-121	Stored Procedure Catalog	Inventory of all PL/pgSQL functions and procedures with input/output defs.	Critical for M13 and M06 audit interfaces.	None	Procedure Completeness	Backend Developers
+F-122	Data Retention Policy Tagging	Tagging tables with retention periods (e.g., 7 years, 10 years) per law.	Automates M11 archival and deletion workflows.	None	Policy Compliance (100%)	Legal Teams
+F-123	Archival Metadata	Tracking status of data (Hot/Warm/Cold) and location (S3, Glacier).	Manages storage costs and access speeds.	None	Storage Cost Accuracy	Infrastructure Leads
+F-124	Encryption Attributes	Specifying encryption standards (AES-256, TEE) for sensitive columns.	Guides M17 Zero Trust security fabric.	None	Encryption Compliance	CISO
+F-125	Tokenization/Pseudonymization Flags	Marking fields that contain blind signatures or hashed IDs.	Crucial for Privacy-by-Design enforcement in M01.	None	Privacy Flag Accuracy	Cryptographers
+F-126	JSON Schema Validation	Storing JSON-Schemas for JSONB columns (e.g., receipt_data).	Enables deep validation of semi-structured data in M03.	JSON Schema Validators	Validation Error Rate	Backend Developers
+F-127	Custom Data Type Registry	Definitions of composite types used in PostgreSQL.	Supports complex financial data structures.	None	Type Consistency	DBAs
+F-128	Row-Level Security (RLS) Policy Ref	Linking RLS policies (from M09) to specific tables.	Ensures security policies are documented and not just code.	None	RLS Documentation %	Security Engineers
+F-129	API Endpoint Mapping	Mapping database fields to OpenAPI/Swagger definitions in M04/M07.	Ensures API contracts match the underlying database.	Schema Matching	API-DB Sync Rate	API Architects
+F-130	Constraint Definition Registry	Catalog of CHECK, UNIQUE, and FOREIGN KEY constraints.	Prevents invalid data entry at the database level.	None	Constraint Coverage %	Data Modelers
+F-131	Trigger Metadata	Documentation of all database triggers and their side effects.	Essential for understanding implicit data flows.	None	Trigger Documentation	DBAs
+F-132	Materialized View Schedule	Tracking refresh intervals for materialized views (Analytics).	Optimizes M08 reporting latency.	None	Schedule Adherence	SREs
+F-133	Data Subject Access Request (DSAR) Map	Graph showing connections between User IDs and all their data points.	Facilitates GDPR DSAR automation.	Graph Clustering	DSAR Processing Time	Privacy Officers
+F-134	Anonymization Technique Registry	Catalog of methods used (k-anonymity, differential privacy).	Supports M16 and M06 privacy features.	None	Technique Validation	Data Scientists
+F-135	Tax Authority Code Mapping	Mapping of internal tax codes to official authority codes (e.g., Elster, SII).	Ensures M22 reports are accepted by gov systems.	None	Code Mapping Accuracy	Tax Specialists
+F-136	Currency Code Validation	Enforcing ISO 4217 standards for currency columns.	Prevents financial calculation errors.	None	Currency Validity	FinanceOps
+F-137	Country Code Validation	Enforcing ISO 3166-1 alpha-2/alpha-3 standards.	Standardizes location data.	None	Geo Validity	Compliance
+F-138	Language Code Support	Defining supported languages (ISO 639) for text fields.	Enables localization in M04 Wallets.	None	Localization Coverage	UX Designers
+F-139	Timezone Metadata	Handling timezone conversions for timestamp fields.	Prevents confusion in cross-border payments.	None	Timezone Error Rate (0%)	Backend Developers
+F-140	Unit of Measure (UOM) Registry	Standardizing units (e.g., cents vs euros, microseconds vs milliseconds).	Critical for accurate financial calculations.	None	UOM Consistency	Product Owners
+F-141	Data Classification Labeling	Labels: Public, Internal, Confidential, Restricted.	Drives M09 ABAC access decisions.	Classification Models	Label Accuracy	Security Architects
+F-142	Criticality Assessment	Ranking tables by business criticality (Tier 1, 2, 3).	Prioritizes disaster recovery (M19) efforts.	None	Criticality Coverage	Business Continuity Mgr
+F-143	Service Level Agreement (SLA) Binding	Linking tables to uptime/latency SLAs (e.g., PaymentTx < 500ms).	Guides M08 monitoring and alerting.	None	SLA Binding Rate	SREs
+F-144	Data Freshness Metric	Defining maximum acceptable age for data in tables.	Monitors M13 pipeline lag.	Time Series Analysis	Freshness Violation Count	Data Engineers
+F-145	Volume Trend Analysis	Metadata tracking historical growth rates of tables.	Informs capacity planning.	Linear Regression	Forecast Accuracy	Capacity Planners
+F-146	Primary Key (PK) Registry	Ensures every table has a documented PK strategy.	Fundamental for data integrity.	None	PK Coverage (100%)	Data Modelers
+F-147	Natural Key Identification	Documenting business natural keys vs surrogate keys.	Helps in deduplication and matching.	None	Key Documentation	Data Analysts
+F-148	Slowly Changing Dimension (SCD) Type	Defining SCD types (Type 1, 2) for dimension tables.	Guides ETL logic in M13/M03.	None	SCD Definition Accuracy	ETL Developers
+F-149	Orphaned Record Detection Logic	Defining rules to identify records with broken FKs.	Cleans up data quality debt.	Graph Algorithms	Orphaned Count	Data Stewards
+F-150	Data Profiling Metadata	Storing statistics (min, max, avg, nulls, cardinality).	Enables M12 automated anomaly detection.	Descriptive Statistics	Profiling Recency	Data Scientists
+F-151	Data Sampling Rules	Defining how data is sampled for M16 Analytics (privacy-safe).	Ensures statistical validity without exposure.	Stratified Sampling	Sample Bias Score	Data Scientists
+F-152	Export Control Classification	Tagging data subject to export restrictions (e.g., cryptography).	Compliance with international trade laws.	None	Export Compliance	Legal Counsel
+F-153	Smart Contract Reference	Linking DB records to on-chain transaction hashes (if applicable).	Bridges off-chain DB with blockchain anchors.	Hash Verification	Link Integrity	Blockchain Integrators
+F-154	Dispute Resolution Evidence Link	Tagging fields that serve as legal evidence in M03.	Ensures data is locked (WORM) when disputes arise.	None	Evidence Integrity	Legal Teams
+F-155	Fraud Marker Storage	Defining schema for fraud tags (M03) attached to transactions.	Enables real-time fraud prevention.	None	Tag Latency	Fraud Analysts
+F-156	Merchant Category Code (MCC) Mapping	Mapping merchant IDs to standard MCC codes.	Essential for interchange fee calculation and risk.	None	MCC Accuracy	Settlement Teams
+F-157	Geo-Spatial Metadata	Definition of PostGIS geometry columns for location data.	Enables location-based fraud checks.	None	Spatial Index Coverage	Geo Data Engineers
+F-158	Blob/Metadata Storage	Catalog of large object storage (PDFs, Images) references.	Manages KYC documents and receipts.	None	Blob Integrity	Storage Engineers
+F-159	Soft Delete Flag Registry	Identifying columns used for soft deletes vs hard deletes.	Prevents confusion in "active" datasets.	None	Delete Policy Clarity	Backend Developers
+F-160	Multi-Tenancy Partition Key	Ensuring every table has a tenant_id or jurisdiction_id.	Critical for data isolation in SaaS model.	None	Isolation Compliance	Architects
+F-161	Default Value Registry	Tracking all default values to prevent logic errors.	Ensures consistent data initialization.	None	Default Consistency	Developers
+F-162	Computed Column Definition	Metadata for virtual/generated columns.	Documents derived logic at the DB level.	None	Logic Consistency	DBAs
+F-163	Deadlock Risk Analysis	Analyzing lock order based on FK dependencies.	Prevents concurrency issues in M01.	Lock Dependency Graph	Deadlock Frequency	Performance Engineers
+F-164	Query Plan Hint Storage	Repository for optimizer hints for complex queries.	Maintains performance edge cases.	None	Hint Utilization	DBAs
+F-165	Failover Partition Support	Marking tables eligible for cross-region replication.	Supports M19 Disaster Recovery.	None	DR Eligibility %	SREs
+F-166	Backfill Strategy Metadata	Defining how historical data is backfilled for new columns.	Manages data migration projects.	None	Backfill Success Rate	Data Engineers
+F-167	Data Lake Sync Status	Tracking replication of DB data to Analytics Lake.	Ensures M08 has fresh data.	None	Sync Lag	Data Engineers
+F-168	Schema Drift Alerting	Automated alerts when prod schema diverges from registry.	Enforces CMMI Level 5 process discipline.	Anomaly Detection	Alert Accuracy	DevOps
+F-169	Data Dictionary REST API	Exposing metadata via OpenAPI for M07 Integration Gateway.	Allows external systems to understand PARI data.	None	API Uptime	Integration Developers
+F-170	GraphQL Schema Generation	Auto-generating GraphQL types from DB schema.	Accelerates frontend development for M04.	Schema Generation	Gen Success Rate	Fullstack Devs
+F-171	Legacy System Mapping	Mapping old legacy fields to new PARI fields during migration.	Smoothes transition from old banks.	String Matching	Mapping Precision	Migration Specialists
+F-172	Test Data Profile Generator	Using metadata to generate compliant test data.	Supports M18 CMMI testing rigor.	GANs (Generative AI)	Test Data Validity	QA Engineers
+F-173	Data Dictionary Search	Full-text search over business terms and column names.	Improves discoverability of data assets.	ElasticSearch/Lucene	Search Relevance	All Users
+F-174	Data Dictionary Favorites	Allowing users to save frequent tables/views.	Improves user productivity.	None	Usage Frequency	Analysts
+F-175	Subscription to Changes	Users can subscribe to email/webhook notifications for schema changes.	Keeps stakeholders informed of impact.	Pub/Sub Model	Notification Latency	Developers
+F-176	Approval Workflow for Changes	enforcing peer-review for metadata updates.	Maintains quality of definitions.	None	Approval Adherence	Data Gov Lead
+F-177	Role-Based Access to Dictionary	Controlling who can edit vs. view definitions.	Prevents unauthorized tampering of metadata.	RBAC	Access Violations (0)	Admins
+F-178	Bulk Import/Export	CSV/Excel upload for mass metadata updates.	Facilitates onboarding of legacy definitions.	Parsing Logic	Import Error Rate	Data Stewards
+F-179	Data Dictionary Health Dashboard	Visual status of metadata completeness (e.g., "85% Tables Described").	Management visibility into governance.	None	Health Score	Executives
+F-180	Metadata Version Diff Viewer	UI to compare versions of schema definitions (Git-like).	Simplifies code reviews.	Diff Algorithms	Review Efficiency	Tech Leads
+F-181	Automated Data Model Diagramming	Generating ERDs (Entity Relationship Diagrams) from metadata.	Visual aid for onboarding and architecture reviews.	Graphviz/Layout Algo	Diagram Accuracy	Architects
+F-182	Glossary Request Workflow	Form for users to request new business terms/definitions.	Closes the loop on missing definitions.	None	Request Fulfillment Time	Business Users
+F-183	Data Usage Analytics	Tracking which tables/views are queried most often.	Identifies hot/cold data and optimization opportunities.	Log Mining	Usage Accuracy	DBAs
+F-184	Cost Attribution Tagging	Assigning cost centers to tables (for cloud storage/billing).	Enables FinOps chargebacks to business units.	None	Billing Accuracy	Finance
+F-185	Regulatory Validation Ruleset	Embedding RegEx patterns for laws (e.g., IBAN, VAT).	Centralizing regulatory logic.	Regex Engines	Rule Validity	Compliance
+F-186	Dynamic Masking Policies	Storing masking rules (e.g., show last 4 digits of card).	Supports M17 Zero Trust display.	None	Policy Coverage	Security
+F-187	Data Dictionary Caching	Caching frequent metadata lookups to reduce DB load.	Improves performance of metadata API.	Redis/Memcached	Cache Hit Ratio	Backend Devs
+F-188	External Identifier Mapping	Linking internal IDs to external IDs (e.g., Swift BIC).	Supports M07 Interoperability.	None	Mapping Integrity	Integration Mgr
+F-189	Hierarchical Data Metadata	Describing parent-child relationships (e.g., Org Charts, Categories).	Enables recursive queries.	Tree Traversal	Hierarchy Accuracy	Backend Devs
+F-190	Data Dictionary SDK	Client libraries for Python/Java to query metadata.	Encourages developers to use metadata in apps.	None	SDK Adoption	Developers
+F-191	AI-Driven Semantic Enrichment	Suggesting business definitions based on column names/data samples.	Accelerates population of the dictionary.	LLMs (GPT/BERT)	Suggestion Acceptance	Stewards
+F-192	Deprecated Field Tracking	Marking fields as "Do Not Use" with sunset dates.	Manages technical debt and deprecation cycles.	None	Deprecation Adherence	Architects
+F-193	Data Standardization Enforcement	Ensuring address formats, phone formats follow standards.	Improves data quality for delivery/verification.	Regex/Parsers	Standardization %	Data Quality
+F-194	Cross-Reference Integrity	Verifying that dictionary definitions match actual DB schema.	Detects "Drift" automatically.	Schema Reflection	Sync Integrity	Automated Jobs
+F-195	Metadata Archival	Archiving old versions of definitions after long periods.	Manages size of the history log.	Lifecycle Mgr	Archive Success	DBAs
+F-196	Disaster Recovery for Metadata	Backing up the Data Dictionary itself (Critical Infra).	Ensures the "Brain" can be restored.	None	RTO for Metadata	SREs
+F-197	Localization of Metadata	Translating business definitions into multiple languages.	Supports global deployment teams.	Machine Translation	Translation Coverage	Localized Teams
+F-198	Data Steward Work Queue	Dashboard showing pending tasks for stewards (reviews, definitions).	Improves governance throughput.	None	Queue Aging	Governance Mgr
+F-199	Impact Analysis on Reports	Identifying which PowerBI/Tableau reports break if schema changes.	Protects decision-making capabilities.	Dependency Injection	Report Impact %	BI Analysts
+F-200	Data Dictionary as Code (DaC)	Storing metadata definitions in YAML/JSON for CI/CD.	Infrastructure as Code approach for data.	None	DaC Coverage	DevOps
+F-201	Semantic Reasoning Engine	Inferring relationships (e.g., InvoiceID implies CustomerID).	Enhances lineage and search capabilities.	Knowledge Graphs	Inference Accuracy	Data Scientists
+F-202	Quantitative Process Metrics	Tracking metrics on the dictionary management process (CMMI L5).	Improves the efficiency of the governance team.	SPC Charts	Process Stability	Quality Assurance
+F-203	Feedback Loop on Definitions	Allowing users to flag "confusing" or "wrong" definitions.	Continuous improvement of metadata quality.	Sentiment Analysis	Feedback Volume	All Users
+F-204	Integration with CMDB	Linking data assets to IT Configuration Management DB.	Full stack traceability (Hardware -> Data).	UUID Mapping	Asset Linkage %	IT Ops
+F-205	Smart Relationship Suggestions	Suggesting potential Foreign Keys based on data distribution.	Finds hidden relationships missed by humans.	Correlation Analysis	Suggestion Precision	Data Modelers
+F-206	Data Sharding Metadata	Defining how data is sharded across clusters.	Essential for horizontal scaling.	Consistent Hashing	Shard Balance	Architects
+F-207	Compliance Certificate Mapping	Linking data assets to specific compliance certificates (SOC2, ISO27001).	Simplifies audit evidence collection.	None	Certification Coverage	Auditors
+F-208	Blockchain Anchor Hash	Storing the hash of the data structure in the blockchain.	Provides immutable proof of data structure history.	SHA-256	Anchor Success	Blockchain Team
+F-209	Zero Knowledge Proof Metadata	Describing which fields are used in ZK-circuits (M01).	Ensures privacy engineering is documented.	None	Privacy Engineering	Cryptographers
+F-210	Data Access Frequency Scoring	Scoring fields based on how often they are accessed.	Optimizes indexing and caching strategies.	Frequency Analysis	Score Accuracy	Performance Engineers
+
+
+h.	Comprehensive List of Database Objects
+
+id	schema_name	object_name	object_type	description	feature_reference	column_names	constraints / notes	junction_tables
+T-01	pari_dd	dd_entity_registry	TABLE	Master list of all tables/entities in the PARI system.	F-101	entity_id (PK, UUID), physical_name (VARCHAR(63)), schema_name (VARCHAR(63)), description (TEXT), business_owner (VARCHAR(100)), technical_owner (VARCHAR(100)), created_at (TIMESTAMPTZ), is_active (BOOLEAN)	UNIQUE(physical_name, schema_name); CHECK (is_active IN (TRUE, FALSE))	N/A
+T-02	pari_dd	dd_attribute_registry	TABLE	Master list of all columns/attributes belonging to entities.	F-102	attribute_id (PK, UUID), entity_id (FK), physical_name (VARCHAR(63)), logical_name (VARCHAR(100)), data_type (VARCHAR(50)), length (INTEGER), nullable (BOOLEAN), default_value (TEXT), ordinal_position (INTEGER), is_pii (BOOLEAN)	FK(entity_id) REFERENCES dd_entity_registry; CHECK (ordinal_position > 0)	N/A
+T-03	pari_dd	dd_glossary_terms	TABLE	Business glossary definitions.	F-103	term_id (PK, UUID), term_name (VARCHAR(255), UNIQUE), definition (TEXT), acronym (VARCHAR(20)), source (VARCHAR(100)), status (VARCHAR(20))	CHECK (status IN ('Draft','Approved','Deprecated'))	dd_entity_glossary_map
+T-04	pari_dd	dd_entity_glossary_map	TABLE	Maps entities/attributes to glossary terms.	F-103	entity_id (FK), attribute_id (FK, NULLABLE), term_id (FK), context (TEXT)	Composite PK on (entity_id, attribute_id, term_id); FKs to parent tables	N/A
+T-05	pari_dd	dd_iso_20022_mapping	TABLE	Maps local fields to ISO 20022 message paths.	F-104	mapping_id (PK, UUID), attribute_id (FK), iso_message_type (VARCHAR(20)), iso_xpath (VARCHAR(500)), mapping_rule (TEXT)	FK(attribute_id) REFERENCES dd_attribute_registry; CHECK (iso_message_type LIKE 'pacs.%' OR iso_message_type LIKE 'pain.%')	N/A
+T-06	pari_dd	dd_regulatory_tags	TABLE	Stores tags like GDPR-PII, PCI-DSS, National-Tax.	F-105, F-116	tag_id (PK, UUID), tag_name (VARCHAR(50), UNIQUE), jurisdiction (VARCHAR(10)), description (TEXT), enforcement_action (VARCHAR(50))	CHECK (jurisdiction IN ('EU','US','CH','GLOBAL'))	dd_attribute_tags_map
+T-07	pari_dd	dd_attribute_tags_map	TABLE	Applies regulatory tags to specific attributes.	F-105, F-116	attribute_id (FK), tag_id (FK), applied_by (VARCHAR(100)), applied_at (TIMESTAMPTZ)	Composite PK on (attribute_id, tag_id)	N/A
+T-08	pari_dd	dd_data_owners	TABLE	Explicit ownership registry.	F-106	owner_id (PK, UUID), entity_id (FK), owner_role (VARCHAR(100)), department (VARCHAR(100)), contact_email (VARCHAR(255))	FK(entity_id) REFERENCES dd_entity_registry	N/A
+T-09	pari_dd	dd_lineage_edges	TABLE	Graph edges for data lineage (Source -> Target).	F-107, F-108	edge_id (PK, BIGSERIAL), source_object_id (UUID), target_object_id (UUID), edge_type (VARCHAR(20)), transform_logic (TEXT)	CHECK (edge_type IN ('DIRECT','DERIVED','LOOKUP'))	N/A
+T-10	pari_dd	dd_change_history	TABLE	Audit log for all metadata changes.	F-110	change_id (PK, BIGSERIAL), object_type (VARCHAR(50)), object_id (UUID), operation (VARCHAR(10)), old_value (JSONB), new_value (JSONB), changed_by (VARCHAR(100)), changed_at (TIMESTAMPTZ)	CHECK (operation IN ('INSERT','UPDATE','DELETE'))	N/A
+T-11	pari_dd	dd_quality_rules	TABLE	Central repository for data quality rules.	F-113	rule_id (PK, UUID), attribute_id (FK), rule_type (VARCHAR(20)), rule_definition (TEXT), severity (VARCHAR(10))	FK(attribute_id) REFERENCES dd_attribute_registry; CHECK (severity IN ('ERROR','WARNING','INFO'))	N/A
+T-12	pari_dd	dd_kpi_bindings	TABLE	Maps KPIs to data attributes.	F-117	binding_id (PK, UUID), kpi_code (VARCHAR(50)), attribute_id (FK), aggregation_func (VARCHAR(20))	FK(attribute_id) REFERENCES dd_attribute_registry	N/A
+T-13	pari_dd	dd_indexes	TABLE	Metadata for database indexes.	F-118	index_id (PK, UUID), entity_id (FK), index_name (VARCHAR(63)), index_type (VARCHAR(20)), is_unique (BOOLEAN), column_list (TEXT[])	FK(entity_id) REFERENCES dd_entity_registry	N/A
+T-14	pari_dd	dd_partitions	TABLE	Partitioning strategy definitions.	F-119	partition_id (PK, UUID), entity_id (FK), partition_key (VARCHAR(63)), strategy (VARCHAR(20))	FK(entity_id) REFERENCES dd_entity_registry; CHECK (strategy IN ('RANGE','LIST','HASH'))	N/A
+T-15	pari_dd	dd_view_registry	TABLE	Registry for SQL Views.	F-120	view_id (PK, UUID), view_name (VARCHAR(63)), definition_sql (TEXT), dependent_on (UUID[])	CHECK (definition_sql IS NOT NULL)	N/A
+T-16	pari_dd	dd_stored_procedures	TABLE	Registry for Functions/Procedures.	F-121	proc_id (PK, UUID), proc_name (VARCHAR(63)), signature (TEXT), source_code (TEXT)	N/A	N/A
+T-17	pari_dd	dd_retention_policies	TABLE	Data retention definitions.	F-122	policy_id (PK, UUID), entity_id (FK), retention_period_years (INTEGER), action_after_expiry (VARCHAR(20))	FK(entity_id) REFERENCES dd_entity_registry	N/A
+T-18	pari_dd	dd_encryption_attributes	TABLE	Encryption metadata for columns.	F-124	enc_id (PK, UUID), attribute_id (FK), encryption_algo (VARCHAR(50)), key_id (VARCHAR(100))	FK(attribute_id) REFERENCES dd_attribute_registry	N/A
+T-19	pari_dd	dd_api_mappings	TABLE	Maps DB fields to REST API fields.	F-129	mapping_id (PK, UUID), attribute_id (FK), api_path (VARCHAR(255)), json_field (VARCHAR(100))	FK(attribute_id) REFERENCES dd_attribute_registry	N/A
+T-20	pari_dd	dd_constraints	TABLE	Registry of DB constraints.	F-130	constraint_id (PK, UUID), entity_id (FK), constraint_name (VARCHAR(63)), constraint_type (VARCHAR(20)), check_clause (TEXT)	FK(entity_id) REFERENCES dd_entity_registry	N/A
+T-21	pari_dd	dd_triggers	TABLE	Registry of DB triggers.	F-131	trigger_id (PK, UUID), entity_id (FK), trigger_name (VARCHAR(63)), timing (VARCHAR(10)), event (VARCHAR(20))	FK(entity_id) REFERENCES dd_entity_registry	N/A
+T-22	pari_dd	dd_materialized_views	TABLE	Mat Views and refresh schedules.	F-132	mv_id (PK, UUID), mv_name (VARCHAR(63)), refresh_interval (INTERVAL), last_refresh (TIMESTAMPTZ)	N/A	N/A
+T-23	pari_dd	dd_rls_policies	TABLE	Row Level Security policy definitions.	F-128	rls_id (PK, UUID), entity_id (FK), policy_name (VARCHAR(63)), using_clause (TEXT)	FK(entity_id) REFERENCES dd_entity_registry	N/A
+T-24	pari_dd	dd_dsar_mappings	TABLE	Data Subject Access Request mapping.	F-133	dsar_id (PK, UUID), user_id_attribute (FK), linked_attributes (UUID[])	FK(user_id_attribute) REFERENCES dd_attribute_registry	N/A
+T-25	pari_dd	dd_taxonomy_nodes	TABLE	Hierarchical taxonomy for data classification.	F-141	node_id (PK, UUID), parent_id (UUID, NULLABLE), label (VARCHAR(100)), classification_level (VARCHAR(20))	Self-referencing FK; CHECK (classification_level IN ('Public','Internal','Confidential'))	N/A
+T-26	pari_dd	dd_slas	TABLE	Service Level Agreements for data.	F-143	sla_id (PK, UUID), entity_id (FK), max_latency_ms (INTEGER), uptime_target (NUMERIC(5,2))	FK(entity_id) REFERENCES dd_entity_registry	N/A
+T-27	pari_dd	dd_criticality_tiers	TABLE	Business criticality tiers.	F-142	tier_id (PK, UUID), entity_id (FK), tier_level (INTEGER), rpo_minutes (INTEGER), rto_minutes (INTEGER)	FK(entity_id) REFERENCES dd_entity_registry	N/A
+T-28	pari_dd	dd_reference_data	TABLE	Registry of lookup/enumeration tables.	F-116	ref_id (PK, UUID), table_name (VARCHAR(63)), category (VARCHAR(50)), description (TEXT)	N/A	N/A
+T-29	pari_dd	dd_profiling_stats	TABLE	Data profiling results history.	F-150	stat_id (PK, UUID), attribute_id (FK), run_date (TIMESTAMPTZ), null_count (BIGINT), distinct_count (BIGINT), min_val (TEXT), max_val (TEXT)	FK(attribute_id) REFERENCES dd_attribute_registry	N/A
+T-30	pari_dd	dd_anchors	TABLE	Blockchain anchors for integrity.	F-208	anchor_id (PK, UUID), object_hash (CHAR(64)), tx_hash (VARCHAR(255)), anchored_at (TIMESTAMPTZ)	CHECK (object_hash IS NOT NULL)	N/A
+T-31	pari_dd	dd_feedback	TABLE	User feedback on definitions.	F-203	feedback_id (PK, UUID), attribute_id (FK), user_id (VARCHAR(100)), comment (TEXT), created_at (TIMESTAMPTZ)	FK(attribute_id) REFERENCES dd_attribute_registry	N/A
+T-32	pari_dd	dd_deployments	TABLE	DDL deployment history.	F-109	deploy_id (PK, UUID), script_name (VARCHAR(255)), checksum (CHAR(32)), deployed_at (TIMESTAMPTZ), status (VARCHAR(20))	CHECK (status IN ('SUCCESS','FAILED','ROLLBACK'))	N/A
+T-33	pari_dd	dd_custom_types	TABLE	Postgres custom types (Composite/Enum).	F-127	type_id (PK, UUID), type_name (VARCHAR(63)), type_category (VARCHAR(20)), definition (TEXT)	CHECK (type_category IN ('ENUM','COMPOSITE','RANGE'))	N/A
+T-34	pari_dd	dd_enums	TABLE	Enum values for custom types.	F-127	enum_id (PK, UUID), type_id (FK), label (VARCHAR(100)), sort_order (INTEGER)	FK(type_id) REFERENCES dd_custom_types	N/A
+T-35	pari_dd	dd_geo_metadata	TABLE	PostGIS column definitions.	F-157	geo_id (PK, UUID), attribute_id (FK), srid (INTEGER), geometry_type (VARCHAR(50))	FK(attribute_id) REFERENCES dd_attribute_registry	N/A
+T-36	pari_dd	dd_synonyms	TABLE	Synonyms for column/table names.	F-115	synonym_id (PK, UUID), object_id (UUID), synonym_name (VARCHAR(63)), scope (VARCHAR(20))	N/A	N/A
+T-37	pari_dd	dd_deprecations	TABLE	Deprecation tracking.	F-192	deprecation_id (PK, UUID), object_id (UUID), sunset_date (DATE), replacement_object_id (UUID, NULLABLE)	N/A	N/A
+T-38	pari_dd	dd_tags	TABLE	General purpose tagging system.	F-201	tag_id (PK, UUID), tag_name (VARCHAR(50)), tag_color (VARCHAR(7))	UNIQUE(tag_name)	dd_object_tags_map
+T-39	pari_dd	dd_object_tags_map	TABLE	Maps tags to any dictionary object.	F-201	object_id (UUID), tag_id (FK)	Composite PK (object_id, tag_id)	N/A
+T-40	pari_dd	dd_relationships	TABLE	Explicit business relationships (Foreign Keys).	F-130, F-205	rel_id (PK, UUID), parent_entity (UUID), child_entity (UUID), relationship_name (VARCHAR(100)), cardinality (VARCHAR(20))	CHECK (cardinality IN ('1:1','1:N','M:N'))	N/A
+T-41	pari_dd	dd_data_lake_sync	TABLE	Sync status to data lake.	F-167	sync_id (PK, UUID), entity_id (FK), last_sync (TIMESTAMPTZ), row_count (BIGINT), status (VARCHAR(20))	FK(entity_id) REFERENCES dd_entity_registry	N/A
+T-42	pari_dd	dd_sharding	TABLE	Sharding metadata.	F-206	shard_id (PK, UUID), entity_id (FK), shard_key (VARCHAR(63)), cluster_region (VARCHAR(50))	FK(entity_id) REFERENCES dd_entity_registry	N/A
+T-43	pari_dd	dd_ml_features	TABLE	Attributes used as ML features.	F-191	feature_id (PK, UUID), attribute_id (FK), model_name (VARCHAR(100)), importance_score (NUMERIC)	FK(attribute_id) REFERENCES dd_attribute_registry	N/A
+T-44	pari_dd	dd_privacy_masks	TABLE	Dynamic masking rules.	F-186	mask_id (PK, UUID), attribute_id (FK), masking_function (VARCHAR(50)), role_exception (VARCHAR(100))	FK(attribute_id) REFERENCES dd_attribute_registry	N/A
+T-45	pari_dd	dd_access_stats	TABLE	Usage analytics for tables.	F-183	stat_id (PK, UUID), entity_id (FK), query_count (BIGINT), last_accessed (TIMESTAMPTZ), avg_latency_ms (INTEGER)	FK(entity_id) REFERENCES dd_entity_registry	N/A
+T-46	pari_dd	dd_subscriptions	TABLE	User subscriptions to changes.	F-175	sub_id (PK, UUID), user_email (VARCHAR(255)), entity_id (FK)	FK(entity_id) REFERENCES dd_entity_registry	N/A
+T-47	pari_dd	dd_approvals	TABLE	Workflow approval states.	F-176	approval_id (PK, UUID), change_request_id (UUID), approver (VARCHAR(100)), status (VARCHAR(20)), approved_at (TIMESTAMPTZ)	CHECK (status IN ('PENDING','APPROVED','REJECTED'))	N/A
+T-48	pari_dd	dd_cost_centers	TABLE	Cost attribution.	F-184	cost_id (PK, UUID), entity_id (FK), cost_code (VARCHAR(50))	FK(entity_id) REFERENCES dd_entity_registry	N/A
+T-49	pari_dd	dd_alerts	TABLE	Configuration for drift/quality alerts.	F-168	alert_id (PK, UUID), entity_id (FK), alert_type (VARCHAR(50)), threshold (NUMERIC), channel (VARCHAR(20))	FK(entity_id) REFERENCES dd_entity_registry	N/A
+T-50	pari_dd	dd_backfill_status	TABLE	Tracks backfill operations.	F-166	backfill_id (PK, UUID), attribute_id (FK), start_date (TIMESTAMPTZ), end_date (TIMESTAMPTZ), rows_processed (BIGINT)	FK(attribute_id) REFERENCES dd_attribute_registry	N/A
+ T-51 	 pari_dd 	 enum_change_operation 	 ENUM 	 Operations for change history. 	 F-110 	 VALUES ('INSERT', 'UPDATE', 'DELETE', 'ALTER') 	 N/A 	 N/A
+ T-52 	 pari_dd 	 enum_data_type_category 	 ENUM 	 High level data types. 	 F-102 	 VALUES ('NUMERIC', 'STRING', 'TEMPORAL', 'BINARY', 'BOOLEAN') 	 N/A 	 N/A
+ T-53 	 pari_dd 	 enum_regulatory_status 	 ENUM 	 Compliance status. 	 F-105 	 VALUES ('COMPLIANT', 'VIOLATION', 'PENDING_REVIEW') 	 N/A 	 N/A
+ T-54 	 pari_dd 	 enum_pii_type 	 ENUM 	 Types of PII. 	 F-105 	 VALUES ('DIRECT', 'INDIRECT', 'HASHED', 'TOKENIZED') 	 N/A 	 N/A
+ T-55 	 pari_dd 	 enum_lineage_type 	 ENUM 	 Types of data flow. 	 F-107 	 VALUES ('INGESTION', 'TRANSFORMATION', 'AGGREGATION', 'EXPORT') 	 N/A 	 N/A
+ T-56 	 pari_dd 	 v_dd_full_schema_inventory 	 VIEW 	 Complete list of tables and attributes. 	 F-112 	 SELECT e.physical_name, a.physical_name, a.data_type FROM dd_entity_registry e JOIN dd_attribute_registry a ON e.entity_id = a.entity_id 	 N/A 	 N/A
+ T-57 	 pari_dd 	 v_dd_pii_exposure_report 	 VIEW 	 Lists all PII columns and owners. 	 F-105 	 SELECT a.physical_name, e.business_owner FROM dd_attribute_registry a JOIN dd_entity_registry e ON a.entity_id = e.entity_id WHERE a.is_pii = TRUE 	 N/A 	 N/A
+ T-58 	 pari_dd 	 v_dd_iso_compliance_status 	 VIEW 	 Shows ISO 20022 coverage. 	 F-104 	 SELECT e.physical_name, COUNT(m.attribute_id) as mapped_fields FROM dd_entity_registry e LEFT JOIN dd_iso_20022_mapping m ON ... GROUP BY e.physical_name 	 N/A 	 N/A
+ T-59 	 pari_dd 	 v_dd_orphaned_tables 	 VIEW 	 Tables without owners. 	 F-149 	 SELECT physical_name FROM dd_entity_registry WHERE business_owner IS NULL 	 N/A 	 N/A
+ T-60 	 pari_dd 	 v_dd_recent_changes 	 VIEW 	 Changes in last 24 hours. 	 F-110 	 SELECT * FROM dd_change_history WHERE changed_at > NOW() - INTERVAL '1 day' 	 N/A 	 N/A
+ T-61 	 pari_dd 	 v_dd_data_quality_score 	 VIEW 	 Aggregates quality rule passes. 	 F-113 	 Complex aggregation of dd_profiling_stats. 	 N/A 	 N/A
+ T-62 	 pari_dd 	 v_dd_criticality_heatmap 	 VIEW 	 Tables by criticality and size. 	 F-142 	 Joins dd_criticality_tiers with pg_class size stats. 	 N/A 	 N/A
+ T-63 	 pari_dd 	 v_dd_lineage_graph 	 VIEW 	 Edge list for lineage visualization. 	 F-107 	 SELECT * FROM dd_lineage_edges 	 N/A 	 N/A
+ T-64 	 pari_dd 	 v_dd_unmapped_glossary_terms 	 VIEW 	 Business terms not linked to technical fields. 	 F-103 	 SELECT t.term_name FROM dd_glossary_terms t LEFT JOIN dd_entity_glossary_map m ON t.term_id = m.term_id WHERE m.term_id IS NULL 	 N/A 	 N/A
+ T-65 	 pari_dd 	 v_dd_retention_audit 	 VIEW 	 Tables exceeding retention policy. 	 F-122 	 Compares pg_class dates with dd_retention_policies. 	 N/A 	 N/A
+ T-66 	 pari_dd 	 v_dd_index_usage_report 	 VIEW 	 Unused indexes. 	 F-118 	 Joins dd_indexes with pg_stat_user_indexes. 	 N/A 	 N/A
+ T-67 	 pari_dd 	 v_dd_security_audit 	 VIEW 	 Columns lacking security tags. 	 F-105, F-116 	 Lists columns with is_pii=true but no entries in dd_attribute_tags_map. 	 N/A 	 N/A
+ T-68 	 pari_dd 	 v_dd_kpi_data_sources 	 VIEW 	 Traces KPIs to source tables. 	 F-117 	 SELECT k.kpi_code, e.physical_name FROM dd_kpi_bindings k JOIN dd_attribute_registry a ON k.attribute_id = a.attribute_id JOIN dd_entity_registry e ON a.entity_id = e.entity_id 	 N/A 	 N/A
+ T-69 	 pari_dd 	 v_dd_pending_approvals 	 VIEW 	 Change requests waiting. 	 F-176 	 SELECT * FROM dd_approvals WHERE status = 'PENDING' 	 N/A 	 N/A
+ T-70 	 pari_dd 	 v_dd_schema_drift 	 VIEW 	 Compares registry to actual DB schema. 	 F-168, F-194 	 Uses information_schema comparison logic. 	 N/A 	 N/A
+ T-71 	 pari_dd 	 v_dd_deprecated_fields 	 VIEW 	 Fields scheduled for removal. 	 F-192 	 SELECT a.physical_name, d.sunset_date FROM dd_attribute_registry a JOIN dd_deprecations d ON a.attribute_id = d.object_id 	 N/A 	 N/A
+ T-72 	 pari_dd 	 v_dd_cost_summary 	 VIEW 	 Storage cost by department. 	 F-184 	 Aggregates pg_relation_size by dd_cost_centers. 	 N/A 	 N/A
+ T-73 	 pari_dd 	 v_dd_access_frequency 	 VIEW 	 Hot vs Cold tables. 	 F-183 	 SELECT * FROM dd_access_stats ORDER BY query_count DESC 	 N/A 	 N/A
+ T-74 	 pari_dd 	 v_dd_dsar_impact 	 VIEW 	 All data linked to a user ID concept. 	 F-133 	 Recursive CTE on dd_lineage_edges starting from user_id_attribute. 	 N/A 	 N/A
+ T-75 	 pari_dd 	 v_dd_ml_feature_importance 	 VIEW 	 Top features for models. 	 F-191 	 SELECT * FROM dd_ml_features ORDER BY importance_score DESC 	 N/A 	 N/A
+ T-76 	 pari_dd 	 sp_register_entity 	 PROCEDURE 	 Registers a new table. 	 F-101 	 IN p_name VARCHAR, IN p_schema VARCHAR 	 Inserts into dd_entity_registry and logs change. 	 N/A
+ T-77 	 pari_dd 	 sp_register_attribute 	 PROCEDURE 	 Registers a new column. 	 F-102 	 IN p_entity_id UUID, IN p_name VARCHAR, ... 	 Inserts into dd_attribute_registry and checks PII classification. 	 N/A
+ T-78 	 pari_dd 	 sp_update_glossary_link 	 PROCEDURE 	 Links attribute to term. 	 F-103 	 IN p_attr_id UUID, IN p_term_id UUID 	 Upserts into dd_entity_glossary_map. 	 N/A
+ T-79 	 pari_dd 	 sp_propagate_change 	 PROCEDURE 	 Notifies downstream of schema change. 	 F-111 	 IN p_object_id UUID 	 Queries dd_lineage_edges to find targets and inserts alerts. 	 N/A
+ T-80 	 pari_dd 	 sp_generate_ddl 	 FUNCTION 	 Generates CREATE TABLE script from metadata. 	 F-112 	 RETURNS TEXT 	 Constructs DDL string from dd_entity_registry and dd_attribute_registry. 	 N/A
+ T-81 	 pari_dd 	 sp_validate_iso_mapping 	 PROCEDURE 	 Checks ISO 20022 map validity. 	 F-104 	 RETURNS TABLE(errors TEXT) 	 Checks if iso_xpath is syntactically valid. 	 N/A
+ T-82 	 pari_dd 	 sp_classify_pii 	 PROCEDURE 	 Auto-classifies columns using NLP model. 	 F-105, F-191 	 IN p_attribute_id UUID 	 Calls external Python ML service via HTTP, updates is_pii flag. 	 N/A
+ T-83 	 pari_dd 	 sp_record_lineage 	 PROCEDURE 	 Records a data flow edge. 	 F-107 	 IN p_src UUID, IN p_tgt UUID, IN p_type VARCHAR 	 Inserts into dd_lineage_edges. 	 N/A
+ T-84 	 pari_dd 	 sp_audit_log_trigger 	 FUNCTION 	 Trigger function for history. 	 F-110 	 RETURNS TRIGGER 	 Writes old/new rows to dd_change_history. 	 N/A
+ T-85 	 pari_dd 	 sp_impact_analysis 	 FUNCTION 	 Returns list of dependent objects. 	 F-111 	 IN p_object_id UUID, RETURNS TABLE(dep_object_id UUID) 	 Recursive query on dd_lineage_edges. 	 N/A
+ T-86 	 pari_dd 	 sp_sync_schema_from_db 	 PROCEDURE 	 Refreshes dictionary from live information_schema. 	 F-194 	 Runs periodically via cron. 	 Compares and updates registry. 	 N/A
+ T-87 	 pari_dd 	 sp_generate_erd 	 FUNCTION 	 Returns Mermaid.js graph definition. 	 F-181 	 RETURNS TEXT 	 Constructs graph string from entities and relationships. 	 N/A
+ T-88 	 pari_dd 	 sp_check_retention 	 PROCEDURE 	 Flags data ready for archival. 	 F-122 	 RETURNS TABLE(entity_id UUID) 	 Compares created_at with retention policies. 	 N/A
+ T-89 	 pari_dd 	 sp_mask_data 	 PROCEDURE 	 Applies masking logic (for testing/anonymization). 	 F-186 	 IN p_sql TEXT 	 Parses SQL and wraps columns with masking functions. 	 N/A
+ T-90 	 pari_dd 	 sp_assign_owner 	 PROCEDURE 	 Sets data owner for an entity. 	 F-106 	 IN p_entity_id UUID, IN p_owner VARCHAR 	 Updates dd_entity_registry and logs. 	 N/A
+ T-91 	 pari_dd 	 sp_analyze_quality 	 PROCEDURE 	 Runs profiling on a table. 	 F-150 	 IN p_entity_id UUID 	 Inserts stats into dd_profiling_stats. 	 N/A
+ T-92 	 pari_dd 	 sp_map_kpi 	 PROCEDURE 	 Links KPI formula to attributes. 	 F-117 	 IN p_kpi_code VARCHAR, IN p_attrs UUID[] 	 Inserts into dd_kpi_bindings. 	 N/A
+ T-93 	 pari_dd 	 sp_deprecate_object 	 PROCEDURE 	 Marks a table/column as deprecated. 	 F-192 	 IN p_object_id UUID, IN p_date DATE 	 Inserts into dd_deprecations. 	 N/A
+ T-94 	 pari_dd 	 sp_search_metadata 	 FUNCTION 	 Full text search on dictionary. 	 F-173 	 IN p_query TEXT, RETURNS SETOF JSON 	 Uses tsvector on description/name fields. 	 N/A
+ T-95 	 pari_dd 	 sp_export_to_csv 	 PROCEDURE 	 Exports metadata to CSV for backup. 	 F-178 	 IN p_entity_id UUID 	 COPY (SELECT ... ) TO STDOUT 	 N/A
+ T-96 	 pari_dd 	 sp_import_from_csv 	 PROCEDURE 	 Bulk imports metadata definitions. 	 F-178 	 IN p_file_path TEXT 	 Parses CSV and performs upserts. 	 N/A
+ T-97 	 pari_dd 	 sp_create_subscription 	 PROCEDURE 	 Subscribes user to table changes. 	 F-175 	 IN p_user_email VARCHAR, IN p_entity_id UUID 	 Inserts into dd_subscriptions. 	 N/A
+ T-98 	 pari_dd 	 sp_notify_subscribers 	 PROCEDURE 	 Sends emails/webhooks on change. 	 F-175 	 Triggered by dd_change_history insert. 	 Iterates dd_subscriptions and calls notifier. 	 N/A
+ T-99 	 pari_dd 	 sp_request_approval 	 PROCEDURE 	 Creates workflow request. 	 F-176 	 IN p_object_id UUID, IN p_change_details JSONB 	 Inserts into dd_approvals. 	 N/A
+ T-100 	 pari_dd 	 sp_approve_change 	 PROCEDURE 	 Approves a workflow request. 	 F-176 	 IN p_approval_id UUID 	 Updates dd_approvals status. 	 N/A
+ T-101 	 pari_dd 	 sp_health_check 	 FUNCTION 	 Returns dictionary health metrics. 	 F-179 	 RETURNS JSON 	 Calculates completeness % from registry. 	 N/A
+ T-102 	 pari_dd 	 sp_anchor_metadata 	 PROCEDURE 	 Writes metadata state hash to blockchain. 	 F-208 	 Generates SHA-256 of current registry state and calls anchor service. 	 N/A 	 N/A
+ T-103 	 pari_dd 	 sp_analyze_dependencies 	 PROCEDURE 	 Auto-discovers Foreign Keys. 	 F-205 	 IN p_entity_id UUID 	 Analyzes data distribution to suggest relationships. 	 N/A
+ T-104 	 pari_dd 	 sp_estimate_backfill_cost 	 FUNCTION 	 Estimates time to backfill a column. 	 F-166 	 IN p_attribute_id UUID, RETURNS INTERVAL 	 Based on row count and column width. 	 N/A
+ T-105 	 pari_dd 	 sp_cleanup_history 	 PROCEDURE 	 Archives old change logs. 	 F-195 	 Moves rows > 1 year to dd_change_history_archive. 	 N/A 	 N/A
+ T-106 	 pari_dd 	 sp_validate_fk 	 FUNCTION 	 Checks referential integrity of metadata. 	 F-130 	 RETURNS TABLE(violation TEXT) 	 Checks if all entity_id FKS exist in dd_entity_registry. 	 N/A
+ T-107 	 pari_dd 	 sp_sync_data_lake 	 PROCEDURE 	 Triggers Glue/Spark job for schema update. 	 F-167 	 IN p_entity_id UUID 	 Calls M13/Kafka topic with schema update event. 	 N/A
+ T-108 	 pari_dd 	 sp_tag_sensitive_data 	 PROCEDURE 	 Bulk tagging based on regex patterns. 	 F-105 	 IN p_pattern TEXT, IN p_tag_id UUID 	 Scans column names and applies tag. 	 N/A
+ T-109 	 pari_dd 	 sp_calculate_storage_cost 	 PROCEDURE 	 Updates storage cost metrics. 	 F-184 	 Runs nightly, calculates pg_relation_size * cost_per_gb. 	 N/A 	 N/A
+ T-110 	 pari_dd 	 sp_check_drift 	 PROCEDURE 	 Compares Git SHA vs DB Schema. 	 F-168 	 Returns diff JSON. 	 N/A 	 N/A
+ T-111 	 pari_dd 	 sp_map_legacy_field 	 PROCEDURE 	 Maps legacy system field to PARI field. 	 F-171 	 IN p_legacy_system VARCHAR, IN p_legacy_field VARCHAR, IN p_pari_attr UUID 	 Insert into mapping table. 	 N/A
+ T-112 	 pari_dd 	 sp_generate_test_data 	 PROCEDURE 	 Creates insert statements with valid test data. 	 F-172 	 IN p_entity_id UUID, IN p_rows INTEGER 	 Uses dd_custom_types and constraints to build data. 	 N/A
+ T-113 	 pari_dd 	 sp_update_stats 	 PROCEDURE 	 Wrapper for ANALYZE command. 	 F-118 	 IN p_entity_id UUID 	 Runs ANALYZE schema.table. 	 N/A
+ T-114 	 pari_dd 	 sp_rebuild_index 	 PROCEDURE 	 Rebuilds index using CONCURRENTLY. 	 F-118 	 IN p_index_name VARCHAR 	 Executes REINDEX INDEX CONCURRENTLY. 	 N/A
+ T-115 	 pari_dd 	 sp_lock_table 	 PROCEDURE 	 Acquires advisory lock. 	 F-163 	 IN p_entity_id UUID 	 SELECT pg_advisory_lock(hashtext(...)). 	 N/A
+ T-116 	 pari_dd 	 sp_unlock_table 	 PROCEDURE 	 Releases advisory lock. 	 F-163 	 IN p_entity_id UUID 	 SELECT pg_advisory_unlock(...). 	 N/A
+ T-117 	 pari_dd 	 sp_vacuum_table 	 PROCEDURE 	 Runs VACUUM. 	 F-118 	 IN p_entity_id UUID 	 VACUUM ANALYZE schema.table. 	 N/A
+ T-118 	 pari_dd 	 sp_set_partition_key 	 PROCEDURE 	 Updates partition metadata. 	 F-119 	 IN p_entity_id UUID, IN p_key VARCHAR 	 Updates dd_partitions. 	 N/A
+ T-119 	 pari_dd 	 sp_create_partition 	 PROCEDURE 	 Creates a child table partition. 	 F-119 	 IN p_parent VARCHAR, IN p_value VARCHAR 	 Dynamic SQL execution. 	 N/A
+ T-120 	 pari_dd 	 sp_drop_partition 	 PROCEDURE 	 Drops old partition. 	 F-122 	 IN p_table_name VARCHAR 	 Used for archival/cleanup. 	 N/A
+ T-121 	 pari_dd 	 sp_clone_metadata 	 PROCEDURE 	 Clones metadata for a new environment. 	 F-195 	 Copies rows from registry to staging registry. 	 N/A 	 N/A
+ T-122 	 pari_dd 	 sp_migrate_entity 	 PROCEDURE 	 Handles logical rename in registry. 	 F-110 	 Updates physical_name and keeps history. 	 N/A 	 N/A
+ T-123 	 pari_dd 	 sp_check_access_rights 	 FUNCTION 	 Checks if user has rights to view metadata. 	 F-177 	 IN p_user VARCHAR, IN p_entity_id UUID 	 Checks dd_data_owners and role mapping. 	 N/A
+ T-124 	 pari_dd 	 sp_log_error 	 PROCEDURE 	 Logs dictionary processing errors. 	 F-168 	 Inserts into dd_errors table. 	 N/A 	 N/A
+ T-125 	 pari_dd 	 sp_get_lineage_dot 	 FUNCTION 	 Returns GraphViz DOT format. 	 F-107 	 RETURNS TEXT 	 Constructs graph string. 	 N/A
+ T-126 	 pari_dd 	 sp_analyze_usage_patterns 	 PROCEDURE 	 Clusters tables by usage similarity. 	 F-183 	 Uses K-Means on dd_access_stats. 	 N/A 	 N/A
+ T-127 	 pari_dd 	 sp_suggest_index 	 PROCEDURE 	 Suggests indexes based on queries. 	 F-118 	 Analyzes pg_stat_statements. 	 N/A 	 N/A
+ T-128 	 pari_dd 	 sp_validate_json_schema 	 FUNCTION 	 Validates JSONB against stored schema. 	 F-126 	 IN p_data JSONB, IN p_attr_id UUID 	 Uses jsonb_schema_validation extension. 	 N/A
+ T-129 	 pari_dd 	 sp_encrypt_column 	 PROCEDURE 	 Encrypts existing data (migration). 	 F-124 	 IN p_attr_id UUID 	 Batch update using pgcrypto. 	 N/A
+ T-130 	 pari_dd 	 sp_update_taxonomy 	 PROCEDURE 	 Updates classification taxonomy. 	 F-141 	 Inserts/Updates dd_taxonomy_nodes. 	 N/A 	 N/A
+ T-131 	 pari_dd 	 sp_check_sla_compliance 	 FUNCTION 	 Checks if latency SLA is breached. 	 F-143 	 IN p_entity_id UUID, RETURNS BOOLEAN 	 Compares dd_access_stats.avg_latency with dd_slas. 	 N/A
+ T-132 	 pari_dd 	 sp_trigger_alert 	 PROCEDURE 	 Sends alert to Opsgenie/PagerDuty. 	 F-168 	 IN p_message TEXT 	 HTTP POST to webhook. 	 N/A
+ T-133 	 pari_dd 	 sp_purge_soft_deletes 	 PROCEDURE 	 Hard deletes rows marked soft deleted. 	 F-122 	 IN p_entity_id UUID 	 DELETE FROM ... WHERE deleted_at IS NOT NULL. 	 N/A
+ T-134 	 pari_dd 	 sp_generate_api_doc 	 PROCEDURE 	 Generates OpenAPI spec from DB metadata. 	 F-129 	 Returns YAML/JSON. 	 N/A 	 N/A
+ T-135 	 pari_dd 	 sp_map_enum 	 PROCEDURE 	 Maps DB enum to API enum. 	 F-129 	 IN p_enum_name VARCHAR 	 Updates dd_api_mappings. 	 N/A
+ T-136 	 pari_dd 	 sp_verify_integrity 	 PROCEDURE 	 Checks data checksums vs anchors. 	 F-208 	 RETURNS BOOLEAN 	 Calculates SHA256 of table data. 	 N/A
+ T-137 	 pari_dd 	 sp_get_entity_dependencies 	 FUNCTION 	 Recursive fetch of all dependencies. 	 F-111 	 IN p_entity_id UUID 	 Recursive CTE. 	 N/A
+ T-138 	 pari_dd 	 sp_get_entity_dependents 	 FUNCTION 	 Recursive fetch of all dependents. 	 F-111 	 IN p_entity_id UUID 	 Recursive CTE. 	 N/A
+ T-139 	 pari_dd 	 sp_normalize_phones 	 FUNCTION 	 Formats phone numbers to E.164. 	 F-193 	 IN p_phone VARCHAR 	 Uses libphonenumber logic. 	 N/A
+ T-140 	 pari_dd 	 sp_normalize_address 	 FUNCTION 	 Standardizes address formats. 	 F-193 	 IN p_address JSONB 	 Parses and reorders fields. 	 N/A
+ T-141 	 pari_dd 	 sp_check_ibm 	 FUNCTION 	 Validates IBAN checksum. 	 F-185 	 IN p_iban VARCHAR 	 Mod-97 algorithm. 	 N/A
+ T-142 	 pari_dd 	 sp_check_vat 	 FUNCTION 	 Validates VAT ID format. 	 F-185 	 IN p_vat VARCHAR 	 Regex check per country. 	 N/A
+ T-143 	 pari_dd 	 sp_generate_report 	 PROCEDURE 	 Creates PDF report of metadata. 	 F-112 	 IN p_entity_id UUID 	 Uses LaTeX or HTML-PDF generator. 	 N/A
+ T-144 	 pari_dd 	 sp_backup_dictionary 	 PROCEDURE 	 Dumps entire pari_dd schema. 	 F-195 	 pg_dump -n pari_dd 	 N/A 	 N/A
+ T-145 	 pari_dd 	 sp_restore_dictionary 	 PROCEDURE 	 Restores pari_dd schema. 	 F-195 	 psql -f dump.sql 	 N/A 	 N/A
+ T-146 	 pari_dd 	 sp_annotate_schema 	 PROCEDURE 	 Adds COMMENT ON to actual DB objects. 	 F-112 	 Updates pg_description. 	 N/A 	 N/A
+ T-147 	 pari_dd 	 sp_get_comments 	 FUNCTION 	 Retrieves comments from pg_description. 	 F-112 	 RETURNS TEXT 	 N/A 	 N/A
+ T-148 	 pari_dd 	 sp_create_materialized_view 	 PROCEDURE 	 Helper to create Mat View and register it. 	 F-132 	 IN p_def TEXT 	 Executes SQL and inserts into dd_materialized_views. 	 N/A
+ T-149 	 pari_dd 	 sp_refresh_mat_view 	 PROCEDURE 	 Refreshes specific Mat View. 	 F-132 	 IN p_mv_name VARCHAR 	 REFRESH MATERIALIZED VIEW CONCURRENTLY. 	 N/A
+ T-150 	 pari_dd 	 sp_create_function 	 PROCEDURE 	 Registers a new PL/pgSQL function. 	 F-121 	 IN p_name VARCHAR, IN p_code TEXT 	 Inserts into dd_stored_procedures. 	 N/A
+ T-151 	 pari_dd 	 sp_drop_function 	 PROCEDURE 	 Drops function and removes from registry. 	 F-121 	 IN p_func_id UUID 	 DROP FUNCTION .... 	 N/A
+ T-152 	 pari_dd 	 sp_create_trigger 	 PROCEDURE 	 Registers trigger. 	 F-131 	 IN p_name VARCHAR, IN p_table UUID 	 Inserts into dd_triggers. 	 N/A
+ T-153 	 pari_dd 	 sp_enable_rls 	 PROCEDURE 	 Enables RLS on a table. 	 F-128 	 IN p_entity_id UUID 	 ALTER TABLE ... ENABLE ROW LEVEL SECURITY. 	 N/A
+ T-154 	 pari_dd 	 sp_create_rls_policy 	 PROCEDURE 	 Creates policy and registers it. 	 F-128 	 IN p_policy_name VARCHAR, IN p_expr TEXT 	 CREATE POLICY .... 	 N/A
+ T-155 	 pari_dd 	 sp_grant_privilege 	 PROCEDURE 	 Grants privilege on table to role. 	 F-177 	 IN p_entity_id UUID, IN p_role VARCHAR, IN p_priv VARCHAR 	 GRANT ... ON .... 	 N/A
+ T-156 	 pari_dd 	 sp_revoke_privilege 	 PROCEDURE 	 Revokes privilege. 	 F-177 	 IN p_entity_id UUID, IN p_role VARCHAR, IN p_priv VARCHAR 	 REVOKE ... ON .... 	 N/A
+ T-157 	 pari_dd 	 sp_create_extension 	 PROCEDURE 	 Installs DB extension (e.g., postgis). 	 F-127 	 IN p_ext_name VARCHAR 	 CREATE EXTENSION .... 	 N/A
+ T-158 	 pari_dd 	 sp_check_extension_version 	 FUNCTION 	 Checks if extension is up to date. 	 F-127 	 IN p_ext_name VARCHAR 	 Queries pg_extension. 	 N/A
+ T-159 	 pari_dd 	 sp_create_schema 	 PROCEDURE 	 Creates new DB schema. 	 F-101 	 IN p_schema_name VARCHAR 	 CREATE SCHEMA. 	 N/A
+ T-160 	 pari_dd 	 sp_drop_schema 	 PROCEDURE 	 Drops DB schema (CASCADE). 	 F-110 	 IN p_schema_name VARCHAR 	 DROP SCHEMA ... CASCADE. 	 N/A
+ T-161 	 pari_dd 	 sp_alter_column_type 	 PROCEDURE 	 Changes column type (with cast). 	 F-110 	 IN p_attr_id UUID, IN p_new_type VARCHAR 	 ALTER TABLE ... ALTER COLUMN ... TYPE .... 	 N/A
+ T-162 	 pari_dd 	 sp_add_column 	 PROCEDURE 	 Adds column to table. 	 F-102 	 IN p_entity_id UUID, IN p_col_name VARCHAR 	 ALTER TABLE ... ADD COLUMN .... 	 N/A
+ T-163 	 pari_dd 	 sp_drop_column 	 PROCEDURE 	 Drops column. 	 F-110 	 IN p_attr_id UUID 	 ALTER TABLE ... DROP COLUMN .... 	 N/A
+ T-164 	 pari_dd 	 sp_rename_column 	 PROCEDURE 	 Renames column. 	 F-110 	 IN p_attr_id UUID, IN p_new_name VARCHAR 	 ALTER TABLE ... RENAME COLUMN .... 	 N/A
+ T-165 	 pari_dd 	 sp_add_check_constraint 	 PROCEDURE 	 Adds check constraint. 	 F-130 	 IN p_entity_id UUID, IN p_expr TEXT 	 ALTER TABLE ... ADD CONSTRAINT ... CHECK .... 	 N/A
+ T-166 	 pari_dd 	 sp_drop_constraint 	 PROCEDURE 	 Drops constraint. 	 F-130 	 IN p_constraint_name VARCHAR 	 ALTER TABLE ... DROP CONSTRAINT .... 	 N/A
+ T-167 	 pari_dd 	 sp_add_foreign_key 	 PROCEDURE 	 Adds FK. 	 F-130 	 IN p_child UUID, IN p_parent UUID, IN p_cols TEXT[] 	 ALTER TABLE ... ADD CONSTRAINT ... FOREIGN KEY .... 	 N/A
+ T-168 	 pari_dd 	 sp_add_unique_constraint 	 PROCEDURE 	 Adds Unique constraint. 	 F-130 	 IN p_entity_id UUID, IN p_cols TEXT[] 	 ALTER TABLE ... ADD CONSTRAINT ... UNIQUE .... 	 N/A
+ T-169 	 pari_dd 	 sp_create_sequence 	 PROCEDURE 	 Creates sequence and registers it. 	 F-102 	 IN p_seq_name VARCHAR 	 CREATE SEQUENCE. 	 N/A
+ T-170 	 pari_dd 	 sp_alter_sequence_owner 	 PROCEDURE 	 Changes sequence owner. 	 F-102 	 IN p_seq_name VARCHAR, IN p_table VARCHAR 	 ALTER SEQUENCE ... OWNED BY. 	 N/A
+ T-171 	 pari_dd 	 sp_analyze_bloat 	 FUNCTION 	 Estimates table/index bloat. 	 F-118 	 RETURNS TABLE(table_name TEXT, bloat_pct NUMERIC) 	 Uses pgstattuple. 	 N/A
+ T-172 	 pari_dd 	 sp_reindex_table 	 PROCEDURE 	 Reindexes all indexes on a table. 	 F-118 	 IN p_entity_id UUID 	 Loop over dd_indexes. 	 N/A
+ T-173 	 pari_dd 	 sp_cluster_table 	 PROCEDURE 	 Clusters table based on index. 	 F-118 	 IN p_entity_id UUID 	 CLUSTER schema.table USING index. 	 N/A
+ T-174 	 pari_dd 	 sp_set_table_space 	 PROCEDURE 	 Moves table to different tablespace. 	 F-122 	 IN p_entity_id UUID, IN p_tablespace VARCHAR 	 ALTER TABLE ... SET TABLESPACE. 	 N/A
+ T-175 	 pari_dd 	 sp_estimate_query_cost 	 FUNCTION 	 Estimates cost of a query plan. 	 F-118 	 IN p_query TEXT 	 EXPLAIN. 	 N/A
+ T-176 	 pari_dd 	 sp_cancel_long_running_query 	 PROCEDURE 	 Cancels queries running > threshold. 	 F-143 	 IN p_duration_minutes INTEGER 	 SELECT pg_cancel_backend(pid). 	 N/A
+ T-177 	 pari_dd 	 sp_kill_backend 	 PROCEDURE 	 Terminates backend. 	 F-163 	 IN p_pid INTEGER 	 SELECT pg_terminate_backend(pid). 	 N/A
+ T-178 	 pari_dd 	 sp_get_blocking_locks 	 FUNCTION 	 Returns blocking lock info. 	 F-163 	 RETURNS TABLE(blocker_pid INT, blocked_pid INT) 	 Query pg_locks. 	 N/A
+ T-179 	 pari_dd 	 sp_get_active_locks 	 FUNCTION 	 Returns all active locks. 	 F-163 	 RETURNS TABLE(locktype TEXT, relation TEXT) 	 Query pg_locks. 	 N/A
+ T-180 	 pari_dd 	 sp_get_table_size 	 FUNCTION 	 Returns size of table (with indexes). 	 F-122 	 IN p_entity_id UUID 	 pg_total_relation_size. 	 N/A
+ T-181 	 pari_dd 	 sp_get_index_size 	 FUNCTION 	 Returns size of index. 	 F-118 	 IN p_index_name VARCHAR 	 pg_relation_size. 	 N/A
+ T-182 	 pari_dd 	 sp_get_database_size 	 FUNCTION 	 Returns DB size. 	 F-184 	 RETURNS BIGINT 	 pg_database_size. 	 N/A
+ T-183 	 pari_dd 	 sp_get_role_list 	 FUNCTION 	 Returns list of DB roles. 	 F-177 	 RETURNS TABLE(rolname TEXT) 	 SELECT rolname FROM pg_roles. 	 N/A
+ T-184 	 pari_dd 	 sp_get_role_privileges 	 FUNCTION 	 Returns privileges for role. 	 F-177 	 IN p_role_name VARCHAR 	 Query information_schema.role_table_grants. 	 N/A
+ T-185 	 pari_dd 	 sp_grant_role 	 PROCEDURE 	 Grants role to user. 	 F-177 	 IN p_user VARCHAR, IN p_role VARCHAR 	 GRANT role TO user. 	 N/A
+ T-186 	 pari_dd 	 sp_revoke_role 	 PROCEDURE 	 Revokes role from user. 	 F-177 	 IN p_user VARCHAR, IN p_role VARCHAR 	 REVOKE role FROM user. 	 N/A
+ T-187 	 pari_dd 	 sp_create_role 	 PROCEDURE 	 Creates new role. 	 F-177 	 IN p_role_name VARCHAR 	 CREATE ROLE. 	 N/A
+ T-188 	 pari_dd 	 sp_drop_role 	 PROCEDURE 	 Drops role. 	 F-177 	 IN p_role_name VARCHAR 	 DROP ROLE. 	 N/A
+ T-189 	 pari_dd 	 sp_set_role_setting 	 PROCEDURE 	 Sets config for role. 	 F-177 	 IN p_role VARCHAR, IN p_setting VARCHAR, IN p_value VARCHAR 	 ALTER ROLE ... SET .... 	 N/A
+ T-190 	 pari_dd 	 sp_get_server_version 	 FUNCTION 	 Returns Postgres version. 	 F-127 	 RETURNS TEXT 	 version(). 	 N/A
+ T-191 	 pari_dd 	 sp_get_settings 	 FUNCTION 	 Returns all GUC settings. 	 F-127 	 RETURNS TABLE(name TEXT, setting TEXT) 	 SHOW ALL. 	 N/A
+ T-192 	 pari_dd 	 sp_reload_config 	 PROCEDURE 	 Reloads Postgres config. 	 F-168 	 SELECT pg_reload_conf(). 	 N/A 	 N/A
+ T-193 	 pari_dd 	 sp_switch_wal 	 PROCEDURE 	 Switches WAL file. 	 F-195 	 SELECT pg_switch_wal(). 	 N/A 	 N/A
+ T-194 	 pari_dd 	 sp_checkpoint 	 PROCEDURE 	 Forces checkpoint. 	 F-195 	 CHECKPOINT. 	 N/A 	 N/A
+ T-195 	 pari_dd 	 sp_get_replication_lag 	 FUNCTION 	 Returns replication lag in seconds. 	 F-167 	 RETURNS INTERVAL 	 Queries pg_stat_replication. 	 N/A
+ T-196 	 pari_dd 	 sp_promote_standby 	 PROCEDURE 	 Promotes standby to primary. 	 F-167 	 SELECT pg_promote(). 	 N/A 	 N/A
+ T-197 	 pari_dd 	 sp_get_stat_activity 	 FUNCTION 	 Returns current activity. 	 F-118 	 RETURNS SETOF JSON 	 Query pg_stat_activity. 	 N/A
+ T-198 	 pari_dd 	 sp_reset_statistics 	 PROCEDURE 	 Resets stats counters. 	 F-118 	 SELECT pg_stat_reset(). 	 N/A 	 N/A
+ T-199 	 pari_dd 	 sp_get_wal_level 	 FUNCTION 	 Returns current WAL level. 	 F-167 	 RETURNS TEXT 	 SHOW wal_level. 	 N/A
+ T-200 	 pari_dd 	 sp_validate_data_model 	 FUNCTION 	 Checks model against CMMI standards. 	 F-102 	 RETURNS TABLE(validation_error TEXT) 	 Checks naming conventions, PK existence. 	 N/A
+ T-201 	 pari_dd 	 dd_entity_history 	 TABLE 	 History of entity records (SCD Type 2). 	 F-110 	 entity_history_id (PK), entity_id (FK), valid_from, valid_to, is_current 	 FK to dd_entity_registry. 	 N/A
+ T-202 	 pari_dd 	 dd_attribute_history 	 TABLE 	 History of attribute records. 	 F-110 	 attr_history_id (PK), attribute_id (FK), valid_from, valid_to 	 FK to dd_attribute_registry. 	 N/A
+ T-203 	 pari_dd 	 dd_data_stewards 	 TABLE 	 List of approved data stewards. 	 F-106 	 steward_id (PK), name, email, department 	 N/A 	 N/A
+ T-204 	 pari_dd 	 dd_steward_assignments 	 TABLE 	 Assigns stewards to specific data domains. 	 F-106 	 assignment_id (PK), steward_id (FK), domain (VARCHAR) 	 FK to dd_data_stewards. 	 N/A
+ T-205 	 pari_dd 	 dd_workflow_steps 	 TABLE 	 Definition of workflow steps for approvals. 	 F-176 	 step_id (PK), workflow_name, step_order, role_required 	 N/A 	 N/A
+ T-206 	 pari_dd 	 dd_workflow_instances 	 TABLE 	 Runtime instances of workflows. 	 F-176 	 instance_id (PK), workflow_name, started_by, current_step 	 N/A 	 N/A
+ T-207 	 pari_dd 	 dd_alert_recipients 	 TABLE 	 Who gets which alerts. 	 F-168 	 recipient_id (PK), alert_type, contact_method, contact_address 	 N/A 	 N/A
+ T-208 	 pari_dd 	 dd_sent_alerts 	 TABLE 	 Log of sent alerts. 	 F-168 	 sent_id (PK), alert_id, recipient_id, sent_at, status 	 N/A 	 N/A
+ T-209 	 pari_dd 	 dd_search_index 	 TABLE 	 TSVector cache for fast search. 	 F-173 	 object_id, document_tsvector 	 GIN index on document_tsvector. 	 N/A
+ T-210 	 pari_dd 	 dd_audit_archive 	 TABLE 	 Archived change logs. 	 F-195 	 archive_id, original_change_id, archived_at, data (JSONB) 	 N/A 	 N/A
+T-211	pari_dd	dd_data_contracts	TABLE	Registry of data contracts between services (Producer/Consumer).	F-112, F-129	contract_id (PK, UUID), producer_service (VARCHAR), consumer_service (VARCHAR), schema_hash (CHAR(64)), sla_latency_ms (INT), status (VARCHAR)	UNIQUE(producer_service, consumer_service)	dd_contract_attributes
+T-212	pari_dd	dd_contract_attributes	TABLE	Attributes included in a specific data contract.	F-112	contract_id (FK), attribute_id (FK), required (BOOLEAN), data_quality_threshold (VARCHAR)	FK to dd_data_contracts and dd_attribute_registry	N/A
+T-213	pari_dd	dd_ownership_history	TABLE	Historical tracking of data ownership transfers for audit.	F-106	history_id (PK, BIGSERIAL), entity_id (FK), old_owner (VARCHAR), new_owner (VARCHAR), transfer_reason (TEXT), changed_at (TIMESTAMPTZ)	FK to dd_entity_registry	N/A
+T-214	pari_dd	dd_pii_scan_results	TABLE	Results of periodic automated scans for PII using ML.	F-105, F-191	scan_id (PK, UUID), attribute_id (FK), scan_date (TIMESTAMPTZ), confidence_score (NUMERIC), model_version (VARCHAR)	CHECK (confidence_score BETWEEN 0 AND 1)	N/A
+T-215	pari_dd	dd_gdpr_requests	TABLE	Tracking metadata for Data Subject Access/Deletion Requests.	F-133	request_id (PK, UUID), request_type (VARCHAR), user_hash (CHAR(64)), status (VARCHAR), submitted_at (TIMESTAMPTZ), completed_at (TIMESTAMPTZ)	CHECK (request_type IN ('ACCESS','DELETE','PORT'))	dd_gdpr_request_scopes
+T-216	pari_dd	dd_gdpr_request_scopes	TABLE	Specific tables/entities covered by a GDPR request.	F-133	request_id (FK), entity_id (FK), processing_status (VARCHAR)	FK to dd_gdpr_requests and dd_entity_registry	N/A
+T-217	pari_dd	dd_retention_exceptions	TABLE	Legal holds or exceptions to standard retention policies.	F-122	exception_id (PK, UUID), entity_id (FK), legal_case_ref (VARCHAR), expiration_date (DATE), reason (TEXT)	FK to dd_entity_registry	N/A
+T-218	pari_dd	dd_disaster_recovery_metadata	TABLE	DR specific metadata (RPO/RTO targets by entity).	F-142	dr_id (PK, UUID), entity_id (FK), rpo_seconds (INT), rto_seconds (INT), backup_priority (INT)	FK to dd_entity_registry	N/A
+T-219	pari_dd	dd_test_data_masks	TABLE	Specific masking rules for non-production environments.	F-186	mask_id (PK, UUID), attribute_id (FK), environment (VARCHAR), masking_algorithm (VARCHAR), seed_value (VARCHAR)	CHECK (environment IN ('DEV','TEST','QA'))	N/A
+T-220	pari_dd	dd_data_generators	TABLE	Configuration for synthetic data generation tools.	F-172	generator_id (PK, UUID), entity_id (FK), generator_type (VARCHAR), config_json (JSONB)	FK to dd_entity_registry	N/A
+T-221	pari_dd	v_data_contract_violations	VIEW	Shows contracts where producer schema has drifted.	F-112	contract_id, producer_service, drift_detected_at	Joins dd_data_contracts with dd_change_history.	N/A
+T-222	pari_dd	v_steward_workload	VIEW	Aggregates open tasks for data stewards.	F-106	steward_name, pending_approvals, unowned_tables	Counts rows from dd_approvals and dd_entity_registry.	N/A
+T-223	pari_dd	v_pii_exposure_risk	VIEW	Tables containing PII accessible by non-privileged roles.	F-105	table_name, access_role, risk_level	Joins dd_attribute_registry with pg_roles.	N/A
+T-224	pari_dd	v_retention_compliance	VIEW	Identifies data past retention but not archived.	F-122	entity_id, physical_name, days_past_retention	Compares table creation times with dd_retention_policies.	N/A
+T-225	pari_dd	sp_validate_data_contract	PROCEDURE	Checks if current entity schema matches contract hash.	F-112	IN p_contract_id UUID, RETURNS BOOLEAN	Computes hash of current schema and compares to dd_data_contracts.	N/A
+T-226	pari_dd	sp_execute_retention_policy	PROCEDURE	Identifies and archives eligible data.	F-122	IN p_dry_run BOOLEAN	Calls sp_check_retention and executes move to S3/GCS if not dry run.	N/A
+T-227	pari_dd	sp_generate_masking_config	PROCEDURE	Generates masking config for ETL tools (e.g., Informatica).	F-186	IN p_entity_id UUID, RETURNS TEXT	Reads dd_test_data_masks and outputs XML/JSON config.	N/A
+T-228	pari_dd	sp_scan_for_pii	PROCEDURE	Runs ML model to detect unclassified PII.	F-191	IN p_entity_id UUID	Samples data, calls Python model, inserts into dd_pii_scan_results.	N/A
+T-229	pari_dd	sp_compare_schemas	FUNCTION	Compares two schema versions (e.g., Prod vs Staging).	F-194	IN p_env1 VARCHAR, IN p_env2 VARCHAR, RETURNS JSON	Queries information_schema for both environments and diffs.	N/A
+T-230	pari_dd	sp_rollback_metadata	PROCEDURE	Reverts metadata registry to a previous version.	F-110	IN p_change_id UUID	Uses dd_change_history to restore state of tables.	N/A
+T-231	pari_dd	tr_audit_entity_mod	TRIGGER	Automatically logs changes to entity registry.	F-110	AFTER INSERT OR UPDATE OR DELETE ON dd_entity_registry	Calls sp_audit_log_trigger().	N/A
+T-232	pari_dd	tr_audit_attribute_mod	TRIGGER	Automatically logs changes to attribute registry.	F-110	AFTER INSERT OR UPDATE OR DELETE ON dd_attribute_registry	Calls sp_audit_log_trigger().	N/A
+T-233	pari_dd	tr_enforce_naming_convention	TRIGGER	Validates naming conventions on insert.	F-102	BEFORE INSERT OR UPDATE ON dd_entity_registry	Checks physical_name matches regex ^[a-z0-9_]+$.	N/A
+T-234	pari_dd	tr_protect_critical_entities	TRIGGER	Prevents deletion of Tier 1 entities.	F-142	BEFORE DELETE ON dd_entity_registry	Checks dd_criticality_tiers and raises exception if Tier 1.	N/A
+T-235	pari_dd	dd_naming_convention_rules	TABLE	Stores regex patterns for allowed naming.	F-102	rule_id (PK, UUID), object_type (VARCHAR), regex_pattern (TEXT), description (TEXT)	CHECK (object_type IN ('TABLE','COLUMN','INDEX'))	N/A
+T-236	pari_dd	dd_validation_library	TABLE	Global reusable validation logic snippets.	F-113	library_id (PK, UUID), rule_name (VARCHAR), logic_sql (TEXT), language (VARCHAR)	N/A	N/A
+T-237	pari_dd	dd_notification_templates	TABLE	Email/Slack templates for alerts.	F-168	template_id (PK, UUID), event_type (VARCHAR), subject (VARCHAR), body_template (TEXT)	N/A	N/A
+T-238	pari_dd	dd_webhook_endpoints	TABLE	URLs for external notification hooks.	F-175	webhook_id (PK, UUID), endpoint_url (TEXT), secret (VARCHAR), active (BOOLEAN)	N/A	N/A
+T-239	pari_dd	dd_api_authentication	TABLE	API Keys for accessing the Dictionary API.	F-169	key_id (PK, UUID), api_key_hash (CHAR(64)), role_name (VARCHAR), expires_at (TIMESTAMPTZ)	UNIQUE(api_key_hash)	N/A
+T-240	pari_dd	dd_rate_limits	TABLE	Rate limiting rules for API access.	F-169	limit_id (PK, UUID), role_name (VARCHAR), requests_per_minute (INT)	N/A	N/A
+T-241	pari_dd	fn_normalize_whitespace	FUNCTION	Cleans string data for standardization.	F-193	IN p_text TEXT, RETURNS TEXT	TRIM(REGEXP_REPLACE(p_text, '\s+', ' '))	N/A
+T-242	pari_dd	fn_encrypt_sensitive	FUNCTION	Encrypts a value using pgcrypto.	F-124	IN p_value TEXT, RETURNS BYTEA	Uses pgp_sym_encrypt.	N/A
+T-243	pari_dd	fn_decrypt_sensitive	FUNCTION	Decrypts a value using pgcrypto.	F-124	IN p_bytea BYTEA, RETURNS TEXT	Uses pgp_sym_decrypt.	N/A
+T-244	pari_dd	fn_hash_sha256	FUNCTION	Returns SHA256 hash of a value.	F-125	IN p_value TEXT, RETURNS CHAR(64)	encode(digest(p_value, 'sha256'), 'hex')	N/A
+T-245	pari_dd	fn_calculate_health_score	FUNCTION	Calculates overall health score (0-100).	F-179	RETURNS NUMERIC	Weighted average of completeness, compliance, and freshness.	N/A
+T-246	pari_dd	sp_export_glossary_excel	PROCEDURE	Exports business glossary to XLSX.	F-178	IN p_file_path TEXT	Uses file_fdw or client-side copy logic.	N/A
+T-247	pari_dd	v_unused_objects	VIEW	Lists tables/views not queried in 90 days.	F-118	object_name, type, last_accessed	Queries dd_access_stats and dd_view_registry.	N/A
+T-248	pari_dd	sp_archive_partition_data	PROCEDURE	Moves a specific partition to cold storage.	F-122	IN p_schema VARCHAR, IN p_table VARCHAR, IN p_partition VARCHAR	Detaches partition, creates foreign table wrapper.	N/A
+T-249	pari_dd	sp_promote_schema	PROCEDURE	Promotes schema changes from Dev to Test.	F-176	IN p_source_schema VARCHAR, IN p_target_schema VARCHAR	Compares DDL and applies to target.	N/A
+T-250	pari_dd	sp_compare_model_versions	FUNCTION	Compares data model version with git tag.	F-109	IN p_git_tag VARCHAR, RETURNS JSON	Returns diff between Git tag SHA and Registry SHA.	N/A

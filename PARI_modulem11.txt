@@ -1,0 +1,508 @@
+
+
+11.	Module M11	Automated Data Lifecycle Manager
+a.	Summary
+The Automated Data Lifecycle Manager (Module M11) is a critical enterprise-grade subsystem within the PARI ecosystem, designed to enforce rigorous data stewardship, optimize storage economics, and ensure absolute regulatory compliance across the lifespan of financial data. In a landscape defined by stringent privacy regulations like GDPR and disparate fiscal retention requirements, traditional manual data management is insufficient, prone to human error, and astronomically expensive. M11 addresses this by implementing a "Zero-Trust" approach to data persistence, ensuring that data is retained only as long as necessary and disposed of securely when its lifecycle ends.
+
+Built upon a foundation of CMMI Level 5 process discipline, M11 automates the entire spectrum of data lifecycle events: from initial ingestion classification and tagging, through tiered archival strategies, to cryptographically secure destruction. The module is deeply integrated with PARI’s PostgreSQL core, leveraging partitioning and Foreign Data Wrappers (FDW) to seamlessly transition data between hot OLTP storage and cold object stores like Amazon S3 or Google Cloud Storage (GCS). This transition is transparent to end-users and analytical modules, ensuring query performance remains high while storage costs plummet—a projected 60% reduction compared to flat storage strategies.
+
+A key differentiator of M11 is its implementation of Cryptographic Erasure for GDPR Article 17 (Right to be Forgotten) compliance. Unlike standard deletion which leaves remnants on physical media, M11 manages the destruction of the encryption keys protecting archived data blocks. Once the key is destroyed securely via Hardware Security Modules (HSM), the data becomes mathematically irrecoverable, satisfying the strictest interpretations of "secure deletion" without the latency and wear of multi-pass physical overwriting on cloud object stores.
+
+Furthermore, M11 acts as the guardian against "Compliance Fragmentation." It utilizes the Regulatory Policy Engine (M02) to dynamically apply retention rules based on transaction metadata. For example, a transaction processed in Germany under GDPR might require a 10-year retention for audit purposes, while a standard Swiss transaction requires 7 years. M11 automatically tags these data blobs at ingestion, schedules their archival at the 6-month mark (moving to S3 Glacier), and queues their cryptographic destruction at the exact millisecond of legal expiry. This automation transforms compliance from a legal liability into a background process, significantly reducing the administrative burden on Data Protection Officers (DPOs) and mitigating the risk of massive regulatory fines.
+
+Finally, M11 provides the Auditability demanded by the PARI vision. Every movement, copy, archival, or deletion of data is recorded in an immutable, append-only log. This ensures that independent auditors and tax authorities can verify that the system has not tampered with historical records, nor has it prematurely destroyed evidence required for forensic analysis. By harmonizing cost-efficiency, privacy rights, and auditability, M11 forms the backbone of trust that allows the PARI system to operate as a sovereign-grade financial utility.
+b.	Scope
+The scope of Module M11 encompasses the end-to-end management of structured and unstructured data within the PARI infrastructure, specifically focusing on:
+
+     Data Classification & Tagging: Automated enforcement of metadata tagging (jurisdiction, data sensitivity, retention period) upon data ingestion.
+     Automated Archival: Transition of data from high-performance PostgreSQL clusters to cost-optimized, encrypted object storage (S3/GCS/Azure Blob) based on age, access frequency, and business rules.
+     Policy Enforcement: Execution of retention schedules derived from the Regulatory Policy Engine (M02), ensuring adherence to global standards (GDPR, Swiss DPA, CCPA).
+     Secure Erasure: Implementation of cryptographic erasure and logical purging to fulfill GDPR "Right to be Forgotten" requests and end-of-life data disposal.
+     Legal Hold Management: Functionality to suspend automated deletion for specific data sets subject to litigation or ongoing investigation (eDiscovery).
+     Storage Cost Optimization: Automated tiering (Hot, Warm, Cold) and compression to minimize infrastructure expenditure.
+     Compliance Reporting: Generation of immutable audit trails and DPO-specific dashboards regarding data location and status.
+     Disaster Recovery Integration: Ensuring archival data is included in geo-redundancy and backup validation strategies.
+
+c.	Business Case
+The current paradigm in digital payment infrastructure often leads to "Data Hoarding"—indefinite retention of transaction logs due to fear of non-compliance or lack of deletion tools. This poses significant business and legal risks:
+
+    Regulatory Risk & GDPR Fines: Under GDPR, storing data longer than necessary is a violation. Fines can reach up to 4% of global turnover. Manual processes are unreliable and risky. M11 eliminates this risk by automating retention with mathematical precision.
+    Excessive Infrastructure Costs: Storing terabytes of historical transaction logs in high-performance databases (like active PostgreSQL clusters) is financially unsustainable. M11 reduces costs by an estimated 60% by moving stale data to low-cost object storage (e.g., S3 Infrequent Access/Glacier).
+    Operational Efficiency: Manually managing deletion requests and archival scripts requires significant engineering hours. M11 automates these workflows, allowing engineers to focus on product innovation rather than maintenance.
+    Trust & Reputation: Demonstrating "Privacy-by-Design" is a competitive advantage. M11 provides the technical proof that user data is respected and disposed of, building trust with citizens and privacy advocates.
+    Audit Readiness: During tax audits or anti-corruption investigations, retrieving 7-year-old data should be instant. M11 ensures that while data is archived, it remains accessible and queryable for authorized roles, preventing "lost data" incidents.
+
+d.	KPIs
+     Archive Success Rate: >99.99% (Target: Zero data loss during transition).
+     Deletion Confirmation Latency: <500ms (Time to confirm cryptographic erasure).
+     Storage Cost Reduction: >60% compared to flat-tier storage architectures.
+     Compliance Violation Count: 0 (Instances of data retained past legal limit or deleted prematurely).
+     Rehydration Speed: <5 seconds (Time to retrieve a cold archive record for an audit query).
+     Legal Hold Application Accuracy: 100% (Zero automated deletions of legally held data).
+     Audit Trail Integrity: 100% (All lifecycle events tamper-evident).
+
+e.	Stakeholder Insights
+Stakeholder	Concern	Implications
+Data Protection Officers (DPO)	GDPR Article 17 compliance (Right to be Forgotten).	Needs verifiable proof that data is permanently deleted and not recoverable. M11 provides cryptographic erasure certificates.
+CTO / Infrastructure Lead	Rising database storage costs and performance degradation.	Requires automated tiering to keep hot databases fast and cold storage cheap. M11 automates this to save 60% on OpEx.
+Tax Authorities / Auditors	Availability of historical records (7-10 years).	Data must be retrievable even if archived. M11 ensures "Cold" data is still queryable via standard SQL interfaces (FDW).
+Legal Counsel	Litigation holds and eDiscovery requests.	Fear that automated systems will delete evidence. M11 allows "Legal Holds" to override standard retention policies instantly.
+Security / CISO	Data leakage in archival tiers and residual data on disposal.	Archives must be encrypted at rest, and disposal must be total. M11 uses strict AES-256 and key destruction.
+Citizens / Users	Privacy and "Surveillance Capitalism".	Concern that their financial history is stored forever. M11 guarantees data is deleted automatically when the legal timer expires.
+
+
+f.	Knowledge Representation Graph (mermaid.js)
+
+graph TD
+    subgraph PARI_Core [PARI Core System]
+        M01[M01: Crypto Transaction Core]
+        M02[M02: Regulatory Policy Engine]
+        DB[(PostgreSQL Hot DB)]
+    end
+
+    subgraph M11_Mod [Module M11: Data Lifecycle Manager]
+        DCS[Data Classification Service]
+        AMS[Archival Management Service]
+        PES[Policy Enforcement Scheduler]
+        CED[Cryptographic Erasure Daemon]
+        LHM[Legal Hold Manager]
+        AL[Audit Logger]
+    end
+
+    subgraph Storage_Layers [Storage Infrastructure]
+        S3[S3 / GCS Cold Storage Encrypted]
+        HSM[HSM / KMS Key Management]
+        Vault[Immutable Audit Vault]
+    end
+
+    subgraph External_Stakeholders [External Entities]
+        DPO[Data Protection Officer]
+        Auditor[Tax Auditor]
+    end
+
+    %% Relationships
+    M01 --|Ingests Data|--> DB
+    DB --|Triggers: Row Age/Status|--> PES
+    M02 --|Syncs Retention Rules|--> PES
+
+    PES -->|Reads Policy|--> DCS
+    PES -->|Triggers Archive|--> AMS
+    PES -->|Triggers Delete|--> CED
+
+    AMS --|Moves Data Partition|--> S3
+    S3 --|Encrypts via|--> HSM
+    HSM --|Stores Keys|--> PES
+
+    CED --|Requests Destruction|--> HSM
+    HSM --|Destroys Key Material|--> CED
+
+    DPO --|Issue Legal Hold|--> LHM
+    LHM --|Overrides Delete|--> PES
+
+    AMS --|Logs Movement|--> AL
+    CED --|Logs Destruction|--> AL
+    AL --|Writes Immutable Log|--> Vault
+
+    Auditor --|Queries Historical Data|--> S3
+    Auditor --|Verifies Deletion|--> Vault
+
+    style M11_Mod fill:#f9f,stroke:#333,stroke-width:2px
+    style S3 fill:#ff9,stroke:#333,stroke-width:1px
+
+g.	Comprehensive List of Features
+ID	Feature	Description	Business Case	AI/ML Algorithms	KPIs	Primary Users
+F-M11-001	Automated Data Ingestion Tagging	Automatically applies retention metadata to incoming transactions based on jurisdiction (M02).	Ensures data is classified correctly at birth, preventing manual errors.	Rule-Based Classification	Tagging Accuracy 100%	System, Compliance
+F-M11-002	Time-To-Live (TTL) Calculation	Dynamically calculates expiration dates for every data object based on local laws.	Guarantees compliance with varying global retention mandates.	N/A	Calculation Error Rate 0%	Compliance Engine
+F-M11-003	PostgreSQL Partition Management	Automatically creates and detaches partitions for archiving (e.g., monthly partitions).	Maintains database performance and enables efficient bulk data movement.	N/A	Partition Creation Success >99.9%	DBA, System
+F-M11-004	S3/GCS Object Lifecycle Rules	Configures transition rules (Hot -> Infrequent Access -> Glacier) on the cloud storage side.	Optimizes storage costs by moving data to cheaper tiers as it ages.	N/A	Cost Reduction Target 60%	DevOps
+F-M11-005	Foreign Data Wrapper (FDW) Integration	Allows SQL queries to access data stored in S3 as if it were still in local tables.	Provides transparency for auditors; they don't need special tools to query old data.	N/A	Query Latency <5s	Auditor, Data Analyst
+F-M11-006	AES-256 Server-Side Encryption	Enforces encryption for all data at rest in cold storage.	Protects against data breaches in cloud storage.	N/A	Encryption Coverage 100%	Security
+F-M11-007	Customer-Managed Keys (CMK) Integration	Uses Cloud KMS or HSM to manage encryption keys, separating key control from data.	Ensures tenant isolation and prevents cloud provider access to sensitive data.	N/A	Key Rotation Success >99%	Security
+F-M11-008	Cryptographic Erasure Trigger	Identifies expired data objects and initiates the destruction process.	Ensures data is deleted exactly when legal retention expires.	N/A	Trigger Latency <1s	System
+F-M11-009	Key Destruction Workflow	Securely deletes the specific encryption key used to encrypt the data object.	Renders data mathematically unrecoverable, satisfying GDPR Art 17.	N/A	Key Shred Confirmation 100%	Security, DPO
+F-M11-010	Zero-Knowledge Archive Proof	Generates a cryptographic proof that data was archived without modification.	Ensures data integrity for forensic analysis.	Merkle Trees / Hashing	Proof Generation Time <100ms	Auditor
+F-M11-011	Legal Hold Toggle	Allows DPOs to flag specific users or transactions for indefinite retention.	Prevents accidental deletion of data relevant to litigation.	N/A	Toggle Application Latency <1s	Legal, DPO
+F-M11-012	Data Retention Dashboard	Visualizes data volume by age, tier, and jurisdiction.	Provides visibility into storage footprint and compliance status.	N/A	Dashboard Refresh Rate <1s	DPO, Management
+F-M11-013	Automated Compliance Reporting	Generates reports for regulators showing data handling practices.	Demonstrates "Privacy by Design" to auditors.	N/A	Report Generation Time <30s	Compliance
+F-M11-014	Immutable Audit Logging	Writes all lifecycle events to a write-once-read-many (WORM) storage.	Prevents tampering with history or hiding deletions.	Blockchain/Hash Chaining	Log Integrity 100%	Auditor
+F-M11-015	Anomaly Detection in Access	Monitors access to archived data for suspicious bulk retrieval patterns.	Prevents large-scale scraping of historical financial data.	Isolation Forests, LSTM	Alert Accuracy >95%	Security
+F-M11-016	Personal Data Extraction Filter	Identifies columns containing PII within transaction blobs.	Ensures stricter handling rules for sensitive fields.	NLP / Regex	PII Identification Recall >98%	Security
+F-M11-017	Right to be Forgotten (RTBF) API	Public API for users to request deletion of their data (where legally permissible).	Empowers users and builds trust.	N/A	API Response Time <200ms	Citizens (via Wallet)
+F-M11-018	Data Minimization Enforcement	Automatically anonymizes data fields that are no longer needed for the current lifecycle stage.	Reduces risk profile of archived data.	K-Anonymity Algorithms	Anonymization Success 100%	Compliance
+F-M11-019	Bulk Archive Verification	Periodically checks checksums of archived data against the live database before deletion.	Prevents data loss during the migration process.	Hashing	Verification Success 100%	System
+F-M11-020	Archive Rehydration	Moves data from cold storage back to hot storage for active investigation.	Enables fast querying for specific legal cases.	N/A	Rehydration Time <5 min	Analyst
+F-M11-021	Intelligent Compression	Uses algorithms like ZSTD to compress data before archival.	Further reduces storage costs and network bandwidth.	N/A	Compression Ratio >2:1	System
+F-M11-022	Multi-Region Replication	Copies archives to a secondary geographic region for disaster recovery.	Ensures data survival during regional outages.	N/A	RPO=0	SRE
+F-M11-023	Jurisdiction-Based Geo-Fencing	Ensures data for EU citizens stays in EU regions (Schrems II compliance).	Avoids cross-border data transfer violations.	N/A	Geo-Fence Violations 0	Compliance
+F-M11-024	Cost Attribution Engine	Allocates storage costs to specific business units or products.	Enables internal chargeback and financial transparency.	N/A	Cost Calculation Accuracy 100%	Finance
+F-M11-025	Archive Metadata Indexing	Creates a searchable index of archived records without exposing the content.	Allows auditors to find records quickly without scanning billions of rows.	Inverted Index	Search Latency <500ms	Auditor
+F-M11-026	Data Lineage Tracking	Tracks transformations and movements of data from creation to deletion.	Essential for debugging and impact analysis.	Graph DB	Lineage Trace Speed <1s	Data Engineer
+F-M11-027	Retention Policy Simulator	Simulates the effect of changing a retention policy before applying it.	Helps DPOs understand impact of new regulations.	Monte Carlo Simulation	Simulation Error Margin <5%	DPO
+F-M11-028	Auto-Purge of Failed Archives	Cleans up temporary chunks if an archival job fails midway.	Prevents storage clutter and orphaned data.	N/A	Cleanup Success 100%	System
+F-M11-029	Manual Archive Trigger	Allows admins to manually force archival of specific tables.	Useful for emergency maintenance.	N/A	Execution Time <1 hour	DBA
+F-M11-030	Secure Token Generation	Generates short-lived tokens for accessing archived data.	Prevents direct long-lived URL access to S3 objects.	N/A	Token Expiration Enforced 100%	Security
+F-M11-031	Predictive Storage Capacity Planning	Uses ML to predict when storage quotas will be exceeded.	Enables proactive infrastructure provisioning.	ARIMA / Prophet	Prediction Accuracy (30-day) >90%	SRE
+F-M11-032	Dead Letter Queue for Archives	Handles archival objects that fail validation or processing.	Ensures no data is silently lost.	N/A	DLQ Processing 100%	System
+F-M11-033	Pseudonymization Service	Replaces direct identifiers with pseudonyms in the archive tier.	Enhances privacy while preserving data utility for statistics.	Format-Preserving Encryption	Pseudonym Collision 0%	Privacy Engineer
+F-M11-034	Audit Log Anonymization	Automatically redacts PII from audit logs after a set period.	Protects the privacy of administrators and auditors.	Differential Privacy	Redaction Accuracy 100%	DPO
+F-M11-035	Archival Job Scheduling	Distributed scheduler (e.g., via Kubernetes Cron) for archival tasks.	Manages high volume of background jobs.	N/A	Job Completion Rate 99.9%	Platform
+F-M11-036	Data Sovereignty Controller	Logic to ensure data residency based on merchant and customer location.	Complex routing for cross-border commerce.	Rules Engine	Violation Events 0	Compliance
+F-M11-037	Deep Storage Analytics	Runs SQL aggregation directly on cold storage (e.g., Amazon Athena).	Enables trend analysis on 10 years of data without rehydration.	N/A	Query Cost <$0.01 per TB	Analyst
+F-M11-038	Smart Tiering Promotion	Automatically promotes "hot" archived data back to warm tier if accessed frequently.	Optimizes performance for unexpected query patterns.	Frequency Analysis	Promotion Latency <24h	System
+F-M11-039	Schema Evolution Support	Handles changes in database schema over 7+ years for archived data.	Ensures old data can still be read with new code.	Avro/Parquet Schemas	Read Success Rate 100%	Data Engineer
+F-M11-040	Granular Role-Based Access Control (RBAC)	Restricts access to lifecycle management functions to specific roles.	Prevents unauthorized admins from deleting data.	N/A	Access Denied Events Logged 100%	Security
+F-M11-041	Tamper-Evident Logs	Signs audit logs with digital keys to detect alteration.	Provides forensic evidence of system integrity.	Asymmetric Signing	Signature Verification 100%	Security
+F-M11-042	Retention Lock Mode	WORM state for specific objects to prevent even admins from deleting them prematurely.	Protects against insider threats.	N/A	Override Impossible 100%	Security
+F-M11-043	External Auditor Portal	Dedicated UI for auditors to query and verify lifecycle status.	Streamlines the audit process.	N/A	Portal Uptime 99.9%	Auditor
+F-M11-044	Data Subject Access Request (DSAR) Support	Collates all data for a user across hot and cold tiers.	Fulfills GDPR Article 15 requirements.	N/A	DSAR Completion Time <24h	DPO
+F-M11-045	Archival Progress Dashboard	Real-time view of background archival jobs (bytes moved, ETA).	Operational visibility.	N/A	UI Refresh Rate <1s	SRE
+F-M11-046	Secure Deletion Certificate	Generates a PDF signed by the system confirming destruction.	Legal evidence for corporate records.	N/A	Certificate Generation Time <5s	Legal
+F-M11-047	Database Snapshot Cleanup	Removes old database snapshots used for backups after retention expires.	Manages backup storage separately from data storage.	N/A	Snapshot Compliance 100%	DBA
+F-M11-048	Cross-Cloud Migration	Ability to move archives from AWS S3 to Azure Blob or MinIO.	Vendor lock-in mitigation.	N/A	Migration Data Integrity 100%	Architect
+F-M11-049	Archive Data Validation Post-Move	Verifies data integrity after moving between storage vendors/classes.	Prevents bit rot during transfers.	CRC64 / SHA-256	Checksum Match 100%	System
+F-M11-050	Configurable Data Retention Overrides	Allows specific retention rules for high-value merchants or VIPs.	Business flexibility for B2B contracts.	N/A	Override Audit Log 100%	Account Manager
+F-M11-051	Event-Driven Archival	Triggers archival based on business events (e.g., account closed) rather than just time.	Faster cleanup of dormant accounts.	N/A	Event Latency <1s	System
+F-M11-052	Hash-Based Deduplication	Identifies duplicate data blocks to save space in the archive.	Cost optimization for redundant metadata.	SHA-256	Space Savings >10%	System
+F-M11-053	API Rate Limiting for Archive Access	Prevents denial-of-service on the retrieval system.	Protects system availability.	Token Bucket	Limit Enforcement 100%	Security
+F-M11-054	Automated Disaster Recovery Testing	Periodically restores a random sample of archives to verify recoverability.	Ensures backup integrity.	Chaos Monkey	Test Pass Rate 100%	SRE
+F-M11-055	Data Masking for Development	Creates anonymized copies of production archives for dev testing.	Security in the SDLC.	Dynamic Masking	PII Leakage 0%	DevOps
+F-M11-056	Compliance Gap Detection	Alerts if data exists without a valid retention policy assigned.	Prevents "orphan" data that never gets deleted.	Rule Engine	Orphan Data Count 0	Compliance
+F-M11-057	Batch Deletion Optimization	Batches key destruction requests to KMS for efficiency.	Reduces API costs to Cloud HSM.	N/A	Batch Efficiency >50 keys/sec	System
+F-M11-058	Archive Search Autocomplete	Suggests search terms based on indexed metadata.	Improves auditor productivity.	N-Gram Model	Suggestion Latency <200ms	Auditor
+F-M11-059	Cloud Storage Events Integration	Listens to S3 Event Notifications for object changes.	Real-time sync of storage state.	N/A	Event Processing Latency <100ms	System
+F-M11-060	Legal Hold Expiry Notification	Alerts legal counsel when a legal hold is approaching expiration.	Ensures holds are reviewed before they expire.	N/A	Notification Sent 7 days prior	Legal
+F-M11-061	Object Versioning Control	Maintains versions of archived objects if amendments occur (rare).	Audit trail for corrections.	N/A	Version History Retained 100%	System
+F-M11-062	Financial Impact Calculator	Calculates the cost savings achieved by lifecycle management.	ROI justification for the module.	N/A	Report Accuracy +/- 5%	Finance
+F-M11-063	Privacy Impact Assessment (PIA) Generator	Auto-generates PIA documents based on data flow maps.	Supports compliance documentation.	NLP	Document Generation Time <1 min	DPO
+F-M11-064	Synthetic Data Generation	Creates fake transaction data to test deletion logic without using real PII.	Safe testing of destructive workflows.	GANs (Optional)	Statistical Similarity >95%	QA
+F-M11-065	Archive Data Ownership Tagging	Tags data with the specific business unit owner.	Clarifies responsibility for data requests.	N/A	Tag Coverage 100%	Governance
+F-M11-066	Secure File Transfer Protocol (SFTP) Gateway	Allows legacy external auditors to pull archives via SFTP.	Interoperability with legacy systems.	N/A	Transfer Success Rate 99.9%	Integration
+F-M11-067	Data Retention Heatmap	Visualizes hotspots of data creation or access.	Identifies trends in platform usage.	N/A	Visualization Render Time <2s	Product
+F-M11-068	Automated Quota Management	Enforces soft and hard limits on storage per tenant.	Prevents noisy neighbor problems.	N/A	Enforcement Latency <1s	Platform
+F-M11-069	Archive Encryption Key Rotation	Rotates master keys on a schedule without re-encrypting all data (envelope encryption).	Security best practice.	N/A	Rotation Frequency 90 days	Security
+F-M11-070	Data Staging Area	Temporary storage for data before it is uploaded to cold storage.	Buffers network latency.	N/A	Staging Capacity 24h Ingestion	System
+F-M11-071	Failed Archival Retry Logic	Exponential backoff for failed uploads to cloud storage.	Resilience against transient network errors.	N/A	Max Retries 5	System
+F-M11-072	Multi-Factor Authentication (MFA) for Deletion	Requires MFA to manually purge data or disable lifecycle rules.	Critical action security.	N/A	MFA Trigger 100%	Admin
+F-M11-073	Data Residency Compliance Map	Visual map showing where data physically resides globally.	Quick compliance check for regulators.	GeoIP	Map Accuracy 100%	DPO
+F-M11-074	Automated Data Categorization	Classifies data into 'Public', 'Internal', 'Confidential', 'Restricted'.	Determines access control and retention tiers.	Naive Bayes	Classification Accuracy >90%	Security
+F-M11-075	Legacy Data Migration Tool	Imports and classifies data from legacy payment systems.	Onboarding new banks to PARI.	ETL Scripts	Migration Error Rate <0.1%	Integration
+F-M11-076	Archive Integrity Monitoring	Continuous background scanning of bit-rot in cold storage.	Ensures long-term data health.	Hashing	Scan Coverage 100%/Month	SRE
+F-M11-077	Dynamic Data Masking Policies	Applies masking rules based on the role of the person querying the archive.	Allows developers to debug without seeing real credit card numbers.	RBAC	Policy Enforcement 100%	Security
+F-M11-078	Data Erasure Verification API	Third-party API to verify that a specific ID has been deleted.	Integration with external privacy watchdogs.	N/A	API Response <200ms	Public
+F-M11-079	Storage Performance Benchmarking	Tests throughput of cold storage retrieval.	Capacity planning.	N/A	Benchmark Frequency Daily	SRE
+F-M11-080	Compliance Calendar	Calendar view of upcoming deletion and archival deadlines.	Planning for DPOs.	N/A	Calendar Accuracy 100%	DPO
+F-M11-081	Granular Consent Tracking	Tracks specific consent given for data processing alongside the data.	GDPR requirement for lawful processing.	N/A	Consent Linkage 100%	Compliance
+F-M11-082	Data Portability Export	Packages all user data into a standard format (JSON/CSV) for export.	GDPR Data Portability Right.	N/A	Export Time <5 mins	User
+F-M11-083	Archive Search History	Logs all search queries made by auditors.	Audit trail of the auditors.	N/A	Log Retention 2 years	Security
+F-M11-084	Intelligent Caching for Archive Metadata	Caches frequently accessed index data.	Performance optimization.	Redis	Cache Hit Ratio >90%	System
+F-M11-085	Automated Data Tagging Correction	Self-healing mechanism to fix mislabeled data tags.	Quality control.	Regex Mapping	Correction Accuracy 100%	System
+F-M11-086	Object Lock Bypass Governance	Requires 2-person approval to bypass a WORM lock.	Extreme emergency procedure.	N/A	Approval Workflow Enforced 100%	C-Level
+F-M11-087	Tax Authority Specific Export	Formats data export specifically for tax authority requirements (e.g., SAF-T).	Regulatory interoperability.	N/A	Format Validation 100%	Compliance
+F-M11-088	Lifecycle Simulation Sandbox	Isolated environment to test new lifecycle policies.	Risk-free testing.	N/A	Sandbox Isolation 100%	Compliance
+F-M11-089	Retention Policy Version Diff	Shows differences between old and new retention policies.	Change management review.	N/A	Diff Accuracy 100%	DPO
+F-M11-090	Automated Data Classification Training	Retrains classification models based on corrected labels.	Continuous improvement of AI models.	Active Learning	Model Retraining Weekly	Data Scientist
+F-M11-091	Blob Storage Abstraction Layer	Unified API that abstracts S3, GCS, and Azure details.	Vendor independence.	Abstract Factory	API Consistency 100%	Developer
+F-M11-092	Data Volume Forecasting by Jurisdiction	Predicts storage growth per country to aid capacity planning.	Regional infrastructure planning.	Prophet	Forecast Error <10%	Architect
+F-M11-093	Legal Hold Request Workflow	Formal ticketing workflow for legal hold requests.	Process traceability.	N/A	Workflow SLA <48h	Legal
+F-M11-094	Archive Data Sampling	Randomly samples archived data for quality assurance.	Ongoing data validation.	Reservoir Sampling	Sample Representativeness 95%	QA
+F-M11-095	Secure Key Backup for Archive	Offline backup of master keys (Shamir's Secret Sharing).	Catastrophe recovery.	Cryptography	Key Recovery Feasibility 100%	Security
+F-M11-096	Data Stewardship Dashboard	Shows which admin is responsible for which data set.	Accountability.	N/A	Ownership Assignment 100%	Governance
+F-M11-097	Automated Retention Extension	Extends retention if a fraud alert is triggered on a transaction.	Compliance with financial investigation needs.	N/A	Extension Trigger Latency <1s	Fraud Team
+F-M11-098	PII Redaction Log	Logs exactly which fields were redacted and when.	Audit of privacy measures.	N/A	Log Detail Level High	DPO
+F-M11-099	Archive Replication Lag Monitoring	Monitors time delay between primary and DR archive site.	RPO assurance.	N/A	Lag Alert Threshold >1s	SRE
+F-M11-100	Cross-Account Archive Access	Securely grants temporary access to archives to external forensic experts.	Third-party collaboration.	STS (Assume Role)	Session Max Duration 1 hour	Security
+F-M11-101	Data Format Converter	Converts legacy archive formats to current open standards (Parquet).	Future-proofing.	N/A	Conversion Fidelity 100%	Data Engineer
+F-M11-102	Archive Access Justification	Requires a text justification for accessing sensitive old data.	Deters fishing expeditions by auditors.	N/A	Justification Required 100%	Auditor
+F-M11-103	Automated Compliance Certificate Renewal	Manages digital certificates used for signing audit logs.	Prevents service outages.	N/A	Renewal Automation 30 days prior	Security
+F-M11-104	Cold Storage Cost Anomaly Detection	Alerts if storage costs spike unexpectedly.	Financial control.	Anomaly Detection	Alert Threshold +/- 20%	Finance
+F-M11-105	Data Lifecycle State Machine	Visual representation of data states (Active, Archived, Deleted, OnHold).	Logic clarity for developers.	N/A	State Transitions Validated 100%	Developer
+F-M11-106	Bulk Legal Hold Upload	CSV upload for bulk case identifiers to be placed on hold.	Efficiency for large class-action lawsuits.	N/A	Upload Success Rate 100%	Legal
+F-M11-107	Archive Data Statistics	Calculates avg transaction value, fraud rate etc., on archived data.	Business intelligence.	N/A	Statistic Accuracy 100%	Analyst
+F-M11-108	Retention Policy Conflict Resolution	Logic to resolve when two jurisdictions have conflicting retention rules.	Legal certainty.	Priority Matrix	Conflict Resolution Time <1s	Compliance
+F-M11-109	Self-Service Data Restore	Allows authorized merchants to restore their own old reports.	Reduces support ticket volume.	N/A	Restore Success Rate 99%	Merchant
+F-M11-110	Archive Query Optimization	Rewrites queries to be efficient on columnar cold storage.	Performance.	Query Plan Analysis	Query Speed Up >10x	System
+F-M11-111	Immutable Write Once Storage	Enforces physical immutability at the cloud provider level (e.g., S3 Object Lock).	Defense against ransomware.	N/A	Object Lock Enabled 100%	SRE
+F-M11-112	PII Hash Index	Indexes hashes of PII to allow searching without exposing raw data.	Privacy-preserving search.	SHA-256	Search Recall 100%	Auditor
+F-M11-113	Dynamic Data Lifecycle Rules	Changes retention rules based on real-time risk assessment.	Adaptive security.	Reinforcement Learning	Rule Update Latency <1h	Security
+F-M11-114	Archive Metadata Caching	Caches metadata to reduce S3 GET requests (HEAD requests).	Cost reduction.	N/A	Cache Hit Ratio >80%	System
+F-M11-115	Data Erasure Witness Service	Third-party service (internal) to sign erasure transactions.	Multi-party proof of deletion.	Multi-Sig	Witness Participation 100%	Security
+F-M11-116	Legacy System Purge	Securely wipes data from decommissioned legacy hardware.	End-of-life hardware security.	N/A	Wipe Standard DoD 5220.22-M	Asset Mgmt
+F-M11-117	Archive Search Suggestions	Auto-completes based on historical successful queries.	UX improvement.	N/A	Suggestion Accuracy >80%	Auditor
+F-M11-118	Data Retention Impact Simulation	Visualizes storage and cost changes if a policy is edited.	Decision support.	N/A	Simulation Time <5s	DPO
+F-M11-119	Secure Audit Log Querying	Encrypted search over audit logs.	Protects sensitive admin operations.	Searchable Encryption	Query Time <2s	Security
+F-M11-120	Compliance Violation Alerting	Alerts immediately if a deletion fails or data persists past expiry.	Risk mitigation.	N/A	Alert SLA <5 mins	Compliance
+F-M11-121	Archive Data Partition Pruning	Skips irrelevant partitions during queries based on time filters.	Performance.	N/A	Pruning Efficiency 100%	System
+F-M11-122	Automated Storage Tier Analysis	Recommends optimal tier configuration based on access patterns.	Cost optimization.	K-Means Clustering	Savings Recommendation Accuracy >90%	SRE
+F-M11-123	Legal Hold Escalation	Escalates legal hold requests approaching expiry to senior legal.	Process compliance.	N/A	Escalation Trigger 3 days prior	Legal
+F-M11-124	Data Lineage Visualization	Graph view of data transformations over time.	Debugging and auditing.	GraphViz	Render Time <2s	Data Engineer
+F-M11-125	Archive Data Redundancy Check	Ensures erasure coding is applied for high durability.	Data durability.	N/A	Redundancy Factor >1.5	Storage
+F-M11-126	Cross-Region Data Copy Status	Real-time status of replication to DR region.	Disaster recovery readiness.	N/A	Status Latency <1s	SRE
+F-M11-127	Data Retention Policy Translation	Translates legal text into machine-readable rules.	Bridges gap between legal and tech.	NLP	Translation Accuracy >85%	Compliance
+F-M11-128	Secure Data Archive Transfer	Encrypts data in transit during vendor migration.	Security during transition.	TLS 1.3	Encryption Strength 256-bit	Security
+F-M11-129	Archive Lifecycle State Events	Kafka events for every state change of a data object.	Event-driven architecture integration.	N/A	Event Delivery Order Guaranteed	System
+F-M11-130	Access Review Workflow	Periodic review of who has access to archives.	Access governance.	N/A	Review Frequency Quarterly	Security
+F-M11-131	Archive Data Sampling for ML	Provides sampled data for training fraud models.	Innovation enablement.	Reservoir Sampling	Sampling Bias <5%	Data Scientist
+F-M11-132	Automated Retention Policy Testing	Tests new policies against a copy of production data.	Risk mitigation.	N/A	Test Coverage 100%	QA
+F-M11-133	Data Subject Identity Resolution	Resolves different IDs (email, wallet hash) to a single profile for DSAR.	Accuracy for deletion.	Graph Matching	Resolution Accuracy 99%	Compliance
+F-M11-134	Archive Storage Quota Alerting	Alerts tenants when they are near their storage limit.	Customer communication.	N/A	Alert Threshold 90%	Support
+F-M11-135	Data Erasure Audit Report	Specific report focusing on deleted items.	Proof of privacy.	N/A	Report Generation <1 min	DPO
+F-M11-136	Archive Data Compression Analysis	Analyzes effectiveness of compression algorithms.	Cost/benefit analysis.	N/A	Analysis Frequency Monthly	SRE
+F-M11-137	Immutable WORM Storage Gateway	On-prem gateway for banks requiring on-prem WORM storage.	Private cloud support.	N/A	Gateway Latency <10ms	Integration
+F-M11-138	Legal Hold Data Isolation	Physically isolates data on legal hold in separate storage class.	Operational safety.	N/A	Isolation Enforced 100%	Legal
+F-M11-139	Archive Query Cost Estimator	Estimates cost of a large analytical query before running.	Cost control.	N/A	Estimate Error <10%	Analyst
+F-M11-140	Automated Retention Extension Trigger	API for Fraud Module (M03) to extend retention.	System integration.	N/A	API Latency <50ms	Fraud System
+F-M11-141	Data Stewardship Assignment	Auto-assigns stewardship based on data origin.	Governance automation.	N/A	Assignment Accuracy 100%	Governance
+F-M11-142	Archive Data Deduplication Reporting	Reports on space saved by deduplication.	ROI tracking.	N/A	Report Frequency Weekly	Finance
+F-M11-143	Cross-Cloud Failback Capability	Fails back from DR cloud to primary cloud.	Disaster recovery flexibility.	N/A	Failback Time <4 hours	SRE
+F-M11-144	Secure Data Disposal Certificate for Hardware	Certifies physical destruction of drives.	Asset management.	N/A	Certificate Serial Number Tracking	Asset Mgmt
+F-M11-145	Archive Search Query Optimization	Materializes frequent query results.	Performance.	N/A	Materialization Refresh Daily	System
+F-M11-146	Data Retention Policy Diff Notification	Notifies stakeholders when a policy is changed.	Change communication.	N/A	Notification Delivery 100%	Compliance
+F-M11-147	Automated Archive Health Check	Daily check of archive availability and integrity.	System health.	N/A	Health Check Status Green 99.9%	SRE
+F-M11-148	Legal Hold Query Filter	Automatically filters queries to exclude legal hold data unless authorized.	Prevents tampering.	N/A	Filter Enforcement 100%	Legal
+F-M11-149	Archive Data Migration Simulation	Simulates migration of 10PB+ data to new provider.	Feasibility testing.	Discrete Event Simulation	Simulation Accuracy >90%	Architect
+F-M11-150	PII Discovery Dashboard	Visual dashboard showing density of PII in archives.	Risk assessment.	N/A	Dashboard Refresh Real-time	DPO
+F-M11-151	Smart Restore Point Creation	Creates granular, named restore points for specific datasets before major upgrades.	Allows rollback of specific data subsets without full system restore.	N/A	Restore Creation Time <1 min	System Admin
+F-M11-152	Hybrid Cloud Storage Tiering	Intelligently routes data between on-premise storage and public cloud based on privacy rules.	Meets strict data residency laws while leveraging cloud scalability.	Cost Optimization Algorithms	Residency Compliance 100%	Architect
+F-M11-153	Smart Erasure Verification	Cross-verifies cryptographic erasure across multiple cloud providers for multi-cloud setups.	Ensures deletion is effective across the entire infrastructure stack.	Consensus Protocols	Verification Time <5 min	Security
+F-M11-154	Consent Withdrawal Impact Analysis	Simulates the effect of a user withdrawing consent on existing archives.	Helps DPOs understand the complexity of fulfilling specific RTBF requests.	Impact Analysis Graph	Report Accuracy >95%	DPO
+F-M11-155	Data Sovereignty Breach Auto-Mitigation	Automatically detects data stored in wrong region and moves it or deletes it.	Prevents massive fines for cross-border data transfer violations.	Geo-Location Services	Mitigation Time <1 hour	Compliance
+F-M11-156	Global Deduplication Store	Deduplicates data across multiple tenants while maintaining strict cryptographic isolation.	Reduces storage costs for SaaS deployments of PARI.	Content-Defined Storage	Dedup Ratio >4:1	Ops
+F-M11-157	Legal Hold AI Assistant	NLP-powered assistant to search and tag relevant data for legal holds.	Reduces lawyer hours spent in searching for evidence.	BERT / NER	Relevance Score >85%	Legal
+F-M11-158	Cold Storage Cost Drift Detection	Alerts if the cost of cold storage is trending upwards unexpectedly.	Prevents budget overruns due to pricing changes or misconfiguration.	Time Series Anomaly	Alert Sensitivity High	Finance
+F-M11-159	Dynamic Compliance Rule Update	Automatically updates retention rules if a law changes (fed via legal APIs).	Future-proofs the system against legislative changes.	NLP on Legal Text	Rule Propagation Time <24h	Compliance
+F-M11-160	Cross-Border Data Transfer Minimization	Automatically strips out non-essential data before transferring across borders.	Reduces compliance risk for international transfers.	Data Minimization Heuristics	Data Reduction % >30%	Compliance
+
+
+h.	Comprehensive List of Database Objects
+
+ID	Schema Name	Object Name	Object Type	Description	Feature Reference	Column Names	Constraints / Notes	Junction Tables
+D-M11-001	lifecycle	retention_policies	Table	Defines the retention rules per data type and jurisdiction.	F-M11-002	policy_id, jurisdiction_code, data_type, retention_period_days, legal_basis	PK: policy_id	N/A
+D-M11-002	lifecycle	archive_jobs	Table	Tracks the status of data archival tasks.	F-M11-003	job_id, table_name, partition_key, status (ENUM), start_time, end_time, bytes_transferred	PK: job_id, FK: status	N/A
+D-M11-003	lifecycle	deletion_requests	Table	Logs requests for data deletion and their execution status.	F-M11-008	request_id, target_object_id, requestor, justification, status, method (CRYPTO/LOGICAL)	PK: request_id	N/A
+D-M11-004	lifecycle	encryption_keys	Table	Maps data objects to their specific encryption keys for erasure.	F-M11-009	key_id, object_path, key_version, status (ACTIVE/DESTROYED), destruction_time	PK: key_id	N/A
+D-M11-005	lifecycle	legal_holds	Table	Tracks data objects placed on legal hold.	F-M11-011	hold_id, case_id, object_id, applied_by, expiry_date, status	PK: hold_id	N/A
+D-M11-006	lifecycle	audit_trail	Table	Immutable log of all lifecycle events.	F-M11-014	event_id, timestamp, action_type, actor, object_id, previous_state, new_state, hash_signature	PK: event_id, UNIQUE: hash_signature	N/A
+D-M11-007	lifecycle	data_classification_tags	Table	Stores tags applied to data for classification.	F-M11-001	tag_id, object_id, tag_name, confidence_score, applied_at	PK: tag_id, FK: object_id	N/A
+D-M11-008	lifecycle	storage_tier_config	Table	Configuration for storage classes (Hot, Warm, Cold).	F-M11-004	tier_id, provider (AWS/GCS), storage_class, cost_per_tb, transition_days	PK: tier_id	N/A
+D-M11-009	lifecycle	compliance_reports	Table	Metadata of generated compliance reports.	F-M11-013	report_id, report_type, generated_at, generated_by, file_path_s3, hash	PK: report_id	N/A
+D-M11-010	lifecycle	dsar_requests	Table	Data Subject Access Request logs.	F-M11-044	dsar_id, user_id, request_date, status, fulfillment_date, data_package_path	PK: dsar_id	N/A
+D-M11-011	lifecycle	archive_verification	Table	Results of periodic archive integrity checks.	F-M11-019	check_id, object_path, expected_hash, actual_hash, check_time, status	PK: check_id	N/A
+D-M11-012	lifecycle	pii_audit_log	Table	Logs of PII access/redactions.	F-M11-098	log_id, action_time, user_id, object_id, fields_redacted, reason	PK: log_id	N/A
+D-M11-013	lifecycle	storage_quota	Table	Quotas per tenant/bu.	F-M11-068	quota_id, tenant_id, soft_limit_gb, hard_limit_gb, current_usage_gb	PK: quota_id	N/A
+D-M11-014	lifecycle	key_rotation_history	Table	History of master key rotations.	F-M11-069	rotation_id, previous_key_version, new_key_version, rotation_time, performed_by	PK: rotation_id	N/A
+D-M11-015	lifecycle	failover_events	Table	Logs of DR failover/failback events.	F-M11-022	event_id, trigger_time, source_region, dest_region, status, initiated_by	PK: event_id	N/A
+D-M11-016	lifecycle	retention_policy_simulations	Table	Stores simulation results.	F-M11-027	sim_id, policy_id, simulated_at, projected_volume_delta, projected_cost_delta	PK: sim_id	N/A
+D-M11-017	lifecycle	legal_hold_approvals	Table	Workflow steps for legal hold approvals.	F-M11-093	approval_id, hold_id, approver_role, status, decision_time	PK: approval_id	N/A
+D-M11-018	lifecycle	archive_metadata_index	Table	Searchable index for archive contents.	F-M11-025	index_id, object_id, key_term, occurrence_count, last_updated	PK: index_id	N/A
+D-M11-019	lifecycle	data_lineage	Table	Graph edges for data lineage.	F-M11-026	lineage_id, parent_object_id, child_object_id, transformation_type	PK: lineage_id	N/A
+D-M11-020	lifecycle	compliance_gaps	Table	Logs data without assigned policies.	F-M11-056	gap_id, object_id, detected_at, severity, status	PK: gap_id	N/A
+D-M11-021	lifecycle	cost_attribution	Table	Allocates costs to business units.	F-M11-024	attribution_id, business_unit, period_month, storage_cost, compute_cost	PK: attribution_id	N/A
+D-M11-022	lifecycle	deletion_certificates	Table	Stores signed PDF proofs of deletion.	F-M11-046	cert_id, request_id, file_path_s3, signature, issued_at	PK: cert_id	N/A
+D-M11-023	lifecycle	access_justifications	Table	Justifications for sensitive archive access.	F-M11-102	justification_id, access_log_id, text, approval_status	PK: justification_id	N/A
+D-M11-024	lifecycle	training_data_labels	Table	Ground truth for ML classification training.	F-M11-090	label_id, object_id, correct_label, feedback_by, timestamp	PK: label_id	N/A
+D-M11-025	lifecycle	migration_batches	Table	Logs of cross-cloud migration batches.	F-M11-048	batch_id, source_provider, dest_provider, object_count, start_time, end_time	PK: batch_id	N/A
+D-M11-026	lifecycle	archive_query_logs	Table	Logs all queries run against the archive.	F-M11-083	query_id, user_id, query_string, rows_scanned, rows_returned, execution_time	PK: query_id	N/A
+D-M11-027	lifecycle	pii_indices	Table	Hashes of PII for privacy-preserving search.	F-M11-112	index_id, data_object_id, pii_hash, pii_type, salt_id	PK: index_id	N/A
+D-M11-028	lifecycle	object_lock_config	Table	WORM lock settings per object.	F-M11-111	lock_id, object_id, mode (GOVERNANCE/COMPLIANCE), until_date	PK: lock_id	N/A
+D-M11-029	lifecycle	retention_override_history	Table	History of retention overrides for VIPs.	F-M11-050	override_id, policy_id, requested_by, approved_by, new_retention_days	PK: override_id	N/A
+D-M11-030	lifecycle	tenant_settings	Table	Specific lifecycle settings per tenant.	F-M11-065	tenant_id, default_retention_override, allow_manual_export, encryption_preference	PK: tenant_id	N/A
+D-M11-031	lifecycle	sync_status	Table	Status of replication to DR region.	F-M11-099	sync_id, object_path, region, lag_ms, status	PK: sync_id	N/A
+D-M11-032	lifecycle	materialized_views_config	Table	Configuration for pre-computed aggregates.	F-M11-145	mv_id, view_name, source_query, refresh_schedule, last_refresh	PK: mv_id	N/A
+D-M11-033	lifecycle	key_shards	Table	Shamir secret sharing shards for master keys.	F-M11-095	shard_id, key_id, holder, encrypted_shard, threshold	PK: shard_id	N/A
+D-M11-034	lifecycle	forensic_exports	Table	Exports generated for external forensic experts.	F-M11-100	export_id, requester_id, case_number, s3_path, access_link_expiry	PK: export_id	N/A
+D-M11-035	lifecycle	data_ownership	Table	Mapping of data objects to stewards.	F-M11-096	ownership_id, object_range_start, object_range_end, steward_user_id	PK: ownership_id	N/A
+D-M11-036	lifecycle	alerts	Table	System generated alerts (cost, compliance, health).	F-M11-120	alert_id, type, severity, message, created_at, acknowledged	PK: alert_id	N/A
+D-M11-037	lifecycle	access_reviews	Table	Logs of periodic access reviews.	F-M11-130	review_id, role_id, reviewer_id, review_date, outcome	PK: review_id	N/A
+D-M11-038	lifecycle	sampling_jobs	Table	Jobs for sampling archive data for QA/ML.	F-M11-131	sample_job_id, target_population, sample_size, method, output_path	PK: sample_job_id	N/A
+D-M11-039	lifecycle	identity_resolution_cache	Table	Cache for linking user identities.	F-M11-133	cache_key, resolved_profile_id, linked_ids_json, ttl	PK: cache_key	N/A
+D-M11-040	lifecycle	anomaly_detection_logs	Table	Logs of detected access anomalies.	F-M11-015	anomaly_id, user_id, score, reason, timestamp, action_taken	PK: anomaly_id	N/A
+D-M11-041	lifecycle	storage_stats	Table	Daily aggregate storage statistics.	F-M11-104	stat_id, date, tier, total_tb, cost	PK: stat_id	N/A
+D-M11-042	lifecycle	policy_conflicts	Table	Logs of conflicting retention rules.	F-M11-108	conflict_id, rule_a, rule_b, resolved_policy, timestamp	PK: conflict_id	N/A
+D-M11-043	lifecycle	dsar_fulfillment_cache	Table	Temporary storage for DSAR data packages.	F-M11-044	cache_id, dsar_id, data_blob, created_at	PK: cache_id	N/A
+D-M11-044	lifecycle	workflow_steps	Table	Generic workflow step tracking.	F-M11-105	step_id, process_id, step_name, status, updated_at	PK: step_id	N/A
+D-M11-045	lifecycle	consent_records	Table	Records of user consent for data processing.	F-M11-081	consent_id, user_id, purpose, granted_at, revoked_at	PK: consent_id	N/A
+D-M11-046	lifecycle	external_audit_tokens	Table	Short-lived tokens for external auditors.	F-M11-030	token_id, token_hash, issued_to, expiry, permissions	PK: token_id	N/A
+D-M11-047	lifecycle	rehydration_requests	Table	Requests to move cold data back to hot.	F-M11-020	req_id, object_id, requested_by, priority, status	PK: req_id	N/A
+D-M11-048	lifecycle	bulk_operations	Table	Tracking bulk uploads/operations.	F-M11-106	bulk_op_id, operation_type, source_file, status, processed_count	PK: bulk_op_id	N/A
+D-M11-049	lifecycle	version_history	Table	History of object versions.	F-M11-061	version_id, object_id, version_number, created_at, hash	PK: version_id	N/A
+D-M11-050	lifecycle	disaster_recovery_tests	Table	Results of DR drills.	F-M11-054	test_id, test_date, sample_object_id, restore_time, result	PK: test_id	N/A
+D-M11-051	lifecycle	masking_rules	Table	Rules for dynamic data masking.	F-M11-077	rule_id, column_name, pattern, masking_function	PK: rule_id	N/A
+D-M11-052	lifecycle	tenant_storage_usage	Table	High frequency usage tracking.	F-M11-134	usage_id, tenant_id, timestamp, bytes_used	PK: usage_id	N/A
+D-M11-053	lifecycle	legal_hold_search_index	Table	Fast lookup for objects under legal hold.	F-M11-148	hold_index_id, case_id, object_id	PK: hold_index_id	N/A
+D-M11-054	ref_data	enum_job_status	ENUM	Status values for jobs.	F-M11-003	PENDING, RUNNING, COMPLETED, FAILED, CANCELLED	N/A	N/A
+D-M11-055	ref_data	enum_storage_class	ENUM	Storage tier types.	F-M11-004	HOT, WARM, COLD, GLACIER, DEEP_ARCHIVE	N/A	N/A
+D-M11-056	ref_data	enum_deletion_method	ENUM	Deletion techniques.	F-M11-008	LOGICAL, CRYPTOGRAPHIC_ERASURE, PHYSICAL_SHRED	N/A	N/A
+D-M11-057	ref_data	enum_data_classification	ENUM	Data sensitivity levels.	F-M11-074	PUBLIC, INTERNAL, CONFIDENTIAL, RESTRICTED, PII	N/A	N/A
+D-M11-058	ref_data	enum_compliance_alert	ENUM	Alert types.	F-M11-120	RETENTION_BREACH, DELETION_FAILURE, ACCESS_ANOMALY	N/A	N/A
+D-M11-059	ref_data	enum_legal_hold_status	ENUM	Hold states.	F-M11-011	ACTIVE, RELEASED, EXPIRED	N/A	N/A
+D-M11-060	ref_data	enum_provider	ENUM	Cloud providers.	F-M11-004	AWS, AZURE, GCP, MINIO	N/A	N/A
+D-M11-061	ref_data	enum_object_lock_mode	ENUM	WORM lock modes.	F-M11-111	GOVERNANCE, COMPLIANCE	N/A	N/A
+D-M11-062	ref_data	enum_pii_type	ENUM	Types of PII.	F-M11-016	IBAN, PASSPORT, EMAIL, PHONE, WALLET_HASH	N/A	N/A
+D-M11-063	audit	vw_archive_summary	VIEW	Summary of archives per day.	F-M11-012	date, total_objects, total_size_gb, status	N/A	N/A
+D-M11-064	audit	vw_retention_risk	VIEW	Objects approaching deletion or expiry.	F-M11-080	object_id, expiry_date, days_remaining, risk_level	N/A	N/A
+D-M11-065	audit	vw_legal_hold_activity	VIEW	Log of legal hold changes.	F-M11-060	hold_id, case_id, action, actor, timestamp	N/A	N/A
+D-M11-066	audit	vw_compliance_dashboard	VIEW	High level KPI view for DPO.	F-M11-013	total_data_stored, compliance_percentage, active_holds	N/A	N/A
+D-M11-067	audit	vw_cost_analysis	VIEW	Monthly cost breakdown.	F-M11-024	month, storage_cost, bandwidth_cost, request_cost	N/A	N/A
+D-M11-068	audit	vw_access_anomalies	VIEW	Recent security alerts.	F-M11-015	timestamp, user, anomaly_type, score	N/A	N/A
+D-M11-069	audit	vw_deletion_queue	VIEW	Upcoming scheduled deletions.	F-M11-008	scheduled_time, object_count, jurisdiction	N/A	N/A
+D-M11-070	audit	vw_data_lineage_graph	VIEW	Graph representation of lineage.	F-M11-026	parent, child, transformation	N/A	N/A
+D-M11-071	audit	vw_tenant_storage	VIEW	Per-tenant storage usage.	F-M11-068	tenant_id, usage_gb, limit_gb, percentage	N/A	N/A
+D-M11-072	audit	vw_archive_health	VIEW	Health status of archives.	F-M11-076	region, provider, availability, last_check	N/A	N/A
+D-M11-073	audit	vw_dsar_status	VIEW	Status of user data requests.	F-M11-044	dsar_id, user_id, status, days_open	N/A	N/A
+D-M11-074	audit	vw_key_management	VIEW	Status of encryption keys.	F-M11-007	key_id, status, creation_date, rotation_date	N/A	N/A
+D-M11-075	audit	vw_training_data_ready	VIEW	Data prepared for ML training.	F-M11-090	dataset_id, size, last_labelled, ready_flag	N/A	N/A
+D-M11-076	audit	vw_failed_jobs	VIEW	List of jobs that failed.	F-M11-028	job_id, type, failure_reason, retry_count	N/A	N/A
+D-M11-077	audit	vw_replication_lag	VIEW	Real-time replication lag.	F-M11-099	primary_region, dr_region, lag_seconds	N/A	N/A
+D-M11-078	audit	vw_forecast_metrics	VIEW	Predicted storage needs.	F-M11-031	month, predicted_tb, upper_bound, lower_bound	N/A	N/A
+D-M11-079	audit	vw_unclassified_data	VIEW	Data missing classification tags.	F-M11-056	object_id, ingestion_date, data_type	N/A	N/A
+D-M11-080	audit	vw_legal_hold_expiring	VIEW	Holds expiring soon.	F-M11-060	case_id, hold_id, expiry_date	N/A	N/A
+D-M11-081	audit	vw_cost_anomaly	VIEW	Costs deviating from forecast.	F-M11-104	period, actual_cost, expected_cost, variance_pct	N/A	N/A
+D-M11-082	audit	vw_audit_trail_search	VIEW	Searchable interface for audit logs.	F-M11-014	timestamp, actor, action, object_id	N/A	N/A
+D-M11-083	audit	vw_access_reviews_pending	VIEW	Reviews needing attention.	F-M11-130	review_id, role, reviewer, due_date	N/A	N/A
+D-M11-084	audit	vw_dedup_savings	VIEW	Savings from deduplication.	F-M11-052	period, logical_tb, physical_tb, saved_tb	N/A	N/A
+D-M11-085	audit	vw_retention_conflicts	VIEW	Active conflicts in policies.	F-M11-108	conflict_id, description, severity	N/A	N/A
+D-M11-086	audit	vw_data_ownership_map	VIEW	Steward assignments.	F-M11-096	steward, data_range, classification	N/A	N/A
+D-M11-087	audit	vw_forensic_activity	VIEW	Exports to forensic experts.	F-M11-100	export_id, requester, timestamp, status	N/A	N/A
+D-M11-088	audit	vw_sampling_results	VIEW	Results of data sampling.	F-M11-094	sample_id, population_size, sample_size, bias_metric	N/A	N/A
+D-M11-089	audit	vw_encryption_status	VIEW	Overall encryption health.	F-M11-007	objects_encrypted, objects_unencrypted, last_rotation	N/A	N/A
+D-M11-090	audit	vw_policy_simulation	VIEW	Results of policy tests.	F-M11-132	sim_id, policy_name, impact_score	N/A	N/A
+D-M11-091	audit	vw_pii_density	VIEW	PII density per archive.	F-M11-150	archive_id, total_records, pii_records, density_pct	N/A	N/A
+D-M11-092	audit	vw_user_privileges	VIEW	User privileges on archives.	F-M11-040	user_id, role, can_delete, can_export	N/A	N/A
+D-M11-093	audit	vw_system_health	VIEW	Overall system health score.	F-M11-047	component, status, uptime_pct, last_incident	N/A	N/A
+D-M11-094	audit	vw_quarantined_data	VIEW	Data in dead letter queue or failed check.	F-M11-028	object_id, reason, quarantine_date	N/A	N/A
+D-M11-095	audit	vw_key_shard_status	VIEW	Status of secret sharing shards.	F-M11-095	shard_id, holder, status, last_check	N/A	N/A
+D-M11-096	audit	vw_migration_progress	VIEW	Progress of cross-cloud migration.	F-M11-048	batch_id, progress_pct, eta	N/A	N/A
+D-M11-097	audit	vw_deletion_certificates	VIEW	List of issued certificates.	F-M11-046	cert_id, issued_to, issue_date, file_link	N/A	N/A
+D-M11-098	audit	vw_audit_log_integrity	VIEW	Verification of audit log signatures.	F-M11-041	log_id, signature_valid, check_time	N/A	N/A
+D-M11-099	audit	vw_retention_audit	VIEW	Detailed audit for retention.	F-M11-002	object_id, policy_applied, retention_end_date, deleted_at	N/A	N/A
+D-M11-100	audit	vw_active_locks	VIEW	Currently active WORM locks.	F-M11-111	object_id, lock_mode, release_date	N/A	N/A
+D-M11-101	audit	vw_data_stewardship	VIEW	Steward contact info.	F-M11-096	steward_id, name, email, department	N/A	N/A
+D-M11-102	audit	vw_query_performance	VIEW	Performance of archive queries.	F-M11-110	query_id, execution_time, rows_scanned	N/A	N/A
+D-M11-103	audit	vw_alert_history	VIEW	Historical alerts.	F-M11-120	alert_id, type, time, resolution	N/A	N/A
+D-M11-104	audit	vw_consent_audit	VIEW	Audit of consent records.	F-M11-081	user_id, consent_given, consent_revoked, duration	N/A	N/A
+D-M11-105	audit	vw_tenants_non_compliant	VIEW	Tenants violating retention.	F-M11-056	tenant_id, violation_count, last_violation	N/A	N/A
+D-M11-106	audit	vw_archive_latency	VIEW	Latency of retrieval.	F-M11-020	tier, avg_latency_p50, avg_latency_p99	N/A	N/A
+D-M11-107	audit	vw_masking_effectiveness	VIEW	Stats on masking.	F-M11-077	column_name, times_masked, unmasked_access_count	N/A	N/A
+D-M11-108	audit	vw_storage_composition	VIEW	Breakdown of data by type.	F-M11-150	data_type, size_gb, percentage	N/A	N/A
+D-M11-109	audit	vw_workflow_status	VIEW	Status of active workflows.	F-M11-105	process_id, current_step, initiator	N/A	N/A
+D-M11-110	audit	vw_identity_resolution	VIEW	Resolved identities.	F-M11-133	primary_id, linked_ids	N/A	N/A
+D-M11-111	audit	vw_external_access	VIEW	Access by external auditors.	F-M11-100	user, access_time, objects_viewed	N/A	N/A
+D-M11-112	audit	vw_cost_allocation	VIEW	Detailed cost allocation.	F-M11-024	bu, cost_center, amount	N/A	N/A
+D-M11-113	audit	vw_retention_policy_versions	VIEW	History of policy changes.	F-M11-089	policy_id, version, change_summary, effective_date	N/A	N/A
+D-M11-114	audit	vw_archive_search_stats	VIEW	Stats on search terms.	F-M11-025	search_term, frequency, avg_result_count	N/A	N/A
+D-M11-115	audit	vw_failover_readiness	VIEW	Readiness score for DR.	F-M11-022	component, ready, notes	N/A	N/A
+D-M11-116	audit	vw_data_ingestion_rate	VIEW	Rate of data coming in.	F-M11-070	date, records_ingested, tb_ingested	N/A	N/A
+D-M11-117	audit	vw_anomaly_trends	VIEW	Trends in security anomalies.	F-M11-015	date, anomaly_count, type	N/A	N/A
+D-M11-118	audit	vw_deletion_success_rate	VIEW	Success rate of deletion jobs.	F-M11-008	date, requested, succeeded, failed	N/A	N/A
+D-M11-119	audit	vw_archive_growth	VIEW	Growth of archive size.	F-M11-031	month, size_tb, growth_mom_pct	N/A	N/A
+D-M11-120	audit	vw_key_lifecycle	VIEW	Lifecycle of keys.	F-M11-009	key_id, created, rotated, destroyed	N/A	N/A
+D-M11-121	audit	vw_policy_conflict_details	VIEW	Details of policy conflicts.	F-M11-108	conflict_id, policy_a_details, policy_b_details, resolution	N/A	N/A
+D-M11-122	audit	vw_data_export_log	VIEW	Log of data exports.	F-M11-082	export_id, exported_by, recipient, record_count	N/A	N/A
+D-M11-123	audit	vw_storage_utilization	VIEW	Storage utilization %.	F-M11-068	tier, used_tb, total_tb, utilization_pct	N/A	N/A
+D-M11-124	audit	vw_access_denied	VIEW	Log of denied access attempts.	F-M11-040	user, resource, timestamp, reason	N/A	N/A
+D-M11-125	audit	vw_retention_extensions	VIEW	Log of extended retentions.	F-M11-140	object_id, original_expiry, new_expiry, reason	N/A	N/A
+D-M11-126	audit	vw_rehydration_stats	VIEW	Stats on data rehydration.	F-M11-020	date, request_count, avg_time	N/A	N/A
+D-M11-127	audit	vw_legal_hold_overview	VIEW	Overview of legal holds.	F-M11-011	case_id, objects_on_hold, hold_duration_days	N/A	N/A
+D-M11-128	audit	vw_compliance_calendar	VIEW	Calendar view of compliance events.	F-M11-080	event_date, event_type, description	N/A	N/A
+D-M11-129	audit	vw_key_rotation_schedule	VIEW	Upcoming key rotations.	F-M11-069	key_id, scheduled_date, assigned_to	N/A	N/A
+D-M11-130	audit	vw_data_disposal_log	VIEW	Log of data disposal.	F-M11-008	object_id, disposed_date, method, authorized_by	N/A	N/A
+D-M11-131	audit	vw_archive_integrity	VIEW	Integrity check results.	F-M11-076	check_id, start_date, end_date, integrity_score	N/A	N/A
+D-M11-132	audit	vw_classification_accuracy	VIEW	Accuracy of auto-classification.	F-M11-090	period, total_classified, correctly_classified, accuracy_pct	N/A	N/A
+D-M11-133	audit	vw_cost_forecast	VIEW	Forecasted costs.	F-M11-031	month, forecast_cost, confidence_interval	N/A	N/A
+D-M11-134	audit	vw_access_patterns	VIEW	Patterns of archive access.	F-M11-025	hour_of_day, day_of_week, access_count	N/A	N/A
+D-M11-135	audit	vw_retention_distribution	VIEW	Distribution of retention policies.	F-M11-002	policy_name, object_count, total_size_gb	N/A	N/A
+D-M11-136	audit	vw_deleted_data_volume	VIEW	Volume of deleted data.	F-M11-008	week, volume_tb, deleted_by	N/A	N/A
+D-M11-137	audit	vw_audit_trail_latency	VIEW	Latency of audit log writes.	F-M11-014	timestamp, write_latency_ms	N/A	N/A
+D-M11-138	audit	vw_data_owner_contact	VIEW	Contact info for data owners.	F-M11-096	owner_id, name, email, phone	N/A	N/A
+D-M11-139	audit	vw_policy_change_impact	VIEW	Impact of policy changes.	F-M11-089	change_id, affected_objects, projected_cost_delta	N/A	N/A
+D-M11-140	audit	vw_forensic_access_log	VIEW	Log of forensic access.	F-M11-100	access_id, case_number, timestamp, user	N/A	N/A
+D-M11-141	audit	vw_key_shard_holders	VIEW	Holders of key shards.	F-M11-095	shard_id, holder_name, holder_contact	N/A	N/A
+D-M11-142	audit	vw_migration_status	VIEW	Status of data migrations.	F-M11-048	migration_id, status, progress_pct, eta	N/A	N/A
+D-M11-143	audit	vw_archive_access_by_role	VIEW	Access stats by role.	F-M11-040	role_name, access_count, avg_rows	N/A	N/A
+D-M11-144	audit	vw_deletion_latency	VIEW	Latency of deletion processing.	F-M11-008	date, avg_latency_seconds	N/A	N/A
+D-M11-145	audit	vw_storage_cost_per_tenant	VIEW	Storage cost per tenant.	F-M11-024	tenant_id, cost_month, storage_cost	N/A	N/A
+D-M11-146	audit	vw_data_retention_compliance	VIEW	Overall compliance status.	F-M11-002	compliant_objects, non_compliant_objects, compliance_pct	N/A	N/A
+D-M11-147	audit	vw_pii_redaction_log	VIEW	Log of PII redactions.	F-M11-098	redaction_id, column_name, redaction_time, user	N/A	N/A
+D-M11-148	audit	vw_archival_job_errors	VIEW	Errors during archival.	F-M11-028	job_id, error_message, error_time	N/A	N/A
+D-M11-149	audit	vw_replication_status	VIEW	Real-time replication status.	F-M11-099	primary_region, dr_region, status	N/A	N/A
+D-M11-150	audit	vw_system_alerts	VIEW	Active system alerts.	F-M11-120	alert_id, severity, message, created_at	N/A	N/A
+D-M11-151	lifecycle	sp_initiate_archive	PROCEDURE	Triggers an archival job for a partition.	F-M11-003	partition_name	Returns job_id	N/A
+D-M11-152	lifecycle	sp_verify_archive_integrity	PROCEDURE	Verifies hashes of archived data.	F-M11-019	archive_path	Returns is_valid	N/A
+D-M11-153	lifecycle	sp_execute_deletion	PROCEDURE	Executes the deletion workflow.	F-M11-008	deletion_request_id	Updates deletion_requests	N/A
+D-M11-154	lifecycle	sp_apply_legal_hold	PROCEDURE	Applies a legal hold to an object.	F-M11-011	object_id, case_id	Inserts into legal_holds	N/A
+D-M11-155	lifecycle	sp_release_legal_hold	PROCEDURE	Releases a legal hold.	F-M11-011	hold_id	Updates legal_holds.status	N/A
+D-M11-156	lifecycle	sp_rotate_encryption_key	PROCEDURE	Rotates master keys.	F-M11-069	key_id	Updates encryption_keys	N/A
+D-M11-157	lifecycle	sp_generate_compliance_report	PROCEDURE	Generates the PDF/CSV report.	F-M11-013	report_type, start_date, end_date	Inserts into compliance_reports	N/A
+D-M11-158	lifecycle	sp_rehydrate_data	PROCEDURE	Moves data from Cold to Hot.	F-M11-020	object_id	Updates storage metadata	N/A
+D-M11-159	lifecycle	sp_check_retention_expiry	PROCEDURE	Scheduled job to find expired data.	F-M11-008	N/A	Returns list of object_id	N/A
+D-M11-160	lifecycle	sp_update_retention_policy	PROCEDURE	Updates an existing policy.	F-M11-002	policy_id, new_period	Updates retention_policies	N/A
+D-M11-161	lifecycle	sp_classify_data	PROCEDURE	Classifies a batch of data.	F-M11-001	batch_id	Inserts into data_classification_tags	N/A
+D-M11-162	lifecycle	sp_delete_encryption_key	PROCEDURE	Deletes a key from KMS.	F-M11-009	key_id	Calls KMS SDK	N/A
+D-M11-163	lifecycle	sp_handle_dsar	PROCEDURE	Processes Data Subject Access Request.	F-M11-044	user_id	Creates package in S3	N/A
+D-M11-164	lifecycle	sp_handle_rtbf	PROCEDURE	Processes Right To Be Forgotten.	F-M11-017	user_id	Triggers deletion for user data	N/A
+D-M11-165	lifecycle	sp_log_audit_event	PROCEDURE	Writes to immutable audit log.	F-M11-014	event_details	Inserts into audit_trail	N/A
+D-M11-166	lifecycle	sp_quarantine_failed_archive	PROCEDURE	Moves failed objects to quarantine.	F-M11-028	object_id	Updates object status	N/A
+D-M11-167	lifecycle	sp_calculate_storage_cost	PROCEDURE	Calculates monthly costs per BU.	F-M11-024	month	Inserts into cost_attribution	N/A
+D-M11-168	lifecycle	sp_analyze_access_anomalies	PROCEDURE	Runs anomaly detection on logs.	F-M11-015	time_range	Inserts into anomaly_detection_logs	N/A
+D-M11-169	lifecycle	sp_failover_to_dr	PROCEDURE	Initiates failover process.	F-M11-022	N/A	Updates failover_events	N/A
+D-M11-170	lifecycle	sp_update_data_ownership	PROCEDURE	Reassigns data ownership.	F-M11-096	new_owner, data_range	Updates data_ownership	N/A
+D-M11-171	lifecycle	sp_purge_audit_logs	PROCEDURE	Purges old audit logs (if allowed).	F-M11-008	retention_date	Deletes from audit_trail	N/A
+D-M11-172	lifecycle	sp_generate_deletion_cert	PROCEDURE	Generates deletion certificate.	F-M11-046	request_id	Inserts into deletion_certificates	N/A
+D-M11-173	lifecycle	sp_simulate_retention_policy	PROCEDURE	Runs simulation.	F-M11-027	policy_id	Inserts into retention_policy_simulations	N/A
+D-M11-174	lifecycle	sp_schedule_key_rotation	PROCEDURE	Schedules rotation.	F-M11-069	key_id, rotation_date	Updates encryption_keys	N/A
+D-M11-175	lifecycle	sp_resync_replication	PROCEDURE	Resyncs replication if lag is high.	F-M11-099	N/A	Updates sync_status	N/A
+D-M11-176	lifecycle	sp_check_compliance_gaps	PROCEDURE	Checks for unclassified data.	F-M11-056	N/A	Inserts into compliance_gaps	N/A
+D-M11-177	lifecycle	sp_create_data_lineage	PROCEDURE	Creates lineage entry.	F-M11-026	parent, child, type	Inserts into data_lineage	N/A
+D-M11-178	lifecycle	sp_sample_archive_data	PROCEDURE	Samples data for QA.	F-M11-094	sample_size	Inserts into sampling_jobs	N/A
+D-M11-179	lifecycle	sp_refresh_materialized_view	PROCEDURE	Refreshes specific MV.	F-M11-145	mv_name	Calls REFRESH MATERIALIZED VIEW	N/A
+D-M11-180	lifecycle	sp_resolve_user_identity	PROCEDURE	Resolves identity for DSAR.	F-M11-133	identifier	Returns profile_id	N/A
+D-M11-181	lifecycle	sp_export_forensic_data	PROCEDURE	Exports data for case.	F-M11-100	case_id, filters	Inserts into forensic_exports	N/A
+D-M11-182	lifecycle	sp_manage_storage_quota	PROCEDURE	Checks and enforces quota.	F-M11-068	tenant_id	Updates storage_quota	N/A
+D-M11-183	lifecycle	sp_mask_pii_column	PROCEDURE	Applies masking dynamically.	F-M11-077	table_name, column_name	Updates masking_rules	N/A
+D-M11-184	lifecycle	sp_reconcile_archive_count	PROCEDURE	Reconciles DB count vs S3 count.	F-M11-019	partition_name	Returns discrepancy	N/A
+D-M11-185	lifecycle	sp_train_classification_model	PROCEDURE	Triggers ML retraining.	F-M11-090	N/A	Updates model metadata	N/A
+D-M11-186	lifecycle	sp_archive_access_log	PROCEDURE	Archives old access logs.	F-M11-003	log_date	Moves to cold storage	N/A
+D-M11-187	lifecycle	sp_cleanup_temp_files	PROCEDURE	Cleans staging area.	F-M11-028	staging_path	Deletes files	N/A
+D-M11-188	lifecycle	sp_update_system_health	PROCEDURE	Updates health stats.	F-M11-047	component, status	Updates cache table	N/A
+D-M11-189	lifecycle	sp_extend_retention	PROCEDURE	Extends retention for specific data.	F-M11-140	object_id, days	Updates retention_policies	N/A
+D-M11-190	lifecycle	sp_verify_key_integrity	PROCEDURE	Verifies key shard integrity.	F-M11-095	key_id	Returns is_intact	N/A
+D-M11-191	lifecycle	sp_migrate_data_batch	PROCEDURE	Migrates batch of data.	F-M11-048	batch_id, target_provider	Updates migration_batches	N/A
+D-M11-192	lifecycle	sp_generate_access_token	PROCEDURE	Generates short-lived access token.	F-M11-030	user_id, permissions	Inserts into external_audit_tokens	N/A
+D-M11-193	lifecycle	sp_record_consent	PROCEDURE	Records user consent.	F-M11-081	user_id, consent_text	Inserts into consent_records	N/A
+D-M11-194	lifecycle	sp_revoke_consent	PROCEDURE	Revokes user consent.	F-M11-081	consent_id	Updates consent_records	N/A
+D-M11-195	lifecycle	sp_schedule_drill	PROCEDURE	Schedules DR drill.	F-M11-054	drill_date	Inserts into disaster_recovery_tests	N/A
+D-M11-196	lifecycle	sp_resolve_conflict	PROCEDURE	Resolves retention conflict.	F-M11-108	conflict_id, resolution	Updates policy_conflicts	N/A
+D-M11-197	lifecycle	sp_index_pii	PROCEDURE	Indexes PII hashes.	F-M11-112	object_id, pii_value	Inserts into pii_indices	N/A
+D-M11-198	lifecycle	sp_compress_data	PROCEDURE	Compresses data before archival.	F-M11-021	object_id	Updates metadata	N/A
+D-M11-199	lifecycle	sp_encrypt_data	PROCEDURE	Encrypts data before archival.	F-M11-006	object_id	Updates metadata	N/A
+D-M11-200	lifecycle	sp_calculate_pii_density	PROCEDURE	Calculates PII density for dashboard.	F-M11-150	archive_id	Returns density_score	N/A
+D-M11-201	lifecycle	restore_points	Table	Stores metadata for manual restore points.	F-M11-151	point_id, name, created_at, snapshot_id, creator	PK: point_id	N/A
+D-M11-202	lifecycle	hybrid_storage_links	Table	Links data objects to their physical location (On-prem vs Cloud).	F-M11-152	link_id, object_id, location_type, region, access_endpoint	PK: link_id	N/A
+D-M11-203	lifecycle	consent_impact_analysis	Table	Results of consent withdrawal simulations.	F-M11-154	analysis_id, user_id, affected_objects_count, storage_saved_gb, timestamp	PK: analysis_id	N/A
+D-M11-204	lifecycle	global_dedup_store	Table	Hash index for global deduplication mapping.	F-M11-156	hash_id, chunk_hash, reference_count, first_tenant_id	PK: hash_id	N/A
+D-M11-205	lifecycle	sovereignty_breaches	Table	Logs detected data residency violations.	F-M11-155	breach_id, object_id, current_location, required_location, detected_at	PK: breach_id	N/A
+D-M11-206	lifecycle	legal_hold_ai_suggestions	Table	AI suggestions for legal hold tagging.	F-M11-157	suggestion_id, case_id, object_id, relevance_score, status	PK: suggestion_id	N/A
+D-M11-207	lifecycle	cost_drift_alerts	Table	Alerts for unusual cost increases.	F-M11-158	alert_id, tier, expected_cost, actual_cost, variance_pct	PK: alert_id	N/A
+D-M11-208	lifecycle	legal_updates_feed	Table	Feed of legal changes from external APIs.	F-M11-159	update_id, jurisdiction, law_name, summary, effective_date	PK: update_id	N/A
+D-M11-209	lifecycle	cross_border_transfers	Table	Logs of data moving across borders.	F-M11-160	transfer_id, object_id, source_country, dest_country, reason_code	PK: transfer_id	N/A
+D-M11-210	lifecycle	erasure_verification_cross_cloud	Table	Verification results for multi-cloud erasure.	F-M11-153	verify_id, object_id, aws_status, azure_status, gcp_status, final_status	PK: verify_id	N/A
+D-M11-211	audit	vw_restore_point_list	VIEW	List of available restore points.	F-M11-151	point_id, name, created_at, size_gb	N/A	N/A
+D-M11-212	audit	vw_hybrid_storage_balance	VIEW	Balance of data between on-prem and cloud.	F-M11-152	location, total_tb, percentage, cost	N/A	N/A
+D-M11-213	audit	vw_consent_impacts	VIEW	Summary of impact analyses.	F-M11-154	date, total_requests, avg_affected_objects	N/A	N/A
+D-M11-214	audit	vw_dedup_savings_global	VIEW	Global savings from deduplication.	F-M11-156	period, logical_tb, physical_tb, savings_pct	N/A	N/A
+D-M11-215	audit	vw_sovereignty_compliance	VIEW	Compliance status regarding data residency.	F-M11-155	jurisdiction, compliant_objects, breached_objects	N/A	N/A
+D-M11-216	audit	vw_legal_hold_suggestions	VIEW	AI recommendations for legal teams.	F-M11-157	case_id, suggestion_count, avg_relevance	N/A	N/A
+D-M11-217	audit	vw_cost_drift_trends	VIEW	Trends in storage cost variance.	F-M11-158	month, variance_pct, tier	N/A	N/A
+D-M11-218	audit	vw_regulatory_updates	VIEW	Recent legal updates impacting retention.	F-M11-159	update_date, jurisdiction, impact_level	N/A	N/A
+D-M11-219	audit	vw_cross_border_activity	VIEW	Log of international transfers.	F-M11-160	date, source_country, dest_country, volume_gb	N/A	N/A
+D-M11-220	audit	vw_multi_cloud_erasure_status	VIEW	Status of deletion across providers.	F-M11-153	object_id, aws_deleted, azure_deleted, gcp_deleted	N/A	N/A
+D-M11-221	lifecycle	sp_create_restore_point	PROCEDURE	Creates a manual restore point.	F-M11-151	point_name, snapshot_id	Returns point_id	N/A
+D-M11-222	lifecycle	sp_route_storage_hybrid	PROCEDURE	Determines best storage location.	F-M11-152	object_id, jurisdiction	Updates hybrid_storage_links	N/A
+D-M11-223	lifecycle	sp_run_consent_impact	PROCEDURE	Runs the impact analysis.	F-M11-154	user_id	Inserts into consent_impact_analysis	N/A
+D-M11-224	lifecycle	sp_register_dedup_chunk	PROCEDURE	Registers a chunk for deduplication.	F-M11-156	chunk_hash, tenant_id	Inserts into global_dedup_store	N/A
+D-M11-225	lifecycle	sp_remediate_sovereignty	PROCEDURE	Moves data back to correct region.	F-M11-155	breach_id	Updates hybrid_storage_links	N/A
+D-M11-226	lifecycle	sp_generate_legal_hold_suggestions	PROCEDURE	Runs AI model for legal holds.	F-M11-157	case_id	Inserts into legal_hold_ai_suggestions	N/A
+D-M11-227	lifecycle	sp_check_cost_drift	PROCEDURE	Compares actuals vs forecast.	F-M11-158	period	Inserts into cost_drift_alerts	N/A
+D-M11-228	lifecycle	sp_process_legal_updates	PROCEDURE	Processes new legal requirements.	F-M11-159	update_id	Updates retention_policies	N/A
+D-M11-229	lifecycle	sp_log_cross_border_transfer	PROCEDURE	Logs data transfer.	F-M11-160	object_id, source, dest	Inserts into cross_border_transfers	N/A
+D-M11-230	lifecycle	sp_verify_multi_cloud_deletion	PROCEDURE	Checks deletion status in all clouds.	F-M11-153	object_id	Inserts into erasure_verification_cross_cloud	N/A

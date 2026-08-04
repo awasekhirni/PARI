@@ -1,0 +1,452 @@
+5.	Module M05	Licensed Exchange & Settlement Hub
+a.	Summary
+The Licensed Exchange & Settlement Hub (Module M05) constitutes the critical regulated nexus within the PARI ecosystem, functioning as the sovereign gateway between traditional fiat financial infrastructure and the privacy-preserving digital currency realm. As a CMMI Level 5 optimized component, M05 is engineered to resolve the fundamental friction between the anonymity requirements of digital cash and the stringent compliance mandates of regulated banking. It achieves this by acting as the sole licensed authority responsible for minting digital coins into circulation (issuance) and redeeming them for fiat currency (redemption), thereby underpinning the entire economic value of the system with verifiable reserves.
+
+Architecturally, M05 operates as a high-availability microservice cluster integrated directly with Central Bank Real-Time Gross Settlement (RTGS) systems and commercial banking rails via ISO 20022 and EBICS protocols. Its primary mandate is to ensure that every unit of privacy-preserving digital currency in circulation is fully backed by a corresponding reserve unit of fiat currency, mitigating volatility risks and ensuring monetary sovereignty. The module manages the complex lifecycle of "blinded" coins, utilizing Hardware Security Modules (HSMs) to cryptographically sign coins without ever seeing the user's identity, thus maintaining the strict payer anonymity guaranteed by PARI while ensuring the exchange itself satisfies Know Your Customer (KYC) obligations.
+
+A core pillar of M05 is its advanced Anti-Money Laundering (AML) and Counter-Terrorist Financing (CFT) framework. Unlike legacy systems that rely on static blacklists, M05 employs a dynamic, API-integrated approach, connecting in real-time with intelligence providers like Chainalysis and ComplyAdvantage. This allows for the screening of withdrawal and redemption flows against global sanctions lists, high-risk jurisdiction databases, and crypto-exposure heuristics. Crucially, this compliance layer operates on the "Exchange" side of the transaction. When a customer withdraws digital coins, the Exchange performs KYC/AML checks before signing the coin, ensuring that while the merchant sees only a valid token, the system has verified the source of funds. This design effectively de-risks the privacy layer for regulators, transforming a potential "dark web" enabler into a transparent, accountable fiscal instrument.
+
+Furthermore, M05 handles the intricacies of real-time settlement. It utilizes event-driven architecture to reconcile intraday liquidity, manage float across multiple currency corridors (e.g., EUR, CHF, USD), and execute automated netting procedures to optimize capital efficiency for partner banks. The module is designed for resilience, featuring geo-redundant active-active database replication and automated failover mechanisms to guarantee settlement finality under 2 seconds, even during peak market volatility. It also manages the fee structure for the ecosystem, calculating and routing interchange fees, withdrawal commissions, and regulatory levies instantly upon transaction execution.
+
+Finally, M05 serves as the primary data source for fiscal transparency. It generates immutable, cryptographically signed audit trails for every minting and burning event, feeding the Independent Auditor Interface (Module M06). By rigorously segregating the "blind" operational data from the "identity" compliance data within its secure PostgreSQL partitions, M05 ensures that tax authorities can verify total transaction volumes and merchant revenues without ever accessing the personal spending histories of individual citizens. In essence, Module M05 is the engine room of trust in the PARI architecture, converting the promise of privacy into a legally compliant, financially stable, and institutionally grade reality.
+
+
+b.	Scope
+
+The scope of Module M05 encompasses the end-to-end management of the fiat-to-digital currency interface. This includes:
+
+     Customer Onboarding & KYC: Integration with eIDAS 2.0 and document verification services for identity assurance.
+     Coin Issuance (Withdrawal): Processing fiat deposits, validating reserves, and signing blinded coins via HSMs.
+     Coin Redemption (Deposit): Verifying spent coins, debiting merchant/customer accounts, and initiating fiat transfers.
+     Liquidity Management: Monitoring reserve ratios, managing intraday liquidity lines with central banks, and handling currency exchange.
+     Compliance Screening: Real-time AML/CFT checks, sanctions screening, and Suspicious Activity Report (SAR) generation.
+     Settlement Operations: ISO 20022 message parsing, EBICS file upload/download, and RTGS connectivity.
+     Fee Management: Calculation, deduction, and routing of transaction fees.
+
+
+c.	Business Case
+
+Current financial ecosystems force a choice between innovation and regulation. Blockchain alternatives offer privacy but lack banking compliance, making them unusable for legitimate commerce and tax collection. Traditional banking offers compliance but zero privacy, exposing citizens to surveillance and data monetization. Banks and Payment Service Providers (PSPs) are eager to enter the digital payments space but face prohibitive costs in building proprietary privacy rails and fear regulatory backlash if those rails are misused.
+
+Module M05 solves this by providing a "Regulated Privacy Bridge." It allows banks and Central Banks to participate in the digital economy without bearing the technical liability of privacy protocol development. By integrating existing standards (ISO 20022) with next-gen privacy, it reduces integration costs by an estimated 40% compared to proprietary blockchain implementations. It creates a new revenue stream for Exchanges through transaction fees while drastically lowering the fraud risk associated with card-not-present transactions. For regulators, it eliminates the "crypto-black box" by providing a transparent, auditable entry and exit point for funds, ensuring that while peer-to-peer transfers remain private, the on/off-ramps are heavily fortified and monitored.
+
+d.	KPIs
+Settlement Finality: < 2 seconds for ISO 20022 instructions.
+ AML False-Negative Rate: < 0.01% (Catch rate of illicit actors).
+ Reserve Ratio Accuracy: 100% (Digital coins in circulation must equal Fiat reserves).
+ System Availability: 99.999% (Five nines).
+ HMS Signing Latency: < 50ms per blind signature request.
+ Compliance Screening Latency: < 200ms per transaction.
+ Reconciliation Success Rate: 100% (Daily automated matching of ledger vs. bank statements)
+
+
+e.	Stakeholder Insights
+Stakeholder	Concern	Implications
+Central Banks	Monetary stability and control of money supply.	M05 must enforce strict 1:1 reserve backing and provide real-time visibility into money creation (minting) and destruction (redemption).
+Commercial Banks	Liquidity risk and regulatory fines (AML non-compliance).	M05 must guarantee immediate access to liquidity for redemptions and provide bullet-proof audit trails for all compliance checks.
+PSPs / Fintechs	High cost of integration and speed of settlement.	M05 must offer standard APIs (ISO 20022) and fast intraday settlement to support their business models.
+Regulators (FIUs)	Use of privacy systems for money laundering/terror financing.	M05 must enforce strict KYC at the point of entry (issuance) and provide automated SAR filing capabilities.
+Merchants	Volatility of digital currency and chargebacks.	M05 ensures instant conversion to fiat, eliminating volatility risk and guaranteeing finality of payment (no chargebacks).
+System Auditors	Integrity of the cryptographic issuance process.	M05 must provide tamper-evident logs and proof of reserve integrity independent of the operational team.
+
+
+f.	Knowledge Representation Graph (mermaid.js)
+graph TD
+    subgraph "External Actors"
+        CB[Central Bank]
+        BANK[Commercial Bank]
+        CUST[End Customer]
+        FIU[Financial Intelligence Unit]
+        RISK[Risk Data Provider]
+    end
+
+    subgraph "Module M05: Licensed Exchange & Settlement Hub"
+        direction LR
+        KYC[KYC/Identity Service]
+        LIQ[Liquidity Manager]
+        SCREEN[AML/CFT Screening Engine]
+        MINT[Coin Issuance Service]
+        BURN[Coin Redemption Service]
+        SETTLE[Settlement Engine ISO20022]
+        HSM[HSM Crypto Provider]
+        RESERVE[Reserve Ledger DB]
+        AUDIT[Audit & Reporting]
+    end
+
+    %% Flows
+    CUST -- "1. KYC Data" --> KYC
+    KYC -- "Verified Identity" --> SCREEN
+
+    BANK -- "2. Fiat Deposit" --> LIQ
+    LIQ -- "Reserve Update" --> RESERVE
+
+    CUST -- "3. Request Blinded Coin" --> MINT
+    MINT -- "Check AML" --> SCREEN
+    SCREEN -- "Sanction Check" --> RISK
+    SCREEN -- "Clear" --> MINT
+    MINT -- "Sign Coin" --> HSM
+    HSM -- "Signed Coin" --> MINT
+    MINT -- "5. Digital Coin" --> CUST
+    MINT -- "Log Issuance" --> RESERVE
+
+    CUST -- "6. Deposit Coin" --> BURN
+    BURN -- "Verify Validity" --> BURN
+    BURN -- "Request Fiat" --> SETTLE
+    SETTLE -- "7. ISO 20022 pacs.008" --> BANK
+    SETTLE -- "8. Reserve Debit" --> RESERVE
+
+    SCREEN -- "Suspicious Activity" --> AUDIT
+    AUDIT -- "9. Auto-SAR" --> FIU
+
+    SETTLE -- "Reconciliation" --> AUDIT
+
+    style M05 fill:#f9f,stroke:#333,stroke-width:4px
+
+g.	Comprehensive List of Features
+
+ID	Feature	Description & Business Case	AI/ML Algorithms	KPIs	Primary Users
+F001	Real-Time KYC Verification	Instant validation of government IDs and biometrics against issuance requests to prevent fraud.	Computer Vision (OCR), Biometric Matching	Verification Time < 5s	Compliance Officers
+F002	Blind Coin Issuance Protocol	Core cryptographic process where the Exchange signs a coin without seeing the user's identity.	N/A (Cryptographic)	Sig Success Rate 100%	Exchange System
+F003	Reserve Ratio Monitoring	Continuous monitoring ensuring digital coins in circulation never exceed fiat reserves.	Time-Series Anomaly Detection	Reserve Deviation 0%	Central Bank Liaison
+F004	Sanctions List Screening	Real-time checking of customers against global watchlists (OFAC, EU, UN) before issuance.	Fuzzy String Matching	Latency < 200ms	AML Analysts
+F005	ISO 20022 Payment Initiation	Generating standardized pacs.008 messages for fiat transfers to partner banks.	N/A	Msg Validation 100%	Settlement Team
+F006	EBICS Client Integration	Secure file transfer for bulk reporting and settlement with Eurozone banks.	N/A	Upload Success 99.99%	Ops Engineers
+F007	AML Transaction Monitoring	Analyzing withdrawal patterns for structuring or smurfing behaviors.	Random Forest, Isolation Forest	False Positive < 0.5%	Fraud Managers
+F008	Crypto-Asset Exposure Check	Screening customers for links to high-risk crypto-exchanges or mixers.	Graph Analytics (Chainalysis API)	Risk Coverage > 95%	Compliance Lead
+F009	Instant Fiat Deposit Processing	Locking customer bank funds instantly upon receipt of credit confirmation.	N/A	Lock-in Time < 1s	Treasury
+F010	Coin Double-Spend Prevention	Verifying the serial number of a deposited coin has not been spent previously.	N/A	Detection Rate 100%	Core Ledger
+F011	HSM Key Management	Secure lifecycle management for the Exchange’s private signing keys.	N/A	Key Rotation Compliance	Security Officer
+F012	SAR Auto-Generation	Automatically drafting Suspicious Activity Reports when AML thresholds are breached.	NLP (Template filling)	Draft Accuracy > 90%	Compliance Officer
+F013	Dynamic Fee Calculation	Computing network fees based on current load and transaction size.	Linear Regression (Load Pred.)	Fee Accuracy 100%	Product
+F014	Liquidity Pool Optimization	Predicting liquidity needs to ensure sufficient funds for redemptions during peaks.	LSTM (Time Series)	Shortfall Events 0	Treasury Manager
+F015	Geo-Jurisdiction Blocking	Blocking transactions originating from or destined for high-risk jurisdictions.	Geo-IP Database Lookup	Blocking Latency < 10ms	Compliance
+F016	Merchant Payout Acceleration	Instant redemption of accumulated coins for merchants.	N/A	Payout Time < 10s	Merchants
+F017	Regulatory Reporting Engine	Automated generation of reports for national tax authorities (e.g., FINMA, BaFin).	N/A	Report Timeliness	Regulators
+F018	Customer Risk Profiling	Assigning a dynamic risk score to customers based on transaction history and behavior.	Gradient Boosting (XGBoost)	Score Update < 1s	Risk Analysts
+F019	Secure Audit Logging	Immutable logging of all administrative actions and cryptographic operations.	N/A	Log Integrity 100%	Auditors
+F020	Webhook Notification Service	Alerting external systems (Wallets, Banks) of transaction status changes.	N/A	Delivery Latency < 500ms	Developers
+F021	Cross-Currency Settlement	Handling exchange rate locks and settlement for multi-currency redemptions.	Arbitrage Detection Models	FX Slippage < 0.01%	Forex Desk
+F022	Bulk Coin Redemption	Processing large batches of coins for institutional clients.	Batch Processing Opt.	Throughput > 10k tps	Corporate Banking
+F023	3DS2 / SCA Integration	Strong Customer Authentication checks for high-value fiat deposits.	N/A	Auth Success Rate > 98%	Retail Users
+F024	Device Fingerprinting	Detecting compromised devices used for account takeover.	Random Forest	Fraud Catch Rate > 90%	Security Team
+F025	Account Freezing Mechanism	Ability to instantly freeze an exchange account upon legal order.	N/A	Freeze Time < 1s	Legal Compliance
+F026	Refund Transaction Processing	Handling merchant-initiated refunds by reversing blinded coins.	N/A	Refund Success Rate 99.9%	Support
+F027	Proof of Reserve Generation	Creating cryptographic proofs (Merkle Trees) to publish solvency to the public.	N/A	Proof Generation Time < 5m	Public/Auditors
+F028	Intraday Liquidity Swaps	Borrowing/lending reserves with other banks to manage daily flows.	Optimization Algo	Cost Reduction 15%	Treasury
+F029	Transaction Limit Enforcement	Enforcing daily/monthly volume limits based on KYC tier.	N/A	Violation Rate 0%	Compliance
+F030	Fraud Dispute Adjudication	Workflow for handling contested fraudulent redemptions.	NLP (Sentiment Analysis)	Resolution Time < 48h	Dispute Team
+F031	Dark Web Monitoring Alert	Alerting if customer credentials appear on the dark web.	Web Crawlers & NLP	Alert Time < 24h	Security Ops
+F032	Structured Data Archival	Moving old transaction data to cold storage (S3) for long-term retention.	N/A	Archive Success 100%	DB Admin
+F033	API Rate Limiting	Preventing DDoS attacks on the Exchange API endpoints.	Token Bucket Algorithm	Uptime 99.99%	Infra Team
+F034	Peer-to-Peer Transfer Limiting	Restricting P2P transfers if they exceed regulatory thresholds without KYC.	N/A	Violations Caught 100%	Compliance
+F035	Smart Contract Compatibility	Interface for automated smart contracts to request redemptions.	N/A	API Success Rate > 99.9%	DeFi Integrators
+F036	Real-Time Dashboard	Visualization of liquidity, active transactions, and system health.	N/A	Refresh Rate < 1s	NOC Engineers
+F037	Automated Reconciliation	Matching internal ledger against bank SWIFT/ISO statements.	Bayesian Matching	Unmatched Items < 0.1%	Finance Ops
+F038	PCI-DSS Compliance Mode	Operating mode for handling raw card data during top-ups.	N/A	Audit Pass 100%	Security
+F039	Multi-Signature Approval	Requiring multiple admin approvals for sensitive configuration changes.	N/A	Policy Enforced 100%	Admin
+F040	Transaction Replay Protection	Ensuring old transaction messages cannot be reprocessed.	Nonce Validation	Replay Success 0%	Protocol Layer
+F041	Granular RBAC	Role-Based Access Control for different operator tiers.	N/A	Access Violations 0	IT Security
+F042	Lost Key Recovery	Process for users to recover wallet access via Exchange backup (with strict checks).	Identity Verification	Recovery Success 99%	Support
+F043	Zero-Knowledge Balance Proof	Allowing users to prove their balance without revealing full history.	zk-SNARKs	Proof Time < 2s	Privacy Advocates
+F044	Merchant KYB Automation	Verifying business registration documents for merchant accounts.	OCR & Entity Extraction	Approval Time < 1h	Sales
+F045	VAT Calculation Support	Embedding VAT rates into redemption data for merchants.	N/A	Accuracy 100%	Tax Engine
+F046	Scheduled Transfers	Allowing users to schedule future withdrawals or redemptions.	N/A	Execution Accuracy 100%	Users
+F047	Whitelisted Address Management	Managing safe withdrawal addresses for corporate users.	N/A	Whitelist Accuracy 100%	Custody Clients
+F048	AML Case Management	UI for investigators to track and resolve AML alerts.	NLP (Case Summarization)	Case Closure Rate > 95%	AML Team
+F049	Network Isolation	Running sensitive HSM operations on an isolated network segment.	N/A	Security Incidents 0	NetSec
+F050	Currency Volatility Hedging	Automatically hedging reserve exposure to forex fluctuations.	Volatility Surface Modeling	Hedging Efficiency > 95%	Treasury
+F051	Data Breach Alerting	Automated notification to DPOs and users upon data anomaly detection.	Anomaly Detection (Unsupervised)	Alert Time < 15m	DPO
+F052	Legacy System Adapter	SOAP/XML wrapper for connecting to older mainframe banking systems.	N/A	Integration Uptime 99.9%	Legacy Integration
+F053	Testnet Faucet	Distributing test coins for developers on the PARI testnet.	N/A	Dispensing Rate > 100/s	DevRel
+F054	Canary Deployment	Gradual rollout of new Exchange features to subset of users.	N/A	Rollback Success 100%	DevOps
+F055	Circuit Breaker Pattern	Automatically stopping non-critical services if system load exceeds capacity.	Control Theory	Crash Prevention 100%	SRE
+F056	End-to-End Encryption	Encrypting all data in transit between Bank and Exchange.	TLS 1.3	Interception 0%	Infra
+F057	Database Sharding Manager	Distributing transaction load across multiple DB shards.	Consistent Hashing	Query Latency < 50ms	DBA
+F058	Automated Backup Rotation	Managing database backup schedules and retention policies.	N/A	RPO < 5 min	DBA
+F059	Regulatory Sandbox Mode	Restricted environment for testing new compliance rules in production.	N/A	Production Impact 0%	Regulators
+F060	Customer Communication Hub	Sending emails/SMS for transaction confirmations and compliance asks.	N/A	Delivery Rate 99%	CX Team
+F061	Inter-Exchange Settlement	Netting positions between multiple regional Exchange instances.	Optimization Solver	Settlement Time < 30m	Global Treasury
+F062	Identity Wallet Integration	Linking with EU Digital Identity Wallets for frictionless KYC.	OIDC	Auth Time < 2s	Product
+F063	Behavioral Biometrics	Analyzing typing/mouse patterns during login to detect bots.	LSTM	Bot Detection > 95%	Security
+F064	Smart Sanctions Update	Hot-reloading of sanctions lists without system restart.	N/A	Update Latency < 10s	Compliance
+F065	Transaction Malleability Check	Ensuring transaction signatures cannot be tweaked without invalidation.	N/A	Vulnerability Count 0	Security
+F066	Privacy Budget Enforcement	Limiting data exposure to third-party analytics APIs.	Differential Privacy	Leakage 0 bits	Data Governance
+F067	Supply Chain Attack Scan	Scanning dependencies for vulnerabilities in the CI/CD pipeline.	SAST (Snyk)	Vulnerability MTTR < 24h	DevSecOps
+F068	Chaos Engineering Tests	Injecting failures to test Exchange resilience.	N/A	Recovery Confidence 100%	SRE
+F069	Quantum-Safe Key Exchange	Using post-quantum algorithms for future-proofing comms.	Kyber/Dilithium	Security Level 256	Crypto Team
+F070	Merchant Fund Splitting	Allowing merchants to split payouts to multiple beneficiaries.	N/A	Split Accuracy 100%	Merchants
+F071	Reconciliation Dispute UI	Interface for bank ops to flag and resolve mismatched transactions.	N/A	Dispute Resolution Time < 4h	Bank Ops
+F072	Dynamic Throttling	Adjusting API limits based on real-time system health.	PID Controller	CPU Usage < 70%	Auto-scaler
+F073	Historical Data Reprocessing	Ability to re-run AML checks on old data with new rules.	Batch Processing	Reprocessing Speed 1M rec/hr	Data Science
+F074	Multi-Language Compliance Support	Handling KYC documents in multiple languages/scripts.	NLP Translation	ID Read Success 99%	Global Ops
+F075	Tokenized Asset Redemption	Support for redeeming security tokens alongside coins.	N/A	Asset Accuracy 100%	Capital Markets
+F076	Graceful Shutdown	Ensuring in-flight transactions complete during maintenance.	N/A	Data Loss 0	Ops
+F077	Audit Trail Query API	Secure API for auditors to pull filtered transaction logs.	RBAC	Query Latency < 1s	External Auditors
+F078	Proof of Concept (PoC) Mode	Lightweight version for quick pilot deployments with partners.	N/A	Setup Time < 1h	Business Dev
+F079	Automated Stress Testing	Simulating Black Friday traffic loads.	JMeter/Gatling	Bottleneck Discovery	Performance
+F080	Depositor Insurance Calculation	Calculating government deposit insurance coverage limits automatically.	N/A	Accuracy 100%	Compliance
+F081	Cash-In Voucher Support	Generating barcodes for cash deposits at retail partners.	N/A	Redemption Rate > 95%	Unbanked Users
+F082	Transaction Correlation ID	Generating unique IDs to trace flow across all subsystems.	UUID v7	Traceability 100%	Debugging
+F083	Hot Wallet Management	Managing small operational wallets for high-frequency redemptions.	N/A	Balance Accuracy 100%	Ops
+F084	Cold Wallet Governance	Multi-sig process for moving funds to long-term cold storage.	N/A	Approval Workflow 100%	Treasury
+F085	Real-time Fraud Scoring	Assigning risk scores to every transaction in sub-second time.	XGBoost	Latency < 100ms	Risk
+F086	Shadow Mode Logging	Running new logic alongside old logic to compare outputs.	Diff Algorithms	Regression Detection	QA
+F087	Bank Holiday Calendar	Automatically adjusting settlement dates based on bank holidays.	N/A	Settlement Failures 0	Finance
+F088	Force Push Mechanism	Manually triggering stalled bank transfers via operations portal.	N/A	Recovery Success 100%	Ops
+F089	GDPR Data Erasure	Securely deleting customer data after retention period.	Crypto Shredding	Erasure Confirmation	Legal
+F090	Web Monetization Proxy	Acting as a proxy for Web Monetization API streams.	N/A	Stream Latency < 1s	Web Users
+F091	Sub-second Confirmation	Optimizing DB writes to provide user feedback in < 1s.	N/A	UX Responsiveness	Frontend
+F092	Tenant Isolation	Logical separation of data for different white-label bank partners.	Row Level Security	Tenant Leakage 0	Platform
+F093	Service Mesh Integration	Managing inter-service communication via Istio/Linkerd.	N/A	Observability 100%	Infra
+F094	Secrets Rotation Bot	Automatically rotating DB and API keys daily.	N/A	Key Age < 24h	Security
+F095	Log Anomaly Detection	Using ML to spot weird patterns in application logs.	LogBERT	Incident Prediction	SRE
+F096	Capacity Planning Bot	Predicting when new hardware is needed.	Linear Regression	Prediction Accuracy > 90%	Management
+F097	Compliance Rule Builder	Low-code UI for compliance officers to define new AML rules.	DSL Engine	Deployment Speed < 1 day	Compliance
+F098	Distributed Tracing	Tracing a request through Kafka, DB, and HSM.	OpenTelemetry	Trace Completeness 100%	Devs
+F099	Dead Letter Queue Handling	Automated retry logic for failed messages.	Exponential Backoff	Processing Success 100%	Integration
+F100	Invoice-based Reconciliation	Matching redemptions against uploaded merchant invoices.	OCR & Matching	Variance < 0.1%	Finance
+F101	Split Payment Processing	Handling single authorization for multiple merchant payouts.	N/A	Success Rate 100%	Marketplaces
+F102	Pre-authorization Hold	Placing a hold on funds without finalizing (like card pre-auth).	N/A	Hold Accuracy 100%	Hotels/Rentals
+F103	Pre-auth Capture	Capturing the held funds after service delivery.	N/A	Capture Latency < 1s	Merchants
+F104	Pre-auth Void	Releasing the hold before capture.	N/A	Release Latency < 1s	Merchants
+F105	Chargeback Prevention	Providing evidence of cryptographically signed delivery to prevent chargebacks.	N/A	Prevention Rate > 99%	Merchants
+F106	Real-time Currency Conversion	Locking FX rates at the moment of transaction initiation.	N/A	Rate Lock Accuracy 100%	Forex
+F107	Recurring Payment Setup	Supporting standing orders for recurring withdrawals.	N/A	Execution Accuracy 100%	Users
+F108	Recurring Payment Execution	Batch processing of recurring withdrawals.	N/A	Fail Rate < 0.1%	Batch Engine
+F109	Bulk Payout File Parsing	Parsing CSV/SEPA files for corporate payroll disbursements.	N/A	Parse Error Rate 0%	Payroll
+F110	Payroll Validation	Validating recipient bank details against IBAN registry.	N/A	Validation Time < 50ms	Payroll
+F111	Instant Payout Fee Calculation	Dynamic pricing for instant vs. standard payouts.	N/A	Margin Accuracy 100%	Product
+F112	Loyalty Point Integration	Converting loyalty points to digital coins.	N/A	Conversion Accuracy 100%	Retail Partners
+F113	Gift Card Issuance	Issuing digital coins as gift cards (anonymous).	N/A	Activation Rate 100%	Retail
+F114	Gift Card Redemption	Validating gift card codes and redeeming coins.	N/A	Redemption Latency < 2s	Retail
+F115	Escrow Service	Holding coins in escrow for disputed transactions.	Smart Contracts	Release Accuracy 100%	Marketplace
+F116	Dispute Timer	Enforcing SLAs for merchant response to disputes.	N/A	SLA Compliance 100%	Ops
+F117	Auto-Refund Logic	Triggering refunds if merchant does not respond.	N/A	Trigger Accuracy 100%	Ops
+F118	Partial Refund Support	Processing refunds for partial amounts of the original coin.	N/A	Accuracy 100%	Merchants
+F119	Multi-Signature Wallet Support	Requiring 2-of-N signatures for corporate withdrawals.	N/A	Sig Validation 100%	Corporate
+F120	Hardware Wallet Bridge	Interface for Ledger/Trezor devices for cold storage withdrawals.	N/A	Connect Success > 99%	Crypto Users
+F121	Recovery Phrase Backup	Encrypting and storing user recovery phrases (optional service).	AES-256	Breach Count 0	Security
+F122	Inheritance Management	Process for transferring coins to beneficiaries upon death.	Identity Verification	Transfer Accuracy 100%	Legal
+F123	Tax Export Generator	Generating CSV/PDF of transaction history for tax filing.	N/A	Report Accuracy 100%	Users
+F124	Cost Basis Tracking	Tracking FIFO/LIFO cost basis for capital gains calculations.	N/A	Accuracy 100%	Tax
+F125	Advanced Analytics Portal	Providing merchants with deep insights into their payment flow.	Aggregation	Query Latency < 3s	Merchants
+F126	Cohort Analysis	Analyzing user behavior over time for marketing.	N/A	Insight Generation	Product
+F127	Churn Prediction	Identifying users likely to stop using the service.	Logistic Regression	Prediction Accuracy > 80%	Marketing
+F128	Next Best Action	Recommending actions to users (e.g., "Top up now") via RL.	Reinforcement Learning	Engagement Lift +10%	Product
+F129	Sentiment Analysis	Analyzing support tickets for sentiment trends.	BERT	Sentiment Accuracy 85%	Support
+F130	Voice Biometrics	Using voice to authenticate high-value support calls.	GMM-based Models	False Accept < 0.01%	Support
+F131	Chatbot Integration	Automated FAQ handling for balance and status queries.	Rasa/DialogFlow	Containment Rate 60%	Support
+F132	Video KYC Support	Guiding users through live video verification.	Face Liveness	Pass Rate > 90%	Compliance
+F133	Liveness Detection	Preventing photo spoofs during KYC.	Active Liveness	Attack Detection 100%	Security
+F134	OCR Document Cleaning	Enhancing scanned document quality for OCR.	Image Processing (OpenCV)	Readability Score > 90%	KYC
+F135	Selfie Matching	Matching user selfie to ID photo.	FaceNet	Similarity > 95%	KYC
+F136	NFC Passport Reading	Reading RFID chips in e-passports for verification.	N/A	Read Success 99%	KYC
+F137	Aadhaar/XML Integration	Integration with India's digital identity stack (if applicable).	N/A	Auth Success 99.9%	Local Ops
+F138	iFrame Embedding	Allowing merchants to embed Exchange checkout in their site.	N/A	Load Time < 1s	Merchants
+F139	Mobile SDK	Native library for Android/iOS to handle KYC and payments.	N/A	SDK Adoption	Developers
+F140	React Native Bridge	Wrapper for cross-platform mobile apps.	N/A	Stability 100%	Developers
+F141	Flutter Plugin	Support for Flutter-based ecosystem apps.	N/A	Plugin Stability	Developers
+F142	REST API Gateway	Unified entry point for all API traffic.	Kong/Ambassador	Uptime 99.99%	Infra
+F143	GraphQL API	Flexible query language for frontend data fetching.	N/A	Query Complexity Limit	Frontend
+F144	gRPC Streaming	Real-time feed of transaction updates to clients.	N/A	Latency < 100ms	Frontend
+F145	WebSocket Support	Persistent connections for instant notifications.	N/A	Connection Stability	Frontend
+F146	Server-Sent Events (SSE)	Lightweight alternative to WebSockets for unidirectional updates.	N/A	Delivery Rate 100%	Frontend
+F147	API Versioning	Maintaining backward compatibility for old API clients.	N/A	Breakage Rate 0%	Engineering
+F148	Developer Portal	Documentation and sandbox for external developers.	N/A	Self-Sufficiency	DevRel
+F149	API Key Management	Issuing and rotating API keys for merchants.	N/A	Key Provisioning < 1s	Merchants
+F150	Usage Quota Enforcement	Limiting API calls based on pricing tier.	Token Bucket	Enforcement Accuracy 100%	Product
+F151	Rate Limit Override	Allowing temporary increases for high-traffic events.	N/A	Approval Time < 1h	Support
+F152	Billing Engine Integration	Calculating monthly fees for merchants based on usage.	N/A	Invoice Accuracy 100%	Finance
+F153	Automated Dunning	Handling failed payments for merchant subscription fees.	N/A	Recovery Rate > 80%	Finance
+F154	Invoice Generation	Creating PDF invoices for merchant fees.	N/A	PDF Generation Success 100%	Finance
+F155	Credit Note Management	Issuing credit notes for service refunds.	N/A	Accounting Accuracy 100%	Finance
+F156	General Ledger Sync	Syncing transaction data to external ERP (SAP, Oracle).	N/A	Sync Success 99.9%	Finance
+F157	Cost Center Allocation	Tagging costs with internal cost centers.	N/A	Allocation Accuracy 100%	Management
+F158	Profitability Analysis	Calculating profit per customer/merchant.	N/A	Calculation Latency < 10m	Management
+F159	Scenario Planning	Modeling financial impact of fee changes.	Monte Carlo Simulation	Model Accuracy	Product
+F160	Competitor Benchmarking	Comparing fees and speeds with competitors.	Web Scraping	Data Freshness < 24h	Strategy
+F161	Market Trend Analysis	Analyzing macro trends in digital payments.	NLP (News)	Trend Accuracy	Strategy
+F162	Regulatory Change Tracker	Monitoring regulatory changes in key jurisdictions.	NLP (Legal Text)	Alert Speed	Compliance
+F163	Impact Assessment Tool	Assessing impact of new regulations on system features.	Dependency Mapping	Assessment Accuracy	Compliance
+F164	Policy Deployment	Rolling out new compliance rules without code deployment.	Drools/Rule Engine	Deployment Time < 10m	Compliance
+F165	Rule Testing Framework	Unit testing compliance rules against synthetic data.	Property-Based Testing	Bug Detection	QA
+F166	Synthetic Data Generator	Generating fake transaction data for testing.	GANs	Data Realism Score	QA
+F167	Load Test Scenario Manager	Managing complex load testing scripts.	N/A	Execution Reliability	QA
+F168	Performance Regression Test	Comparing current build performance against baseline.	N/A	Regression Detection	QA
+F169	Security Regression Test	Checking for re-introduction of known vulnerabilities.	SAST	Vulnerability Count	Security
+F170	Penetration Test Coordination	Managing schedules and reports for third-party pentesters.	N/A	Remediation Tracking	Security
+F171	Bug Bounty Management	Handling vulnerability reports from researchers.	N/A	Triage Time < 24h	Security
+F172	Incident Response Runbooks	Automated playbooks for common incidents.	N/A	Execution Time < 5m	SRE
+F173	War Room Dashboard	Real-time view during major incidents.	N/A	Data Latency < 1s	Management
+F174	Post-Mortem Generator	Drafting post-mortem documents from incident logs.	NLP (Text Gen)	Draft Quality	SRE
+F175	Root Cause Analysis (RCA) AI	Suggesting root causes based on historical data.	Causal Inference	Suggestion Accuracy 60%	SRE
+F176	Change Management Board	Workflow for approving production changes.	N/A	Approval Time < 24h	Release Mgr
+F177	Feature Flag Management	Toggling features without deployment.	N/A	Toggle Latency < 1s	DevOps
+F178	Blue/Green Deployment	Zero-downtime deployment strategy.	N/A	Downtime 0s	DevOps
+F179	Rollback Automation	Automatically rolling back if error rates spike.	Control Loop	Rollback Time < 30s	DevOps
+F180	Configuration Drift Detection	Ensuring all servers have identical config.	Agent-Based	Drift Count 0	Infra
+F181	Patch Management	Automated OS and library patching.	N/A	Patch Latency < 48h	Infra
+F182	Container Security Scanning	Scanning Docker images for vulnerabilities.	Clair	Vulnerability Count 0	DevSecOps
+F183	Kubernetes Resource Limits	Preventing noisy neighbors in the cluster.	N/A	OOMKilled Count 0	Infra
+F184	Pod Autoscaling	Scaling pods based on CPU/Memory/Custom Metrics.	HPA/VPA	Scaling Lag < 30s	Infra
+F185	Cluster Autoscaling	Adding nodes to the cluster when resource limits hit.	Cluster API	Node Ready Time < 3m	Infra
+F186	Spot Instance Integration	Using spot instances for non-critical workloads.	N/A	Cost Savings 40%	Infra
+F187	Multi-Region Replication	Replicating data across geographies for disaster recovery.	N/A	RPO < 1m	Infra
+F188	Global Load Balancing	Routing users to nearest region.	GeoDNS	Latency Reduction	Infra
+F189	CDN Caching	Caching static assets (images, JS) at edge.	N/A	Hit Ratio > 90%	Frontend
+F190	Image Optimization	Automatically compressing and resizing images.	Sharp/MozJPEG	Size Reduction 50%	Frontend
+F191	Code Splitting	Reducing JavaScript bundle size.	Webpack/Rollup	Bundle Size < 200KB	Frontend
+F192	Lazy Loading	Loading components only when needed.	N/A	Initial Load Time < 2s	Frontend
+F193	Service Worker Caching	Caching API responses for offline capability.	N/A	Offline Availability	Frontend
+F194	Push Notifications	Alerting users to transaction updates.	FCM/APNS	Delivery Rate > 98%	Product
+F195	Email Notifications	Sending receipts and alerts via email.	SES/SendGrid	Delivery Rate > 99%	Product
+F196	SMS Notifications	Sending 2FA codes and alerts.	Twilio	Delivery Rate > 99%	Product
+F197	In-App Notifications	Real-time updates within the app.	WebSockets	Display Latency < 1s	Product
+F198	Notification Preferences	Allowing users to customize notification channels.	N/A	Preference Accuracy 100%	Product
+F199	Do Not Disturb (DND)	Respecting user quiet hours.	N/A	Violation Count 0	Product
+F200	Accessibility Audit	Ensuring compliance with WCAG 2.1 AA.	Axe/Pa11y	Accessibility Score > 95	QA
+
+
+h.	Comprehensive List of Database Objects
+
+ID	schema_name	object_name	object_type	description	feature_reference	column_names	constraints / notes	junction_tables
+D201	exchange	api_revenue	TABLE	Revenue generated from API usage fees	F201	rev_id PK, partner_id, endpoint, cost, period	cost >= 0
+D202	exchange	carbon_credits	TABLE	Purchased carbon offsets to neutralize transaction energy	F202	credit_id PK, tons_co2, source, purchase_date	tons_co2 > 0
+D203	exchange	hf_trades	TABLE	History of high-frequency liquidity trades	F203	trade_id PK, pair, side, price, volume	volume > 0
+D204	exchange	contract_audits	TABLE	Audit trail of smart contract interactions	F204	audit_id PK, contract_address, method, input_hash	input_hash NOT NULL
+D205	exchange	gdpr_deletion_log	TABLE	Record of data erasure requests	F205	del_id PK, customer_id, requested_at, completed_at	completed_at > requested_at
+D206	exchange	cbir_reports	TABLE	Cross-border regulatory reports generated	F206	report_id PK, jurisdiction, format, file_path	format CHECK
+D207	exchange	sla_metrics	TABLE	Daily calculation of SLA compliance per merchant	F207	metric_id PK, merchant_id, uptime_pct, avg_latency	uptime_pct CHECK (0-100)
+D208	exchange	geo_fences	TABLE	Allowed zones for specific card/merchant usage	F208	fence_id PK, card_id, lat_long_radius, action	action CHECK ('block','alert')
+D209	exchange	biometric_3d	TABLE	3D depth map data storage for liveness	F209	scan_id PK, session_id, depth_map_hash	Encrypted at rest
+D210	exchange	voice_resets	TABLE	Logs of password resets via voice	F210	reset_id PK, user_id, match_score, timestamp	match_score > 0.9
+D211	exchange	onboarding_bot_state	TABLE	Conversation state for the KYC AI bot	F211	session_id PK, user_id, current_step, context_json	current_step NOT NULL
+D212	exchange	dcc_rates	TABLE	Dynamic rates for currency conversion at POS	F212	rate_id PK, currency_pair, markup_pct, source	markup_pct >= 0
+D213	exchange	fraud_consortium	TABLE	Shared anonymous fraud signals	F213	signal_id PK, hash_type, signal_hash, source_bank	signal_hash UNIQUE
+D214	exchange	virtual_accounts	TABLE	Generated sub-accounts for reconciliation	F214	va_id PK, parent_account, va_number, purpose	va_number UNIQUE
+D215	exchange	payment_links	TABLE	Generated pay-by-link details	F215	link_id PK, merchant_id, amount, expiry, status	status CHECK
+D216	exchange	invoice_financing	TABLE	Financed invoice records	F216	finance_id PK, invoice_id, advance_amount, fee	advance_amount > 0
+D217	exchange	corp_cards	TABLE	Corporate virtual card definitions	F217	card_id PK, company_id, limit, mcc_restrictions	limit >= 0
+D218	exchange	treasury_investments	TABLE	Reserve investment positions	F218	invest_id PK, asset_class, isin, value, maturity	value > 0
+D219	exchange	sandbox_snapshots	TABLE	Stored snapshots of sandbox DB state	F219	snap_id PK, partner_id, created_at, storage_path	created_at
+D220	exchange	dr_triggers	TABLE	Log of disaster recovery activations	F220	trigger_id PK, triggered_by, reason, region_to	region_to CHECK
+V001	exchange	v_active_reserves	VIEW	Real-time view of current fiat reserves vs liability	F003	SELECT currency, SUM(amount) ... GROUP BY currency
+V002	exchange	v_daily_revenue	VIEW	Aggregated daily revenue by source	F158	SELECT date(created_at), SUM(fees) ...
+V003	exchange	v_pending_kyc	VIEW	List of users currently in KYC process	F001	JOIN customers ON kyc_documents.status = 'pending'
+V004	exchange	v_high_risk_customers	VIEW	Customers with risk score > threshold	F018	WHERE risk_scores.score > 80
+V005	exchange	v_settlement_status	VIEW	Live status of outgoing bank transfers	F005	JOIN iso_messages ON transactions.status = 'settling'
+V006	exchange	v_merchant_balance	VIEW	Current spendable balance for merchants	F016	SUM(credits) - SUM(debits)
+V007	exchange	v_transaction_volume	VIEW	Hourly transaction volume metrics	F036	GROUP BY date_trunc('hour', timestamp)
+V008	exchange	v_error_rates	VIEW	Percentage of failed transactions by type	F036	COUNT(*) FILTER (WHERE error IS NOT NULL)
+V009	exchange	v_fee_breakdown	VIEW	Detailed fee aggregation by product	F013	JOIN fees ON transactions.fee_id = fees.id
+V010	exchange	v_audit_trail_summary	VIEW	Simplified audit log for regulators	F019	SELECT actor, action, COUNT(*)
+V011	exchange	v_expiry_alerts	VIEW	Items expiring in next 7 days (certs, limits)	F029	WHERE expiry BETWEEN NOW() AND NOW()+7
+V012	exchange	v_sar_open_cases	VIEW	Open Suspicious Activity Reports	F012	WHERE sars.status = 'open'
+V013	exchange	v_fx_exposure	VIEW	Net FX exposure across all currencies	F021	SUM(amount * rate) GROUP BY base_currency
+V014	exchange	v_liquidity_forecast	VIEW	Comparison of forecast vs actuals	F014	JOIN forecasts ON date = current_date
+V015	exchange	v_alert_aging	VIEW	Aging report for open AML alerts	F007	DATEDIFF(day, created_at, NOW())
+V016	exchange	v_coin_inventory	VIEW	Total coins issued vs redeemed	F002	SUM(issued) - SUM(redeemed)
+V017	exchange	v_hot_wallet_utilization	VIEW	Percentage of hot wallet capacity used	F083	current_balance / max_limit
+V018	exchange	v_regulatory_reports_queue	VIEW	Reports ready for submission	F017	WHERE generated = true AND submitted = false
+V019	exchange	v_dispute_trends	VIEW	Monthly dispute volume by reason	F030	GROUP BY reason, date_trunc('month', created_at)
+V020	exchange	v_merchant_performance	VIEW	Success rates for top merchants	F207	WHERE merchant_id IN (SELECT ...)
+V021	exchange	v_batch_processing_status	VIEW	Status of long-running batch jobs	F022	WHERE job_type = 'redemption_batch'
+V022	exchange	v_reconciliation_exceptions	VIEW	Transactions failing reconciliation	F037	WHERE diff != 0
+V023	exchange	v_api_usage_by_partner	VIEW	API call volume per API key	F033	GROUP BY api_key_id
+V024	exchange	v_webhook_delivery_failures	VIEW	Webhooks that failed to deliver	F020	WHERE delivery_status = 'failed'
+V025	exchange	v_geo_risk_heatmap	VIEW	Transactions originating from high-risk IPs	F008	JOIN geoip ON ip_address
+V026	exchange	v_device_trust_scores	VIEW	Aggregated trust scores per device	F024	AVG(score) GROUP BY device_id
+V027	exchange	v_corporate_hierarchy	VIEW	Recursive view of parent-child company accounts	F119	WITH RECURSIVE cte AS (...)
+V028	exchange	v_compliance_rule_hits	VIEW	Frequency of specific rule triggers	F097	GROUP BY rule_id
+V029	exchange	v_backup_verification	VIEW	Results of latest backup integrity checks	F058	WHERE check_status = 'verified'
+V030	exchange	v_system_capacity	VIEW	Current CPU/Memory/Disk usage across cluster	F036	FROM health_metrics WHERE timestamp = NOW()
+V031	exchange	v_daily_settlement_summary	VIEW	Summary of funds moved to banks	F005	SELECT settlement_date, COUNT(*), SUM(amount)
+V032	exchange	v_potential_dupes	VIEW	Customers with similar details (fuzzy match)	F001	SOUNDEX(name) GROUP BY ...
+V033	exchange	v_aged_debtors	VIEW	Merchants with outstanding debt > 90 days	F012	WHERE balance < 0 AND aged_days > 90
+V034	exchange	v_token_sales	VIEW	Record of token sales via gift cards	F113	JOIN gift_cards ON sales.token_id = ...
+V035	exchange	v_instant_payout_requests	VIEW	Queue of requests for instant settlement	F016	WHERE payout_type = 'instant' AND status = 'pending'
+V036	exchange	v_cost_center_spend	VIEW	Operational spend per internal cost center	F157	GROUP BY cost_center_id
+V037	exchange	v_feature_adoption	VIEW	Usage stats for new features	F054	GROUP BY feature_name
+V038	exchange	v_third_party_risk	VIEW	Risk score of integrated providers (banks, etc)	F028	FROM risk_providers
+V039	exchange	v_user_lifecycle	VIEW	Funnel analysis from sign-up to first trade	F126	COUNT(*) FILTER (WHERE stage = ...)
+V040	exchange	v_promotion_usage	VIEW	Redemption of promotional codes	F013	WHERE promo_code IS NOT NULL
+V041	exchange	v_compliance_coverage	VIEW	% of transactions screened by new rules	F073	screened_count / total_count
+V042	exchange	v_interest_accrued	VIEW	Interest accrued on negative balances	F012	SUM(interest) WHERE balance < 0
+V043	exchange	v_encryption_key_status	VIEW	Status of HSM keys and rotation	F011	WHERE expiry < NOW()
+V044	exchange	v_data_retention_schedule	VIEW	Data eligible for archival per policy	F032	WHERE created_at < (NOW() - INTERVAL '7 years')
+V045	exchange	v_fraud_detection_accuracy	VIEW	Precision/Recall of fraud model	F085	TP/(TP+FP)
+V046	exchange	v_license_usage	VIEW	Usage count vs licensed limits	F148	current_usage / max_limit
+V047	exchange	v_cash_out_trend	VIEW	Trend analysis for fiat withdrawals	F010	GROUP BY date_trunc('week', timestamp)
+V048	exchange	v_partner_profitability	VIEW	Net profit per white-label partner	F092	revenue - costs GROUP BY tenant_id
+V049	exchange	v_security_incidents	VIEW	High-level summary of security events	F051	SELECT severity, COUNT(*)
+V050	exchange	v_regulatory_change_impact	VIEW	Features affected by upcoming laws	F163	JOIN regulatory_changes ON ...
+P001	exchange	sp_process_withdrawal	PROCEDURE	Handles the logic of fiat deposit and coin minting	F002	p_customer_id, p_amount, p_currency	p_coin_sig	Uses HSM for signing
+P002	exchange	sp_check_sanctions	PROCEDURE	Checks customer details against cached lists	F004	p_customer_id	p_is_clean BOOLEAN	Returns false if match found
+P003	exchange	sp_generate_merkle_root	PROCEDURE	Generates daily Merkle root for Proof of Reserve	F027	p_date	p_root_hash	Iterates over all coins
+P004	exchange	sp_archive_transaction	PROCEDURE	Moves old data to cold storage table	F032	p_cutoff_date	N/A	Runs nightly via cron
+P005	exchange	sp_calculate_settlement	PROCEDURE	Calculates net position for a merchant/bank	F005	p_entity_id	p_net_amount	Aggregates credits/debits
+P006	exchange	sp_reconcile_bank	PROCEDURE	Matches ledger entries against bank statement	F037	p_statement_id	p_variance	Auto-posts minor diffs
+P007	exchange	sp_rotate_hsm_key	PROCEDURE	Triggers key rotation in HSM and updates DB	F011	p_key_id	N/A	Atomic transaction
+P008	exchange	sp_trigger_sar	PROCEDURE	Creates SAR record and notifies FIU	F012	p_alert_id, p_details	p_sar_id	Idempotent
+P009	exchange	sp_purge_old_logs	PROCEDURE	Hard deletes logs past retention period	F089	p_log_type, p_before_date	N/A	Requires elevated rights
+P010	exchange	sp_update_fx_rate	PROCEDURE	Updates FX rate table and validates	F021	p_pair, p_rate	N/A	Checks for arbitrage
+P011	exchange	sp_execute_payout	PROCEDURE	Processes a batch payout file	F109	p_file_id	p_success_count	Idempotent processing
+P012	exchange	sp_refund_transaction	PROCEDURE	Handles full or partial refund logic	F026	p_txn_id, p_amount	p_refund_id	Checks refund window
+P013	exchange	sp_freeze_account	PROCEDURE	Instantly locks customer account	F025	p_customer_id, p_reason	N/A	Sets status = 'frozen'
+P014	exchange	sp_unfreeze_account	PROCEDURE	Unlocks account and notifies user	F025	p_customer_id	N/A	Validates unlock auth
+P015	exchange	sp_kyc_upgrade	PROCEDURE	Upgrades user KYC tier and increases limits	F001	p_customer_id, p_new_tier	N/A	Updates limits table
+P016	exchange	sp_check_risk_score	PROCEDURE	Calculates real-time risk for a transaction	F085	p_txn_data (JSON)	p_risk_score	Calls Python model via UDF
+P017	exchange	sp_submit_cbir	PROCEDURE	Formats and submits CBIR report to regulator	F206	p_period	p_submission_id	Encrypts payload
+P018	exchange	sp_create_virtual_account	PROCEDURE	Generates a unique virtual IBAN	F214	p_parent_id	p_iban	Uses external API
+P019	exchange	sp_link_wallet	PROCEDURE	Links a hardware wallet public key	F120	p_customer_id, p_pub_key	N/A	Validates signature
+P020	exchange	sp_close_batch	PROCEDURE	Finalizes a batch and generates report	F022	p_batch_id	p_file_url	Updates status
+P021	exchange	sp_requeue_failed_msg	PROCEDURE	Pushes DLQ message back to main queue	F099	p_msg_id	N/A	Updates retry count
+P022	exchange	sp_charge_fee	PROCEDURE	Deducts fee from wallet/balance	F013	p_account_id, p_fee_id	N/A	Updates fee table
+P023	exchange	sp_apply_promo	PROCEDURE	Applies promo code to a transaction	F040	p_code, p_txn_id	p_discount_amt	Validates expiry/usage
+P024	exchange	sp_notify_user	PROCEDURE	Queues notification (Email/SMS/Push)	F060	p_user_id, p_template, p_vars	N/A	Inserts to comms table
+P025	exchange	sp_convert_currency	PROCEDURE	Executes internal currency conversion	F021	p_from, p_to, p_amount	p_converted_amt	Uses locked rate
+P026	exchange	sp_validate_iban	PROCEDURE	Validates IBAN checksum and format	F110	p_iban	p_is_valid	Uses MOD-97 algorithm
+P027	exchange	sp_audit_trail_insert	PROCEDURE	Helper to insert audit logs with metadata	F019	p_actor, p_action, p_details	N/A	Auto-fills timestamp/IP
+P028	exchange	sp_expire_session	PROCEDURE	Invalidates user auth tokens	F021	p_token_id	N/A	Blacklists token
+P029	exchange	sp_create_escrow	PROCEDURE	Moves funds to escrow for dispute	F115	p_dispute_id, p_amount	N/A	Updates balances
+P030	exchange	sp_release_escrow	PROCEDURE	Releases funds from escrow to winner	F117	p_dispute_id	N/A	Validates dispute status
+P031	exchange	sp_anonymize_user	PROCEDURE	Scrubs PII for GDPR compliance	F089	p_customer_id	N/A	Replaces with hashes
+P032	exchange	sp_settle_invoice	PROCEDURE	Pays invoice from account balance	F100	p_invoice_id	N/A	Checks balance
+P033	exchange	sp_report_profit_loss	PROCEDURE	Generates P&L report for period	F158	p_start, p_end	p_report_ref	CURSOR based
+P034	exchange	sp_bulk_upload_customers	PROCEDURE	Inserts bulk customers (e.g., corporate)	F109	p_temp_table	p_success_count	Transactional
+P035	exchange	sp_verify_merkle_proof	PROCEDURE	Verifies a user's inclusion in reserve tree	F043	p_proof, p_root_hash	p_is_valid	Cryptographic check
+P036	exchange	sp_calculate_vat	PROCEDURE	Calculates VAT based on merchant location	F045	p_amount, p_country_code	p_vat_amt	Lookups in vat_rates
+P037	exchange	sp_lock_funds	PROCEDURE	Locks funds for pre-auth	F102	p_account_id, p_amount	p_auth_id	Decrements available
+P038	exchange	sp_capture_locked_funds	PROCEDURE	Finalizes a pre-auth capture	F103	p_auth_id, p_amount	N/A	Moves to settled
+P039	exchange	sp_void_locked_funds	PROCEDURE	Releases a pre-auth hold	F104	p_auth_id	N/A	Returns to available
+P040	exchange	sp_reindex_search	PROCEDURE	Triggers search index rebuild	F036	p_table_name	N/A	Async operation
+P041	exchange	sp_health_check	PROCEDURE	Checks DB connectivity and vital signs	F036	N/A	p_status_json	Used by load balancer
+P042	exchange	sp_migrate_shard	PROCEDURE	Moves data between shards	F057	p_shard_key, p_target_shard	N/A	Background job
+P043	exchange	sp_compact_table	PROCEDURE	Runs VACUUM FULL on table	F032	p_table_name	N/A	Locks table (use caution)
+P044	exchange	sp_send_internal_transfer	PROCEDURE	P2P transfer between internal users	F034	p_sender, p_receiver, p_amt	N/A	Double-entry bookkeeping
+P045	exchange	sp_validate_kyc_document	PROCEDURE	Initial automated validation of doc hash/size	F001	p_doc_id	p_is_valid	Checks MIME/Size
+P046	exchange	sp_failover_region	PROCEDURE	Triggers application layer failover	F220	p_target_region	N/A	Updates DNS/Traffic
+P047	exchange	sp_process_recurring	PROCEDURE	Batch job for recurring payments	F108	N/A	p_processed_count	Iterates scheduled_transfers
+P048	exchange	sp_update_exchange_status	PROCEDURE	Updates operational status page	F036	p_service, p_status	N/A	Broadcasts via SSE
+P049	exchange	sp_prune_metrics	TABLE	Deletes old high-resolution metrics	F036	p_before_date	N/A	Keeps daily aggregates
+P050	exchange	sp_generate_qr	PROCEDURE	Generates QR code for cash deposit voucher	F081	p_voucher_id	p_qr_image	Returns bytea/binary
+E001	exchange	txn_status_type	ENUM	Valid states for a transaction	'pending', 'completed', 'failed', 'reversed'	F010
+E002	exchange	kyc_tier_enum	ENUM	Levels of customer verification	'tier0', 'tier1', 'tier2', 'tier3'	F001
+E003	exchange	aml_severity_enum	ENUM	Severity of AML alerts	'low', 'medium', 'high', 'critical'	F007
+E004	exchange	currency_iso_code	ENUM	Supported ISO 4217 currencies	'EUR', 'USD', 'GBP', 'CHF', 'JPY'	F003
+E005	exchange	fee_type_enum	ENUM	Types of fees charged	'flat', 'percentage', 'tiered'	F013
+E006	exchange	compliance_status	ENUM	Status of a compliance check	'pending', 'approved', 'rejected', 'manual_review'	F012
+E007	exchange	notification_channel	ENUM	Channels for alerts	'email', 'sms', 'push', 'webhook'	F060
+E008	exchange	dispute_state	ENUM	Lifecycle states of disputes	'open', 'investigating', 'resolved', 'closed'	F030
+E009	exchange	login_method	ENUM	Authentication methods	'password', 'sso', 'mfa', 'biometric'	F023
+E010	exchange	error_code	ENUM	Standardized error codes	'INSUFFICIENT_FUNDS', 'INVALID_SIGNATURE', 'KYC_PENDING'	F005
+E011	exchange	user_role	ENUM	Roles for RBAC	'admin', 'operator', 'auditor', 'viewer'	F041
+E012	exchange	transaction_direction	ENUM	Inflow or Outflow	'credit', 'debit'	F005
+E013	exchange	doc_type	ENUM	Types of ID documents	'PASSPORT', 'DRIVING_LICENSE', 'ID_CARD', 'RESIDENCE_PERMIT'	F001
+E014	exchange	system_env	ENUM	Environment deployment	'dev', 'staging', 'production'	F053
+E015	exchange	gender	ENUM	Gender for KYC	'male', 'female', 'other', 'undeclared'	F001
+E016	exchange	card_scheme	ENUM	Supported card networks	'VISA', 'MASTERCARD', 'AMEX'	F217
+E017	exchange	sanctions_source	ENUM	Source of sanctions list	'OFAC', 'UN', 'EU', 'HMT'	F004
+E018	exchange	batch_status	ENUM	Status of batch jobs	'created', 'processing', 'completed', 'failed'	F022
+E019	exchange	data_sensitivity	ENUM	Sensitivity level for data	'public', 'internal', 'confidential', 'restricted'	F019
+E020	exchange	recurring_frequency	ENUM	Frequency for standing orders	'daily', 'weekly', 'monthly', 'yearly'	F107

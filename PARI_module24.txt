@@ -1,0 +1,532 @@
+
+
+24.	Module M24	Post-Quantum Cryptography (PQC) Migration Layer
+a.	Summary
+The Post-Quantum Cryptography (PQC) Migration Layer (Module M24) serves as the cryptographic bedrock of the PARI ecosystem, designed to secure the next-generation payment infrastructure against the existential threat posed by quantum computing. As quantum capabilities advance, the widely deployed public-key cryptosystems—such as RSA, ECC, and Elliptic Curve Digital Signature Algorithm (ECDSA)—that underpin current financial security, digital identities, and blockchain technologies face the risk of being rendered obsolete. This vulnerability introduces the "Harvest Now, Decrypt Later" attack vector, where adversaries could store encrypted PARI transactions today to decrypt them once sufficiently powerful quantum computers exist. Module M24 neutralizes this threat by implementing a robust, crypto-agile abstraction layer that integrates NIST-standardized Post-Quantum Algorithms (e.g., CRYSTALS-Dilithium for signatures and CRYSTALS-Kyber for key encapsulation) alongside classical algorithms in a hybrid execution model.
+
+Architecturally, Module M24 functions as a high-performance cryptographic service, interfacing with the Wallet (M01) and Exchange (M05) layers to ensure that all digital coins, blind signatures, and regulatory metadata are signed using quantum-resistant primitives. The module leverages the Open Quantum Safe (OQS) library and hardware-backed Security Modules (HSMs) to provide offloaded, high-throughput cryptographic operations without compromising latency requirements. By employing a "Hybrid Signature" approach—where a transaction is signed simultaneously with a classical key (e.g., ECDSA P-256) and a post-quantum key (e.g., Dilithium3)—PARI ensures backward compatibility during the transitional period while guaranteeing long-term security against quantum attacks. This dual-signature strategy ensures that even if one algorithm fails, the integrity of the financial transaction remains intact.
+
+Governed by CMMI Level 5 principles, the module includes rigorous process management for cryptographic agility. It automates the lifecycle of cryptographic keys, versioning, and algorithm deprecation schedules. It features an embedded "Crypto-Benchmarking Engine" that continuously monitors the performance overhead of post-quantum operations (key generation time, signature size, verification latency) against defined Service Level Objectives (SLOs). Should a specific algorithm show signs of degradation or theoretical weakness (identified via AI-driven threat intelligence feeds), the system can dynamically initiate a migration protocol to rotate to a stronger candidate standard (e.g., moving from Dilithium to Falcon or SPHINCS+ for stateless hash-based signatures) without system downtime.
+
+Furthermore, the PQC Layer is deeply integrated with the Compliance Hub (M02) to meet emerging regulatory standards such as the French ANSSI recommendations or the US National Security Memorandum (NSM-10) on quantum readiness. It maintains an immutable cryptographic ledger of algorithm versions used for every transaction batch, enabling auditors to verify the security posture of the system at any point in history. By decoupling the application logic from the underlying cryptographic primitives, Module M24 ensures that PARI is not just a payment system for today, but a future-proof sovereign digital utility capable of protecting the financial privacy and fiscal integrity of its stakeholders for decades to come.
+b.	Scope
+The scope of Module M24 encompasses the full lifecycle management of post-quantum and hybrid cryptographic primitives within the PARI infrastructure.
+
+     Algorithm Abstraction: Providing a unified API for classical (RSA, ECC) and post-quantum (Lattice-based, Hash-based, Code-based) algorithms.
+     Hybrid Execution: Orchestrating combined signing and encryption operations to ensure security against both classical and quantum adversaries.
+     Key Management: Secure generation, storage (via HSM/KMS), rotation, and destruction of quantum-safe keys.
+     Performance Orchestration: Load balancing cryptographic operations between CPU, GPU, and HSM accelerators to maintain sub-500ms transaction latencies.
+     Compliance & Auditing: Logging all cryptographic parameters, key versions, and algorithm identifiers for regulatory reporting.
+     Migration Governance: Automated workflows for sunsetting weak algorithms and deploying new ones (Crypto-Agility).
+
+c.	Business Case
+The deployment of Module M24 is driven by the critical need to protect the long-term viability of the PARI payment system and the assets of its stakeholders.
+
+     Risk Mitigation (Harvest Now, Decrypt Later): Financial transaction data, even if anonymized via blind signatures, has a long shelf life. If encrypted data intercepted today is decrypted in 10-15 years, the financial privacy of citizens and the trade secrets of merchants could be exposed. PQC prevents data exfiltration from becoming a future liability.
+     Regulatory Pre-emption: Governments and central banks are already mandating migration schedules for quantum-resistant cryptography. By integrating PQC now, PARI avoids costly, emergency retrofits and ensures immediate compliance with frameworks like eIDAS 2.0 and PSD3 future amendments.
+     Competitive Differentiation: Most current fintech and blockchain solutions are "quantum-vulnerable." PARI’s proactive stance offers a unique selling proposition to institutional partners (Central Banks, Tax Authorities) who require century-long security guarantees for digital currency issuance.
+     Operational Continuity: The module’s crypto-agility ensures that advances in cryptanalysis (breaking a specific algorithm) do not result in system outages. The system can patch cryptographic vulnerabilities via configuration rather than code rewrites.
+
+d.	KPIs
+     Crypto Agility Score: Time (in hours) required to onboard and activate a new cryptographic algorithm standard across the cluster.
+     Migration Rehearsal Success Rate: Percentage of successful dry-run migrations (e.g., switching from Test-Algo-A to Test-Algo-B) without transaction errors.
+     PQC Overhead Ratio: Percentage increase in transaction latency and payload size when using Hybrid PQC vs. Classical-only (Target: <10% latency, <20% size).
+     Key Rotation Coverage: Percentage of keys successfully rotated before their cryptographic validity expiration window.
+     Vulnerability Response Time: Time taken to disable a compromised algorithm across the network following a security advisory (Target: <1 hour).
+
+e.	Stakeholder Insights
+Stakeholder	Concern	Implications
+Cryptographers	Algorithm Selection & Parameter Safety	Need granular control over parameter sets (e.g., Dilithium2 vs Dilithium3) to balance security and performance based on evolving NIST standards.
+CISO / Security Team	"Harvest Now, Decrypt Later" Attacks	Require assurance that all data at rest and in transit is protected by quantum-resistant layers, ensuring long-term data confidentiality.
+Regulators (Tax/Central Bank)	Compliance with Quantum Readiness Mandates	Need verifiable proof that the payment infrastructure adheres to national security roadmaps regarding cryptographic migration.
+SRE / DevOps	Performance Degradation	PQC operations (key gen, signing) are computationally heavy. Implications require hardware acceleration (HSM/FPGA) to prevent latency spikes.
+Merchants	Integration Complexity	Implication that PQC must be transparent; API changes should not break existing merchant plugins or SDKs during the transition.
+End Users (Citizens)	Device Battery Life & Speed	Heavier crypto math on mobile wallets could drain battery or slow payments. Requires efficient implementation and offloading to server-side where possible.
+
+f.	Knowledge Representation Graph (mermaid.js)
+graph TD
+    subgraph "PQC Migration Layer M24"
+        M24[Module M24 Core]
+
+        subgraph "Algorithm Abstraction"
+            AA[Crypto Abstraction API]
+            ALGO[Algorithm Registry]
+            SIG[Signature Primitives]
+            KEM[Key Encapsulation Primitives]
+            HYB[Hybrid Logic Engine]
+        end
+
+        subgraph "Infrastructure & Hardware"
+            HSM[HSM / TPM Integration]
+            KMS[Cloud KMS Wrapper]
+            ACC[Hardware Accelerators FPGA/GPU]
+        end
+
+        subgraph "Governance & Operations"
+            CL[Key Lifecycle Manager]
+            POL[Policy Enforcement Engine]
+            AUD[Crypto Audit Log]
+            MON[Performance Benchmarking]
+        end
+    end
+
+    %% Dependencies
+    M24 --> AA
+    AA --> ALGO
+    ALGO -->|Implements| SIG
+    ALGO -->|Implements| KEM
+    AA --> HYB
+
+    SIG -->|Uses| HSM
+    KEM -->|Uses| HSM
+    HSM --> KMS
+
+    HYB -->|Managed By| CL
+    CL -->|Enforced By| POL
+    POL -->|Logs To| AUD
+    AA -->|Monitored By| MON
+
+    %% External Context
+    M24 -->|Secures| M01[Wallet Layer]
+    M24 -->|Secures| M05[Exchange Layer]
+    M24 -->|Ingests| FEED[NIST/Cryptographic News Feeds]
+
+classDiagram
+    class PQC_Module {
+        +AbstractCryptoAPI
+        +HybridOrchestrator
+        +PolicyEngine
+    }
+
+    class Algorithm {
+        +String name
+        +Enum family
+        +Enum type
+        +Int nist_level
+        +Bool is_post_quantum
+    }
+
+    class KeyMetadata {
+        +UUID key_id
+        +String alias
+        +Enum state
+        +DateTime expires_at
+        +HSM_Reference hsm_ref
+    }
+
+    class HSM {
+        +String pool_id
+        +String provider
+        +String endpoint
+    }
+
+    class CryptoLog {
+        +UUID log_id
+        +Enum operation
+        +UUID key_id
+        +Int latency_ms
+    }
+
+    class Benchmark {
+        +UUID result_id
+        +UUID algo_id
+        +Float ops_per_sec
+    }
+
+    class ComplianceMapping {
+        +UUID mapping_id
+        +String jurisdiction
+        +UUID algo_id
+    }
+
+    class PolicyRule {
+        +UUID rule_id
+        +String condition
+        +Enum action
+    }
+
+    class IncidentResponse {
+        +UUID run_id
+        +String playbook
+        +Enum status
+    }
+
+    PQC_Module --> Algorithm : Manages
+    PQC_Module --> KeyMetadata : Provisions
+    PQC_Module --> HSM : Interfaces
+    PQC_Module --> CryptoLog : Generates
+    PQC_Module --> Benchmark : Collects
+    PQC_Module --> ComplianceMapping : Enforces
+    PQC_Module --> PolicyRule : Evaluates
+    PQC_Module --> IncidentResponse : Executes
+
+    Algorithm "1" -- "*" Benchmark : has
+    KeyMetadata "1" -- "*" CryptoLog : generates
+    Algorithm "1" -- "*" ComplianceMapping : mapped by
+    KeyMetadata "1" -- "1" HSM : stored in
+
+
+g.	Comprehensive List of Features
+
+id	Feature	Description	Business Case	AI/ML Algorithms	KPIs	Primary Users
+F01	Algorithm Registry Service	Central repository managing available classical and PQC algorithms (NIST Levels 1-5).	Ensures only approved, vetted crypto is used system-wide.	N/A	Registry Sync Time (ms)	Cryptographers
+F02	Dilithium Signature Wrapper	Wrapper for CRYSTALS-Dilithium (NIST Standard for Signatures).	Primary quantum-safe signature mechanism for authenticity.	N/A	Ops/Sec	Devs
+F03	Kyber KEM Wrapper	Wrapper for CRYSTALS-Kyber (NIST Standard for Key Encapsulation).	Enables secure key exchange in a post-quantum world.	N/A	Encaps Time (ms)	Devs
+F04	Hybrid Signature Orchestrator	Orchestrates ECDSA + Dilithium combined signing.	Provides safety net: if one fails, security remains intact.	N/A	Hybrid Sig Gen Time	Security Architects
+F05	Hybrid Encryption Orchestrator	Combines X25519 (ECDH) + Kyber for session key establishment.	Defense-in-depth for key exchange protocols.	N/A	Handshake Latency	Network Engineers
+F06	Falcon High-Speed Signatures	Implementation of Falcon (Lattice-based, smaller sigs).	Optimizes bandwidth for low-latency microtransactions.	N/A	Signature Size (bytes)	Product Managers
+F07	SPHINCS+ Stateless Hashing	Implementation of SPHINCS+ (Hash-based, conservative security).	Used for high-value, long-term archival signatures where minimal trust is needed.	N/A	Sig Gen Time (high)	Auditors
+F08	Sphincs+ One-Time Signature Pool	Management of OTS (One-Time Signatures) within SPHINCS+.	Prevents reuse of OTS keys which leaks private keys.	N/A	Pool Exhaustion Rate	Security Ops
+F09	Classic Fallback Mechanism	Automatic fallback to RSA/ECC if PQC operation fails (configurable).	Ensures system availability during PQC implementation bugs.	Anomaly Detection	Fallback Frequency	SREs
+F10	Algorithm Versioning API	Semantic versioning for all crypto algorithm implementations.	Facilitates audit trails of exactly which algo signed a tx in 2026 vs 2028.	N/A	Version Coverage	Compliance Officers
+F11	Crypto-Agility Factory Pattern	Software design pattern allowing runtime swapping of crypto providers.	Reduces code rewrite effort when migrating standards.	N/A	Swap Downtime	Engineering Leads
+F12	Open Quantum Safe (OQS) Integration	Native bindings to liboqs for open-source algorithm portability.	Prevents vendor lock-in and leverages community vetted code.	N/A	Integration Stability	Open Source Maintainers
+F13	HSM Abstraction Layer	PKCS#11 interface abstraction supporting multiple HSM vendors (Thales, Utimaco, AWS CloudHSM).	Allows switching hardware suppliers without changing application code.	N/A	Vendor Swap Time	Infra Managers
+F14	Cloud KMS Connector	Connectors for AWS KMS, Azure Key Vault, GCP KMS for PQC key storage.	Leverages cloud-native security for key management at scale.	N/A	API Latency	Cloud Architects
+F15	FIPS 203 Compliance Monitor	Continuous monitoring of implementation against upcoming FIPS 203 (Dilithium) standards.	Ensures future regulatory compliance for US markets.	N/A	Compliance %	Regulators
+F16	EPC Quantum Readiness Tracker	Alignment tracker for European Payments Council quantum guidelines.	Facilitates cross-border interoperability in EU.	N/A	Guideline Adherence	EU Liaisons
+F17	Key Generation Scheduler	Automated batch jobs for pre-generating PQC keys (pre-warming).	Mitigates slow key-gen latency of PQC algorithms during peak loads.	Predictive Modeling	Key Availability	SREs
+F18	Key Distribution Daemon	Secure daemon for distributing public keys to Wallet and Merchant nodes.	Ensures all parties have the correct keys for verification.	N/A	Distribution Latency	Network Ops
+F19	Blind Signature PQC Adapter	Adapts Chaumian blind signatures to work with Dilithium.	Core privacy feature of PARI (payer anonymity) maintained in PQC era.	N/A	Verification Time	Core Devs
+F20	Zero-Knowledge Proof PQC Layer	ZK-SNARKs/STARKs integration using PQC underlying fields.	Enhances privacy proofs (e.g., balance sufficiency) with quantum resistance.	N/A	Proof Size	Privacy Engineers
+F21	Transaction Payload Compressor	Zstandard compression for PQC transaction blobs (which are larger).	Reduces bandwidth cost and storage overhead.	N/A	Compression Ratio	DBAs
+F22	Side-Channel Resistance Tester	Continuous fuzzing and timing analysis to detect side-channel leaks.	PQC implementations are vulnerable to power/timing attacks; this mitigates them.	Anomaly Detection	Vulnerability Count	Security Researchers
+F23	Constant-Time Implementation Enforcer	Static analysis enforcement to ensure all crypto ops run in constant time.	Prevents timing attacks on the PQC layer.	N/A	Code Violations	DevSecOps
+F24	Memory Sanitization Guard	Automatic zeroing of memory buffers after crypto operations.	Prevents memory scrapers from retrieving private keys.	N/A	Sanitization Speed	Security Engineers
+F25	Cryptographic Audit Logger	Immutable logging of every crypto operation (Sign, Verify, KeyGen).	Essential for forensic analysis and CMMI Level 5 traceability.	N/A	Log Throughput	Auditors
+F26	Algorithm Deprecation Workflow	Automated workflow to sunset weak algos (e.g., SHA-1 to SHA-3 transition).	Manages end-of-life for cryptographic components gracefully.	N/A	Deprecation Time	Governance Board
+F27	Dynamic Policy Engine (Crypto)	Policy-based routing of transactions to specific algos based on value/risk.	High-value txs use stronger/slower algos (SPHINCS+); low-value use faster (Dilithium).	Decision Trees	Policy Match Rate	Risk Managers
+F28	Quantum Threat Intelligence Feed	Ingestion of academic news regarding breaks in PQC schemes.	Early warning system to rotate algorithms before a break becomes practical.	NLP / Sentiment Analysis	Feed Latency	CISO
+F29	PQC Benchmarking Suite	Automated performance regression tests for all supported algorithms.	Ensures updates or hardware changes do not degrade performance.	N/A	Benchmark Baseline	QA Engineers
+F30	Latency Budget Tracker	Real-time tracking of crypto operation cost against total tx budget.	Alerts if crypto operations are consuming too much time.	Statistical Process Control	Budget Variance	Performance Engineers
+F31	Hardware Acceleration Router	Routes crypto ops to GPU/FPGA if CPU load is high.	Optimizes resource usage during peak transaction periods.	Reinforcement Learning	Hardware Utilization	Systems Architects
+F32	Multi-Party Computation (MPC) Key Gen	Distributed generation of PQC keys (Dilithium-MPC).	No single point of compromise for the Exchange's master keys.	N/A	Gen Success Rate	Cryptographers
+F33	Threshold Signature Support	Threshold implementation for PQC signatures (t-of-n).	Increases resilience for high-value exchange keys.	N/A	Reconstruct Time	Security Architects
+F34	Forward Secrecy Manager	Manages ephemeral keys for PQC key exchange.	Ensures that compromise of long-term keys doesn't decrypt past sessions.	N/A	Key Rotation Interval	Privacy Officers
+F35	Replay Attack Protection (PQC)	Nonce/sequence management specific to PQC transaction structures.	Prevents replay of valid quantum-signed transactions.	N/A	False Positive Rate	Fraud Engineers
+F36	Merchant Certificate PQC Authority	Internal CA issuing X.509 certs with PQC extensions (RFC 8410 style).	Enables merchants to identify themselves using quantum-safe keys.	N/A	Issuance Rate	PKI Managers
+F37	User Wallet Key Backup (PQC)	Encrypted backup of wallet keys using PQC symmetric primitives.	Secure recovery mechanism for user funds.	N/A	Restore Time	Product Managers
+F38	Shard Key Isolation	Ensures keys for different geographic shards are cryptographically isolated.	Limits blast radius of a key compromise to a single region.	N/A	Isolation Score	Infra Security
+F39	Quantum Random Number Generator (QRNG)	Integration with hardware QRNG for high-entropy key generation.	True randomness is critical for PQC security assumptions.	Entropy Estimation	Entropy Bits/sec	Hardware Vendors
+F40	Deterministic Nonce Generator	RFC 6979 style deterministic nonce generation adapted for PQC.	Prevents catastrophic failure due to bad RNG (reused nonces).	N/A	Nonce Collision Rate	Crypto Librarians
+F41	Compliance Tagging Engine	Tags every transaction payload with metadata: "Algo: Dilithium3", "KeyVer: 2".	Allows auditors to instantly verify security properties of old data.	N/A	Tagging Accuracy	Compliance
+F42	Cross-Jurisdiction Algorithm Mapper	Maps countries to allowed algorithms (e.g., France allows Kyber, Country X does not).	Compliance with diverse national crypto regulations.	Rule Engine	Map Accuracy	Legal Team
+F43	Wallet SDK Crypto Drop-in	Drop-in replacement library for mobile wallets to use PQC.	Simplifies adoption for app developers.	N/A	Integration Effort	Mobile Devs
+F44	Merchant Gateway PQC Plugin	Plugin for existing payment gateways to accept PQC-signed tokens.	Backwards compatibility for merchants on legacy infrastructure.	N/A	Plugin Uptime	Partner Integrations
+F45	Test Vector Validator	Automated validation against official NIST test vectors for all algos.	Ensures mathematical correctness of implementation.	N/A	Validation Pass Rate	QA
+F46	Interoperability Test Harness	Tests PARI PQC against other external systems (e.g., ECB tests).	Ensures the system plays nice with the broader financial ecosystem.	N/A	Test Coverage	Interop Leads
+F47	Signature Size Optimizer	Selects the most compact algorithm suitable for the security level.	Reduces storage costs for the database.	N/A	Size Reduction %	DBAs
+F48	Verification Offloading Server	Dedicated server cluster for heavy PQC verification ops.	Protects transaction processing nodes from CPU spikes.	Load Balancing	Queue Depth	SREs
+F49	Fail-Closed Security Mode	If crypto verification fails for any reason, transaction is rejected.	Security-first posture prevents unverified txs from settling.	N/A	Rejection Rate	Security Ops
+F50	Key Usage Analytics	Tracks how often a key is used to detect anomalies.	Detects keys being used more frequently than expected (leakage?).	Anomaly Detection	Usage Deviation	Data Scientists
+F51	Self-Healing Key Store	Detects corrupt keys and attempts recovery from backup shards.	High availability for cryptographic material.	N/A	Recovery Success	Storage Engineers
+F52	PQC Code Coverage Scanner	Ensures all crypto code paths have 100% test coverage.	CMMI Level 5 quality requirement for critical security code.	N/A	Coverage %	Test Leads
+F53	Static Application Security Testing (SAST)	Deep scans for crypto-specific code smells (e.g., weak randomness).	Prevents introduction of vulnerabilities during dev.	N/A	Vulnerability Count	DevSecOps
+F54	Dynamic Application Security Testing (DAST)	Runtime analysis of the crypto module in staging.	Catches environment-specific crypto issues.	N/A	Finding Severity	Security Ops
+F55	Software Bill of Materials (SBOM) for Crypto	Detailed SBOM for all crypto libraries (liboqs, openssl, etc.).	Rapid vulnerability scanning (Log4j style) for crypto components.	N/A	SBOM Freshness	Supply Chain Security
+F56	Dependency Patch Automator	Auto-patching of crypto libraries upon CVE release.	Reduces window of exposure.	N/A	Patch Time	Release Managers
+F57	Configuration Drift Detector	Ensures all nodes run the same version/config of PQC algorithms.	Prevents inconsistencies in a distributed system.	N/A	Drift Count	Config Managers
+F58	Granular Access Control for Keys	ABAC policies defining who can initiate a sign operation with Master Key.	Zero-Trust implementation for crypto ops.	N/A	Auth Failure Rate	IAM Engineers
+F59	Just-In-Time Key Access	Temporary elevation of privileges to perform a crypto operation.	Limits standing access to high-value keys.	N/A	Session Duration	Security Architects
+F60	Geo-Fencing for Key Usage	Keys can only be used within specific geographic data centers.	Prevents remote exfiltration of keys usage.	N/A	Violation Alerts	Security Ops
+F61	Time-Based Key Validity	Keys strictly expire and become invalid after a set duration.	Enforces crypto-agility and rotation.	N/A	Expiration Accuracy	Key Managers
+F62	Disaster Recovery Key Vault	Air-gapped backup of master seeds for PQC recovery.	Last resort recovery scenario.	N/A	Seal Integrity	DR Managers
+F63	Blue/Green Algorithm Deployment	Running new algo on green traffic while old algo stays on blue.	Safe rollout mechanism for new crypto standards.	N/A	Cutover Success	Release Engineers
+F64	Canary Release for Crypto	Routing 1% of traffic to new algorithm implementation.	Detects subtle bugs before full rollout.	N/A	Error Diff	Release Engineers
+F65	Shadow Traffic Mirroring	Mirroring real traffic to PQC verification nodes without affecting results.	Testing production readiness without risk.	N/A	Mirror Fidelity	SREs
+F66	Real-Time Alerting on Crypto Failures	PagerDuty/Slack alerts on signature verification failures.	Immediate response to potential security incidents.	N/A	Alert Latency	Ops Managers
+F67	Heatmap of Algorithm Usage	Visualization of which algorithms are used where.	Strategic planning for migration efforts.	N/A	Map Refresh Rate	PMO
+F68	Cost Per Transaction Calculator (Crypto)	Attributes CPU/GPU cost to crypto operations.	Financial optimization of the security layer.	N/A	Cost/TX	Finance Ops
+F69	Throughput Sharding based on Algo	Sharding database based on the crypto algorithm used for indexing.	Optimizes query performance for verification.	N/A	Query Latency	DBAs
+F70	Legacy Algorithm Bridge	Wrapper to verify old RSA/ECC signatures during transition.	Allows historical data verification while migrating to PQC.	N/A	Bridge Availability	Migration Leads
+F71	Algorithm Negotiation Protocol	Protocol for client/server to agree on best mutual algorithm.	Ensures interoperability between old and new wallet versions.	N/A	Negotiation Time	Protocol Engineers
+F72	Forced Migration Trigger	Admin trigger to force all clients to upgrade to PQC algorithms.	Used when old algorithms are deprecated or broken.	N/A	Uptime During Force	Crisis Managers
+F73	Customer Notification of Crypto Upgrade	In-app messaging regarding security upgrades.	Ensures users update wallets for continued access.	N/A	Read Rate	Product Managers
+F74	Quantum-Safe VPN Tunnels	VPN tunnels between Exchange and Banks using Kyber/Dilithium.	Secures infrastructure-to-infrastructure communication.	N/A	Tunnel Throughput	NetSec
+F75	API Gateway PQC Authentication	OAuth2/JWT tokens signed with PQC for internal APIs.	Secures microservice communication mesh.	N/A	Token Verification Time	Backend Devs
+F76	Service Mesh Identity (PQC)	SPIFFE certificates with PQC keys for service mesh.	Zero-trust networking between Kubernetes pods.	N/A	Identity Issue Time	Platform Engineers
+F77	PQC Key Export (Encrypted)	Secure export of keys for backup purposes (wrapped with master key).	Portability of keys between HSMs.	N/A	Export Integrity	Key Managers
+F78	Key Component Assembly	Assembling private key from encrypted shares stored in different locations.	High-security key activation process.	N/A	Assembly Time	Cryptographers
+F79	Cryptographic Material Erasure	Secure deletion of key material (Cryptographic Shred).	GDPR "Right to be Forgotten" compliance for keys.	N/A	Erasure Certification	DPOs
+F80	Blinded Coin PQC Minting	The process of minting digital coins using blind signatures with Dilithium.	Core issuance logic of PARI, now quantum safe.	N/A	Minting Rate	Exchange Devs
+F81	Deposit Transaction PQC Signing	Customer signing deposit requests with PQC wallet key.	Secures the entry of fiat into the system.	N/A	Sign Success Rate	Wallet Devs
+F82	Withdrawal Transaction PQC Verification	Exchange verifying withdrawal requests with PQC.	Prevents unauthorized draining of funds.	N/A	Verify Success Rate	Exchange Devs
+F83	Refund Transaction PQC Signing	Merchant signing refunds with PQC (blinded).	Secure refund mechanism preserving anonymity.	N/A	Refund Time	Merchant Backend
+F84	Tax Report PQC Signing	Tax Authority signing report requests with PQC.	Ensures authenticity of fiscal data requests.	N/A	Report Integrity	Regulators
+F85	Auditor Read-Only PQC Key	Minimal privilege key for auditors to access encrypted logs.	Grants access without granting control.	N/A	Key Usage Count	Internal Audit
+F86	PQC Enabled SSL/TLS Termination	Termination of TLS at edge using Kyber key exchange.	Protects data in transit immediately.	N/A	TLS Handshake Time	Edge Engineers
+F87	Hardware Security Module (HSM) Failover	Automatic failover to secondary HSM if primary dies.	High availability for signing operations.	N/A	Failover Time	HSM Admins
+F88	Multi-Region HSM Replication	Replicating encrypted key blobs across regions.	Disaster recovery for key material.	N/A	RPO/RTO	DR Engineers
+F89	FIPS 140-2/3 Level 3 Validation	Ensuring HSMs and modules meet FIPS physical security standards.	Regulatory requirement for handling financial keys.	N/A	Validation Status	Compliance
+F90	EIDAS 2.0 PQC Integration	Integration with EU Digital Identity Wallets using PQC.	Alignment with upcoming EU identity standards.	N/A	Integration Success	EU Integrators
+F91	Post-Quantum Digital Receipts	Receipts signed with SPHINCS+ for long-term non-repudiation.	Proof of purchase valid for decades (warranty/tax).	N/A	Receipt Size	Merchants
+F92	Supply Chain Attestation (PQC)	Attesting software components of PARI using PQC signatures (Sigstore/cosign style).	Securing the build pipeline against quantum threats.	N/A	Attestation Verify Time	DevSecOps
+F93	Secure Boot with PQC	Firmware boot verification using PQC signatures.	Prevents low-level rootkits.	N/A	Boot Time	Hardware Engineers
+F94	Container Image PQC Signing	Signing Docker/Kubernetes images with PQC.	Secure deployment pipeline.	N/A	Image Pull Time	Platform Engineers
+F95	Configuration File PQC Signing	Signing configuration files to prevent tampering.	Ensures deployed config matches approved config.	N/A	Load Time	Ops
+F96	PQC Algorithm Simulation Mode	Simulating a quantum computer attack to test resilience (theoretical).	Stress testing the architecture.	N/A	Attack Success Rate	Red Team
+F97	Hybrid Signature Verification Cache	Caching verification results for recurring public keys.	Optimizes performance for popular merchants.	Caching Strategy	Cache Hit Rate	Backend Devs
+F98	PublicKey Infrastructure (PKI) Bridge	Mapping between classical X.509 and PQC certificates.	Seamless transition without re-issuing all identities immediately.	N/A	Bridge Mapping Accuracy	PKI Architects
+F99	Algorithm Strength Meter	UI component displaying "Security Level" (1-5) of current connection.	Transparency for users regarding their security.	N/A	Render Time	UX Designers
+F100	Quantum Safe Backup Encryption	Encrypting DB backups with PQC symmetric algorithms (e.g., Kyber encapsulated key).	Long-term protection of archived data.	N/A	Backup Size	Storage Ops
+F101	Key Derivation Function (PQC)	KDF using quantum-resistant hashes (SHA-3/SHAKE).	Deriving sub-keys from master keys securely.	N/A	Derivation Speed	Crypto Engineers
+F102	Entropy Health Monitor	Monitoring system entropy levels to ensure quality key generation.	Prevents weak keys due to low entropy.	Statistical Analysis	Entropy Score	Systems Ops
+F103	Quantum Resistant OATH Implementation	TOTP/HOTP using PQC algorithms for 2FA.	Future-proofing multi-factor authentication.	N/A	Auth Time	Security Engineers
+F104	Biometric Key Binding	Binding PQC keys to biometric data (Secure Enclave).	Stronger user authentication factor.	N/A	Match False Rate	Mobile Devs
+F105	Secure Element Integration	Storing PQC private keys in hardware Secure Elements (NFC chips).	Protects keys on physical smart cards/devices.	N/A	Write Time	Hardware Vendors
+F106	PQC Key Splitting (Shamir's Secret)	Splitting PQC keys for multi-person control.	Governance requirement for master keys.	N/A	Split/Combine Time	Governance
+F107	Blind Coin Unblinding (PQC)	Wallet client unblinding the coin using Dilithium.	Critical step in receiving funds.	N/A	Client CPU Load	Wallet Devs
+F108	Merchant Deposit Aggregation	Aggregator signing batch deposits with PQC.	Efficiency for high-volume merchants.	N/A	Batch Size	Backend Devs
+F109	Instant Payment PQC Protocol	Optimized PQC flow for sub-second instant payments.	Real-time payment requirement.	N/A	E2E Latency	Protocol Leads
+F110	Offline Payment Queueing (PQC)	Queueing offline signed PQC transactions for sync.	Functionality in low-connectivity areas.	N/A	Sync Success Rate	Mobile Devs
+F111	PQC for SMS/Email Notifications	Signing notifications with PQC (optional).	Verifying source of alerts.	N/A	Notification Time	Comms Devs
+F112	Rate Limiting (Crypto Aware)	Rate limiting based on computational cost of crypto (PQC costs more).	Prevents DoS via expensive PQC operations.	Token Bucket	Limit Accuracy	NetSec
+F113	Resource Quota per Algorithm	Assigning CPU/GPU quotas to specific algorithms.	Fair scheduling of mixed workloads.	Resource Monitor	Quota Adherence	SREs
+F114	PQC Memory Profiler	Profiling memory usage of PQC libs (stack/heap).	PQC algos can be memory heavy; preventing OOM.	N/A	Heap Usage	Performance
+F115	Garbage Collection Tuning	Tuning GC for languages (Java/Go) using large byte arrays for PQC.	Preventing latency spikes caused by GC.	N/A	GC Pause Time	Backend Devs
+F116	Native Library Wrapper Generator	Automated generation of wrappers for liboqs C code.	Facilitates updates to underlying crypto libraries.	N/A	Wrapper Gen Time	Tooling Engineers
+F117	Fuzzing Dashboard for Crypto	Dashboard showing fuzzing results (crashes, hangs) for PQC code.	Visibility into stability of crypto implementation.	N/A	Bug Discovery Rate	QA
+F118	Formal Verification Records	Linking mathematical proofs to specific code versions.	Highest level of assurance for critical modules.	N/A	Proof Coverage	Cryptographers
+F119	Vulnerability Bounty Program (Crypto)	Specific scope for PQC vulnerabilities.	Crowdsourced security testing.	N/A	Bounty Payout	Security
+F120	Regulatory Sandbox Keys	Isolated set of keys for testing with regulators.	Safe environment for compliance testing.	N/A	Sandbox Uptime	RegTech
+F121	PQC Education Module	Internal training material for devs on PQC risks.	Knowledge management and upskilling.	N/A	Training Completion	HR/Eng
+F122	Incident Response Playbook (Quantum)	Specific runbook for "A quantum computer just broke X".	Preparedness for cryptapocalypse scenarios.	N/A	Execution Time	Incident Commanders
+F123	Algorithm Performance Baseline DB	Database storing historical performance of algos across hardware.	Capacity planning.	Time Series Analysis	Data Ingestion Rate	DBAs
+F124	Cost Optimization Engine (Crypto)	Recommends cheapest valid algo for specific security level.	Reducing cloud compute costs.	Linear Programming	Savings Estimate	FinOps
+F125	PQC Compliance Report Generator	Generating PDF/JSON reports for auditors regarding crypto status.	Automating evidence collection.	N/A	Report Gen Time	Compliance
+F126	Audit Trail Hash Chaining	Chaining audit logs with SPHINCS+ to prevent history rewriting.	Immutable history of system events.	N/A	Chain Length	Auditors
+F127	User Consent for PQC Upgrade	UI/UX flow for obtaining consent to upgrade wallet keys.	Legal requirement in some jurisdictions.	N/A	Consent Rate	Legal/Product
+F128	Wallet Key Migration Wizard	Guided process for users to migrate keys from ECC to PQC.	Reduces friction during the global upgrade.	N/A	Abandonment Rate	Product
+F129	Merchant Key Migration Tool	Bulk migration tool for merchants to rotate thousands of keys.	Operational efficiency for B2B.	N/A	Migration Speed	Merchant Support
+F130	Fallback Key Storage	Storing old ECC keys only for decryption of legacy data.	Minimal access to deprecated keys.	N/A	Access Frequency	Archivists
+F131	PQC Enabled QR Code Format	QR code format containing PQC public keys/sigs.	Physical world interaction (NFC/QR).	N/A	Scan Success Rate	UX
+F132	NFC Secure Element PQC Protocol	Protocol for conducting PQC operations over NFC.	Contactless payments security.	N/A	Transaction Time	Hardware
+F133	Bluetooth Low Energy (BLE) PQC Pairing	Pairing devices using PQC key exchange.	IoT payment terminal security.	N/A	Pairing Time	IoT Engineers
+F134	Smart Contract PQC Verification	Verifying PQC signatures within smart contracts (if applicable).	Blockchain interoperability.	N/A	Gas Cost	Blockchain Devs
+F135	State Channel PQC Security	Securing off-chain state channels with PQC.	High-speed off-chain scaling.	N/A	Channel Close Time	Protocol Engineers
+F136	Hash Time Locked Contracts (PQC)	HTLCs using PQC hash functions.	Atomic swaps and routing.	N/A	Lock Time	Core Devs
+F137	PQC for Inter-Exchange Communication	Securing communication between different Exchange nodes.	Federation security.	N/A	Msg Latency	Network Ops
+F138	Load Balancer PQC Persistence	Persisting PQC sessions in load balancers.	Session affinity for long crypto handshakes.	N/A	Session Error Rate	NetSec
+F139	WebAssembly (WASM) PQC Lib	WASM compiled version of PQC for browser-based wallets.	Client-side web payments.	N/A	Download Size	Frontend Devs
+F140	Service Worker Crypto Offload	Using browser Service Workers for PQC operations.	Non-blocking UI.	N/A	UI Thread Lag	Frontend Devs
+F141	PQC Key Fingerprints	Visual representation (hex/emoji) of PQC key hashes for verification.	Human-verifiable identity checks.	N/A	Match Accuracy	UX Security
+F142	S/MIME Replacement (PQC)	Secure email communication for support using PQC.	Internal secure comms.	N/A	Encrypt Time	IT Ops
+F143	Document Signing (PQC)	Internal PDF/document signing with PQC.	Enterprise workflow security.	N/A	Sig Time	Internal Apps
+F144	Code Signing (PQC)	Signing PARI release binaries with PQC.	Supply chain security.	N/A	Verify Time	Release Engineers
+F145	Driver Signature PQC Enforcement	Enforcing drivers/modules signed with PQC.	Kernel level security.	N/A	Load Time	Platform
+F146	PQC in Config Management (Ansible/Chef)	Encrypting config secrets in management tools with PQC.	Infrastructure as Code Security.	N/A	Decrypt Time	DevOps
+F147	Secrets Scanning for PQC Keys	Scanning repos for leaked PQC private keys.	Leak prevention.	Regex/Pattern Matching	Scan Time	DevSecOps
+F148	PQC Key Rollover Automation	Automated rollover of keys nearing end-of-life.	Operational continuity.	N/A	Rollover Success	Automation
+F149	Compliance Dashboard (Crypto)	High-level view of crypto compliance across all regions.	Executive visibility.	N/A	Dashboard Load	Execs
+F150	PQC Module Health API	/health endpoint specific to crypto engine status.	Monitoring integration.	N/A	Response Time	Monitoring
+F151	Algorithm Interoperability Matrix	Matrix showing which versions of PARI support which algorithms.	Support planning.	N/A	Matrix Completeness	Support
+F152	PQC Error Code Dictionary	Standardized error codes for PQC failures.	Debugging and logging.	N/A	Code Usage	Docs
+F153	Dynamic Feature Flagging (Algo)	Feature flags to turn specific algorithms on/off remotely.	Incident control.	N/A	Flag Latency	DevOps
+F154	Latency Impact Analysis	Post-deployment analysis of latency impact of new algo.	Validation of performance KPIs.	T-Tests	P-value	Performance
+F155	PQC Key Recovery Token	Secure token mechanism to trigger key recovery process.	Workflow for lost keys.	N/A	Token Validity	Support
+
+
+
+
+h.	Comprehensive List of Database Objects
+id	schema_name	object_name	object_type	description	feature_reference	column_names	constraints / notes	junction_tables
+DB01	pqc	pqc_supported_algorithms	TABLE	Registry of cryptographic algorithms supported by the system.	F01	algo_id, name (PK), family (e.g., Lattice, Hash), type (Sig, KEM), nist_level, is_post_quantum, default_key_size, status	name UNIQUE; status CHECK (Active, Deprecated, Testing)
+DB02	pqc	pqc_algorithm_versions	TABLE	Versioning history for each algorithm implementation.	F10	version_id (PK), algo_id (FK), semantic_version, liboqs_version, implementation_hash, released_at, deprecated_at	FK -> pqc_supported_algorithms(algo_id)
+DB03	pqc	algo_family_enum	ENUM	Enumeration of cryptographic families (Lattice, Code-based, Multivariate, etc.).	F01	(ECC, RSA, LATTICE, HASH_BASED, CODE_BASED, ISOGENY, SYMMETRIC)
+DB04	pqc	nist_security_level_enum	ENUM	NIST security categories (1, 3, 5).	F01	(LEVEL_1, LEVEL_3, LEVEL_5)
+DB05	pqc	pqc_key_metadata	TABLE	Stores metadata for keys managed by HSM/KMS (Material is external).	F12-F14	key_id (PK), key_alias, algo_id (FK), version_id (FK), key_purpose (Sig, Enc), key_state, created_at, expires_at, hsm_slot_id	key_alias UNIQUE INDEX
+DB06	pqc	key_state_enum	ENUM	Lifecycle states of a cryptographic key.	F61	(GENERATED, ACTIVE, ROTATING, DISABLED, DESTROYED, COMPROMISED)
+DB07	pqc	pqc_hsm_pools	TABLE	Configuration for HSM clusters and pools.	F13	pool_id (PK), pool_name, provider (Thales, AWS, Utimaco), region, endpoint_url, status, max_ops_per_sec	status CHECK
+DB08	pqc	hsm_provider_enum	ENUM	List of supported HSM providers.	F13	(THALES_NCIPHER, AWS_CLOUDHSM, AZURE_DPS, GOOGLE_CLOUD_KMS, UTIMACO, SOFT_HSM)
+DB09	pqc	pqc_key_shards	TABLE	Stores metadata for keys split via Shamir's Secret Sharing.	F106	shard_id (PK), key_id (FK), shard_index, shard_location_id, verification_hash	FK -> pqc_key_metadata(key_id)
+DB10	pqc	crypto_operation_log	TABLE	Immutable audit log of every cryptographic operation.	F25	log_id (PK), transaction_id, operation_type (Sign, Verify, Gen), algo_id (FK), key_id (FK), requester_id, result (Success, Fail), latency_ms, timestamp	Index on timestamp, key_id
+DB11	pqc	operation_type_enum	ENUM	Types of cryptographic operations performed.	F10	(KEYGEN, SIGN, VERIFY, ENCAPS, DECAPS, ENCRYPT, DECRYPT, HASH)
+DB12	pqc	operation_result_enum	ENUM	Result status of an operation.	F10	(SUCCESS, FAILURE, ERROR, TIMEOUT)
+DB13	pqc	pqc_deprecation_schedule	TABLE	Schedule for retiring specific algorithms.	F26	schedule_id (PK), algo_id (FK), deprecation_date, forbidden_after_date, replacement_algo_id (FK)	FK -> pqc_supported_algorithms(algo_id)
+DB14	pqc	pqc_compliance_mappings	TABLE	Maps algorithms to regional compliance standards.	F42, F16	mapping_id (PK), jurisdiction_code (FK), standard_name (e.g., FIPS203), algo_id (FK), is_allowed	Unique(jurisdiction_code, standard_name, algo_id)
+DB15	pqc	pqc_benchmark_results	TABLE	Stores performance metrics for algorithms on specific hardware.	F29	result_id (PK), algo_id (FK), cpu_arch, ops_type, ops_per_sec, avg_latency_ms, memory_kb, timestamp	FK -> pqc_supported_algorithms(algo_id)
+DB16	pqc	cpu_arch_enum	ENUM	CPU architectures for benchmarking context.	F29	(X86_64, ARM64, PPC64LE, S390X)
+DB17	pqc	pqc_policy_rules	TABLE	Policy engine definitions for crypto usage.	F27	rule_id (PK), rule_name, condition_expr, action (Allow, Deny, RequireHybrid), priority
+DB18	pqc	policy_action_enum	ENUM	Actions enforced by the policy engine.	F27	(ALLOW, DENY, REQUIRE_HYBRID, REQUIRE_PQC_ONLY, ESCALATE)
+DB19	pqc	pqc_hardware_accelerators	TABLE	Inventory of hardware accelerators (GPU/FPGA).	F31	accelerator_id (PK), type (GPU, FPGA), model, location_id, total_capacity, available_capacity
+DB20	pqc	accelerator_type_enum	ENUM	Types of hardware acceleration.	F31	(NONE, CPU, GPU_NVIDIA, FPGA_XILINX, ASIC)
+DB21	pqc	pqc_key_usage_analytics	TABLE	Aggregated stats on key usage frequency for anomaly detection.	F50	stat_id (PK), key_id (FK), usage_count, window_start, window_end, is_anomalous	FK -> pqc_key_metadata(key_id)
+DB22	pqc	pqc_transaction_signatures	TABLE	Links transactions to their signature metadata (not the full sig).	F80-F85	signature_id (PK), transaction_id (FK), algo_id (FK), key_id (FK), signature_size_bytes, verification_status	FK -> pqc_key_metadata(key_id)
+DB23	pqc	hybrid_signature_components	TABLE	Decomposes hybrid signatures into classical and PQ parts.	F04	hybrid_id (PK), signature_id (FK), component_type (Classical, PQ), algo_id (FK), component_hash	FK -> pqc_transaction_signatures(signature_id)
+DB24	pqc	component_type_enum	ENUM	Types of components in a hybrid scheme.	F04	(CLASSICAL, POST_QUANTUM)
+DB25	pqc	pqc_audit_immutable_chain	TABLE	Blockchain-like chain of custody for audit logs.	F126	chain_id (PK), prev_chain_hash (FK), current_log_hash, log_id (FK), timestamp	prev_chain_hash Self FK
+DB26	pqc	pqc_side_channel_tests	TABLE	Results of side-channel resistance fuzzing.	F22	test_id (PK), algo_id (FK), test_type (Timing, Power, Cache), result_status (Pass, Fail, Leaky), cvss_score	FK -> pqc_supported_algorithms(algo_id)
+DB27	pqc	test_type_enum	ENUM	Types of side-channel analysis.	F22	(TIMING_ANALYSIS, CACHE_ATTACK, POWER_ANALYSIS, EMANATION)
+DB28	pqc	pqc_config_history	TABLE	History of configuration changes to the PQC module.	F57	config_id (PK), parameter_name, old_value, new_value, changed_by, changed_at
+DB29	pqc	pqc_incident_response_runs	TABLE	Logs of execution of quantum incident response playbooks.	F122	run_id (PK), playbook_name, triggered_by, start_time, end_time, status, actions_taken_json
+DB30	pqc	pqc_key_rotation_schedule	TABLE	Scheduled jobs for automatic key rotation.	F148	schedule_id (PK), key_id (FK), scheduled_for, status, completed_at	FK -> pqc_key_metadata(key_id)
+DB31	pqc	pqc_failover_events	TABLE	Logs of HSM failover events.	F87	event_id (PK), primary_pool_id, secondary_pool_id, trigger_reason, switch_time_ms	FK -> pqc_hsm_pools(pool_id)
+DB32	pqc	pqc_software_inventory	TABLE	SBOM data for crypto libraries.	F55	inventory_id (PK), library_name, version, license_type, cpe_id, purl, vulnerability_scan_date	library_name, version INDEX
+DB33	pqc	pqc_vulnerabilities	TABLE	Known CVEs affecting crypto libraries.	F56	vuln_id (PK), inventory_id (FK), cve_id, severity, description, patch_available, patch_version	FK -> pqc_software_inventory(inventory_id)
+DB34	pqc	pqc_merchant_keys	TABLE	Metadata for merchant-specific PQC keys.	F36	merchant_key_id (PK), merchant_id (FK), key_id (FK), public_key_pem, certificate_id	FK -> pqc_key_metadata(key_id)	pqc_merchant_x_jurisdiction
+DB35	pqc	pqc_user_wallet_keys	TABLE	Metadata for user wallet PQC keys.	F37	wallet_key_id (PK), user_id (FK), key_id (FK), device_fingerprint, backup_status	FK -> pqc_key_metadata(key_id)
+DB36	pqc	pqc_backup_shards	TABLE	Metadata for user wallet key backups.	F37	backup_id (PK), wallet_key_id (FK), shard_location, encryption_algo_id (FK)	FK -> pqc_user_wallet_keys(wallet_key_id)
+DB37	pqc	pqc_geofencing_rules	TABLE	Rules defining where keys can be used.	F60	rule_id (PK), key_id (FK), region_code, allowed_ip_range	FK -> pqc_key_metadata(key_id)
+DB38	pqc	pqc_just_in_time_access	TABLE	Records of temporary privilege elevations.	F59	access_id (PK), requester_id, key_id (FK), granted_at, expires_at, reason	FK -> pqc_key_metadata(key_id)
+DB39	pqc	pqc_cost_allocation	TABLE	Attributing cloud compute costs of crypto ops.	F68	allocation_id (PK), transaction_id, algo_id (FK), cpu_cost_usd, compute_duration_ms	FK -> pqc_supported_algorithms(algo_id)
+DB40	pqc	pqc_migration_phases	TABLE	Phases of the PQC migration roadmap.	F63-F65	phase_id (PK), phase_name, start_date, end_date, description, status
+DB41	pqc	migration_status_enum	ENUM	Status of a migration phase.	F63	(PLANNING, CANARY, BLUE_GREEN, PRODUCTION, ROLLED_BACK)
+DB42	pqc	pqc_test_vectors	TABLE	Official NIST test vectors for validation.	F45	vector_id (PK), algo_id (FK), vector_set_name, input_data_hex, expected_output_hex	FK -> pqc_supported_algorithms(algo_id)
+DB43	pqc	pqc_interop_tests	TABLE	Interoperability test results with external systems.	F46	test_id (PK), partner_system, algo_id (FK), test_result, failure_reason, timestamp	FK -> pqc_supported_algorithms(algo_id)
+DB44	pqc	pqc_training_records	TABLE	Records of staff training on PQC.	F121	record_id (PK), staff_id, training_module, completion_date, score_pct
+DB45	pqc	pqc_compliance_reports	TABLE	Generated compliance reports.	F125	report_id (PK), report_type, generation_date, period_start, period_end, file_path, status
+DB46	pqc	pqc_key_recovery_requests	TABLE	Workflow for recovering lost keys.	F155	request_id (PK), user_id (FK), key_id (FK), token_hash, requested_at, status, approved_by	FK -> pqc_key_metadata(key_id)
+DB47	pqc	recovery_status_enum	ENUM	Status of key recovery.	F155	(PENDING, APPROVED, REJECTED, COMPLETED, EXPIRED)
+DB48	pqc	pqc_notification_templates	TABLE	Templates for user crypto upgrade notifications.	F123	template_id (PK), locale, subject, body_template, version
+DB49	pqc	pqc_consent_records	TABLE	User consent for PQC key migration.	F127	consent_id (PK), user_id (FK), consent_version, granted_at, ip_address	FK -> pqc_user_wallet_keys(user_id)
+DB50	pqc	pqc_merchant_migrations	TABLE	Bulk migration jobs for merchants.	F129	batch_id (PK), merchant_id (FK), started_at, completed_at, total_keys, failed_keys	FK -> pqc_merchant_keys(merchant_key_id)
+DB51	pqc	pqc_rate_limits	TABLE	Rate limiting rules based on crypto cost.	F112	rule_id (PK), algo_id (FK), requests_per_minute, burst_capacity	FK -> pqc_supported_algorithms(algo_id)
+DB52	pqc	pqc_resource_quotas	TABLE	Quota allocation for algorithms per tenant.	F113	quota_id (PK), tenant_id, algo_id (FK), max_cpu_cores, max_memory_mb	FK -> pqc_supported_algorithms(algo_id)
+DB53	pqc	pqc_error_codes	TABLE	Standardized error codes dictionary.	F152	code_id (PK), error_code, error_message, severity, troubleshooting_url
+DB54	pqc	pqc_feature_flags	TABLE	Feature flags for algorithm toggling.	F153	flag_id (PK), flag_name, is_enabled, allowed_roles, last_updated
+DB55	pqc	pqc_latency_impact	TABLE	Analysis of latency impact post-deployment.	F154	analysis_id (PK), deployment_id, algo_id (FK), avg_latency_before, avg_latency_after, pvalue, is_significant	FK -> pqc_supported_algorithms(algo_id)
+DB56	pqc	pqc_health_status	TABLE	Current health status of the crypto module.	F150	status_id (PK), component_name (HSM, Lib, KMS), status (Up, Down, Degraded), last_check, message
+DB57	pqc	pqc_key_components	TABLE	For MPC keys, stores metadata of components.	F32	component_id (PK), key_id (FK), node_id, component_index	FK -> pqc_key_metadata(key_id)
+DB58	pqc	pqc_threshold_sigs	TABLE	Configuration for threshold signatures (t-of-n).	F33	thresh_id (PK), key_id (FK), total_shares, threshold_required	FK -> pqc_key_metadata(key_id)
+DB59	pqc	pqc_document_signatures	TABLE	Internal document signing metadata.	F143	doc_sig_id (PK), document_id (FK), key_id (FK), signature_hash, signed_at	FK -> pqc_key_metadata(key_id)
+DB60	pqc	pqc_code_signatures	TABLE	Metadata for signed release binaries.	F144	code_sig_id (PK), binary_hash, version, key_id (FK), signed_at	FK -> pqc_key_metadata(key_id)
+DB61	pqc	pqc_config_encryption	TABLE	Metadata for encrypted IaC configs.	F146	config_id (PK), config_path, encryption_algo_id (FK), iv, encrypted_hash	FK -> pqc_supported_algorithms(algo_id)
+DB62	pqc	pqc_leak_scans	TABLE	Results of secret scanning for keys.	F147	scan_id (PK), repo_url, key_id (FK), detected_at, commit_hash, false_positive	FK -> pqc_key_metadata(key_id)
+DB63	pqc	pqc_entropy_metrics	TABLE	System entropy levels over time.	F102	metric_id (PK), source_device, entropy_bits, timestamp
+DB64	pqc	pqc_kdf_params	TABLE	Parameters for Key Derivation Functions.	F101	kdf_id (PK), algo_id (FK), salt, iterations, output_length	FK -> pqc_supported_algorithms(algo_id)
+DB65	pqc	pqc_oath_tokens	TABLE	OATH tokens using PQC.	F103	token_id (PK), user_id (FK), secret_id (FK), counter, moving_factor
+DB66	pqc	pqc_secure_elements	TABLE	Registry of hardware secure elements.	F105	element_id (PK), device_id, serial_number, attestation_cert
+DB67	pqc	pqc_biometric_bindings	TABLE	Binding of PQC keys to biometric data.	F104	binding_id (PK), key_id (FK), biometric_template_hash, fidelity_score	FK -> pqc_key_metadata(key_id)
+DB68	pqc	pqc_smart_contracts	TABLE	References to smart contracts utilizing PQC.	F134	contract_id (PK), chain_id, contract_address, verification_algo_id (FK)	FK -> pqc_supported_algorithms(algo_id)
+DB69	pqc	pqc_state_channels	TABLE	Metadata for off-chain state channels secured by PQC.	F135	channel_id (PK), participants, closing_algo_id (FK), balance_merkle_root	FK -> pqc_supported_algorithms(algo_id)
+DB70	pqc	pqc_htlc_contracts	TABLE	Hash Time Locked Contracts with PQC.	F136	htlc_id (PK), preimage_hash, lock_time, algo_id (FK)	FK -> pqc_supported_algorithms(algo_id)
+DB71	pqc	pqc_exchange_keys	TABLE	Keys specific to Exchange nodes for federation.	F137	exchange_key_id (PK), exchange_node_id (FK), key_id (FK), federation_id	FK -> pqc_key_metadata(key_id)
+DB72	pqc	pqc_session_persistence	TABLE	Data for persisting PQC sessions in load balancers.	F138	session_id (PK), user_id, session_data_encrypted, expires_at
+DB73	pqc	pqc_wallet_versions	TABLE	Compatibility of wallet versions with PQC algos.	F151	version_id (PK), wallet_version, supported_algo_ids (ARRAY), min_security_level	FK -> pqc_supported_algorithms(algo_id)
+DB74	pqc	pqc_driver_signatures	TABLE	OS kernel/module signatures with PQC.	F145	driver_sig_id (PK), driver_name, key_id (FK), signature_hash, kernel_version	FK -> pqc_key_metadata(key_id)
+DB75	pqc	pqc_secure_backup	TABLE	Metadata for encrypted DB backups using PQC.	F100	backup_id (PK), backup_file_path, encryption_algo_id (FK), key_wrap_id	FK -> pqc_supported_algorithms(algo_id)
+DB76	pqc	pqc_interop_matrix	TABLE	Matrix of supported algorithms per partner system.	F151	matrix_id (PK), partner_system, algo_id (FK), support_status	FK -> pqc_supported_algorithms(algo_id)
+DB77	pqc	pqc_quantum_simulations	TABLE	Logs of theoretical quantum attack simulations.	F96	sim_id (PK), algo_id (FK), attack_type, qubits_required, success_probability	FK -> pqc_supported_algorithms(algo_id)
+DB78	pqc	pqc_audit_triggers	TABLE	Configuration for automated audit logging triggers.	F25	trigger_id (PK), table_name, event_type (INSERT, UPDATE), log_level
+DB79	pqc	pqc_cache_entries	TABLE	Cache for verification results of popular keys.	F97	cache_id (PK), key_id (FK), public_key_hash, verification_result, expires_at	FK -> pqc_key_metadata(key_id)
+DB80	pqc	pqc_bridge_mappings	TABLE	Mappings between classical X.509 and PQC certificates.	F98	bridge_id (PK), cert_classical_id, cert_pqc_id, relationship_type
+DB81	pqc	pqc_strength_meter	TABLE	Data for UI security strength meters.	F99	meter_id (PK), connection_id, security_level, algo_id (FK), timestamp	FK -> pqc_supported_algorithms(algo_id)
+DB82	pqc	pqc_offline_queue	TABLE	Queue for offline PQC transactions.	F110	queue_id (PK), transaction_id, user_id (FK), signed_payload, created_at, synced_at
+DB83	pqc	pqc_instant_payments	TABLE	Metadata for instant payment optimizations.	F109	payment_id (PK), precomputed_key_id (FK), optimization_flags	FK -> pqc_key_metadata(key_id)
+DB84	pqc	pqc_notification_logs	TABLE	Logs of sent notifications regarding PQC.	F123	log_id (PK), user_id (FK), template_id (FK), sent_at, channel (Email, SMS, Push)	FK -> pqc_notification_templates(template_id)
+DB85	pqc	pqc_secret_scanning_rules	TABLE	Custom regex rules for scanning PQC keys.	F147	rule_id (PK), rule_name, regex_pattern, algo_id (FK)	FK -> pqc_supported_algorithms(algo_id)
+DB86	pqc	pqc_dependency_graph	TABLE	Graph of dependencies between crypto modules.	DB10	node_id, edge_id, dependency_type
+DB87	pqc	pqc_deployment_history	TABLE	History of PQC module deployments.	F63	deployment_id (PK), version, git_sha, deployed_at, deployed_by, status
+DB88	pqc	pqc_sandbox_keys	TABLE	Keys isolated for regulatory sandbox testing.	F120	sandbox_key_id (PK), sandbox_id, key_id (FK), scope	FK -> pqc_key_metadata(key_id)
+DB89	pqc	pqc_key_export_logs	TABLE	Audit logs for key export operations.	F77	export_id (PK), key_id (FK), requested_by, destination_type, approval_status	FK -> pqc_key_metadata(key_id)
+DB90	pqc	pqc_erasure_logs	TABLE	Logs of cryptographic material erasure.	F79	erasure_id (PK), key_id (FK), method (CryptoShred, Physical), verification_token	FK -> pqc_key_metadata(key_id)
+DB91	pqc	pqc_component_assembly	TABLE	Logs of MPC key component assembly.	F78	assembly_id (PK), key_id (FK), assembled_by, success, timestamp	FK -> pqc_key_metadata(key_id)
+DB92	pqc	pqc_key_shard_locations	TABLE	Locations where key shards are stored.	DB09	location_id (PK), location_name, storage_type, geo_region
+DB93	pqc	pqc_forward_secrecy	TABLE	Configuration for forward secrecy parameters.	F34	fs_id (PK), session_type, ratchet_interval, algo_id (FK)	FK -> pqc_supported_algorithms(algo_id)
+DB94	pqc	pqc_merchant_certificates	TABLE	Internal CA issuance records for merchants.	F36	cert_id (PK), merchant_id (FK), public_key_id (FK), issuer_id, valid_from, valid_to	FK -> pqc_merchant_keys(merchant_key_id)
+DB95	pqc	pqc_audit_access	TABLE	Access control list for the auditor read-only keys.	F85	access_id (PK), auditor_id (FK), key_id (FK), granted_scope, expiry	FK -> pqc_key_metadata(key_id)
+DB96	pqc	pqc_tls_config	TABLE	Configuration for PQC-enabled TLS termination.	F86	config_id (PK), kex_algo_ids (ARRAY), signature_algo_ids (ARRAY), min_version
+DB97	pqc	pqc_service_mesh_id	TABLE	SPIFFE/SPIRE identity metadata using PQC.	F76	identity_id (PK), service_name, key_id (FK), trust_domain	FK -> pqc_key_metadata(key_id)
+DB98	pqc	pqc_receipts	TABLE	Metadata for PQC signed receipts.	F91	receipt_id (PK), transaction_id, signature_algo_id (FK), receipt_hash, store_duration	FK -> pqc_supported_algorithms(algo_id)
+DB99	pqc	pqc_supply_chain_attestation	TABLE	Attestation records for software components.	F92	attestation_id (PK), component_hash, key_id (FK), payload_uri	FK -> pqc_key_metadata(key_id)
+DB100	pqc	pqc_secure_boot	TABLE	Firmware boot verification entries.	F93	boot_id (PK), device_id, key_id (FK), measurement_hash, verified	FK -> pqc_key_metadata(key_id)
+DB101	pqc	pqc_container_images	TABLE	Metadata for PQC signed container images.	F94	image_id (PK), image_name, key_id (FK), signature_digest	FK -> pqc_key_metadata(key_id)
+DB102	pqc	pqc_qr_codes	TABLE	Metadata for PQC data in QR codes.	F131	qr_id (PK), payload_type, payload_hash, algo_id (FK), version	FK -> pqc_supported_algorithms(algo_id)
+DB103	pqc	pqc_nfc_sessions	TABLE	Logs of NFC PQC operations.	F132	session_id (PK), device_id, duration_ms, protocol_version
+DB104	pqc	pqc_ble_pairing	TABLE	BLE pairing keys using PQC.	F133	pairing_id (PK), device_a, device_b, shared_secret_hash
+DB105	pqc	pqc_wallet_sdk_versions	TABLE	Compatibility of SDKs with PQC features.	F43	sdk_id (PK), platform, version, supported_features
+DB106	pqc	pqc_gateway_plugins	TABLE	Metadata for merchant gateway plugins.	F44	plugin_id (PK), gateway_name, version, algo_id (FK)	FK -> pqc_supported_algorithms(algo_id)
+DB107	pqc	pqc_verification_offloading	TABLE	Jobs sent to verification server cluster.	F48	job_id (PK), payload_hash, node_id, status, queue_time
+DB108	pqc	pqc_shadow_traffic	TABLE	Config for shadow traffic mirroring.	F65	mirror_id (PK), source_rule, destination_cluster, sampling_rate
+DB109	pqc	pqc_canary_releases	TABLE	Config for canary algorithm deployments.	F64	canary_id (PK), algo_id (FK), traffic_percentage, duration_hours	FK -> pqc_supported_algorithms(algo_id)
+DB110	pqc	pqc_blue_green_deployments	TABLE	State of blue/green deployment for crypto services.	F63	deployment_id (PK), active_color (Blue/Green), algo_id (FK)	FK -> pqc_supported_algorithms(algo_id)
+DB111	pqc	pqc_key_derivation	TABLE	Records of key derivation operations.	F101	derivation_id (PK), parent_key_id (FK), child_key_id (FK), context	FK -> pqc_key_metadata(key_id)
+DB112	pqc	pqc_user_consent_history	TABLE	Full history of user consents.	DB49	history_id (PK), consent_id (FK), action_type (Granted, Revoked), timestamp	FK -> pqc_consent_records(consent_id)
+DB113	pqc	pqc_alerting_rules	TABLE	Rules for triggering alerts on crypto failures.	F66	rule_id (PK), metric_name, threshold, severity, channel
+DB114	pqc	pqc_incident_artifacts	TABLE	Artifacts generated during incident response.	F122	artifact_id (PK), run_id (FK), artifact_type (Log, Config, Dump), file_path	FK -> pqc_incident_response_runs(run_id)
+DB115	pqc	pqc_cost_optimization	TABLE	Recommendations for optimizing crypto costs.	F124	opt_id (PK), tenant_id, current_algo (FK), recommended_algo (FK), estimated_savings	FK -> pqc_supported_algorithms(algo_id)
+DB116	pqc	pqc_compliance_standards	TABLE	Reference table for compliance standards.	DB14	standard_id (PK), name, jurisdiction, description, effective_date
+DB117	pqc	pqc_jurisdictions	TABLE	Reference table for jurisdictions.	DB14	jurisdiction_code (PK), name, region
+DB118	pqc	pqc_audit_reports	TABLE	Generated audit reports.	F125	report_id (PK), standard_id (FK), report_blob, generated_by, created_at	FK -> pqc_compliance_standards(standard_id)
+DB119	pqc	pqc_key_escrow	TABLE	Metadata for escrowed keys (legal requirements).	F129	escrow_id (PK), key_id (FK), escrow_agent, release_conditions	FK -> pqc_key_metadata(key_id)
+DB120	pqc	pqc_firmware_keys	TABLE	Keys embedded in hardware firmware.	F93	fw_key_id (PK), hardware_model, key_id (FK), signature	FK -> pqc_key_metadata(key_id)
+DB121	pqc	pqc_api_gateway_auth	TABLE	Auth tokens for API gateway signed with PQC.	F75	token_id (PK), service_id, key_id (FK), claims_hash	FK -> pqc_key_metadata(key_id)
+DB122	pqc	pqc_spiffe_trust_bundle	TABLE	Trust bundle for SPIFFE identities.	F76	bundle_id (PK), trust_domain, root_ca_ids (ARRAY)
+DB123	pqc	pqc_vpn_tunnels	TABLE	VPN tunnels secured with PQC.	F74	tunnel_id (PK), gateway_a, gateway_b, algo_id (FK), psk_hash	FK -> pqc_supported_algorithms(algo_id)
+DB124	pqc	pqc_ssh_keys	TABLE	SSH keys using PQC for internal access.	F75	ssh_key_id (PK), user_id, key_id (FK), public_key_ssh_format	FK -> pqc_key_metadata(key_id)
+DB125	pqc	pqc_document_storage	TABLE	Encrypted document storage metadata.	F143	doc_id (PK), storage_path, encryption_algo_id (FK), iv	FK -> pqc_supported_algorithms(algo_id)
+DB126	pqc	pqc_email_security	TABLE	S/MIME replacement records.	F142	email_id (PK), message_id, key_id (FK), signature_hash	FK -> pqc_key_metadata(key_id)
+DB127	pqc	pqc_secret_sharing_config	TABLE	Configuration for Shamir's Secret Sharing schemes.	F106	config_id (PK), key_id (FK), n_shares, k_threshold	FK -> pqc_key_metadata(key_id)
+DB128	pqc	pqc_key_split_audit	TABLE	Audit trail for key splitting and recombining.	F78	split_id (PK), config_id (FK), operator_id, timestamp	FK -> pqc_secret_sharing_config(config_id)
+DB129	pqc	pqc_ha_cluster_status	TABLE	Status of high-availability crypto clusters.	F87	cluster_id (PK), active_node_id, standby_node_ids, last_heartbeat
+DB130	pqc	pqc_load_balancer_config	TABLE	Crypto-aware load balancer configurations.	F138	lb_id (PK), pool_id, algorithm, weights
+DB131	pqc	pqc_cache_invalidation	TABLE	Rules for invalidating crypto caches.	F97	rule_id (PK), trigger_event, cache_type
+DB132	pqc	pqc_performance_counters	TABLE	Real-time performance metrics.	F29	counter_id (PK), metric_name, value, timestamp
+DB133	pqc	pqc_error_stats	TABLE	Aggregated error statistics.	F10	stat_id (PK), error_code_id (FK), count, window_start	FK -> pqc_error_codes(code_id)
+DB134	pqc	pqc_regulatory_submissions	TABLE	Logs of data sent to regulators.	F84	submission_id (PK), regulator_id, payload_hash, algo_id (FK), status	FK -> pqc_supported_algorithms(algo_id)
+DB135	pqc	pqc_regulator_keys	TABLE	Public keys of regulators for verification.	F84	reg_key_id (PK), regulator_id, key_id (FK), cert_pem	FK -> pqc_key_metadata(key_id)
+DB136	pqc	pqc_taxonomy	TABLE	Ontology of crypto terms.	F15	term_id (PK), term, parent_id (FK), definition	parent_id Self FK
+DB137	pqc	pqc_threat_models	TABLE	Defined threat models for PQC.	F96	model_id (PK), name, assumptions, likelihood, impact
+DB138	pqc	pqc_penetration_tests	TABLE	Results of penetration tests on crypto module.	F26	test_id (PK), test_name, date, finding_count, severity_score
+DB139	pqc	pqc_compliance_gaps	TABLE	Identified gaps in compliance.	DB14	gap_id (PK), standard_id, description, remediation_plan, status	FK -> pqc_compliance_standards(standard_id)
+DB140	pqc	pqc_training_materials	TABLE	Metadata for training content.	F121	material_id (PK), title, url, version, required_roles
+DB141	pqc	pqc_skill_matrix	TABLE	Staff skills certification on PQC.	F121	matrix_id (PK), staff_id, skill_id, proficiency_level
+DB142	pqc	pqc_onboarding_checklist	TABLE	Checklist for new engineers working on crypto.	F121	checklist_id (PK), item_name, is_required, completion_flag
+DB143	pqc	pqc_code_coverage	TABLE	Detailed code coverage metrics for crypto libs.	F52	coverage_id (PK), module_name, line_coverage_pct, branch_coverage_pct, date
+DB144	pqc	pqc_static_analysis	TABLE	Results of SAST scans.	F53	scan_id (PK), tool_name, file_path, issue_type, severity
+DB145	pqc	pqc_dynamic_analysis	TABLE	Results of DAST scans.	F54	scan_id (PK), endpoint, vulnerability_id, payload, result
+DB146	pqc	pqc_sprint_backlog	TABLE	Crypto module development backlog.	F18	task_id (PK), title, priority, status, story_points
+DB147	pqc	pqc_release_notes	TABLE	Release notes for crypto versions.	F87	version_id (PK), notes, features_added, bugs_fixed
+DB148	pqc	pqc_deployment_rollback	TABLE	Records of rollback operations.	DB87	rollback_id (PK), deployment_id (FK), reason, timestamp	FK -> pqc_deployment_history(deployment_id)
+DB149	pqc	pqc_configuration_drift	TABLE	Detected configuration drifts.	F57	drift_id (PK), node_id, parameter_name, expected_val, actual_val
+DB150	pqc	pqc_capacity_planning	TABLE	Data for capacity planning of crypto operations.	F124	plan_id (PK), period, projected_tps, required_hardware
+DB151	pqc	pqc_budget_tracking	TABLE	Budget tracking for crypto infrastructure.	F68	budget_id (PK), fiscal_year, allocated, spent, remaining
+DB152	pqc	pqc_vendor_contracts	TABLE	Contracts with crypto vendors (HSM, Consulting).	F13	contract_id (PK), vendor_name, service_type, start_date, end_date
+DB153	pqc	pqc_license_compliance	TABLE	Compliance checks for open source crypto licenses.	DB14	check_id (PK), library_name, license_type, compliant_flag
+DB154	pqc	pqc_patent_review	TABLE	Review of patents related to PQC algorithms.	F16	patent_id (PK), algorithm_name, patent_number, expiry_date
+DB155	pqc	pqc_academic_collaboration	TABLE	Collaboration records with academic institutions.	F96	collab_id (PK), institution, project_name, start_date, status
+DB156	pqc	pqc_publications	TABLE	Research publications authored by the crypto team.	F96	pub_id (PK), title, journal, date, url
+DB157	pqc	pqc_conference_attendance	TABLE	Records of conference attendance (e.g., RSA, Real World Crypto).	F121	attendee_id (PK), event_name, date, topics_covered
+DB158	pqc	pqc_standardization_bodies	TABLE	Participation in standardization working groups.	F16	body_id (PK), name (NIST, ETSI, IETF), working_group, role
+DB159	pqc	pqc_commentary_period	TABLE	Internal commentary on draft standards.	DB14	draft_id (PK), standard_name, comment, submitted_by
+DB160	pqc	pqc_liaison_office	TABLE	Liaison office details for regulatory interaction.	DB14	office_id (PK), region, contact_person, email
+DB161	pqc	vw_pqc_active_keys	VIEW	View of currently active keys.	DB05	SELECT * FROM pqc_key_metadata WHERE key_state = 'ACTIVE'
+DB162	pqc	vw_pqc_deprecated_keys	VIEW	View of keys using deprecated algorithms.	DB05	SELECT * FROM pqc_key_metadata JOIN pqc_supported_algorithms ON ... WHERE status = 'Deprecated'
+DB163	pqc	vw_pqc_compliance_status	VIEW	High-level compliance status by jurisdiction.	DB14	SELECT j.name, s.name, COUNT(*) ...
+DB164	pqc	vw_pqc_performance_summary	VIEW	Summary of benchmark results.	DB15	SELECT algo_id, AVG(ops_per_sec)...
+DB165	pqc	vw_pqc_recent_incidents	VIEW	List of recent crypto incidents.	F122	SELECT * FROM pqc_incident_response_runs ORDER BY start_time DESC
+DB166	pqc	vw_pqc_key_expiry	VIEW	Keys expiring in the next 30 days.	DB05	SELECT * FROM pqc_key_metadata WHERE expires_at <= NOW() + 30 DAYS
+DB167	pqc	vw_pqc_cost_report	VIEW	Monthly cost breakdown.	DB39	SELECT SUM(cpu_cost_usd)...
+DB168	pqc	vw_pqc_vulnerability_summary	VIEW	Summary of known CVEs.	DB33	SELECT severity, COUNT(*)...
+DB169	pqc	vw_pqc_audit_trail	VIEW	Formatted audit trail for auditors.	DB10	SELECT * FROM crypto_operation_log ORDER BY timestamp
+DB170	pqc	sp_rotate_key	PROCEDURE	Stored procedure to initiate key rotation.	F148	IN key_id UUID	Calls key scheduler
+DB171	pqc	sp_deprecate_algorithm	PROCEDURE	Procedure to deprecate an algorithm.	F26	IN algo_id VARCHAR	Updates statuses
+DB172	pqc	sp_revoke_key	PROCEDURE	Procedure to immediately revoke a key.	F61	IN key_id UUID, IN reason TEXT	Sets key_state to DISABLED
+DB173	pqc	sp_log_crypto_operation	PROCEDURE	Helper to log operations.	DB10	IN op_type, IN algo_id, ...	Inserts into crypto_operation_log
+DB174	pqc	sp_get_active_algo_for_level	FUNCTION	Returns active algorithm for a given security level.	F27	IN level INT	Returns algo_id
+DB175	pqc	sp_check_policy_compliance	FUNCTION	Checks if a transaction/key is policy compliant.	F27	IN tx_id, IN key_id	Returns BOOLEAN
+DB176	pqc	sp_generate_benchmark_report	PROCEDURE	Generates a benchmark report.	F29	OUT report_path	Aggregates pqc_benchmark_results
+DB177	pqc	sp_cleanup_old_logs	PROCEDURE	Archives old crypto logs.	DB10	IN retention_days	Moves to cold storage
+DB178	pqc	sp_sync_hsm_status	PROCEDURE	Syncs HSM health status.	DB56	Updates pqc_health_status
+DB179	pqc	sp_schedule_key_migration	PROCEDURE	Schedules a batch migration.	F129	IN batch_id	Updates pqc_merchant_migrations
+DB180	pqc	sp_create_audit_report	PROCEDURE	Creates a compliance audit report.	DB45	IN standard_id	Inserts into pqc_compliance_reports
+DB181	pqc	sp_verify_signature_chain	FUNCTION	Verifies a chain of hybrid signatures.	DB25	IN transaction_id	Returns BOOLEAN
+DB182	pqc	sp_get_wallet_compat_version	FUNCTION	Returns wallet version compatibility.	DB73	IN wallet_version	Returns supported algos
+DB183	pqc	sp_update_compliance_matrix	PROCEDURE	Updates the compliance matrix.	DB14	IN mapping_data	Upserts into pqc_compliance_mappings
+DB184	pqc	sp_notify_user_migration	PROCEDURE	Queues notification for user migration.	DB49	IN user_id	Inserts into pqc_notification_logs
+DB185	pqc	sp_record_secret_scan	PROCEDURE	Records result of secret scan.	DB62	IN scan_data	Inserts into pqc_leak_scans
+DB186	pqc	sp_trigger_failover	PROCEDURE	Triggers HSM failover.	DB31	IN pool_id	Updates pqc_hsm_pools
+DB187	pqc	sp_record_sast_scan	PROCEDURE	Records SAST results.	DB53	IN scan_results	Inserts into pqc_static_analysis
+DB188	pqc	sp_update_cost_allocation	PROCEDURE	Updates cost allocation for a transaction.	DB39	IN tx_id, IN cost	Updates pqc_cost_allocation
+DB189	pqc	sp_create_shard	PROCEDURE	Creates a key shard for MPC.	DB09	IN key_id, IN location	Inserts into pqc_key_shards
+DB190	pqc	sp_assemble_key	PROCEDURE	Assembles key from shards.	DB78	IN key_id	Verifies and marks assembled
+DB191	pqc	sp_escrow_key	PROCEDURE	Places key in escrow.	DB119	IN key_id, IN agent	Inserts into pqc_key_escrow
+DB192	pqc	sp_export_key_securely	PROCEDURE	Handles secure key export.	DB77	IN key_id, IN dest	Logs in pqc_key_export_logs
+DB193	pqc	sp_ensure_crypto_agility	PROCEDURE	Checks system crypto agility readiness.	F11	Returns agility_score
+DB194	pqc	sp_schedule_deprecation	PROCEDURE	Schedules algorithm deprecation.	DB13	IN algo_id, IN date	Inserts into pqc_deprecation_schedule
+DB195	pqc	sp_verify_test_vectors	PROCEDURE	Verifies implementation against test vectors.	DB42	IN algo_id	Compares outputs
+DB196	pqc	sp_record_interop_test	PROCEDURE	Records interoperability test results.	DB43	IN test_data	Inserts into pqc_interop_tests
+DB197	pqc	sp_update_threat_model	PROCEDURE	Updates threat model based on new intel.	DB37	IN model_data	Upserts pqc_threat_models
+DB198	pqc	sp_calculate_entropy	PROCEDURE	Calculates system entropy.	DB63	Updates pqc_entropy_metrics
+DB199	pqc	sp_backup_config	PROCEDURE	Backs up current crypto config securely.	DB28	Writes to secure storage
+DB200	pqc	sp_restore_config	PROCEDURE	Restores crypto config from backup.	DB28	IN backup_path	Applies config

@@ -1,0 +1,573 @@
+
+
+19.	Module M19	Disaster Recovery & Geo-Redundancy Orchestrator
+a.	Summary
+The Module M19: Disaster Recovery & Geo-Redundancy Orchestrator constitutes the operational backbone of the PARI ecosystem, engineered to guarantee the continuous availability and integrity of a next-generation privacy-preserving payment infrastructure. In the high-stakes domain of digital finance, where downtime equates to lost revenue, eroded consumer trust, and potential regulatory sanctions, M19 transcends traditional backup solutions to provide a unified, intelligent, and fully automated resilience fabric. It is designed upon the foundational principle that a public digital payment utility must exhibit the same reliability as critical infrastructure—power grids or water supply systems—ensuring that citizens and merchants can transact seamlessly regardless of localized catastrophic events, hardware failures, or cyberattacks.
+
+The core of M19’s capability lies in its sophisticated management of Multi-region Kubernetes clusters. It orchestrates the deployment of the PARI payment nodes across geographically dispersed data centers, ensuring strict data sovereignty compliance (e.g., GDPR, Swiss DPA) while maintaining high availability. By leveraging the native resilience of Kubernetes combined with custom-engineered orchestration logic, M19 automates the lifecycle of container workloads, performing self-healing actions such as pod eviction, node draining, and cluster scaling without human intervention. This container-centric approach is tightly integrated with a PostgreSQL logical replication layer, which manages the stateful aspects of the system. Unlike simple master-slave replication, M19 implements a dynamic topology management system capable of handling complex failover scenarios, ensuring zero data loss (RPO=0) and sub-30-second recovery times (RTO<30s) during regional outages.
+
+A critical differentiator of M19 is its embedded Chaos Engineering discipline. Moving beyond reactive recovery, the module proactively validates the system's resilience by continuously injecting faults into the production-like environment. By simulating realistic failure scenarios—such as network latency spikes, random instance terminations, and database connection drops—M19 identifies latent vulnerabilities before they impact users. This "gamification of failure" is managed through a rigorous CMMI Level 5 process framework, where every chaos experiment is treated as a controlled hypothesis test, with results feeding back into continuous process improvement cycles. This ensures that the disaster recovery strategies are not static configurations but evolving protocols that adapt to new threats and changing system topologies.
+
+Furthermore, M19 handles the intricate synchronization of the PARI regulatory and compliance layers. During a geo-failover, the module ensures that the Regulatory Policy Engine (M02) and the Audit Module (M06) maintain consistent states, preventing regulatory gaps that could occur during a transition. It manages the complex routing of traffic via Global Server Load Balancing (GSLB) and DNS management, intelligently steering users away from degraded regions towards healthy infrastructure with minimal latency impact. The module also enforces strict security posture during recovery events, automating the rotation of TLS certificates, the verification of HSM (Hardware Security Module) connectivity, and the re-establishment of Zero Trust network mTLS connections to prevent unauthorized access during the vulnerable recovery window.
+
+Ultimately, M19 serves as the guardian of the PARI promise: a payment system that is privacy-preserving yet fully accountable. By harmonizing cutting-edge cloud-native technologies with rigorous enterprise governance, it ensures that the system remains robust, compliant, and operational 24/7/365, thereby fostering the trust necessary for the widespread adoption of open-source digital currency infrastructure.
+
+b.	Scope
+The scope of Module M19 encompasses the entire spectrum of infrastructure resilience, continuity planning, and automated recovery operations within the PARI ecosystem.
+
+     Infrastructure Orchestration: Management of multi-region Kubernetes clusters, including node provisioning, resource pooling, pod anti-affinity scheduling, and cluster autoscaling.
+     Data Continuity: Implementation and monitoring of PostgreSQL logical replication, WAL (Write-Ahead Logging) archiving, point-in-time recovery (PITR), and database failover automation.
+     Network Resilience: Global Server Load Balancing (GSLB), cross-region VPC peering, traffic throttling, circuit breaking, and DNS failover mechanisms.
+     Chaos Engineering: Automated fault injection (pod kills, network partitions, I/O stress), hypothesis testing, and resilience scoring.
+     Observability & Monitoring: Real-time tracking of system health, latency, replication lag, and resource utilization across all regions.
+     Security & Compliance in DR: Automated key management recovery, TLS certificate rotation during failover, and enforcement of data residency constraints during cross-region failover.
+     Backup & Archival: Scheduled snapshots, cold storage integration (S3/GCS), and automated backup integrity verification.
+     Process Governance: Integration with CMMI Level 5 workflows for incident management, root cause analysis, and process improvement related to availability.
+
+
+c.	Business Case
+
+In the digital payments sector, availability is synonymous with trust. A single hour of downtime can result in millions of Euros in failed transactions, severe reputational damage, and loss of merchant confidence. Traditional disaster recovery (DR) solutions often rely on manual intervention, passive "cold" standby sites, and complex restoration procedures that result in unacceptable Recovery Time Objectives (RTOs) and data loss (RPO > 0).
+
+M19 addresses these critical business risks:
+
+    Revenue Protection: By achieving RTO < 30s and RPO = 0, M19 minimizes transaction friction during outages, ensuring that PARI captures revenue opportunities that would be lost to competitors or cash.
+    Regulatory Compliance & Fines Avoidance: European and global regulators increasingly mandate strict availability and data integrity standards for payment systems (e.g., PSD3, Digital Operational Resilience Act - DORA). M19 ensures compliance, avoiding hefty fines.
+    Cost Optimization: Through automated resource scaling and the strategic use of spot instances (where resilience logic permits), M19 optimizes infrastructure costs while maintaining high availability.
+    Customer Retention: Merchants and citizens abandon payment systems that are unreliable. M19’s "always-on" experience drives adoption and user retention.
+    Risk Mitigation: Proactive chaos engineering identifies the "unknown unknowns" in the system, preventing catastrophic failures caused by software bugs or misconfigurations before they reach production.
+    Data Sovereignty: M19’s ability to manage failovers while respecting jurisdictional data boundaries allows PARI to operate globally without violating cross-border data transfer laws
+
+d.	KPIs
+
+     Recovery Time Objective (RTO): < 30 seconds (Target: <15s).
+     Recovery Point Objective (RPO): 0 seconds (Zero data loss).
+     System Uptime / Availability: 99.999% (Five Nines).
+     Failover Success Rate: 100% (Automated success without manual rollback).
+     Replication Lag: < 500ms (Cross-region), < 10ms (Same region).
+     Chaos Experiment Coverage: > 90% of critical system paths tested quarterly.
+     Mean Time To Detection (MTTD): < 10 seconds.
+     Mean Time To Mitigation (MTTM): < 60 seconds.
+     Data Backup Integrity Check Success Rate: 100%.
+     False Positive Rate for Auto-Failover: < 0.01%.
+
+
+e.	Stakeholder Insights
+Stakeholder	Concern	Implications
+SREs & DevOps Teams	Complexity of multi-region management.	Risk of configuration drift and split-brain scenarios. M19 must provide a single pane of glass for control.
+Regulators (Tax/Financial)	Continuity of audit trails and fiscal data.	Inability to access transaction data during an outage could lead to non-compliance. Data integrity is paramount.
+Merchants	Payment processing availability during sales peaks.	Downtime equals lost sales and frustrated customers. They require transparent status updates.
+End Users (Citizens)	Access to funds and payment services.	Loss of trust if the system is down during emergencies. Fear of losing funds during a transfer.
+Executive Management	Cost of infrastructure vs. risk of downtime.	High cost of geo-redundancy must be justified by ROI and risk mitigation.
+Security Officers	Attack surface expansion during failover events.	Failover procedures are vulnerable to exploitation. Strict identity verification is needed.
+
+
+f.	Knowledge Representation Graph (mermaid.js)
+
+graph TD
+    subgraph "PARI Core Application Layer"
+        M01[Crypto Core M01]
+        M02[Policy Engine M02]
+        M05[Exchange M05]
+    end
+
+    subgraph "Module M19: DR & Geo-Redundancy"
+        DR_Orchestrator[DR Orchestrator<br/>K8s Controller]
+        Chaos_Engine[Chaos Engine<br/>LitmusChaos/ChaosMesh]
+        Monitor[Global Monitor<br/>Prometheus/Grafana]
+        GSLB[Global Load Balancer<br/>DNS/GSLB]
+    end
+
+    subgraph "Infrastructure Region A (Primary)"
+        K8s_A[K8s Cluster A]
+        PG_A[PostgreSQL Primary]
+        Kafka_A[Kafka Cluster A]
+    end
+
+    subgraph "Infrastructure Region B (DR)"
+        K8s_B[K8s Cluster B]
+        PG_B[PostgreSQL Standby]
+        Kafka_B[Kafka Cluster B]
+    end
+
+    subgraph "Data Plane"
+        S3_Backup[Immutable Backup Storage<br/>S3/GCS]
+    end
+
+    M01 --> K8s_A
+    M05 --> PG_A
+
+    DR_Orchestrator -.->|Manages| K8s_A
+    DR_Orchestrator -.->|Manages| K8s_B
+    DR_Orchestrator -.->|Controls Failover| PG_B
+    DR_Orchestrator -.->|Routes Traffic| GSLB
+
+    PG_A ==|Streaming Replication/WAL|==> PG_B
+    PG_A ==|Archived Logs|==> S3_Backup
+
+    Chaos_Engine -.->|Injects Faults| K8s_A
+    Monitor -.->|Metrics/Alerts| DR_Orchestrator
+
+    GSLB -->|Traffic Routing| K8s_A
+    GSLB -->|Failover Traffic| K8s_B
+
+    style DR_Orchestrator fill:#f9f,stroke:#333,stroke-width:4px
+
+g.	Comprehensive List of Features
+
+ID	Feature	Description	Business Case	AI/ML Algorithms	KPIs	Primary Users
+F01	Multi-Master Kubernetes Orchestration	Manages active-active K8s clusters across zones to eliminate single points of control.	Ensures control plane resilience; prevents management plane outage.	Anomaly Detection on Control Plane Metrics	API Availability 99.999%	SREs
+F02	Automated Pod Eviction & Rescheduling	Detects unhealthy nodes/pods and immediately reschedules workloads on healthy nodes.	Reduces MTTR for node failures; maintains transaction processing capacity.	Threshold-based Heuristics	Pod Restart Rate < 1%	SREs
+F03	PostgreSQL Logical Replication Manager	Configures and monitors logical replication slots between primary and standby DBs.	Enables near real-time data synchronization; supports zero-downtime upgrades.	Lag Prediction (Time Series)	Replication Lag < 100ms	DBAs
+F04	Automated Database Failover (Patroni/Etcd)	Uses a consensus store to trigger automatic promotion of standby to primary.	Guarantees database availability without manual intervention during outages.	Leader Election Consensus Algorithms	Failover Time < 30s	DBAs
+F05	Cross-Region VPC Peering Manager	Automates the setup and routing of private networks between geo-locations.	Enables secure, low-latency data transfer for replication and consistency.	Network Path Optimization	Inter-region Latency < 50ms	NetOps
+F06	Global Server Load Balancing (GSLB) Integration	Monitors regional health and updates DNS records to steer traffic to healthy regions.	Prevents users from connecting to degraded or down regions.	Weighted Round Robin / Health Check	DNS Update Latency < 5s	NetOps
+F07	Chaos Experiment Scheduler	Schedules automated fault injection tests (e.g., killing random pods) during off-peak hours.	Proactively identifies system weaknesses; validates resilience.	N/A (Deterministic Scheduling)	Test Coverage 100%	SREs
+F08	Network Latency Injection	Artificially delays network traffic between microservices to test timeout handling.	Ensures application handles real-world network instability gracefully.	Latency Distribution Modeling	Error Rate < 0.1% under load	QA Engineers
+F09	Packet Loss Simulation	Randomly drops network packets to test application retry logic and idempotency.	Validates that financial transactions are not duplicated or lost.	Probabilistic Packet Dropping	Transaction Idempotency 100%	QA Engineers
+F10	Pod Chaos (Random Pod Kill)	Terminates random application pods to simulate instance failures.	Verifies Kubernetes self-healing and state management capabilities.	Random Selection Algorithm	Recovery Time < 30s	SREs
+F11	Resource Stress Testing (CPU/Memory)	Spawns helper pods to consume CPU/RAM, testing throttling and OOM handling.	Ensures "noisy neighbor" scenarios don't crash payment processing.	Load Generation Models	System Stability Score	SREs
+F12	Disk I/O Pressure Simulation	Increases disk latency to test database query performance under stress.	Identifies slow queries that could cause cascading failures.	I/O Scheduler Simulation	DB Query P95 < 200ms	DBAs
+F13	Kafka Partition Rebalance Orchestrator	Manages Kafka partition leader reassignment during broker failures.	Ensures message queue availability and ordering guarantees.	Partition Heuristic Algorithms	Consumer Lag < 1000 msgs	Backend Devs
+F14	Kafka MirrorMaker Cross-Cluster	Replicates Kafka topics between regions for disaster recovery.	Provides a backup event stream; allows region failover for message processing.	Asynchronous Replication	Replication Lag < 1s	Data Engineers
+F15	Redis Cluster Resharding & Failover	Automates Redis slot migration and master promotion during node loss.	Maintains session state and cache availability during outages.	Consistent Hashing	Cache Hit Ratio > 95%	Backend Devs
+F16	Application State Sync Service	Synchronizes in-memory state (like 2FA tokens) across active nodes.	Prevents session loss if a user is routed to a different region after failover.	State Vector Clocks	Session Continuity 100%	Architects
+F17	Immutable Backup Scheduler	Automates hourly snapshots of PostgreSQL and transaction logs to S3/GCS.	Ensures point-in-time recovery capability in case of logical corruption.	N/A	Backup Success Rate 100%	Backup Admins
+F18	Backup Integrity Verifier	Periodically restores backups to a staging environment to verify data usability.	Prevents "false sense of security" from corrupt backups.	Checksum Validation (SHA-256)	Verification Pass Rate 100%	Compliance Officers
+F19	Point-in-Time Recovery (PITR) Automator	Allows restoration of the database state to any specific second in the retention window.	Essential for recovering from accidental data deletion or logical errors.	WAL Replay Automation	RPO Accuracy 100%	DBAs
+F20	Object Storage Lifecycle Manager	Moves old backups and logs to cold storage (Glacier/Archive) to reduce costs.	Optimizes storage spending while maintaining legal retention requirements.	Cost Optimization Algorithms	Storage Cost Reduction	Finance/Ops
+F21	HSM Key Synchronization	Securely synchronizes cryptographic keys between primary and DR HSMs.	Ensures encrypted data and digital signatures can be verified/decrypted in DR.	Secure Multi-Party Computation	Key Sync Success 100%	Security Team
+F22	Automated Certificate Rotation (mTLS)	Rotates TLS certificates for service-to-service communication automatically.	Prevents service interruptions due to expired certificates during failover.	Certificate Lifecycle Mgmt	Cert Expiry Incidents 0	Security Team
+F23	Zero Trust Policy Rehydration	Re-establishes firewall and access control policies instantly upon node spin-up.	Maintains security posture during rapid scaling or recovery events.	Policy-as-Code Engine	Policy Enforcement Time < 1s	Security Team
+F24	Data Residency Compliance Checker	Verifies that no PII crosses forbidden borders during a failover event.	Prevents massive GDPR fines and legal violations.	Geo-IP Matching / Regex	Compliance Violations 0	DPOs
+F25	Real-time Transaction Reconciliation	Compares transaction logs between active and passive systems to ensure consistency.	Detects data divergence before it becomes unrecoverable.	Hash-based Merkle Tree Comparison	Divergence Rate 0%	Accountants
+F26	Graceful Shutdown Handler	Ensures in-flight transactions complete before pods are terminated during updates.	Prevents "cut transactions" that could lead to financial inconsistencies.	Request Draining Logic	Abort Rate 0%	Backend Devs
+F27	Database Connection Pool Drain	Manages DB connections during failover to prevent connection storms.	Protects the new primary database from overload during recovery.	Connection Limiting Algorithms	DB CPU Utilization < 70%	DBAs
+F28	Idempotency Enforcement Wrapper	Ensures all financial API endpoints are idempotent to safely handle retries.	Essential for handling network glitches and duplicate requests during outages.	Request Deduplication (Redis)	Duplicate Transaction Rate 0%	API Developers
+F29	Distributed Locking Manager	Coordinates resources across regions to prevent split-brain scenarios.	Ensures only one region acts as "master" for specific tasks (e.g., coin minting).	Redlock Algorithm	Split-Brain Events 0	Architects
+F30	Split-Brain Preventer (Quorum)	Requires a majority vote from nodes to elect a leader, preventing dual primaries.	Critical for data consistency in distributed databases.	Raft / Paxos Consensus	Leader Election Stability 100%	DBAs
+F31	Application Performance Monitoring (APM) Integration	Deep monitoring of code-level performance (traces) in real-time.	Provides granular visibility into bottlenecks during failover stress.	Latency Percentile Analysis	Trace Capture Rate 100%	SREs
+F32	Centralized Logging Aggregation	Collects logs from all regions into a single searchable cluster (ELK/Loki).	Enables debugging and forensic analysis across regions.	N/A	Log Ingestion Latency < 5s	SREs
+F33	Anomaly Detection Alerting	Uses ML to detect unusual patterns in metrics (e.g., sudden latency spike).	Alerts human operators before a small issue becomes a major outage.	Isolation Forest / LSTM	Alert Precision > 90%	SREs
+F34	Incident Response Runbook Automation	Automatically executes predefined runbooks (e.g., restart service) when specific alerts trigger.	Reduces human reaction time and error rate during incidents.	Workflow Automation Engines	MTTR Reduction	Incident Managers
+F35	War Room Dashboard	Real-time visualization of system health, active incidents, and failover status.	Provides executives and engineers with a single source of truth.	N/A	Dashboard Refresh < 1s	All Staff
+F36	Regional Capacity Planner	Predicts future resource needs based on growth trends across regions.	Ensures infrastructure scales ahead of demand, preventing performance degradation.	Linear Regression / Time Series	Capacity Forecast Accuracy	Ops Managers
+F37	Cost Attribution by Region	Tracks infrastructure costs associated with each geographical region.	Enables chargeback and optimization of spending.	Cost Allocation Algorithms	Reporting Accuracy 100%	Finance
+F38	Self-Healing API Gateway	Detects failures in backend services and routes traffic to healthy instances or caches.	Masks backend failures from end-users, improving perceived reliability.	Circuit Breaker Pattern	Gateway Uptime 99.999%	API Managers
+F39	DNS Record Health Checker	Continuously monitors DNS propagation and resolution correctness.	Ensures users can resolve the payment system URL globally.	DNS Query Validation	Resolution Success 100%	NetOps
+F40	DNSSEC Validation	Ensures DNS responses are cryptographically signed to prevent cache poisoning attacks.	Secures the routing layer of the application.	Public Key Cryptography	DNSSEC Validity 100%	Security Team
+F41	BGP Route Hijacking Detector	Monitors global BGP tables to detect unauthorized IP prefix announcements.	Prevents traffic from being diverted to malicious servers.	BGP Route Analysis	Detection Time < 5 mins	NetOps
+F42	DDoS Mitigation Integration	Automatically scrubs malicious traffic at the edge before it reaches the data center.	Ensures availability during volumetric attacks.	Traffic Pattern Analysis	Mitigation Latency < 1s	Security Team
+F43	Rate Limiting Per Region	Enforces API rate limits based on the origin region to prevent localized abuse.	Protects infrastructure capacity for legitimate users.	Token Bucket Algorithm	Request Throttle Accuracy	API Managers
+F44	API Quota Management	Manages usage quotas for different tenant types (Banks vs. Merchants).	Prevents noisy tenants from degrading system performance.	Leaky Bucket Algorithm	Fairness Score 100%	Product Managers
+F45	Dependency Health Check	Checks the health of external dependencies (e.g., National Tax APIs, KYC providers).	Allows the system to degrade gracefully if external services fail.	Synthetic Transactions	External Dependency Visibility	Integrators
+F46	Circuit Breaker for External Calls	Automatically trips circuits to external services if they become unresponsive.	Prevents cascading failures from external dependencies.	State Machine Pattern	Failure Isolation Rate 100%	Backend Devs
+F47	Fallback Cache for External Data	Serves stale data from cache if external providers (e.g., FX rates) are down.	Ensures the system remains operational with slightly stale data.	TTL Management	Cache Hit Ratio > 90%	Backend Devs
+F48	Database Connection Kill Switch	Ability to instantly kill all long-running or stuck database connections.	Frees up database resources during deadlocks or connection storms.	Query Duration Analysis	DB Recovery Time < 1s	DBAs
+F49	Read-Replica Routing	Directs read-only traffic (analytics, dashboard) to read replicas.	Offloads the primary database, improving write transaction performance.	Read-Write Splitting Logic	Primary Load Reduction	Backend Devs
+F50	Multi-AZ Deployment Enforcement	Ensures resources are spread across at least 3 availability zones per region.	Protects against zone-level outages (e.g., power failure in one zone).	Topology Spread Constraints	Zone Distribution Balance	SREs
+F51	Kubernetes Node Auto-Provisioning	Automatically adds new nodes when resource utilization exceeds thresholds.	Handles sudden spikes in transaction volume automatically.	Threshold Scaling	Scaling Latency < 2 mins	SREs
+F52	Cluster Autoscaler Down-Scaling	Removes underutilized nodes to save costs when demand drops.	Optimizes cloud spending during off-peak hours.	Utilization Metrics	Cost Savings	Ops Managers
+F53	Pod Disruption Budget (PDB) Manager	Ensures a minimum number of pods are always running during voluntary disruptions.	Guarantees availability during maintenance updates.	Availability Calculations	Minimum Available Pods 100%	SREs
+F54	Rolling Update Controller	Updates application pods gradually to minimize downtime and risk.	Enables zero-downtime deployments of new features.	Rolling Update Strategy	Update Success Rate 100%	DevOps
+F55	Canary Deployment Support	Routes a small percentage of traffic to the new version for testing.	Validates new versions in production before full rollout.	Traffic Splitting Algorithm	Canary Error Rate Detection	DevOps
+F56	Blue/Green Deployment Switch	Maintains two identical production environments and switches traffic instantly.	Allows for instant rollback if a deployment fails catastrophically.	DNS/Service Switching	Rollback Time < 10s	DevOps
+F57	Configuration Drift Detection	Identifies discrepancies between infrastructure code and actual running state.	Prevents configuration errors that cause outages.	State Comparison (Terraform)	Drift Incidents 0	Compliance
+F58	Infrastructure as Code (IaC) Versioning	Tracks every change to infrastructure configuration in Git.	Provides auditability and ability to revert to known good states.	Git Versioning	Change History 100%	DevOps
+F59	Secret Management Rotation	Automates rotation of DB passwords, API keys, and tokens.	Reduces the window of opportunity for credential theft.	Secret Expiry Policies	Secret Age < 24h	Security Team
+F60	Secure Boot Validation	Ensures all server instances boot with verified, signed firmware/OS.	Prevents rootkit attacks at the hardware/boot level.	Cryptographic Signature Verification	Boot Integrity 100%	SecOps
+F61	File System Integrity Check	Monitors critical system files for unauthorized changes.	Detects intrusion attempts or malware modification.	FIM (File Integrity Monitoring)	Tamper Alerts 0	Security Team
+F62	Intrusion Detection System (IDS)	Analyzes network traffic for known attack patterns and signatures.	Provides early warning of security breaches.	Signature Matching	Alert True Positive Rate > 85%	SOC Analysts
+F63	Security Incident Forensic Snapshot	Automatically snapshots memory and disk state when a security incident is detected.	Preserves evidence for post-mortem analysis and legal action.	Trigger-based Imaging	Snapshot Completeness	Incident Response
+F64	Automated Compliance Scanning	Scans infrastructure and configs for compliance with standards (CIS, GDPR).	Ensures continuous compliance rather than point-in-time audits.	Policy-as-Code	Compliance Score > 95%	DPOs
+F65	Audit Log Immutability	Ensures audit logs cannot be deleted or altered by privileged users.	Critical for non-repudiation of financial transactions.	WORM Storage	Log Tampering Attempts 0	Auditors
+F66	Service Mesh Traffic Management	Uses Istio/Linkerd to manage traffic flow between microservices.	Provides granular control over retries, timeouts, and circuit breaking.	Envoy Proxy Config	Service Latency P99 < 200ms	Architects
+F67	Mutual TLS (mTLS) Enforcement	Encrypts and authenticates all service-to-service communication.	Eliminates the risk of internal network sniffing or spoofing.	Certificate Authority	Encryption Coverage 100%	Security Team
+F68	Distributed Tracing (Jaeger/Zipkin)	Tracks a request as it travels through dozens of microservices.	Dramatically speeds up debugging of performance issues.	Trace ID Propagation	Trace Sampling Rate 1%	Developers
+F69	Profiling Data Aggregation	Collects continuous profiling data (CPU, memory) to find code hotspots.	Identifies inefficient code causing resource waste.	eBPF Profiling	Performance Overhead < 5%	Developers
+F70	Container Image Vulnerability Scanner	Scans Docker images for known CVEs before deployment.	Prevents deployment of vulnerable software into production.	CVE Database Matching	Image Vulnerability Severity 0	DevSecOps
+F71	Software Bill of Materials (SBOM) Generation	Automatically generates a list of all libraries and dependencies in the stack.	Required for supply chain security compliance and rapid vulnerability assessment.	CycloneDX/SPDX	SBOM Completeness 100%	Security Team
+F72	Dependency Update Automation	Automatically creates PRs for security updates in dependencies.	Reduces the window of exposure to known vulnerabilities in libraries.	Semantic Version Analysis	Patch Lag Time < 24h	Developers
+F73	Database Query Performance Analyzer	Identifies slow queries and suggests indexes or rewrites.	Optimizes database performance to handle higher throughput.	Query Plan Analysis	Slow Query Trend	DBAs
+F74	Automatic Index Advisor	Proposes and can create database indexes based on query patterns.	Reduces database load and improves transaction speed.	Usage Statistics	Index Usage Ratio	DBAs
+F75	Table Partitioning Manager	Automatically partitions large database tables (e.g., by date).	Improves query performance and manageability of historical data.	Time-Based Partitioning	Query Speed Improvement	DBAs
+F76	Vacuum and Analyze Scheduler	Automates routine PostgreSQL maintenance tasks (VACUUM, ANALYZE).	Prevents table bloat and ensures the query planner has accurate stats.	Cost-Based Vacuuming	Table Bloat Ratio	DBAs
+F77	WAL Archival Compression	Compresses WAL files before sending to object storage.	Reduces storage costs and network bandwidth for replication.	Gzip/Zstandard Compression	Compression Ratio > 70%	DBAs
+F78	Logical Decoding Output Plugin	Converts WAL changes into a readable format (JSON/Protobuf) for consumers.	Enables change data capture (CDC) for real-time analytics and auditing.	Output Plugin Logic	Decoding Latency	Data Engineers
+F79	Consumer Group Lag Monitor	Monitors how far behind Kafka consumers are from the latest message.	Detects backlogs in payment processing or audit pipelines.	Offset Comparison	Consumer Lag < 100	Data Engineers
+F80	Dead Letter Queue (DLQ) Manager	Isolates messages that failed processing for later analysis.	Prevents bad messages from blocking the entire processing pipeline.	Error Count Threshold	DLQ Processing Rate	Backend Devs
+F81	Message Schema Registry	Manages Avro/JSON schemas for Kafka topics to ensure compatibility.	Prevents data corruption from incompatible producer/consumer versions.	Schema Evolution Logic	Schema Validation 100%	Data Engineers
+F82	Topic Retention Policy Enforcer	Automatically deletes old Kafka messages based on retention rules.	Manages disk usage on Kafka clusters efficiently.	Time/Size Based Retention	Disk Usage < 80%	Data Engineers
+F83	Redis Eviction Policy Manager	Configures Redis to evict old keys when memory is full.	Prevents Redis crashes due to memory exhaustion.	LRU/LFU Algorithms	OOM Errors 0	Backend Devs
+F84	Distributed Cache Warmer	Preloads the cache with frequently accessed data (e.g., tax rates).	Reduces database load immediately after a failover/restart.	Popularity Ranking	Cache Warm-up Time	Backend Devs
+F85	Session Replication across Regions	Synchronizes user sessions between data centers.	Allows users to continue their session seamlessly if routed to a new region.	Session Replication Protocols	Session Loss Rate 0%	Backend Devs
+F86	Transaction Timeout Manager	Enforces timeouts on long-running database transactions.	Prevents resource locks from lasting too long.	Timeout Timers	Lock Wait Time	DBAs
+F87	Deadlock Detector & Logger	Identifies and logs database deadlocks automatically.	Provides visibility into concurrency issues requiring code fixes.	Graph Cycle Detection	Deadlock Count	DBAs
+F88	Connection Pool Monitoring	Tracks connection pool usage (active, idle) for the application.	Identifies connection leaks or insufficient pool sizes.	JMX/Prometheus Exporters	Pool Exhaustion Events	Backend Devs
+F89	Thread Dump Collector	Automatically collects thread dumps during stalls.	Essential for diagnosing complex concurrency bugs.	JVM Diagnostics	Collection Success Rate	SREs
+F90	Heap Dump Analyzer	Generates heap snapshots on OutOfMemoryErrors.	Helps identify memory leaks in Java/Go services.	HPROF Analysis	Memory Leak Detection	SREs
+F91	Garbage Collection (GC) Log Analyzer	Parses GC logs to identify excessive pause times.	Optimizes JVM settings for low latency.	GC Log Parsing	GC Pause Frequency	Backend Devs
+F92	CPU Throttling Detector	Detects if containers are being throttled by the CPU quota.	Identifies if allocated CPU resources are insufficient.	Kernel Metrics	CPU Throttling Ratio	SREs
+F93	Memory OOM Killer Monitor	Detects if processes are being killed by the Linux OOM killer.	Indicates insufficient memory limits in the container config.	Kernel Logs	OOM Kill Count	SREs
+F94	Disk IOPS Limiter	Ensures noisy neighbors don't exceed disk IOPS quotas.	Maintains consistent disk performance for critical services.	Cgroup Limits	IOPS Usage	Storage Admins
+F95	Network Bandwidth Throttling	Limits network bandwidth for non-critical batch jobs.	Ensures interactive user transactions get priority network bandwidth.	Traffic Control (tc)	Latency P99 for Users	NetOps
+F96	Automated Security Patching	Patches OS vulnerabilities automatically with a safety rollback.	Critical for maintaining infrastructure security hygiene.	CVE Scanning + Patching	Patch Lag < 48h	SecOps
+F97	Kernel Live Patching	Patches kernel vulnerabilities without rebooting.	Eliminates the need for disruptive maintenance reboots.	Kpatch/Kgraft	Reboot Frequency Reduction	SysAdmins
+F98	Configuration Validator	Validates all config files (YAML/JSON) against schemas before applying.	Prevents application crashes due to typos or invalid config.	JSON Schema	Config Error Rate 0%	DevOps
+F99	Terraform State Locking	Prevents concurrent modifications to the infrastructure state.	Avoids state corruption and race conditions in deployments.	DynamoDB/Consul Locking	State Corruption Events 0	DevOps
+F100	Cloud Resource Tagging Enforcer	Enforces tagging of all cloud resources for cost allocation and ownership.	Ensures clear accountability and cost management.	Tag Policies	Untagged Resources 0%	Finance/Ops
+F101	Idle Resource Finder	Identifies and alerts on idle cloud resources (e.g., unattached IPs).	Reduces cloud waste and optimizes budgets.	Usage Metrics Analysis	Cost Savings	Ops Managers
+F102	Right-Sizing Recommender	Analyzes resource utilization and recommends smaller/larger instance types.	Optimizes price-performance ratio of infrastructure.	Statistical Analysis	Optimization Uptake	Architects
+F103	Reserved Instance (RI) Manager	Automatically purchases RIs for predictable workloads to save money.	Maximizes savings on long-running infrastructure.	Usage Prediction	Savings Realization	Finance
+F104	Spot Instance Orchestrator	Utilizes cheap spot instances for fault-tolerant batch processing jobs.	Reduces compute costs for analytics/chaos workloads.	Spot Market Pricing	Cost Reduction	Data Engineers
+F105	Multi-Cloud Abstraction Layer	Provides a unified API for deploying to AWS, GCP, and Azure.	Prevents vendor lock-in and increases bargaining power.	Cloud Provider Adapters	Deployment Portability	Architects
+F106	Service Dependency Graph Generator	Maps dependencies between all microservices automatically.	Essential for impact analysis before deploying changes.	Call Graph Analysis	Graph Accuracy	Architects
+F107	Change Management Database (CMDB) Auto-Update	Updates the CMDB with every infrastructure change automatically.	Keeps IT inventory accurate in real-time.	Event Stream Processing	CMDB Accuracy	IT Managers
+F108	Failure Modes and Effects Analysis (FMEA) Tool	Assesses potential failure points in new architecture designs.	Proactively mitigates risks during the design phase.	Risk Matrix	Risk Score Reduction	Architects
+F109	Runbook Recommendation Engine	Suggests relevant runbooks based on incoming alert symptoms.	Reduces cognitive load on operators during incidents.	NLP / Keyword Matching	Suggestion Accuracy	Incident Managers
+F110	Incident Post-Mortem Automator	Generates a draft post-mortem report based on logs and chat history.	Streamlines the learning process and ensures no steps are missed.	Data Aggregation	Report Completeness	SREs
+F111	Knowledge Base Search	Integrated search for finding solutions to past errors.	Enables rapid resolution of recurring issues.	Full-Text Search (Elastic)	Search Relevance	Support Teams
+F112	On-Call Scheduler Automation	Rotates on-call duties and integrates with alerting pages.	Ensures fair distribution of operational burden.	Roster Logic	On-Call Coverage	Engineering Managers
+F113	Escalation Policy Manager	Automatically escalates unresolved alerts to higher levels of management.	Ensures critical issues are never ignored.	Time-Based Escalation	Escalation Adherence	Engineering Managers
+F114	Mean Time To Resolve (MTTR) Tracker	Measures how long it takes to restore service after an incident.	Key metric for improving operational efficiency.	Time Series Analysis	MTTR Trend	Engineering Leadership
+F115	Change Failure Rate (CFR) Calculator	Measures the percentage of deployments that result in an incident.	Key metric for assessing deployment quality.	Deployment Correlation	CFR Trend	QA Managers
+F116	Deployment Frequency Tracker	Measures how often the team successfully deploys to production.	Indicates agility and velocity of the team.	CI/CD Pipeline Logs	Deployment Count	Product Owners
+F117	Service Level Indicator (SLI) Aggregator	Calculates specific health metrics (latency, error rate) for services.	The data source for Service Level Objectives (SLOs).	Prometheus Querying	SLI Accuracy	SREs
+F118	Service Level Objective (SLO) Monitor	Compares SLIs against the defined targets (e.g., 99.9%).	Triggers alerts when the system is at risk of breaking its promise.	Error Budget Calculation	Budget Burn Rate	SREs
+F119	Error Budget Policy Enforcer	Automatically freezes deployments if the error budget is exhausted.	Prevents risky changes when the system is already unstable.	Deployment Gate Logic	Freeze Adherence	Release Managers
+F120	Global Traffic Throttling	Reduces traffic acceptance globally when system-wide capacity is reached.	Prevents total system collapse during massive overload (e.g., Black Friday).	Load Shedding	System Stability	SREs
+F121	Priority Queue Management	Prioritizes high-value transactions (e.g., corporate transfers) over low-value ones.	Ensures business continuity for premium clients during stress.	Priority Algorithm	VIP Transaction Success	Product Managers
+F122	Geofencing Failover	Restricts failover targets to specific regions based on data sovereignty laws.	Automates compliance during disaster recovery.	Geo-IP Rules	Compliance Violations 0	Legal
+F123	Shadow Mode Testing	Mirrors production traffic to a non-production cluster to test new versions.	Validates performance/correctness without affecting real users.	Traffic Mirroring	Result Discrepancy Rate	QA Engineers
+F124	Feature Flag System	Dynamically toggles features on/off without deployment.	Provides a kill switch for problematic features in real-time.	Key-Value Store	Flag Update Latency < 100ms	Product Owners
+F125	Remote Config Management	Updates application configuration without redeploying the service.	Allows rapid response to operational issues.	Push/Pull Configuration	Config Sync Time	SREs
+F126	Synthetic Transaction Monitoring	Runs fake transactions (end-to-end) every minute to check health.	Detects issues that internal health checks might miss (e.g., API key expiry).	Script Execution	Synthetic Success Rate	SREs
+F127	Browser Performance Monitoring (RUM)	Tracks real-user performance metrics from the browser/wallet.	Identifies client-side issues affecting users (e.g., slow JS).	JS SDK Injection	RUM Data Coverage	Frontend Devs
+F128	Mobile Crash Reporting	Captures crash reports from the mobile wallet app.	Ensures stability of the user-facing component.	Crashlytics Integration	Crash-Free Users > 99%	Mobile Devs
+F129	Push Notification Gateway	Sends alerts to users about service status or transaction failures.	Keeps users informed and reduces support ticket volume.	APNS/FCM Integration	Delivery Success Rate	Support Teams
+F130	Status Page Generator	Automatically updates the public status page based on internal health.	Reduces inbound support inquiries during outages.	Component Health Mapping	Page Accuracy	Marketing/Support
+F131	API Gateway Usage Analytics	Tracks usage of API endpoints by partners/developers.	Provides insights for API product management.	Log Aggregation	Report Accuracy	API Managers
+F132	SDK Health Monitor	Monitors the health of SDKs used by third-party integrators.	Ensures partners are using stable, supported libraries.	Version Telemetry	Deprecated SDK Usage	Integrators
+F133	Webhook Delivery Retry	Retries failed webhook deliveries to merchants with exponential backoff.	Ensures merchants receive payment notifications reliably.	Queue Management	Delivery Success Rate > 99.9%	Backend Devs
+F134	Idempotency Key Cache	Stores idempotency keys to prevent duplicate processing.	Ensures exactly-once semantics for payment operations.	Redis Storage	Cache Hit Ratio > 95%	Backend Devs
+F135	Request Correlation ID Injection	Injects a unique ID into every request header for tracing.	Links logs across microservices for a single transaction.	HTTP Headers	Trace Coverage 100%	Developers
+F136	Log Sensitive Data Scrubber	Automatically redacts PII and credit card numbers from logs.	Prevents security leaks via log files.	Regex / Pattern Matching	Data Leak Incidents 0	Security Team
+F137	Structured Logging Enforcer	Enforces JSON format for all application logs.	Enables machine parsing and automated analysis of logs.	JSON Schema	Structured Log Compliance	Developers
+F138	Log Retention Policy Manager	Manages deletion/archival of logs based on compliance rules.	Balances storage costs with forensic needs.	Time-Based Deletion	Storage Cost Control	Compliance
+F139	Alert Noise Reduction	Uses ML to deduplicate and correlate noisy alerts.	Prevents "alert fatigue" for on-call engineers.	Clustering Algorithms	Alert Reduction Rate	SREs
+F140	Predictive Autoscaling	Uses ML to predict traffic spikes and scale up before they happen.	Ensures capacity is ready before users notice lag.	LSTM / Prophet	Prediction Accuracy	SREs
+F141	Geo-Distributed Lock Store	Provides locking mechanisms that work across regions.	Coordinates distributed tasks safely.	Distributed Hash Table	Lock Contention	Architects
+F142	Quorum Read Manager	Ensures reads are verified by a majority of database nodes.	Provides strong consistency for critical financial reads.	Consensus Protocol	Read Consistency 100%	DBAs
+F143	Event Sourcing Store Replayer	Replays events to rebuild application state.	Essential for disaster recovery of in-memory state.	Event Stream	Replay Accuracy	Backend Devs
+F144	CQRS (Command Query Responsibility Segregation) Handler	Separates read and write models for scalability.	Optimizes read performance for dashboards and audits.	Event Projection	Read Latency P99	Architects
+F145	Saga Orchestrator	Manages distributed transactions across microservices.	Ensures data consistency across bounded contexts without 2PC.	Choreography/Orchestration	Transaction Completion Rate	Backend Devs
+F146	Compensating Transaction Executor	Automatically rolls back parts of a distributed transaction if it fails.	Ensures financial integrity across services.	Reverse Logic	Rollback Success Rate	Backend Devs
+F147	API Rate Limiter (Distributed)	Enforces rate limits across all instances of an API gateway.	Prevents abuse at a global scale.	Redis Counters	Limit Accuracy	API Managers
+F148	Request Coalescing	Merges identical simultaneous requests into one.	Reduces load on the database for "thundering herd" scenarios.	Request Batching	Load Reduction	Backend Devs
+F149	Response Caching Headers Manager	Injects Cache-Control headers for public assets.	Reduces bandwidth costs and improves load times.	HTTP Headers	Cache Hit Ratio (CDN)	Frontend Devs
+F150	HTTP/2 & HTTP/3 Pusher	Supports modern protocols for multiplexing and reduced latency.	Improves wallet-app performance.	Protocol Negotiation	Protocol Adoption	NetOps
+
+
+h.	Comprehensive List of Database Objects
+
+ID	schema_name	object_name	object_type	description	feature_reference	column_names	constraints / notes	junction_tables
+T001	dr	dr_cluster_status	TABLE	Tracks the real-time health and status of all Kubernetes clusters.	F01	cluster_id (PK), region, status, last_heartbeat, capacity, active_pods	CHECK (status IN ('ACTIVE','DEGRADED','DOWN'))
+T002	dr	dr_failover_event_log	TABLE	Immutable log of all failover operations for audit and post-mortem.	F04	event_id (PK), timestamp, trigger_reason, from_cluster, to_cluster, success_bool	NOT NULL
+T003	dr	dr_replication_slot_status	TABLE	Monitors PostgreSQL logical replication slots to prevent lag.	F03	slot_name, database_name, confirmed_lsn, restart_lsn, lag_bytes	CHECK (lag_bytes < 104857600)
+T004	dr	dr_chaos_experiment	TABLE	Stores configuration and history of chaos engineering tests.	F07	experiment_id (PK), name, fault_type, target_service, schedule_cron, status	CHECK (status IN ('SCHEDULED','RUNNING','COMPLETED'))
+T005	dr	dr_chaos_run_result	TABLE	Results of individual chaos experiment executions.	F07	run_id (PK), experiment_id (FK), timestamp, system_impact_score, error_logs	FK to dr_chaos_experiment
+T006	dr	dr_backup_job	TABLE	Tracks backup schedules and their status.	F17	job_id (PK), resource_type, resource_id, backup_type, schedule_cron, retention_days	CHECK (retention_days > 0)
+T007	dr	dr_backup_execution	TABLE	Logs of actual backup executions.	F17	exec_id (PK), job_id (FK), start_time, end_time, status, size_bytes, storage_location	FK to dr_backup_job
+T008	dr	dr_integrity_check	TABLE	Results of backup integrity verification.	F18	check_id (PK), backup_exec_id (FK), timestamp, checksum_verified (bool), result_detail	FK to dr_backup_execution
+T009	dr	dr_hsm_key_state	TABLE	Synchronization status of HSM keys across regions.	F21	key_id, primary_region, dr_region, last_sync_ts, sync_status	CHECK (sync_status IN ('SYNCED','PENDING','FAILED'))
+T010	dr	dr_certificate_inventory	TABLE	Manages TLS certificates for mTLS.	F22	cert_id (PK), domain, serial_number, issuer, expiry_date, auto_renew (bool)	CHECK (expiry_date > NOW())
+T011	dr	dr_compliance_violation	TABLE	Logs any data residency or compliance failures during DR.	F24	violation_id (PK), timestamp, rule_id, description, severity, region	CHECK (severity IN ('LOW','MEDIUM','HIGH','CRITICAL'))
+T012	dr	dr_reconciliation_report	TABLE	Results of transaction log reconciliation between regions.	F25	report_id (PK), timestamp, region_a, region_b, total_records, mismatched_records	CHECK (mismatched_records = 0)
+T013	dr	dr_incident_alert	TABLE	Aggregated alerts for operations teams.	F33	alert_id (PK), source_service, severity, message, status, created_at	CHECK (status IN ('OPEN','ACKNOWLEDGED','RESOLVED'))
+T014	dr	dr_runbook_execution	TABLE	Logs automated runbook executions triggered by alerts.	F34	exec_id (PK), alert_id (FK), runbook_name, steps_executed, result	FK to dr_incident_alert
+T015	dr	dr_cost_attribution	TABLE	Monthly cost breakdown by region and service.	F37	entry_id (PK), month, region, service, cost_currency, cost_amount	UNIQUE (month, region, service)
+T016	dr	dr_dependency_graph	TABLE	Stores edges of the service dependency map.	F106	edge_id (PK), upstream_service, downstream_service, dependency_type
+T017	dr	dr_slo_history	TABLE	Time-series data for Service Level Objectives compliance.	F118	id, service_name, slo_name, timestamp, error_budget_burn, sli_value
+T018	dr	dr_deployment_log	TABLE	Tracks all deployments to correlate with incidents.	F116	deploy_id (PK), service, version, environment, timestamp, triggered_by
+T019	dr	dr_change_failure	TABLE	Links deployments to resulting incidents for CFR calculation.	F115	id, deploy_id (FK), incident_id (FK), failure_time	FK to dr_deployment_log
+T020	dr	dr_synthetic_transaction	TABLE	Configuration of synthetic health checks.	F126	check_id (PK), name, endpoint, expected_response, interval_seconds
+T021	dr	dr_synthetic_result	TABLE	Results of synthetic checks.	F126	result_id (PK), check_id (FK), timestamp, latency_ms, success	FK to dr_synthetic_transaction
+T022	dr	dr_capacity_plan	TABLE	Future capacity planning forecasts.	F136	plan_id (PK), region, forecast_date, predicted_cpu, predicted_mem, action_taken
+T023	dr	dr_region_config	TABLE	Configuration parameters for each geographic region.	F01	region_id (PK), country, cloud_provider, data_residency_req, dns_name	UNIQUE (dns_name)
+T024	dr	dr_dns_health_check	TABLE	Results of DNS resolution checks globally.	F39	check_id (PK), region, resolver_ip, query_time_ms, success
+T025	dr	dr_ddos_event	TABLE	Logs of DDoS attacks and mitigation actions.	F42	event_id (PK), start_time, end_time, attack_vector, peak_bps, mitigation_status
+T026	dr	dr_security_incident	TABLE	Tracks security-related incidents requiring forensic snapshots.	F63	incident_id (PK), timestamp, severity, description, snapshot_location
+T027	dr	dr_compliance_scan	TABLE	Results of infrastructure compliance scans (CIS, GDPR).	F64	scan_id (PK), timestamp, scanner_name, compliance_score, failed_controls
+T028	dr	dr_kb_article	TABLE	Knowledge base articles for runbooks and solutions.	F111	article_id (PK), title, content, tags, last_updated_ts
+T029	dr	dr_on_call_roster	TABLE	Schedule of on-call engineers.	F112	entry_id (PK), engineer_name, contact_method, start_date, end_date	CHECK (end_date > start_date)
+T030	dr	dr_escalation_path	TABLE	Defines escalation chains for alerts.	F113	rule_id (PK), service, level_1_contact, level_2_contact, escalation_delay_mins
+T031	dr	dr_lock	TABLE	Distributed lock table for coordinating DR actions.	F29	lock_key (PK), holder_id, acquired_at, expiry_ts	UNIQUE (lock_key)
+T032	dr	dr_feature_flag	TABLE	Global feature flags.	F124	flag_name (PK), is_enabled, description, last_updated_by
+T033	dr	dr_audit_log	TABLE	Immutable audit trail for all configuration changes in DR.	F65	log_id (PK), timestamp, actor, action, old_value_json, new_value_json	NOT NULL
+T034	dr	dr_node_health	TABLE	Detailed health status of individual K8s nodes.	F02	node_name, region, condition, ready_bool, capacity_cpu, capacity_mem
+T035	dr	dr_pod_history	TABLE	History of pod lifecycle events (scheduling, eviction).	F02	pod_name, namespace, event_type, timestamp, reason, node_name
+T036	dr	dr_network_latency	TABLE	Measured latency metrics between regions.	F05	source_region, dest_region, latency_ms, timestamp
+T037	dr	dr_quorum_vote	TABLE	Logs of quorum votes for leader election.	F30	election_id (PK), term, candidate_id, voter_id, vote_granted
+T038	dr	dr_webhook_delivery	TABLE	Status of webhook delivery retries.	F133	delivery_id (PK), url, payload_hash, attempt_count, last_attempt_ts, success
+T039	dr	dr_session_state	TABLE	Synchronized user session state across regions.	F85	session_id (PK), user_id, region, last_activity, state_json
+T040	dr	dr_message_dead_letter	TABLE	Dead letter queue entries for failed messages.	F80	message_id (PK), topic, original_payload, error_reason, timestamp
+T041	dr	dr_container_image_scan	TABLE	CVE scan results for Docker images.	F70	image_id (PK), image_tag, scan_timestamp, cve_count, max_severity	CHECK (max_severity IN ('NONE','LOW','MEDIUM','HIGH','CRITICAL'))
+T042	dr	dr_sbom_entry	TABLE	Software Bill of Materials entries.	F71	component_id (PK), image_id (FK), name, version, license_type, supplier	FK to dr_container_image_scan
+T043	dr	dr_dependency_update	TABLE	Proposed dependency updates for security.	F72	update_id (PK), library_name, current_version, safe_version, pr_link
+T044	dr	dr_db_slow_query	TABLE	Log of slow queries detected.	F73	query_id (PK), query_hash, db_name, duration_ms, query_text_preview
+T045	dr	dr_db_index_usage	TABLE	Usage statistics for database indexes.	F74	index_id (PK), table_name, index_name, idx_scan, idx_tup_read
+T046	dr	dr_db_deadlock	TABLE	Log of database deadlocks.	F87	deadlock_id (PK), timestamp, affected_tables, blocking_pid, waiting_pid
+T047	dr	dr_cache_stats	TABLE	Aggregated Redis cache statistics.	F83	region, cache_hit_ratio, memory_used, evicted_keys, timestamp
+T048	dr	dr_thread_dump	TABLE	Metadata of collected thread dumps.	F89	dump_id (PK), pod_name, timestamp, file_location_s3
+T049	dr	dr_gc_log_stats	TABLE	Parsed Garbage Collection log statistics.	F91	pod_name, timestamp, gc_pause_ms, heap_before_mb, heap_after_mb
+T050	dr	dr_resource_limit	TABLE	Defined resource limits for workloads.	F92	workload_name, cpu_limit_millicore, mem_limit_mb, burst_allowed
+T051	core	tbl_kyc_record	TABLE	Stores KYC data for customers.	M05	record_id (PK), user_id (FK), verification_status, document_hash, provider	FK: core.users
+T052	core	tbl_transaction	TABLE	Core financial transaction log.	M01	tx_id (PK), amount, currency, timestamp, blind_coin_hash, merchant_id (FK)	FK: core.merchants
+T053	core	tbl_merchant	TABLE	Registered merchant details.	M21	merchant_id (PK), business_name, vat_number, settlement_bank_account, status
+T054	core	tbl_wallet	TABLE	User wallet configuration and public keys.	M04	wallet_id (PK), user_id (FK), public_key, wallet_version, created_at	FK: core.users
+T055	core	tbl_exchange_balance	TABLE	Real-time balance of the exchange.	M05	exchange_id (PK), currency_code, available_balance, reserved_balance
+T056	core	tbl_audit_trail	TABLE	Immutable audit trail for all financial events.	M06	event_id (PK), tx_id (FK), event_type, actor, timestamp, metadata_json	FK: core.tbl_transaction
+T057	core	tbl_compliance_report	TABLE	Generated reports for tax authorities.	M22	report_id (PK), jurisdiction, period_start, period_end, total_vat, file_hash
+T058	core	tbl_coin_reserve	TABLE	Tracking of blinded coins in reserve.	M01	coin_hash (PK), denomination, status, expiry_timestamp, reserve_pub
+T059	core	tbl_refund	TABLE	Records of refund transactions.	M04	refund_id (PK), original_tx_id (FK), refund_amount, reason, status	FK: core.tbl_transaction
+T060	core	tbl_fraud_alert	TABLE	Alerts generated by the fraud engine.	M03	alert_id (PK), transaction_id (FK), risk_score, anomaly_type, reviewed	FK: core.tbl_transaction
+T061	core	tbl_regulatory_rule	TABLE	Active regulatory rules per jurisdiction.	M02	rule_id (PK), jurisdiction, rule_type, logic_json, active_from
+T062	core	tbl_user	TABLE	User account details (pseudonymous).	M04	user_id (PK), username_hash, created_at, tier_level
+T063	core	tbl_settlement_batch	TABLE	Aggregated settlements for merchants.	M05	batch_id (PK), merchant_id (FK), total_amount, execution_date, status	FK: core.tbl_merchant
+T064	core	tbl_wire_transfer	TABLE	Outgoing wire transfers to bank accounts.	M05	transfer_id (PK), bank_account, amount, currency, status, transaction_id
+T065	core	tbl_error_log	TABLE	Application level error logs.	M08	log_id (PK), service_name, error_code, stack_trace, timestamp
+T066	core	tbl_api_key	TABLE	API keys for merchant access.	M07	key_id (PK), merchant_id (FK), api_key_hash, permissions, expiry	FK: core.tbl_merchant
+T067	core	tbl_contract	TABLE	Cryptographic contracts for payments.	M04	contract_id (PK), contract_hash, terms_json, parties_involved
+T068	core	tbl_prov_invoice	TABLE	Provisional invoices before payment.	M22	invoice_id (PK), merchant_id (FK), amount, due_date, status	FK: core.tbl_merchant
+T069	core	tbl_tax_config	TABLE	Tax rates configuration.	M02	config_id (PK), jurisdiction, tax_rate, vat_category, valid_from
+T070	core	tbl_sig_key	TABLE	Stored public keys for verification.	M01	key_id (PK), master_pub, exchange_pub, start_date, end_date
+T071	core	tbl_denomination	TABLE	Supported coin denominations.	M01	denom_id (PK), value, currency, fee_withdraw, fee_deposit
+T072	core	tbl_global_fee	TABLE	Global platform fees.	M07	fee_type, fee_value, currency, effective_from
+T073	core	tbl_account_merger	TABLE	Logs of account history merges for privacy.	M04	merge_id (PK), old_account, new_account, timestamp
+T074	core	tbl_history_request	TABLE	Requests for transaction history.	M04	req_id (PK), wallet_id (FK), timestamp, result_status	FK: core.tbl_wallet
+T075	core	tbl_refresh_session	TABLE	Melt and refresh session for coins.	M04	session_id (PK), melt_coin_hash, timestamp
+T076	core	tbl_deposit	TABLE	Deposit operations (Wire transfer to Exchange).	M05	deposit_id (PK), wire_ref, amount, account_pub, status
+T077	core	tbl_reserve_out	TABLE	Withdrawals from reserves to coins.	M01	out_id (PK), reserve_pub, h_blind_ev, denom_sig
+T078	core	tbl_payback	TABLE	Payback of coins to reserve (refresh).	M04	payback_id (PK), coin_pub, reserve_pub, amount
+T079	core	tbl_aggregation	TABLE	Tracking of coin aggregation for deposits.	M05	aggregation_id (PK), deposit_serial, wtid
+T080	core	tbl_recoup	TABLE	Recoup of coins (emergency).	M04	recoup_id (PK), coin_pub, reserve_out_serial
+T081	core	tbl_recoup_refresh	TABLE	Recoup of refreshed coins.	M04	recoup_r_id (PK), coin_pub, rrc_serial
+T082	core	tbl_purse	TABLE	Purse for peer-to-peer payments.	M04	purse_pub (PK), merge_pub, balance, expiration
+T083	core	tbl_account_merger_proposal	TABLE	Proposals for account merge.	M04	proposal_id (PK), old_pub, new_pub, timestamp
+T084	core	tbl_partner_account	TABLE	Partner exchange accounts for P2P.	M04	partner_url, payto_uri, wad_id
+T085	core	tbl_consistency_proof	TABLE	Consistency proofs for audit.	M06	proof_id (PK), table_name, row_uuid, hash
+T086	core	tbl_wire_fee	TABLE	Fees for wire transfers.	M07	wire_fee_id (PK), wire_method, start_date, end_date, fee_json
+T087	core	tbl_close_request	TABLE	Requests to close a reserve.	M05	close_id (PK), reserve_pub, target_account, timestamp
+T088	core	tbl_history_entry	TABLE	Generic history entries for wallets.	M04	entry_id (PK), wallet_id (FK), type, amount, sign	FK: core.tbl_wallet
+T089	core	tbl_planchet	TABLE	Planchet details for withdrawal.	M01	coin_priv, denom_pub_hash, blinding_key
+T090	core	tbl_refund_proof	TABLE	Proofs associated with refunds.	M04	proof_id (PK), refund_id (FK), proof_json	FK: core.tbl_refund
+T091	core	tbl_policy_group	TABLE	Policy groups for ABAC.	M02	group_id (PK), name, description, permissions_json
+T092	core	tbl_user_group_mapping	TABLE	Mapping users to policy groups.	M02	user_id, group_id	Junction Table	tbl_policy_group, core.tbl_user
+T093	core	tbl_jurisdiction	TABLE	Supported jurisdictions.	M02	code (PK), name, data_locality_req
+T094	core	tbl_auditor_denom_sigs	TABLE	Auditor signatures on denominations.	M06	auditor_uuid, denom_pub_hash, auditor_sig
+T095	core	tbl_exchange_signkey	TABLE	Exchange signing keys lifecycle.	M01	exchange_pub, master_sig, valid_from, expire_legal
+T096	core	tbl_prewire	TABLE	Records of prepared wire transfers.	M05	prewire_uuid (PK), method, bank_account, amount
+T097	core	tbl_webhook_notify	TABLE	Configured webhooks for merchants.	M07	notify_id (PK), merchant_id (FK), event_type, url	FK: core.tbl_merchant
+T098	core	tbl_extension_manifest	TABLE	Extension manifests for compatibility.	M15	ext_id (PK), name, version, config_json
+T099	core	tbl_anonymity_set	TABLE	Anonymity sets for privacy analysis.	M01	set_id, denom_pub_hash, size, timestamp
+T100	core	tbl_zk_proof	TABLE	Zero Knowledge Proofs storage/verification.	M01	proof_id (PK), statement_id, proof_json, valid
+T101	dr	v_cluster_health_summary	VIEW	Aggregated view of cluster health.	F01	region, status, active_pods, capacity	Source: dr.dr_cluster_status
+T102	dr	v_replication_lag	VIEW	High replication lag alerts.	F03	slot_name, lag_bytes, status	Source: dr.dr_replication_slot_status
+T103	dr	v_recent_incidents	VIEW	List of recent security/operational incidents.	F63, F13	incident_id, timestamp, severity, status	Source: dr.dr_security_incident, dr.dr_incident_alert
+T104	dr	v_cost_report	VIEW	Monthly cost report by region.	F37	month, region, total_cost	Source: dr.dr_cost_attribution
+T105	dr	v_failed_backups	VIEW	List of failed backup jobs.	F17	job_id, timestamp, reason	Source: dr.dr_backup_execution
+T106	dr	v_compliance_status	VIEW	Current compliance score across regions.	F64	region, scanner_name, score	Source: dr.dr_compliance_scan
+T107	dr	v_webhook_failures	VIEW	Webhook delivery failures.	F133	url, attempt_count, last_error	Source: dr.dr_webhook_delivery
+T108	dr	v_slow_queries_top10	VIEW	Top 10 slowest queries.	F73	query_text_preview, avg_duration	Source: dr.dr_db_slow_query
+T109	dr	v_expiring_certificates	VIEW	Certificates expiring in 7 days.	F22	domain, expiry_date	Source: dr.dr_certificate_inventory
+T110	dr	v_capacity_forecast	VIEW	Forecasted capacity needs.	F136	region, forecast_date, predicted_cpu	Source: dr.dr_capacity_plan
+T111	dr	v_chaos_schedule	VIEW	Upcoming chaos experiments.	F07	experiment_name, scheduled_time	Source: dr.dr_chaos_experiment
+T112	dr	v_change_failure_rate	VIEW	CFR metric calculation.	F115	deploy_count, failed_count, cfr_percentage	Source: dr.dr_deployment_log, dr.dr_change_failure
+T113	dr	v_active_locks	VIEW	Currently held distributed locks.	F29	lock_key, holder_id, expiry_ts	Source: dr.dr_lock
+T114	dr	v_dead_letter_queue_size	VIEW	Size of dead letter queues.	F80	topic, count	Source: dr.dr_message_dead_letter
+T115	dr	v_slo_burn_rate	VIEW	Current error budget burn rate.	F118	service_name, burn_rate, status	Source: dr.dr_slo_history
+T116	dr	v_on_call_current	VIEW	Current on-call engineer.	F112	engineer_name, contact_method	Source: dr.dr_on_call_roster
+T117	dr	v_network_topology	VIEW	Visual representation of network latency.	F05	source, dest, latency	Source: dr.dr_network_latency
+T118	dr	v_image_vulnerabilities	VIEW	High/Critical CVEs in images.	F70	image_tag, cve_count, max_severity	Source: dr.dr_container_image_scan
+T119	dr	v_pending_updates	VIEW	Pending security dependency updates.	F72	library_name, current_version, safe_version	Source: dr.dr_dependency_update
+T120	dr	v_gc_pause_stats	VIEW	Statistics on GC pause times.	F91	pod_name, avg_pause, max_pause	Source: dr.dr_gc_log_stats
+T121	dr	v_cache_efficiency	VIEW	Cache hit ratios per region.	F83	region, cache_hit_ratio	Source: dr.dr_cache_stats
+T122	dr	v_audit_trail_summary	VIEW	Summary of DR config changes.	F65	actor, action_count, last_action	Source: dr.dr_audit_log
+T123	dr	v_kyber_post_quantum_keys	VIEW	Status of post-quantum keys.	M24	key_id, state, expiry	Source: dr.dr_hsm_key_state
+T124	dr	v_data_residency_check	VIEW	Verification of data location compliance.	F24	data_type, region, compliant	Source: dr.dr_compliance_violation
+T125	dr	v_backup_age	VIEW	Age of most recent backups.	F17	resource_type, hours_since_last_backup	Source: dr.dr_backup_execution
+T126	dr	v_disk_io_pressure	VIEW	Instances experiencing high disk I/O wait.	F12	instance_id, iowait_pct	Source: dr.dr_node_health
+T127	dr	v_pod_restarts_24h	VIEW	Pods restarted in last 24 hours.	F02	pod_name, restart_count	Source: dr.dr_pod_history
+T128	dr	v_zombie_sessions	VIEW	Sessions idle for too long.	F85	session_id, idle_seconds	Source: dr.dr_session_state
+T129	dr	v_traffic_throttle_status	VIEW	Current traffic throttling status.	F120	region, throttle_percentage	Source: dr.dr_incident_alert
+T130	dr	v_deployment_frequency	VIEW	Deployment frequency metric.	F116	count_per_week	Source: dr.dr_deployment_log
+T131	dr	v_mttr_by_service	VIEW	Mean Time To Resolve per service.	F114	service_name, avg_mttr_minutes	Source: dr.dr_incident_alert
+T132	dr	v_quorum_election_history	VIEW	History of leader elections.	F30	election_id, winner, term	Source: dr.dr_quorum_vote
+T133	dr	v_synthetic_availability	VIEW	Availability based on synthetic checks.	F126	check_name, uptime_percentage	Source: dr.dr_synthetic_result
+T134	dr	v_geo_dns_propagation	VIEW	DNS propagation status by region.	F39	region, resolver_ip, success_rate	Source: dr.dr_dns_health_check
+T135	dr	v_ddos_attack_history	VIEW	History of DDoS attacks.	F42	start_time, duration, peak_bps	Source: dr.dr_ddos_event
+T136	dr	v_hardware_attestation	VIEW	Hardware security module attestation status.	F17	device_id, attestation_status	Source: dr.dr_cluster_status
+T137	dr	v_lock_contention	VIEW	Locks experiencing high contention.	F29	lock_key, wait_queue_length	Source: dr.dr_lock
+T138	dr	v_message_lag	VIEW	Kafka consumer lag by topic.	F79	topic, consumer_group, lag	Source: dr.dr_message_dead_letter
+T139	dr	v_transaction_throughput	VIEW	Real-time transaction throughput.	M01	tps, timestamp	Source: core.tbl_transaction
+T140	dr	v_error_rate_budget	VIEW	Error rate vs budget for SLOs.	F118	service_name, error_rate, budget_remaining	Source: dr.dr_slo_history
+T141	dr	v_feature_flag_usage	VIEW	Usage stats of feature flags.	F124	flag_name, is_enabled, toggle_count	Source: dr.dr_feature_flag
+T142	dr	v_runbook_recommendations	VIEW	Recommended runbooks for current alerts.	F109	alert_id, recommended_runbook	Source: dr.dr_incident_alert, dr.dr_kb_article
+T143	dr	v_sla_compliance	VIEW	Overall SLA compliance percentage.	F118	period, availability_percentage	Source: dr.dr_slo_history
+T144	dr	v_storage_cost_trend	VIEW	Trend of storage costs over time.	F37	month, storage_cost	Source: dr.dr_cost_attribution
+T145	dr	v_unused_resources	VIEW	Idle or underutilized cloud resources.	F101	resource_id, type, idle_hours	Source: dr.dr_cost_attribution
+T146	dr	v_network_latency_heatmap	VIEW	Matrix of latencies between all regions.	F05	source, dest, latency	Source: dr.dr_network_latency
+T147	dr	v_security_patch_coverage	VIEW	Percentage of nodes patched.	F96	region, patch_level	Source: dr.dr_cluster_status
+T148	dr	v_pod_disruption_budget_status	VIEW	Current PDB status.	F53	pdb_name, current_pods, desired	Source: dr.dr_cluster_status
+T149	dr	v_canary_analysis	VIEW	Comparison of canary vs baseline performance.	F55	metric_name, baseline_val, canary_val	Source: dr.dr_deployment_log
+T150	dr	v_infrastructure_drift	VIEW	Drift between IaC and actual state.	F57	resource_id, drift_detected	Source: dr.dr_audit_log
+T151	dr	sp_trigger_failover	PROCEDURE	Triggers failover sequence for a given service.	F04	IN service_name, IN target_region	LANGUAGE plpgsql
+T152	dr	sp_cleanup_old_logs	PROCEDURE	Archives logs older than retention period.	F138	IN retention_days	LANGUAGE plpgsql
+T153	dr	sp_rotate_certificates	PROCEDURE	Initiates TLS certificate rotation.	F22	IN cert_id	LANGUAGE plpgsql
+T154	dr	sp_promote_standby_db	PROCEDURE	Promotes a standby DB to primary.	F04	IN cluster_id	LANGUAGE plpgsql
+T155	dr	sp_purge_dead_letter	PROCEDURE	Purges processed messages from DLQ.	F80	IN older_than_hours	LANGUAGE plpgsql
+T156	dr	sp_update_cluster_health	PROCEDURE	Refreshes cluster health table from metrics.	F01	NO ARG	LANGUAGE plpgsql
+T157	dr	sp_calculate_slo	PROCEDURE	Calculates SLO compliance for the past hour.	F118	IN service_name	LANGUAGE plpgsql
+T158	dr	sp_expire_sessions	PROCEDURE	Expires stale user sessions.	F85	IN idle_timeout_seconds	LANGUAGE plpgsql
+T159	dr	sp_vacuum_analyze_dr	PROCEDURE	Runs VACUUM ANALYZE on DR tables.	F76	NO ARG	LANGUAGE plpgsql
+T160	dr	sp_generate_cost_report	PROCEDURE	Generates the monthly cost report.	F37	IN month, IN year	LANGUAGE plpgsql
+T161	dr	sp_check_backup_integrity	PROCEDURE	Verifies checksums of recent backups.	F18	IN backup_id	LANGUAGE plpgsql
+T162	dr	sp_create_chaos_experiment	PROCEDURE	Inserts a new chaos experiment schedule.	F07	IN params_json	LANGUAGE plpgsql
+T163	dr	sp_notify_on_call	PROCEDURE	Sends alert to on-call engineer.	F113	IN message	LANGUAGE plpgsql
+T164	dr	sp_lock_resource	PROCEDURE	Acquires a distributed lock.	F29	IN lock_key, IN holder_id	LANGUAGE plpgsql
+T165	dr	sp_release_lock	PROCEDURE	Releases a distributed lock.	F29	IN lock_key, IN holder_id	LANGUAGE plpgsql
+T166	dr	sp_scale_cluster	PROCEDURE	Adjusts cluster size.	F51	IN cluster_id, IN node_count	LANGUAGE plpgsql
+T167	dr	sp_reconcile_transactions	PROCEDURE	Runs reconciliation between regions.	F25	IN region_a, IN region_b	LANGUAGE plpgsql
+T168	dr	sp_audit_access	PROCEDURE	Logs access to sensitive DR data.	F65	IN user_id, IN action	LANGUAGE plpgsql
+T169	dr	sp_prune_dependencies	PROCEDURE	Removes unused dependency records.	F72	NO ARG	LANGUAGE plpgsql
+T170	dr	sp_record_deployment	PROCEDURE	Records a new deployment event.	F116	IN service, IN version	LANGUAGE plpgsql
+T171	dr	sp_evaluate_runbook	PROCEDURE	Determines if runbook execution succeeded.	F34	IN exec_id, IN result_json	LANGUAGE plpgsql
+T172	dr	sp_fetch_metrics	PROCEDURE	Fetches latest metrics for a view.	F31	IN metric_name	LANGUAGE plpgsql
+T173	dr	sp_update_slo_history	PROCEDURE	Inserts current SLI into history table.	F118	NO ARG	LANGUAGE plpgsql
+T174	dr	sp_purge_audit_trail	PROCEDURE	Moves old audit logs to cold storage.	F65	IN older_than_days	LANGUAGE plpgsql
+T175	dr	sp_report_compliance	PROCEDURE	Generates compliance summary.	F64	IN jurisdiction	LANGUAGE plpgsql
+T176	dr	sp_trigger_rollback	PROCEDURE	Rolls back a deployment.	F56	IN deploy_id	LANGUAGE plpgsql
+T177	dr	sp_webhook_retry	PROCEDURE	Retries failed webhook delivery.	F133	IN delivery_id	LANGUAGE plpgsql
+T178	dr	sp_aggregate_logs	PROCEDURE	Aggregates logs for dashboard.	F32	IN time_range	LANGUAGE plpgsql
+T179	dr	sp_cleanup_old_backups	PROCEDURE	Deletes backups exceeding retention.	F20	IN job_id	LANGUAGE plpgsql
+T180	dr	sp_update_dns_health	PROCEDURE	Refreshes DNS health check data.	F39	IN region	LANGUAGE plpgsql
+T181	dr	sp_analyze_traffic	PROCEDURE	Analyzes traffic patterns for autoscaling.	F140	NO ARG	LANGUAGE plpgsql
+T182	dr	sp_check_cves	PROCEDURE	Scans images for CVEs and updates DB.	F70	IN image_id	LANGUAGE plpgsql
+T183	dr	sp_generate_sbom	PROCEDURE	Generates SBOM JSON for an image.	F71	IN image_id	LANGUAGE plpgsql
+T184	dr	sp_kill_long_query	PROCEDURE	Terminates long-running DB queries.	F86	IN query_id	LANGUAGE plpgsql
+T185	dr	sp_refresh_cache	PROCEDURE	Warms up cache with frequent keys.	F84	NO ARG	LANGUAGE plpgsql
+T186	dr	sp_record_incident	PROCEDURE	Creates a new incident record.	F13	IN severity, IN description	LANGUAGE plpgsql
+T187	dr	sp_close_incident	PROCEDURE	Closes an incident and calculates MTTR.	F114	IN incident_id	LANGUAGE plpgsql
+T188	dr	sp_update_capacity_plan	PROCEDURE	Updates capacity forecast.	F136	IN region, IN forecast_json	LANGUAGE plpgsql
+T189	dr	sp_purge_sessions	PROCEDURE	Deletes expired sessions.	F85	IN expired_before	LANGUAGE plpgsql
+T190	dr	sp_rebuild_indexes	PROCEDURE	Rebuilds fragmented DB indexes.	F74	IN index_id	LANGUAGE plpgsql
+T191	dr	sp_rotate_keys	PROCEDURE	Initiates HSM key rotation.	F21	IN key_id	LANGUAGE plpgsql
+T192	dr	sp_sync_configuration	PROCEDURE	Syncs config from primary to DR regions.	F125	IN config_type	LANGUAGE plpgsql
+T193	dr	sp_validate_schema	PROCEDURE	Validates DB schema against golden master.	F98	IN schema_name	LANGUAGE plpgsql
+T194	dr	sp_estimate_cost	PROCEDURE	Estimates cost of infrastructure changes.	F102	IN change_json	LANGUAGE plpgsql
+T195	dr	sp_purchase_spot_instance	PROCEDURE	Purchases spot instances for batch jobs.	F104	IN instance_type, IN count	LANGUAGE plpgsql
+T196	dr	sp_check_residency	PROCEDURE	Validates data residency compliance.	F24	IN data_id	LANGUAGE plpgsql
+T197	dr	sp_analyze_gc	PROCEDURE	Analyzes GC logs and inserts stats.	F91	IN pod_name	LANGUAGE plpgsql
+T198	dr	sp_dump_threads	PROCEDURE	Triggers thread dump collection.	F89	IN pod_name	LANGUAGE plpgsql
+T199	dr	sp_record_synthetic_check	PROCEDURE	Records result of synthetic check.	F126	IN check_id, IN result	LANGUAGE plpgsql
+T200	dr	sp_quarantine_image	PROCEDURE	Quarantines image with Critical CVE.	F70	IN image_id	LANGUAGE plpgsql
+T201	dr	enum_cluster_status	ENUM	Defines the operational states of a Kubernetes cluster.	F01	'PROVISIONING','RUNNING','DEGRADED','RESCALING','TERMINATED','ERROR'	N/A
+T202	dr	enum_failover_type	ENUM	Categorizes the trigger mechanism for a failover event.	F04	'AUTOMATED','MANUAL','SCHEDULED_MAINTENANCE','FORCED'	N/A
+T203	dr	enum_incident_severity	ENUM	Severity levels for operational incidents.	F13	'P1_CRITICAL','P2_HIGH','P3_MEDIUM','P4_LOW'	N/A
+T204	dr	enum_backup_status	ENUM	Status of a backup job execution.	F17	'PENDING','RUNNING','COMPLETED','FAILED','ABORTED'	N/A
+T205	dr	enum_chaos_fault_type	ENUM	Types of faults that can be injected by the Chaos Engine.	F07	'POD_KILL','CPU_HOG','MEM_HOG','LATENCY','PACKET_LOSS','DISK_FILL'	N/A
+T206	dr	dr_drill_log	TABLE	Records manual disaster recovery drills performed by the team.	F07	drill_id (PK), drill_name, start_time, end_time, facilitator, objectives_json, score	CHECK (score BETWEEN 0 AND 100)
+T207	dr	dr_risk_assessment	TABLE	Stores periodic risk assessments for infrastructure components.	F108	assessment_id (PK), component, risk_score, mitigation_plan, assessed_by, date	CHECK (risk_score BETWEEN 1 AND 10)
+T208	dr	dr_vendor_contact	TABLE	Emergency contact information for cloud and service providers.	F02	vendor_name (PK), support_tier, priority_phone, escalation_email, account_manager
+T209	dr	dr_capacity_tier	TABLE	Defines capacity tiers (Hot, Warm, Cold) for resources.	F205	tier_id (PK), tier_name, recovery_time_objective, cost_multiplier, storage_class
+T210	dr	dr_network_bandwidth_cap	TABLE	Configures network bandwidth throttling limits per region.	F95	cap_id (PK), region, max_ingress_mbps, max_egress_mbps, applied_to_service
+T211	dr	dr_restoration_script	TABLE	Metadata for custom scripts used during disaster recovery.	F208	script_id (PK), name, description, path_s3, checksum, last_tested_ts
+T212	dr	dr_rpo_achievement	TABLE	Tracks actual Recovery Point Objectives achieved vs. targets.	F210	metric_id (PK), resource_id, target_rpo_secs, actual_rpo_secs, achieved_at	CHECK (actual_rpo_secs <= target_rpo_secs)
+T213	dr	dr_user_session_failover	TABLE	Tracks specific user experiences during failover events.	F213	session_id, user_id (FK), failover_event_id (FK), reconnect_latency_ms, error_code	FK to core.tbl_user
+T214	dr	dr_k8s_namespace_quota	TABLE	Defines resource quotas per Kubernetes namespace.	F214	namespace_name, region, cpu_hard_limit, mem_hard_limit, storage_hard_limit
+T215	dr	dr_storage_class_config	TABLE	Configuration of storage classes (IO types) per region.	F215	class_name, region, provisioner (e.g., ebs-gp3), iops, throughput_gb, encryption_enabled
+T216	dr	dr_autoscaling_policy	TABLE	Policies governing how services scale up and down.	F216	policy_id (PK), service_name, min_replicas, max_replicas, target_cpu_percent, target_mem_percent	CHECK (min_replicas <= max_replicas)
+T217	dr	dr_dns_record	TABLE	Manages DNS records controlled by the orchestrator.	F217	record_id (PK), zone, name, type (A/CNAME), value, ttl, proxy_enabled
+T218	dr	dr_lb_pool_member	TABLE	Members of a load balancer pool in a specific region.	F218	pool_id, member_ip, port, health_status, weight
+T219	dr	dr_vpn_connection	TABLE	Status of site-to-site VPN connections between regions.	F219	connection_id, local_gw, remote_gw, tunnel_state, bytes_in, bytes_out
+T220	dr	dr_firewall_rule	TABLE	Current firewall rules applied to infrastructure.	F220	rule_id (PK), direction, source_cidr, dest_cidr, port_range, protocol, action	CHECK (action IN ('ALLOW','DENY'))
+T221	dr	dr_backup_encryption_key	TABLE	Tracks keys used to encrypt backups.	F221	key_id, version, creation_ts, status, kms_id
+T222	dr	dr_snapshot_catalog	TABLE	Catalog of volume snapshots for recovery.	F222	snapshot_id, volume_id, creation_ts, size_gb, status, region
+T223	dr	dr_replication_flow_control	TABLE	Controls the rate of replication to avoid saturating networks.	F223	stream_id, max_bytes_per_sec, current_throttle, status
+T224	dr	dr_failover_test_result	TABLE	Detailed results of automated failover tests.	F224	test_id (PK), timestamp, success_bool, failover_duration_secs, data_loss_bytes
+T225	dr	dr_performance_baseline	TABLE	Stores baseline metrics for anomaly detection.	F225	metric_name, service_name, hour_of_day, baseline_value_p50, baseline_value_p99
+T226	dr	dr_incident_tag	TABLE	Tags for categorizing incidents (e.g., 'database', 'network').	F226	tag_id (PK), tag_name, color_code
+T227	dr	dr_incident_tag_map	TABLE	Maps incidents to tags for filtering.	F226	incident_id (FK), tag_id (FK)	UNIQUE (incident_id, tag_id)	dr_incident_alert, dr_incident_tag
+T228	dr	dr_notification_channel	TABLE	Channels for alerting (Slack, PagerDuty, SMS).	F228	channel_id (PK), type, endpoint, active_bool, escalation_level
+T229	dr	dr_user_role	TABLE	Roles for RBAC within the DR system.	F229	role_id (PK), role_name, description
+T230	dr	dr_permission	TABLE	Granular permissions for DR operations.	F230	perm_id (PK), resource, action (e.g., 'failover', 'delete_backup')
+T231	dr	dr_user_role_map	TABLE	Maps users to roles.	F229	user_id, role_id	dr_user_role
+T232	dr	dr_audit_log_partition	TABLE	Metadata for partitioning the audit log table.	F232	partition_name, parent_table, start_date, end_date
+T233	dr	dr_partition_config	TABLE	Configuration for automatic partitioning of tables.	F233	table_name, partition_key (e.g., 'created_at'), interval_type (e.g., 'MONTH')
+T234	dr	dr_data_archive_log	TABLE	Log of data moved from hot to cold storage.	F234	archive_id (PK), table_name, row_count, archive_location_s3, archive_ts
+T235	dr	dr_rollback_plan	TABLE	Pre-defined plans for rolling back a failover.	F235	plan_id (PK), scenario_name, steps_json, author
+T236	dr	dr_service_version	TABLE	Tracks versions of services running in each environment.	F236	service_name, region, version, build_number, deployed_at
+T237	dr	dr_patch_history	TABLE	History of OS and software patches applied.	F237	patch_id (PK), node_name, patch_type, patch_id_ref, applied_at, outcome
+T238	dr	dr_security_baseline	TABLE	Defines the golden standard for security configuration.	F238	baseline_id (PK), name, config_json, version
+T239	dr	dr_scan_schedule	TABLE	Schedule for automated security and compliance scans.	F239	schedule_id (PK), scanner_type, cron_expression, last_run, next_run
+T240	dr	dr_external_dependency	TABLE	Third-party services the system depends on.	F240	dep_id (PK), name, endpoint, criticality, sla_uptime_target
+T241	dr	v_global_health_score	VIEW	Calculates a composite health score (0-100) for the entire system.	F241	score, timestamp, critical_issues_count	Source: dr_dr_cluster_status, dr_incident_alert
+T242	dr	v_failover_readiness	VIEW	Shows whether a specific region is ready to become primary.	F242	region, ready_bool, replication_lag_ok, backups_ok, enough_capacity	Source: dr_dr_replication_slot_status, dr_dr_backup_execution
+T243	dr	v_cost_drift	VIEW	Compares actual spend vs. forecasted budget.	F243	month, budgeted_cost, actual_cost, variance_percentage	Source: dr_dr_cost_attribution
+T244	dr	v_security_posture	VIEW	Aggregates security vulnerabilities and compliance status.	F244	critical_cves, compliance_percentage, open_incidents	Source: dr_dr_container_image_scan, dr_dr_compliance_scan
+T245	dr	v_active_incidents_summary	VIEW	Summary of currently active incidents grouped by severity.	F245	severity, count, avg_duration_minutes	Source: dr_dr_incident_alert
+T246	dr	v_longest_running_queries	VIEW	Lists the top 5 longest running queries currently active.	F246	pid, query_start, duration, state, query_text	Source: pg_stat_activity
+T247	dr	v_disk_usage_forecast	VIEW	Predicts when disks will run out of space based on growth.	F247	mount_point, current_usage_pct, days_until_full	Source: dr_dr_node_health (derived)
+T248	dr	sp_calculate_health_score	PROCEDURE	Computes and updates the global health score table.	F246	IN region_id	LANGUAGE plpgsql
+T249	dr	sp_create_monthly_partition	PROCEDURE	Creates a new partition for a time-series table.	F247	IN table_name, IN month	LANGUAGE plpgsql
+T250	dr	sp_rotate_encryption_key	PROCEDURE	Generates a new data key and re-encrypts backups.	F248	IN backup_id	LANGUAGE plpgsql
+T251	dr	sp_execute_drill	PROCEDURE	Starts a manual drill process.	F249	IN drill_name, IN scenario_json	LANGUAGE plpgsql
+T252	dr	sp_generate_compliance_report	PROCEDURE	Creates a detailed compliance report for a given period.	F250	IN start_date, IN end_date, IN format	LANGUAGE plpgsql
+T253	dr	sp_promote_region_to_primary	PROCEDURE	Executes the steps to promote a DR region to active.	F242	IN region_id	LANGUAGE plpgsql
+T254	dr	sp_update_firewall_rules	PROCEDURE	Applies a set of firewall rules from the config table.	F220	IN rules_json	LANGUAGE plpgsql
+T255	dr	sp_cleanup_old_snapshots	PROCEDURE	Deletes snapshots older than the retention policy.	F222	IN older_than_days	LANGUAGE plpgsql
+T256	dr	sp_estimate_data_transfer_cost	PROCEDURE	Estimates cost for data egress between regions.	F05	IN source_region, IN dest_region, IN data_gb	LANGUAGE plpgsql
+T257	dr	sp_trigger_scale_down	PROCEDURE	Reduces replica count during off-hours.	F216	IN service_name, IN min_replicas	LANGUAGE plpgsql
+T258	dr	sp_import_sbom	PROCEDURE	Imports an SBOM file into the database.	F242	IN file_path_s3	LANGUAGE plpgsql
+T259	dr	sp_check_certificate_expiry	PROCEDURE	Sends alerts for certificates expiring soon.	F109	IN days_threshold	LANGUAGE plpgsql
+T260	dr	sp_analyze_incident_trends	PROCEDURE	Analyzes past incidents to predict future risks.	F242	IN days_to_analyze	LANGUAGE plpgsql
+T261	dr	sp_sync_replication_slot	PROCEDURE	Manually syncs a lagging replication slot.	F242	IN slot_name	LANGUAGE plpgsql
+T262	dr	sp_vacuum_full_table	PROCEDURE	Runs VACUUM FULL on a specified table (requires lock).	F242	IN table_name	LANGUAGE plpgsql
+T263	dr	sp_reindex_table	PROCEDURE	Rebuilds indexes on a table to reduce bloat.	F242	IN table_name	LANGUAGE plpgsql
+T264	dr	sp_archive_partition	PROCEDURE	Detaches an old partition and moves it to archive.	F242	IN table_name, IN partition_name	LANGUAGE plpgsql
+T265	dr	sp_send_test_alert	PROCEDURE	Sends a test alert to verify notification channels.	F228	IN channel_id	LANGUAGE plpgsql
+T266	dr	sp_quarantine_compromised_node	PROCEDURE	Cordons and drains a node suspected of compromise.	F242	IN node_name	LANGUAGE plpgsql
+T267	dr	sp_failover_dns	PROCEDURE	Updates DNS to point to the new primary region.	F242	IN region_id	LANGUAGE plpgsql
+T268	dr	sp_purge_audit_logs_partition	PROCEDURE	Drops a partition of old audit logs.	F232	IN partition_name	LANGUAGE plpgsql
+T269	dr	sp_generate_terraform_state	PROCEDURE	Generates a Terraform state file from current DB records.	F05	IN region_id	LANGUAGE plpgsql
+T270	dr	sp_validate_backup_chain	PROCEDURE	Verifies that WAL logs chain correctly to base backup.	F18	IN backup_id	LANGUAGE plpgsql
+T271	core	seq_transaction_id	SEQUENCE	Sequence for generating transaction IDs if not using UUIDs.	M01	bigint	INCREMENT BY 1
+T272	core	seq_audit_log_id	SEQUENCE	Sequence for audit log IDs.	M06	bigint	CYCLE
+T273	core	seq_report_id	SEQUENCE	Sequence for compliance report IDs.	M22	bigint	NO CYCLE
+T274	core	tbl_user_preference	TABLE	User notification and display preferences.	M04	user_id (FK), notify_email (bool), notify_push (bool), language_code	FK: core.tbl_user
+T275	core	tbl_oauth_token	TABLE	Stores OAuth tokens for OpenID Connect integration.	M04	user_id (FK), provider, access_token_hash, refresh_token_hash, expires_at	FK: core.tbl_user
+T276	core	tbl_refund_transaction	TABLE	Specific table linking refund requests to execution.	M04	refund_tx_id (PK), refund_req_id (FK), coin_pub, timestamp
+T277	core	tbl_merchant_rating	TABLE	Ratings given by users to merchants (if applicable).	M21	merchant_id (FK), user_id (FK), rating, comment	tbl_merchant, core.tbl_user
+T278	core	tbl_tax_payment	TABLE	Records of tax payments made to authorities.	M22	payment_id (PK), report_id (FK), amount, payment_method, reference	FK: core.tbl_compliance_report
+T279	core	tbl_wire_fee_aggregate	TABLE	Aggregated wire fees for reporting.	M05	wire_method, start_date, end_date, total_fees_collected
+T280	core	tbl_denomination_revocation	TABLE	Records of revoked coin denominations.	M01	denom_pub_hash, master_sig, revocation_ts
+T281	core	tbl_signkey_revocation	TABLE	Records of revoked exchange signing keys.	M01	exchange_pub, master_sig, revocation_ts
+T282	core	tbl_patronite	TABLE	Records of donations/patronage to the platform (FOSS funding).	M14	donor_id (FK), amount, donation_date, recurring_bool
+T283	core	tbl_contract_terms	TABLE	Standard terms and conditions stored as JSON-LD.	M04	contract_id (PK), version, terms_json, effective_date
+T284	core	tbl_proof_reserve	TABLE	Proof of reserve holdings for audits.	M06	reserve_pub, balance_timestamp, balance, signature
+T285	core	tbl_auditor_balance	TABLE	Balance summaries submitted to auditors.	M06	auditor_uuid, balance_timestamp, reserve_balance, wire_balance
+T286	core	tbl_legitimization_process	TABLE	Tracks KYC/AML process status.	M05	process_id (PK), user_id (FK), provider, status, decision_ts	FK: core.tbl_user
+T287	core	tbl_coin_history	TABLE	Anonymized history of a coin for privacy analysis.	M04	coin_pub, denomination, age_group, location_hint
+T288	core	tbl_ephemeral_key	TABLE	Short-lived keys for TEE (Trusted Execution Environment) attestation.	M01	key_id (PK), session_id, public_key, expires_at
+T289	core	tbl_regulatory_limit	TABLE	Transaction limits per jurisdiction.	M02	jurisdiction, max_amount_daily, max_amount_single, kyc_tier_required
+T290	core	tbl_wire_deposit	TABLE	Detailed records of wire deposits to the exchange.	M05	deposit_id, wire_transfer_id, amount, currency, sender_account
+T291	core	tbl_exchange_config	TABLE	Global configuration settings for the Exchange.	M05	currency, max_wire_fee, max_fee, base_url
+T292	core	tbl_account_merger_signature	TABLE	Signatures authorizing account merges.	M04	merge_id (PK), old_sig, new_sig, timestamp
+T293	core	tbl_webhook_log	TABLE	Detailed logs of webhook attempts.	M07	log_id (PK), webhook_id (FK), request_payload, response_code, latency_ms	FK: core.tbl_webhook_notify
+T294	core	tbl_scheduled_maintenance	TABLE	Schedule of planned maintenance windows.	M19	maintenance_id (PK), start_ts, end_ts, description, affected_services
+T295	core	tbl_currency_conversion	TABLE	FX rates for multi-currency support.	M22	from_currency, to_currency, rate, timestamp
+T296	core	tbl_psp_config	TABLE	Configuration for external Payment Service Providers.	M07	psp_id (PK), name, api_endpoint, credentials_encrypted, supported_currencies
+T297	core	tbl_bank_account_info	TABLE	Bank account details for settlements.	M05	account_id (PK), iban, bic, owner_name, status
+T298	core	tbl_analytics_event	TABLE	User events for privacy-preserving analytics (aggregated).	M16	event_type, count, date, region
+T299	core	tbl_error_code_mapping	TABLE	Maps internal errors to user-friendly messages.	M04	internal_code, user_message_lang, severity
+T300	core	tbl_feature_usage	TABLE	Tracks usage of specific features (e.g., P2P vs Merchant).	M14	feature_name, user_segment, usage_count

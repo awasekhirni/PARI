@@ -1,0 +1,546 @@
+
+17.	Module M17	Zero-Trust Security Fabric
+a.	Summary
+In the rapidly evolving landscape of digital finance, traditional "castle-and-moat" security architectures—defending the perimeter while implicitly trusting internal network traffic—are fundamentally obsolete. The PARI system, characterized by its decentralized nature, stringent privacy requirements, and CMMI Level 5 maturity standards, necessitates a paradigm shift toward a Zero-Trust Security Fabric (Module M17). This module is not merely a set of firewalls; it is a pervasive, dynamic, and cryptographically verifiable security layer that treats every network packet, service request, and hardware instruction as potentially hostile until proven otherwise. By assuming "never trust, always verify," M17 mitigates the most critical risks in modern cloud-native fintech: lateral movement by attackers who have breached a perimeter, supply chain compromises, and insider threats.
+
+At the heart of M17 lies Mutual Transport Layer Security (mTLS), ensuring that all communication—whether between the Wallet Layer and the Exchange Layer, or internal microservices within the Kubernetes orchestration plane—is encrypted and mutually authenticated. To manage this at scale, the module integrates SPIFFE (SPIFFE-Presentable Identity Framework for Everyone) and SPIRE. This infrastructure assigns a cryptographically strong, unique identity to every workload, regardless of where it runs. This eliminates the reliance on fragile IP addresses or network segments as security primitives, ensuring that a compromised node cannot impersonate a legitimate service.
+
+Furthermore, M17 addresses the integrity of the compute environment itself through Hardware-Backed Attestation. Leveraging technologies like Intel SGX (Software Guard Extensions) and AWS Nitro Enclaves, the system verifies that the code running within a Trusted Execution Environment (TEE) is exactly the signed, uncompromised version intended by the PARI governance body. Before processing sensitive cryptographic keys or Personally Identifiable Information (PII), the system verifies a hardware-generated "quote" proving the integrity of the runtime. This is crucial for a privacy-preserving system where a single malformed line of code could leak user anonymity or bypass regulatory checks.
+
+Key management is centralized yet distributed via Hardware Security Modules (HSMs) and Cloud Key Management Services (KMS). M17 orchestrates the lifecycle of millions of cryptographic keys—generating, rotating, and destroying them without human intervention, ever ensuring that root signing keys never exist in plaintext memory. This aligns with the CMMI Level 5 optimisation goals; the process is quantitatively managed, with automated alerts for key rotation compliance and latency in attestation checks.
+
+The module also functions as the enforcement point for the Regulatory Policy Engine (M02). It translates high-level compliance requirements (e.g., "GDPR Article 32 requires pseudonymization") into low-level network policies and encryption ciphers. It integrates deeply with the Fraud Intelligence Module (M03), feeding telemetry on anomalous connection attempts (e.g., port scanning, geo-inconsistent logins) to the anomaly detection algorithms.
+
+Ultimately, Module M17 provides the "immune system" of PARI. It ensures that the privacy guarantees are mathematically enforceable, that the audit trails are immutable and trustworthy, and that the infrastructure can withstand sophisticated, persistent threats. By automating trust verification, M17 drastically reduces the attack surface, lowers the Mean Time to Respond (MTTR) to incidents, and builds a foundation of institutional trust necessary for a sovereign-grade payment infrastructure.
+b.	Scope
+The scope of Module M17 encompasses the entire security stack of the PARI ecosystem, spanning infrastructure, identity, data, and application layers:
+
+     Identity & Access Management: Implementation of SPIFFE/SPIRE for workload identity; integration with eIDAS 2.0 compliant hardware tokens for human operators; Zero-Trust Network Access (ZTNA) for all API endpoints.
+     Cryptography & Key Management: Lifecycle management for asymmetric keys (RSA, ECDSA, Post-Quantum CRYSTALS-Dilithium) and symmetric keys (AES-256-GCM); integration with on-premises HSMs (Thales, Gemalto) and Cloud KMS (AWS KMS, GCP KMS, Azure Key Vault).
+     Confidential Computing: Provisioning and attestation of TEEs (Intel SGX, AMD SEV, AWS Nitro) for critical operations like blind signature signing and PII decryption.
+     Network Security: Enforcement of mTLS for all East-West (service-to-service) and North-South (client-to-service) traffic; automated service mesh configuration (Istio/Linkerd); network segmentation policies.
+     Audit & Observability: Real-time logging of all security events; cryptographic chaining of logs (hash linking) to prevent tampering; integration with the Independent Auditor Module (M06).
+     Supply Chain Security: Verification of software artifacts via SBOM (Software Bill of Materials); runtime integrity monitoring; container image scanning admission controllers.
+
+c.	Business Case
+The Problem: Legacy Vulnerabilities in High-Stakes Environments
+Traditional financial systems rely on "trust zones." Once an attacker penetrates the firewall (e.g., via phishing or a vulnerability in a web server), they can move laterally through the internal network, accessing databases, payment ledgers, and cryptographic keys. Additionally, cloud-native infrastructures face threats from compromised supply chains (e.g., a malicious dependency injected during a CI/CD build) and rogue administrators with excessive privileges.
+
+The Solution: Mathematical Certainty over Implicit Trust
+Module M17 eliminates the concept of an internal "trusted zone."
+
+    Risk Mitigation: By enforcing mTLS and workload identity (SPIFFE), an attacker compromising a single microservice (e.g., a log aggregator) cannot impersonate the payment processor or access the database, as they lack the cryptographic X.509-SVID required to do so.
+    Regulatory Compliance: Regulations like GDPR, DORA (Digital Operational Resilience Act), and PSD2 require strict access controls and data encryption. M17 provides the technical enforcement of these policies, reducing compliance friction and avoiding potential fines (up to 4% of global turnover).
+    Operational Efficiency: Automated attestation and key rotation reduce the manual overhead of certificate management. CMMI Level 5 metrics drive continuous improvement, allowing the organization to predictively patch vulnerabilities before they are exploited.
+    Brand Trust: For a payment system promising "Privacy-by-design," a security breach is fatal. M17 ensures that privacy is guaranteed by hardware and cryptography, not just policy documents, instilling confidence in citizens, merchants, and regulators.
+
+d.	KPIs
+     Mean Time to Detect (MTTD): < 5 minutes (for anomalous identity or credential usage).
+     Mean Time to Respond (MTTR): < 15 minutes (automated revocation of compromised SVIDs).
+     Attestation Success Rate: 99.999% (percentage of valid workload attestations at startup).
+     mTLS Coverage: 100% (All traffic, internal and external, must be encrypted).
+     Certificate Rotation Compliance: 100% (No certificates expired beyond policy limits).
+     Key Escrow/Exposure Incidents: 0.
+     False Positive Rate (Auth): < 0.01% (Legitimate traffic blocked by Zero-Trust policies).
+
+
+
+e.	Stakeholder Insights
+Stakeholder	Concern	Implications
+CISO (Chief Information Security Officer)	Lateral movement and supply chain attacks.	Requires a system where identity is tied to code/crypto, not network IP. Needs automated responses to contain breaches instantly.
+DevSecOps Engineers	Complexity of managing secrets and certificates in Kubernetes.	Needs automated SPIFFE/SPIRE integration to eliminate manual certificate issuance and rotation.
+Regulators (e.g., EBA, GDPR DPA)	Protection of consumer data and payment integrity.	Demands proof that access control is granular, logged, and cryptographically enforced (non-repudiation).
+Merchants	Uptime and availability during security updates or breaches.	Zero-Trust must not introduce latency; automated recovery must be seamless to prevent transaction failures.
+Privacy Advocates	Insider threats and surveillance by administrators.	Requires hardware enclaves (TEE) where even system admins cannot view raw PII or private keys.
+
+f.	Knowledge Representation Graph (mermaid.js)
+graph TD
+    subgraph "Module M17: Zero-Trust Security Fabric"
+        ZT[Zero Trust Policy Engine]
+
+        subgraph "Identity Layer"
+            SPIRE[SPIRE Server]
+            Workload[Workload Identity X.509 SVID]
+            JWT[JWT Tokens for Humans]
+        end
+
+        subgraph "Infrastructure Security"
+            mTLS[Mutual TLS Gateway]
+            Mesh[Service Mesh Istio/Linkerd]
+            Attest[Hardware Attestation SGX/Nitro]
+        end
+
+        subgraph "Data Protection"
+            KMS[Cloud KMS / HSM]
+            Vault[Secrets Broker]
+            Enc[Envelope Encryption]
+        end
+
+        subgraph "Compliance & Audit"
+            Audit[Cryptographically Chained Logs]
+            SBOM[SBOM Verification Scanner]
+            Mon[Real-time Threat Monitor]
+        end
+    end
+
+    %% PARI Modules
+    Wallet[M01 Wallet Layer]
+    Exchange[M05 Exchange Layer]
+    AuditMod[M06 Auditor Module]
+    Compliance[M02 Regulatory Engine]
+
+    %% Relationships
+    Wallet -->|mTLS + SVID| mTLS
+    Exchange -->|Attestation Quote| Attest
+    Attest -->|Verify Integrity| ZT
+
+    ZT -->|Request Identity| SPIRE
+    SPIRE -->|Issue Certs| Workload
+
+    KMS -->|Provide Data Keys| Enc
+    Vault -->|Inject Secrets| Workload
+
+    mTLS -->|Allow/Deny Traffic| Mesh
+    Mesh -->|Decrypt| Enc
+
+    ZT -->|Log Event| Audit
+    Audit -->|Read-only| AuditMod
+
+    SBOM -->|Vuln Scan| ZT
+    Compliance -->|Push Policies| ZT
+
+    style ZT fill:#f9f,stroke:#333,stroke-width:4px
+    style Attest fill:#bbf,stroke:#333,stroke-width:2px
+
+g.	Comprehensive List of Features
+ID	Feature	Description & Business Case	AI/ML Algorithms	KPIs	Primary Users
+M17-F001	Universal mTLS Enforcement	Configures the service mesh to reject any unencrypted traffic or traffic lacking a valid client certificate.	-	100% Encryption Rate	DevSecOps
+M17-F002	SPIFFE Identity Provisioning	Automatically generates a SPIFFE ID for every service pod upon startup, binding identity to the workload.	-	Provisioning Latency <50ms	SRE
+M17-F003	X.509-SVID Rotation	Automates the rotation of workload certificates every 24 hours or upon compromise detection without downtime.	-	Rotation Success Rate 99.99%	Security Ops
+M17-F004	HSM Key Generation	Generates root keys and master encryption keys within FIPS 140-2 Level 3 certified Hardware Security Modules.	-	Key Entropy Quality Score	Crypto Manager
+M17-F005	Hardware Attestation Verification	Validates Intel SGX quotes or AWS Nitro PCRs to ensure the runtime environment is trusted before releasing keys.	-	Attestation Pass Rate 100%	Platform Engineer
+M17-F006	JWT Policy Enforcement Point	Validates OAuth2/OIDC tokens for human access to administrative consoles, enforcing fine-grained claims.	-	Auth Latency <20ms	System Admin
+M17-F007	Dynamic Zero-Trust Policies	Updates service-to-service authorization rules in real-time based on risk scores (e.g., isolate high-risk services).	Reinforcement Learning	Policy Update Latency <1s	CISO
+M17-F008	Automated Secret Injection	Injects database credentials and API keys into application memory only after identity attestation succeeds.	-	Zero Secret Exposure	Developers
+M17-F009	Container Image Admission Control	Blocks deployment of containers if their image hash does not match the signed SBOM or has critical CVEs.	-	Block Rate (Prevention)	Release Manager
+M17-F010	Cryptographic Log Chaining	Hashes each audit log entry with the previous entry's hash, creating an immutable chain of evidence.	-	Chain Integrity Score	Auditors
+M17-F011	Anomaly Detection on Network Traffic	Identifies lateral movement attempts (e.g., a database suddenly talking to an external IP).	Isolation Forests	False Positive Rate <0.5%	Security Analyst
+M17-F012	Geo-Fencing API Access	Restricts administrative API calls based on the geographic source IP, matching compliance jurisdictions.	-	Violation Count	Compliance Officer
+M17-F013	Just-in-Time (JIT) Access	Grants temporary, elevated privileges to operators only upon approval of a change ticket, auto-revoking after N hours.	-	Access Revocation Compliance	Ops Manager
+M17-F014	Post-Quantum Key Agreement	Implements CRYSTALS-Kyber for key exchange in preparation for quantum decryption threats.	-	PQC Handshake Success	Cryptographer
+M17-F015	Zero-Knowledge Proofs of Identity	Allows workloads to prove they possess valid secrets without revealing the secret over the network.	zk-SNARKs	Proof Verification Time <10ms	Backend Dev
+M17-F016	Rate Limiting & DDoS Shield	Enforces granular rate limits per authenticated identity to prevent service exhaustion attacks.	Token Bucket	Request Drop Rate	Network Eng
+M17-F017	Service Mesh Telemetry	Collects detailed metrics on latency, errors, and traffic saturation between services.	-	Observability Coverage	SRE
+M17-F018	Automated Key Escrow Recovery	Securely splits master keys using Shamir's Secret Sharing across different jurisdictions for disaster recovery.	-	Recovery Test Success	DR Manager
+M17-F019	Runtime Application Self-Protection (RASP)	Instruments the application binary to detect and block attacks (e.g., SQLi) at runtime.	Heuristic Analysis	Attack Block Rate	AppSec Engineer
+M17-F020	Identity Context Propagation	Propagates user identity (e.g., blinded payer ID) securely across asynchronous calls (Kafka/HTTP).	-	Context Loss Rate 0%	Backend Dev
+M17-F021	KMS Auto-Rotation	Automatically rotates data encryption keys (DEK) based on age or policy, re-encrypting data on the fly.	-	Rotation Coverage 100%	DBA
+M17-F022	Secure Boot Validation	Ensures all servers boot only with signed, trusted firmware and OS kernels.	-	Compliance Rate	Infrastructure Lead
+M17-F023	Side-Channel Attack Mitigation	Implements cache flushing and constant-time algorithms in cryptographic libraries to prevent SGX side-channel leaks.	-	Vulnerability Count	Security Researcher
+M17-F024	Compliance Dashboard	Visualizes real-time adherence to security controls (e.g., PCI-DSS, GDPR) for stakeholders.	NLP for Reporting	Dashboard Refresh Rate	Executives
+M17-F025	Encrypted Traffic Analysis	Decrypts, inspects, and re-encrypts traffic at dedicated inspection points for malware scanning (with privacy safeguards).	Deep Learning (CNN)	Scan Latency Impact	SOC Analyst
+M17-F026	Privileged Access Management (PAM)	Centralizes management of superuser accounts, recording all sessions (video/keystrokes).	-	Session Recording Rate 100%	Security Ops
+M17-F027	Database Activity Monitoring	Monitors database access in real-time for unauthorized queries or large-scale exports.	Anomaly Detection	Alert Accuracy	DBA
+M17-F028	API Gateway Firewall	Validates OpenAPI specs against incoming requests, rejecting malformed XML/JSON immediately.	-	Schema Validation Rate	API Manager
+M17-F029	Key Usage Analytics	Tracks which keys are used most frequently to optimize rotation schedules and detect dormant keys.	Clustering	Key Optimization Score	Crypto Manager
+M17-F030	Multi-Cloud Key Replication	Synchronizes keys across AWS, Azure, and on-prem HSMs ensuring availability during cloud outages.	-	Replication Lag <5min	Architect
+M17-F031	Threat Intelligence Feed Integration	Consumes STIX/TAXII feeds to block IP addresses and domains known for malicious activity.	-	Feed Update Latency	Intel Analyst
+M17-F032	Zero-Trust Network Segmentation	Creates micro-segments in the network; e.g., the "Wallet" microservice cannot ping "Audit" directly.	Graph Algorithms	Segment Violation Count	NetEng
+M17-F033	Automated Penetration Testing	Runs continuous, benign attacks against the infrastructure to validate defenses.	Genetic Algorithms	Vulnerability Discovery Rate	Red Team
+M17-F034	Policy-as-Code (PaC)	Defines security policies in code (OPA/Rego), versioned in Git, reviewed like software.	-	Policy Drift 0%	DevSecOps
+M17-F035	Certificate Authority (CA) Hierarchy	Manages Root CA, Intermediate CAs, and Leaf CAs with automated CRL (Revocation List) publishing.	-	CRL Publication Time	PKI Engineer
+M17-F036	Secure Enclave SDK Wrapper	Provides a simplified SDK for developers to interact with SGX enclaves without knowing low-level details.	-	Developer Adoption Rate	Tech Lead
+M17-F037	Data Loss Prevention (DPI)	Inspects outgoing traffic for patterns resembling Credit Card numbers or National IDs.	Regex + ML	Leak Detection Accuracy	Compliance Officer
+M17-F038	Session Hardening	Enforces short session timeouts, re-authentication for sensitive actions, and binding session to IP/TLS fingerprint.	-	Session Hijack Attempts	AppSec Engineer
+M17-F039	Backup Encryption	Ensures all backups (database, logs, configs) are encrypted with keys separate from the production environment.	-	Backup Unencryptable Count	Backup Admin
+M17-F040	Node Identity Draining	Automates the removal of cryptographic identities from nodes being decommissioned or upgraded.	-	Identity Cleanup Time	SRE
+M17-F041	Denial of Service via Logic Attack Prevention	Detects application-layer DoS (e.g., expensive search queries) and throttles specific identities. - -	Fraud Engineer
+M17-F042	Supply Chain Integrity Check	Verifies the digital signatures of all third-party libraries and dependencies during the build process.	-	Dependency Rejection Rate	Supply Chain Sec
+M17-F043	HSM Cluster Failover	Detects HSM failure and seamlessly switches traffic to a backup cluster without transaction loss.	-	Failover Time <2s	Platform Eng
+M17-F044	Secure Configuration Management	Ensures all services launch with hardened OS configs (no root login, minimal packages).	-	Drift Detection Rate	SysAdmin
+M17-F045	User Behavior Analytics (UEBA)	Models normal admin behavior and flags anomalies (e.g., access at 3 AM from unusual location).	LSTM Networks	Alert Precision	SOC Analyst
+M17-F046	API Security Throttling	Intelligently throttles API consumers based on their quota, tier, and system health.	Control Theory	API Availability 99.99%	API Manager
+M17-F047	WebAssembly (WASM) Sandboxing	Runs untrusted user logic or third-party smart contracts in a sandboxed WASM environment.	-	Sandbox Escape Attempts 0	Blockchain Dev
+M17-F048	Real-time Vulnerability Scanning	Scans running containers for newly disclosed CVEs (CVE database feed).	-	Patch Deployment Time	SecOps
+M17-F049	Secure Key Deletion (Crypto-Shredding)	Physically deletes or crypto-shreds data keys upon user request (GDPR Right to be Forgotten).	-	Data Recovery Probability 0%	DPO
+M17-F050	Service-to-Service Authorization	Uses OPA to enforce fine-grained rules (e.g., "Service A can GET but not POST to Service B").	-	AuthZ Decision Latency <5ms	Architect
+M17-F051	Audit Log Tamper Detection	Uses Merkle Trees to summarize logs and periodically publish the hash to an immutable public ledger (optional).	-	Tamper Detection Time	Auditor
+M17-F052	Cloud Security Posture Management (CSPM)	Continuously audits cloud resource configurations (S3 buckets, Security Groups) for misconfigurations.	-	Misconfiguration Alert MTTR	Cloud Eng
+M17-F053	IP Whitelisting for Critical Ops	Restricts access to critical KMS/HSM management interfaces to known office IP ranges.	-	Unauthorized Access Attempts	NetEng
+M17-F054	Biometric Multi-Factor Auth	Integrates with WebAuthn for hardware-backed MFA (YubiKey, TouchID) for admin access.	-	MFA Success Rate >99%	Identity Manager
+M17-F055	Least Privilege Role Definitions	Dynamically calculates minimum required permissions for tasks and assigns temporary roles.	Graph Search	Privilege Creep Count	IAM Lead
+M17-F056	DNS Security (DNSSEC)	Enforces DNSSEC resolution to prevent DNS spoofing/cache poisoning attacks.	-	DNS Validation Success	NetEng
+M17-F057	Memory Encryption (AMD SEV)	Encrypts Virtual Machine memory to prevent hypervisor-level snooping.	-	Memory Encryption Overhead <5%	Platform Lead
+M17-F058	Fraud Signal Correlation	Correlates security signals (e.g., failed auth) with transaction data to detect coordinated fraud.	Correlation Matrices	Fraud Detection Recall	Fraud Analyst
+M17-F059	Automated Incident Response Playbooks	Executes SOAR playbooks (e.g., "Isolate Host", "Revoke Cert") upon detection of specific indicators of compromise (IoC).	NLP/Rule Engine	Playbook Execution Accuracy	SOC Manager
+M17-F060	Secure File Transfer (SFTP/MFT)	Manages secure transfers of bulk payment files with automated key exchange and integrity checks.	-	Transfer Success Rate 100%	B2B Integrator
+M17-F061	Kubernetes Network Policies	Defines YAML-based network policies to strictly control pod-to-pod communication.	-	Policy Coverage 100%	K8s Admin
+M17-F062	Secret Versioning	Maintains versions of secrets/secrets keys to allow rollback in case of accidental corruption.	-	Version Retention Compliance	Vault Admin
+M17-F063	Hardware Security Module (HSM) Auditing	Aggregates and monitors logs directly from the physical HSM appliances for physical access attempts.	-	Audit Log Delivery Rate	Physical Sec
+M17-F064	Entropy Monitoring	Monitors the system's entropy pool to ensure sufficient randomness for cryptographic operations.	-	Entropy Level >2000	Crypto Engineer
+M17-F065	Secure CI/CD Pipeline	Enforces code signing, branch protection rules, and required approvals before deployment.	-	Pipeline Success Rate	DevOps Lead
+M17-F066	TLS Configuration Hardening	Enforces TLS 1.3, disables weak ciphers (RC4, SHA1), and implements HSTS headers.	-	SSL Labs Grade A+	SecOps
+M17-F067	Identity Federation	Trusts external identities (e.g., Bank ID, Government eID) via federated protocols (SAML/OIDC).	-	Federation Latency	Identity Architect
+M17-F068	Advanced Persistent Threat (APT) Hunt	Proactively searches telemetry for signs of dormant APTs living in the environment.	Graph Analysis	IOC Detection Count	Threat Hunter
+M17-F069	Root Certificate Rotation	Provides a mechanism to rotate the cluster Root CA without downtime (requires workload restart).	-	Root Rotation Downtime <10min	Platform Eng
+M17-F070	Dynamic Firewall Rules	Updates firewall rules (iptables/nftables) automatically based on service discovery events.	-	Rule Sync Latency	NetEng
+M17-F071	Data Masking for Support	Dynamically masks sensitive data fields in logs visible to L1 support staff.	-	Data Leak Incidents 0	Support Manager
+M17-F072	Zero-Trust for IoT	Extends ZT principles to IoT devices (POS terminals) using device certificates.	-	Device Onboarding Time	IoT Engineer
+M17-F073	Code Signing Service	Signs all release artifacts (binaries, docker images) to guarantee authenticity.	-	Signature Verification Rate	Release Eng
+M17-F074	Compliance Mapping Automation	Automatically maps technical controls to regulatory frameworks (ISO 27001, SOC2).	Knowledge Graph	Control Coverage %	GRC Analyst
+M17-F075	Sandbox Evasion Detection	Detects if malware is trying to detect the analysis environment (sandboxes) to avoid execution.	Heuristics	Evasion Attempt Count	Malware Analyst
+M17-F076	Geo-Replicated Secrets Storage	Ensures secrets are stored in the region where they are used to comply with data sovereignty.	-	Data Residency Score	Architect
+M17-F077	Quantum Random Number Generator (QRNG)	Integrates hardware QRNG for true randomness in key generation.	-	Randomness Test Pass %	Crypto Lead
+M17-F078	Service Graph Discovery	Maps all service dependencies in real-time to visualize blast radius of a compromise.	Force Directed Graph	Graph Completeness	Sec Architect
+M17-F079	Alert Fatigue Reduction	Uses ML to correlate duplicate alerts and suppress noise, focusing only on high-fidelity threats.	Clustering	Alert Reduction Rate	SOC Analyst
+M17-F080	Regel-based Access Control (ReBAC)	Moves beyond RBAC to relationship-based access (e.g., "User can pay Merchant because they have a contract").	Graph DB	Query Latency	IAM Developer
+M17-F081	Endpoint Detection & Response (EDR)	Monitors admin laptops and endpoints for suspicious activity (malware, data exfil).	EDR Heuristics	Endpoint Coverage	IT Support
+M17-F082	Cloud Workload Protection (CWP)	Scans cloud workloads for vulnerabilities and misconfigurations at runtime.	-	Scan Frequency	Cloud Sec
+M17-F083	Secure Token Service (STS)	Issues short-lived tokens for service-to-service auth based on mTLS certificates.	-	Token TTL Compliance	Auth Developer
+M17-F084	Private Key Export Prevention	Ensures private keys can never be exported from HSMs or Enclaves (Key Exfiltration Protection).	-	Export Attempts 0	Crypto Manager
+M17-F085	Deception Technology (Honeypots)	Deploys fake services/credentials to lure attackers and generate early warnings.	-	Honeypot Engagement Time	Threat Intel
+M17-F086	Bare-Metal Attestation	Verifies the firmware and BIOS signature of bare-metal servers before provisioning.	-	Boot Time Overhead <5s	Platform Eng
+M17-F087	Identity Synchronization	Syncs identities from HR systems (LDAP) to cloud IAM automatically with provisioning/deprovisioning.	-	Sync Latency <15min	IT Ops
+M17-F088	Database Encryption at Rest	Implements TDE (Transparent Data Encryption) for all customer databases.	-	Encryption Status 100%	DBA
+M17-F089	Secure Remote Access (Bastion)	Provides a jump host/bastion with recorded sessions for remote SSH/RDP access.	-	Session Recording 100%	NetEng
+M17-F090	Anomaly-based Signature Generation	Automatically creates Snort/Suricata rules based on observed traffic anomalies.	-	Rule Deployment Time	NetSec
+M17-F091	Cross-Cloud Identity Federation	Allows identities (Workloads) to authenticate across AWS and Azure seamlessly.	-	Cross-Cloud Auth Success	Architect
+M17-F092	Privacy Preserving Auth	Uses anonymous credentials (Privacy Pass) to authenticate users without tracking them.	ZKPs	Auth Accuracy	Privacy Lead
+M17-F093	Resource Quota Enforcement	Enforces strict CPU/Memory limits via Kubernetes requests/limits to prevent DoS via noisy neighbors.	-	OOMKill Count 0	SRE
+M17-F094	Secure Aggregation	Aggregates security logs from multiple nodes without revealing individual node data.	Secure Multi-Party Computation	Aggregation Accuracy	Privacy Engineer
+M17-F095	Compliance Ticketing	Automatically creates Jira tickets for non-compliant resources (e.g., unencrypted S3 bucket).	-	Ticket Resolution SLA	GRC Team
+M17-F096	Forensics Readiness	Ensures all disk images, memory dumps, and network captures are retained in a forensically sound manner.	-	Retention Compliance	Incident Responder
+M17-F097	Key Derivation Function (KDF) Management	Manages the derivation of sub-keys from master keys using standardized algorithms (HKDF, Argon2).	-	Derivation Speed	Crypto Engineer
+M17-F098	Secure Web Gateway (SWG)	Filters and inspects web traffic from internal users to prevent data exfiltration.	URL Filtering	Malware Block Rate	NetSec
+M17-F099	Blockchain Anchoring	Anchors audit log hashes to a public blockchain for immutable timestamping.	-	Anchor Confirmation Time	Auditor
+M17-F100	Role Mining Automation	Analyzes access patterns to suggest optimal role definitions and remove unused permissions.	Association Rule Mining	Role Reduction Count	IAM Analyst
+M17-F101	Secure API Gateway Rate Limiting	Throttles specific API endpoints based on resource consumption to protect backend services.	-	Latency Percentile P99	API Eng
+M17-F102	Integrity Measurement Architecture (IMA)	Measures file integrity on Linux nodes before execution.	-	Measurement Validation Time	OS Security
+M17-F103	Cloud-Native Firewall	Implements a next-gen firewall (NGFW) specifically designed for Kubernetes pod traffic.	-	Rule Deployment Latency	SecOps
+M17-F104	Threat Modeling Automation	Automatically generates threat models (STRIDE/DREAD) from API specs and code changes.	NLP / LLM	Model Coverage	AppSec
+M17-F105	Secret Scanning in Repos	Scans Git repositories for accidentally committed secrets/keys and revokes them.	Pattern Matching	Scan Frequency <5min	DevSecOps
+M17-F106	Certificate Transparency Monitoring	Monitors public CT logs for certificates issued to PARI domains to detect CA compromise.	-	Rogue Cert Detection Time	SecOps
+M17-F107	Service Mesh Resilience	Implements retries, circuit breakers, and timeouts within the mesh to prevent cascading failures.	-	Recovery Success Rate	SRE
+M17-F108	Hardware Root of Trust	Utilizes TPM 2.0 chips in physical servers for secure boot and key storage.	-	TPM Activation Rate	Infrastructure
+M17-F109	Adaptive Authentication	Prompts for additional MFA factors based on risk score (e.g., new device, new location).	Risk Scoring Engine	Step-up Auth Rate	Product Manager
+M17-F110	File Integrity Monitoring (FIM)	Alerts on unauthorized changes to critical system files, configs, or binaries.	-	Change Alert Latency	SysAdmin
+M17-F111	Zero-Trust for Data Lakes	Enforces fine-grained access control (column-level) for data in the analytics lake.	-	Query Denial Accuracy	Data Eng
+M17-F112	Secure DNS Resolution	Uses DNS-over-HTTPS (DoH) for secure DNS queries from internal services.	-	DoH Adoption Rate	NetEng
+M17-F113	Automated Compliance Reporting	Generates PDF/Excel reports for auditors showing status of all security controls.	NLP	Report Generation Time	GRC
+M17-F114	Container Escape Prevention	Enforces strict seccomp profiles and AppArmor/SELinux policies to prevent container breakout.	-	Escape Attempt Count	Platform Sec
+M17-F115	Secure Inter-Cluster Communication	Encrypts and authenticates traffic between different Kubernetes clusters (Multi-cluster).	-	Inter-cluster Latency Impact	NetEng
+M17-F116	Identity Governance & Administration (IGA)	Manages the lifecycle of digital identities (joiner, mover, leaver processes).	-	Provisioning SLA	IT Ops
+M17-F117	Behavioral Biometrics	Analyzes typing patterns and mouse movement for continuous authentication of admin users.	RNN Classifier	Imposter Detection Rate	Product Manager
+M17-F118	Secure Object Storage	Enforces bucket policies and pre-signed URL short expiry for S3/GCS object access.	-	Public Bucket Count 0	Storage Eng
+M17-F119	Load Balancer Security	Integrates WAF and DDoS protection directly at the load balancer edge.	-	Edge Throughput	NetEng
+M17-F120	Orchestration Security	Locks down Kubernetes API server with RBAC, admission controllers, and audit logging.	-	K8s API Violation Count	Cluster Admin
+M17-F121	Endpoint Encryption	Ensures full disk encryption (FDE/VeraCrypt) on all developer and admin laptops.	-	Encryption Compliance 100%	IT Support
+M17-F122	Context-Aware Authorization	Makes auth decisions based on time, device posture, and location, not just identity.	Decision Tree	Context Check Latency	IAM Dev
+M17-F123	Secure Email Gateway	Filters phishing emails and prevents business email compromise (BEC).	Text Classification	Phishing Catch Rate	InfoSec
+M17-F124	Vulnerability Prioritization	Uses threat intelligence to prioritize patching of vulnerabilities actively being exploited in the wild.	Risk Scoring	Patch SLA Adherence	Patch Manager
+M17-F125	Micro-Segmentation Dashboard	Visualizes the micro-segmentation policy status and traffic flows.	-	Visualization Accuracy	NetSec
+M17-F126	Secure Shell (SSH) Hardening	Enforces key-based auth only, disables root login, and uses a bastion host.	-	SSH Brute Force Count	SysAdmin
+M17-F127	Data Classification Tagging	Automatically tags data (Public, Confidential, Restricted) based on content analysis.	NLP	Tagging Accuracy	Data Steward
+M17-F128	Runtime Process Whitelisting	Allows only known/signed processes to run on production servers.	-	Unknown Process Blocks 0%	Platform Sec
+M17-F129	Zero-Trust VPN Alternative	Replaces traditional VPN with clientless ZTNA for secure application access.	-	Remote Access Latency	NetEng
+M17-F130	Cryptography Agility Dashboard	Monitors usage of deprecated algorithms (SHA1, 3DES) and flags for removal.	-	Legacy Crypto Count	Crypto Lead
+M17-F131	Secure CI/CD Variables	Passes secrets securely to CI/CD pipelines without printing them to logs.	-	Secret Leak Count 0	DevOps
+M17-F132	Threat Intelligence API	Exposes an internal API for other modules to check IP/Domain reputation.	-	API Response Time <50ms	Developers
+M17-F133	Log Aggregation Normalization	Normalizes logs from various sources (Syslog, JSON, CEF) into a common schema.	-	Parse Error Rate	Data Eng
+M17-F134	Self-Healing Infrastructure	Automatically replaces nodes detected as compromised or non-compliant.	-	Heal Time	SRE
+M17-F135	Secure Session State	Encrypts session cookies and stores them with a HMAC signature to prevent tampering.	-	Session Forgery Attempts 0	Backend Dev
+M17-F136	Penetration Test Management	Coordinates and tracks remediation of findings from external penetration tests.	-	Remediation Velocity	AppSec
+M17-F137	Compliance Evidence Collection	Automatically collects screenshots and configs as evidence for audit trails.	-	Evidence Validity	GRC
+M17-F138	Secure WebSockets	Enforces origin checks and rate limiting on WebSocket connections.	-	WS Abuse Attempts	Backend Dev
+M17-F139	Cloud Asset Inventory	Maintains a real-time inventory of all cloud assets (VMs, Storage, Keys).	-	Inventory Accuracy 100%	Cloud FinOps
+M17-F140	Identity Brokering	Brokers authentication requests between legacy protocols (LDAP) and modern (OIDC).	-	Broker Latency	IAM Arch
+M17-F141	Secure Configuration Backup	Encrypts and backs up security appliance configurations (Firewalls, WAFs).	-	Backup Restore Success	NetEng
+M17-F142	AI-Powered Phishing Simulation	Runs automated phishing simulations to train staff on security awareness.	LLM (Text Gen)	Employee Click Rate	Security Awareness
+M17-F143	Granular Database Auditing	Logs specific row access (SELECT queries) for highly sensitive tables (e.g., keys).	-	Audit Overhead <2%	DBA
+M17-F144	Service Dependency Mapping	Maps dependencies to identify critical paths for security patching.	Graph Traversal	Critical Path Accuracy	SRE
+M17-F145	Secure Token Revocation	Implements a fast revocation list (e.g., CRL, OCSP) for JWT/SVID tokens.	-	Revocation Propagation Time	Auth Dev
+M17-F146	Disaster Recovery Security	Ensures DR site has identical security posture and up-to-date keys/patches.	-	Drift Count 0	DR Manager
+M17-F147	Container Runtime Security	Blocks malicious behavior in containers (e.g., spawning a shell).	eBPF	Behavior Block Rate	Platform Sec
+M17-F148	Access Certification	sends periodic reviews to managers to re-certify user access rights.	-	Certification Completion %	IAM Ops
+M17-F149	Secure Software Supply Chain	Implements the SLSA framework (Supply-chain Levels for Software Artifacts).	-	SLSA Level Achieved	Supply Chain Sec
+M17-F150	Wireless Security	Monitors and secures the corporate wireless network (WPA3-Enterprise).	-	Rogue AP Detection	NetEng
+
+
+h.	Comprehensive List of Database Objects
+
+ID	schema_name	object_name	object_type	description	feature_reference	column_names	constraints / notes
+M17-DB001	sec_identity	spiffe_identities	Table	Stores the mapping between SPIFFE IDs and Workload metadata.	M17-F002	id, spiffe_id, workload_selector, trust_domain, created_at, expires_at	UNIQUE(spiffe_id)
+M17-DB002	sec_identity	x509_certificates	Table	Stores issued X.509-SVID certificates.	M17-F003	id, spiffe_id, certificate_pem, private_key_ref, serial_number, not_before, not_after, status	CHECK (status IN ('ACTIVE','REVOKED','EXPIRED'))
+M17-DB003	sec_identity	trust_domains	Table	Defines accepted trust domains for federation.	M17-F091	id, domain_name, trust_bundle_pem, root_ca_id, enabled	UNIQUE(domain_name)
+M17-DB004	sec_kms	encryption_keys	Table	Metadata for all managed encryption keys (DEK and KEK).	M17-F004	key_id, key_type, algorithm, state, creation_date, rotation_date, cloud_provider, kms_key_arn	CHECK (state IN ('ENABLED','DISABLED','PENDING_DELETION'))
+M17-DB005	sec_kms	key_versions	Table	Tracks versions of keys to support rollback and auditing.	M17-F021	version_id, key_id, version_number, public_key_hash, created_at, active	FOREIGN KEY (key_id)
+M17-DB006	sec_kms	key_usage_logs	Table	Immutable log of every key usage (encrypt/decrypt/sign).	M17-F029	log_id, key_id, operation, user_id, resource_id, timestamp, success	CHECK (success IN (true, false))
+M17-DB007	sec_attestation	attestation_quotes	Table	Stores hardware quotes (SGX/Nitro) for verification.	M17-F005	quote_id, workload_id, nonce, quote_body, verification_status, timestamp, pcr_values	CHECK (verification_status IN ('VALID','INVALID','REVOKED'))
+M17-DB008	sec_attestation	pcr_values	Table	Expected Platform Configuration Register values for golden images.	M17-F005	pcr_index, pcr_value_hash, image_id, policy_id	PRIMARY KEY (pcr_index, image_id)
+M17-DB009	sec_policy	zero_trust_policies	Table	Stores OPA/Rego policies or JSON representations of authz rules.	M17-F034	policy_id, name, description, policy_content (jsonb), version, hash, active_from	CHECK (active_from <= NOW())
+M17-DB010	sec_policy	policy_assignments	Table	Maps policies to specific services or namespaces.	M17-F050	id, policy_id, target_service, target_namespace, mode	FOREIGN KEY (policy_id)
+M17-DB011	sec_audit	audit_trail	Table	Central tamper-evident log of all security events.	M17-F010	event_id, timestamp, event_type, actor_id, resource_id, action, outcome, previous_hash, current_hash	CHECK (outcome IN ('SUCCESS','FAILURE'))
+M17-DB012	sec_audit	audit_integrity_chain	Table	Stores periodic Merkle roots of the audit trail for verification.	M17-F051	chain_id, sequence_number, merkle_root_hash, timestamp, created_by	UNIQUE(sequence_number)
+M17-DB013	sec_access	access_requests	Table	Tracks Just-in-Time (JIT) access requests.	M17-F013	request_id, requester_id, resource_id, justification, start_time, duration, approval_status	CHECK (approval_status IN ('PENDING','APPROVED','DENIED','EXPIRED'))
+M17-DB014	sec_access	jit_grants	Table	Active grants for JIT access.	M17-F013	grant_id, request_id, granted_role, session_token, expires_at	FOREIGN KEY (request_id)
+M17-DB015	sec_supply_chain	sbom_entries	Table	Stores Software Bill of Materials data for artifacts.	M17-F009	sbom_id, artifact_name, artifact_hash, component_name, component_version, license, supplier	INDEX (artifact_hash)
+M17-DB016	sec_supply_chain	vulnerability_scans	Table	Results of container image and dependency scans.	M17-F048	scan_id, target_id, scanner_name, cve_id, severity, cvss_score, state, detected_at	CHECK (severity IN ('LOW','MEDIUM','HIGH','CRITICAL'))
+M17-DB017	sec_incident	security_incidents	Table	Manages the lifecycle of security incidents.	M17-F059	incident_id, title, description, severity, status, created_by, created_at, mttr	CHECK (status IN ('OPEN','INVESTIGATING','CLOSED'))
+M17-DB018	sec_incident	iocs	Table	Indicators of Compromise associated with incidents.	M17-F059	ioc_id, incident_id, ioc_type, ioc_value, source, confidence_score	CHECK (ioc_type IN ('IP','DOMAIN','HASH','EMAIL'))
+M17-DB019	sec_network	network_policies	Table	Kubernetes NetworkPolicy definitions or firewall rules.	M17-F032	policy_id, name, namespace, pod_selector, ingress_egress, rules (jsonb)	-
+M17-DB020	sec_network	traffic_flows	Table	Aggregated logs of network traffic for analytics.	M17-F011	flow_id, src_ip, dst_ip, src_service, dst_service, port, protocol, bytes, duration	-
+M17-DB021	sec_compliance	control_mappings	Table	Maps technical controls to compliance frameworks (ISO, GDPR).	M17-F074	mapping_id, control_id, framework_name, standard_ref, description	-
+M17-DB022	sec_compliance	evidence_locker	Table	Stores pointers to evidence files (screenshots, logs) for audits.	M17-F137	evidence_id, control_id, file_path, collected_at, collected_by, hash	UNIQUE(hash)
+M17-DB023	sec_auth	user_sessions	Table	Manages active user/admin sessions.	M17-F038	session_id, user_id, auth_method, mfa_verified, ip_address, user_agent, started_at, last_activity	INDEX (user_id)
+M17-DB024	sec_auth	failed_attempts	Table	Tracks failed login attempts for brute force detection.	M17-F011	attempt_id, username, ip_address, timestamp, reason	-
+M17-DB025	sec_crypto	root_ca_certificates	Table	Stores root CA certificates for the system.	M17-F035	ca_id, common_name, cert_pem, private_key_ref, expiry_date, status	UNIQUE(common_name)
+M17-DB026	sec_crypto	intermediate_cas	Table	Stores intermediate CA certificates.	M17-F035	ca_id, root_ca_id, common_name, cert_pem, private_key_ref, path_length	FOREIGN KEY (root_ca_id)
+M17-DB027	sec_config	security_configurations	Table	Key-value store for security module settings.	M17-F044	config_key, config_value, description, encrypted	UNIQUE(config_key)
+M17-DB028	sec_monitoring	anomaly_alerts	Table	Alerts generated by ML models or rule engines.	M17-F011	alert_id, anomaly_type, severity, affected_resource, description, created_at, resolved	CHECK (resolved IN (true, false))
+M17-DB029	sec_supply_chain	sign_keys	Table	Public keys used for code signing verification.	M17-F073	key_id, key_owner, public_key_pem, fingerprint, expiry_date	UNIQUE(fingerprint)
+M17-DB030	sec_compliance	gdpr_data_requests	Table	Tracks Right to be Forgotten requests and their status.	M17-F049	request_id, user_id, request_type, status, processed_at, verified	CHECK (request_type IN ('ERASURE','EXPORT','CORRECTION'))
+M17-DB031	sec_identity	service_accounts	Table	Machine accounts for non-human services.	M17-F080	account_id, name, description, secret_ref, disabled	UNIQUE(name)
+M17-DB032	sec_identity	account_roles	Table	Assigns roles to service accounts.	M17-F055	id, account_id, role_id, assigned_at, expires_at	FOREIGN KEY (account_id)
+M17-DB033	sec_kms	hsm_partitions	Table	Logical partitions within HSMs for key segregation.	M17-F004	partition_id, hsm_id, partition_name, serial_number, status	CHECK (status IN ('ACTIVE','OFFLINE'))
+M17-DB034	sec_attestation	tee_enclaves	Table	Registry of authorized Trusted Execution Enclaves.	M17-F036	enclave_id, mr_enclave (hash), signer, product_id, status	CHECK (status IN ('PRODUCTION','STAGING','REVOKED'))
+M17-DB035	sec_audit	admin_actions	Table	Specific log for highly privileged admin actions.	M17-F026	action_id, admin_id, target_system, action_type, params_json, timestamp	-
+M17-DB036	sec_network	ip_whitelists	Table	Allowed IP ranges for critical ops.	M17-F053	list_id, name, cidr_block, description, expires_at	-
+M17-DB037	sec_compliance	risk_assessments	Table	Records of periodic risk assessments.	M17-F024	assessment_id, asset_id, risk_score, vulnerability_count, mitigation_plan, assessed_date	-
+M17-DB038	sec_crypto	cipher_suites	Table	Allowed TLS cipher suites.	M17-F066	suite_id, name, protocol_version, security_strength, enabled	CHECK (security_strength > 128)
+M17-DB039	sec_identity	identity_providers	Table	Configuration of external IdPs (eIDAS, BankID).	M17-F067	provider_id, name, protocol, issuer_url, client_id, scopes	-
+M17-DB040	sec_supply_chain	dependency_licenses	Table	Extracted license information from SBOMs.	M17-F009	license_id, spdx_id, license_name, approved_for_use	CHECK (approved_for_use IN (true, false))
+M17-DB041	sec_monitoring	system_metrics	Table	Aggregated security metrics (MTTR, MTTD).	M17-F004	metric_id, metric_name, value, unit, timestamp	INDEX (metric_name, timestamp)
+M17-DB042	sec_access	permission_sets	Table	Granular permissions bundled into sets.	M17-F050	set_id, name, description, permissions_json	-
+M17-DB043	sec_access	role_permissions	Table	Maps permission sets to roles.	M17-F055	id, role_id, permission_set_id	FOREIGN KEY (permission_set_id)
+M17-DB044	sec_network	geo_blocks	Table	Countries blocked from accessing specific endpoints.	M17-F012	block_id, country_code, endpoint_prefix, reason	-
+M17-DB045	sec_audit	log_retention	Table	Configures retention periods for different log types.	M17-F011	log_type, retention_days, archive_location	-
+M17-DB046	sec_kms	key_escrow	Table	Details of key escrow shares for recovery.	M17-F018	share_id, key_id, trustee_id, encrypted_share, location	FOREIGN KEY (key_id)
+M17-DB047	sec_policy	rule_conditions	Table	Logical conditions for policy rules.	M17-F050	condition_id, policy_id, field, operator, value, logic_operator	-
+M17-DB048	sec_incident	playbooks	Table	Automated incident response playbooks.	M17-F059	playbook_id, name, trigger_ioc_type, steps_json, enabled	-
+M17-DB049	sec_monitoring	threat_feeds	Table	Configured external threat intelligence feeds.	M17-F031	feed_id, name, url, format, last_update_hash	UNIQUE(url)
+M17-DB050	sec_supply_chain	build_pipelines	Table	Registered CI/CD pipelines subject to security checks.	M17-F065	pipeline_id, repo_url, branch, required_approvals, signing_key_id	-
+M17-DB051	sec_config	vulnerability_thresholds	Table	Thresholds for automatic blocking based on CVSS.	M17-F124	threshold_id, environment, max_cvss, action	CHECK (action IN ('WARN','BLOCK'))
+M17-DB052	sec_monitoring	health_checks	Table	Results of health checks for security components.	M17-F017	check_id, component_name, status, latency_ms, timestamp	-
+M17-DB053	sec_access	biometric_templates	Table	Stores hashed biometric data (e.g., for continuous auth).	M17-F117	template_id, user_id, template_hash, created_at	FOREIGN KEY (user_id)
+M17-DB054	sec_identity	device_trust	Table	Trust status of user devices (laptops, phones).	M17-F081	device_id, user_id, device_fingerprint, trust_score, last_seen	UNIQUE(device_fingerprint)
+M17-DB055	sec_kms	one_time_tokens	Table	Short-lived tokens for specific operations (e.g., reset).	M17-F003	token_id, token_hash, purpose, expires_at, consumed	CHECK (consumed IN (true, false))
+M17-DB056	sec_network	dns_records	Table	Internal DNS records for security enforcement.	M17-F056	record_id, hostname, ip_address, type, ttl	CHECK (type IN ('A','AAAA','CNAME'))
+M17-DB057	sec_audit	sensitive_operations	Table	Log of operations involving PII or Keys.	M17-F011	op_id, operator_id, data_type, record_id, justification, timestamp	-
+M17-DB058	sec_compliance	audit_reports	Table	Generated audit reports for download.	M17-F113	report_id, title, framework_id, file_path, generated_at, requested_by	-
+M17-DB059	sec_incident	incident_tasks	Table	Tasks generated during an incident response.	M17-F059	task_id, incident_id, description, assignee, status, due_date	FOREIGN KEY (incident_id)
+M17-DB060	sec_supply_chain	container_images	Table	Registry of all deployed container images.	M17-F009	image_id, registry_url, image_tag, digest_hash, signed	CHECK (signed IN (true, false))
+M17-DB061	sec_policy	abac_attributes	Table	User/Resource attributes for Attribute-Based Access Control.	M17-F080	attribute_id, entity_id, entity_type, key, value	INDEX (key, value)
+M17-DB062	sec_network	firewall_rules	Table	L3/L4 firewall rules.	M17-F070	rule_id, source, destination, port, protocol, action, priority	-
+M17-DB063	sec_identity	social_logins	Table	Links external social accounts to internal identities (if allowed).	M17-F067	link_id, user_id, provider, provider_user_id	UNIQUE(provider, provider_user_id)
+M17-DB064	sec_crypto	quantum_keys	Table	Metadata for post-quantum experimental keys.	M17-F014	qkey_id, algorithm, key_size, public_key, status	-
+M17-DB065	sec_monitoring	honeypots	Table	Configuration of decoy services.	M17-F085	pot_id, service_type, listening_port, alert_channel	-
+M17-DB066	sec_kms	key_destruction_logs	Table	Proof of key destruction.	M17-F049	destruction_id, key_id, method, witness_id, timestamp	-
+M17-DB067	sec_access	api_keys	Table	API Keys for external integration.	M17-F095	key_id, key_hash, owner_id, scope, rate_limit, expires_at	-
+M17-DB068	sec_config	security_headers	Table	Enforced HTTP headers (CSP, HSTS).	M17-F066	header_id, header_name, value, enabled	-
+M17-DB069	sec_supply_chain	code_repositories	Table	Registered source code repositories.	M17-F105	repo_id, url, scm_type, default_branch	-
+M17-DB070	sec_monitoring	forensic_snapshots	Table	Metadata of snapshots taken for forensics.	M17-F096	snapshot_id, instance_id, volume_id, taken_at, status	-
+M17-DB071	sec_identity	user_entitlements	Table	Detailed entitlements granted to users.	M17-F055	entitlement_id, user_id, resource_id, permission, expires_at	-
+M17-DB072	sec_network	traffic_anomalies	Table	Detected anomalies in traffic flow.	M17-F011	anomaly_id, flow_id, anomaly_score, detected_at, model_version	FOREIGN KEY (flow_id)
+M17-DB073	sec_policy	consent_records	Table	Records of user consent for data processing (Privacy).	M17-F092	consent_id, user_id, purpose_id, granted_at, revoked_at	-
+M17-DB074	sec_compliance	penetration_tests	Table	Scheduled and completed penetration tests.	M17-F033	test_id, vendor_name, start_date, end_date, status, report_ref	-
+M17-DB075	sec_kms	hmac_keys	Table	Keys used for HMAC signing of requests.	M17-F099	key_id, algorithm, purpose, rotation_period	-
+M17-DB076	sec_access	session_revocations	Table	Revoked session tokens (blacklist).	M17-F145	revocation_id, session_id, revoked_at, reason	-
+M17-DB077	sec_supply_chain	secret_commits	Table	Records of secrets found in code.	M17-F105	finding_id, repo_id, file_path, line_number, secret_hash, resolved	-
+M17-DB078	sec_monitoring	service_graph	Table	Directed graph edges of service dependencies.	M17-F078	edge_id, source_service, dest_service, weight	-
+M17-DB079	sec_config	feature_flags	Table	Security feature toggles.	M17-F067	flag_name, is_enabled, description, rollout_percentage	-
+M17-DB080	sec_audit	backup_logs	Table	Logs of backup operations.	M17-F039	backup_id, source, destination, status, size_bytes, duration	CHECK (status IN ('SUCCESS','FAILED'))
+M17-DB081	sec_identity	mfa_factors	Table	Registered MFA factors per user.	M17-F054	factor_id, user_id, type, secret_ref, verified	CHECK (type IN ('TOTP','SMS','HARDWARE_TOKEN','BIOMETRIC'))
+M17-DB082	sec_network	ddos_events	Table	Detected DDoS events.	M17-F016	event_id, attack_vector, peak_bps, peak_pps, duration, mitigated	-
+M17-DB083	sec_kms	key_recovery_requests	Table	Requests for key recovery from escrow.	M17-F018	req_id, key_id, requester_id, approval_count, status	-
+M17-DB084	sec_supply_chain	library_versions	Table	Whitelist of allowed library versions.	M17-F009	lib_id, group_id, artifact_id, version, allowed	UNIQUE(group_id, artifact_id, version)
+M17-DB085	sec_monitoring	performance_impact	Table	Impact of security controls on system performance.	M17-F017	metric_id, control_name, baseline_latency, actual_latency, impact_ratio	-
+M17-DB086	sec_compliance	training_records	Table	Records of security training completed by staff.	M17-F142	record_id, user_id, training_module, completion_date, score	-
+M17-DB087	sec_access	role_mining_results	Table	Results of automated role mining.	M17-F100	result_id, suggested_role_name, users_count, permissions_json, confidence_score	-
+M17-DB088	sec_crypto	digital_signatures	Table	Log of digital signatures performed.	M17-F073	sig_id, signer_id, data_hash, signature_ref, algorithm, timestamp	-
+M17-DB089	sec_audit	admin_sessions	Table	Detailed session logs for privileged access workstations.	M17-F089	session_id, admin_id, workstation_ip, start_time, end_time, video_log_path	-
+M17-DB090	sec_network	geoip_cache	Table	Cache of IP to Geo mappings for performance.	M17-F012	ip_range_start, ip_range_end, country_code, city	INDEX (ip_range_start, ip_range_end)
+M17-DB091	sec_compliance	sla_compliance	Table	Tracks adherence to security SLAs (e.g., patch time).	M17-F124	sla_id, metric_name, target_value, actual_value, period, compliant	CHECK (compliant IN (true, false))
+M17-DB092	sec_kms	encryption_context	Table	Contextual data associated with envelope encryption.	M17-F005	context_id, key_id, context_key, context_value	FOREIGN KEY (key_id)
+M17-DB093	sec_identity	deactivated_accounts	Table	Archive of deactivated user accounts.	M17-F087	user_id, deactivation_reason, timestamp, data_retained_until	-
+M17-DB094	sec_monitoring	dashboard_widgets	Table	Configuration for security dashboards.	M17-F024	widget_id, dashboard_id, query, visualization_type, position	-
+M17-DB095	sec_policy	waf_rules	Table	Web Application Firewall rules.	M17-F025	rule_id, rule_pattern, action, severity, description	-
+M17-DB096	sec_supply_chain	artifact_signatures	Table	Signatures for build artifacts.	M17-F073	artifact_id, signature_hash, signer_id, timestamp	-
+M17-DB097	sec_network	ip_reputations	Table	Reputation scores of IP addresses.	M17-F031	ip_address, score, source, last_updated	UNIQUE(ip_address)
+M17-DB098	sec_access	consent_revocations	Table	Log of consent withdrawals.	M17-F049	revocation_id, consent_id, revoked_at, request_ip	FOREIGN KEY (consent_id)
+M17-DB099	sec_audit	data_classification	Table	Classification labels applied to data assets.	M17-F127	asset_id, classification_level, classifier_id, timestamp	CHECK (classification_level IN ('PUBLIC','INTERNAL','CONFIDENTIAL','RESTRICTED'))
+M17-DB100	sec_compliance	control_exceptions	Table	Approved exceptions to security policies.	M17-F043	exception_id, policy_id, justification, approver, expiry_date	FOREIGN KEY (policy_id)
+M17-DB101	sec_kms	kms_failovers	Table	Log of KMS cluster failover events.	M17-F043	event_id, cluster_from, cluster_to, timestamp, duration	-
+M17-DB102	sec_identity	federation_metadata	Table	Metadata from federated identity providers.	M17-F067	provider_id, metadata_url, certificate_chain, expires_at	-
+M17-DB103	sec_network	port_scan_logs	Table	Logs of detected port scanning activity.	M17-F011	scan_id, source_ip, target_ip, scanned_ports, timestamp	-
+M17-DB104	sec_config	secrets_config	Table	Configuration for secret engines.	M17-F008	engine_id, name, type, config_json	-
+M17-DB105	sec_supply_chain	code_review_stats	Table	Stats from automated security code reviews.	M17-F104	pr_id, repo_id, critical_issues, high_issues, review_date	-
+M17-DB106	sec_monitoring	alert_escalations	Table	Escalation paths for unresolved alerts.	M17-F059	escalation_id, alert_type, level_1_owner, level_2_owner, timeout_minutes	-
+M17-DB107	sec_kms	key_shards	Table	Shamir secret sharing shards.	M17-F018	shard_id, key_id, shard_index, encrypted_shard, custodian_id	UNIQUE(key_id, shard_index)
+M17-DB108	sec_audit	api_usage_logs	Table	Detailed logs of API usage for anomaly detection.	M17-F046	log_id, endpoint, user_id, status_code, response_time_ms	-
+M17-DB109	sec_network	dns_security_logs	Table	Logs of DNS security events (e.g., DQ attempts).	M17-F056	event_id, query_name, query_type, response_code, threat_score	-
+M17-DB110	sec_compliance	asset_inventory	Table	Registry of all digital assets.	M17-F139	asset_id, asset_type, owner, location, criticality	CHECK (asset_type IN ('SERVER','DATABASE','CONTAINER','KEY'))
+M17-DB111	sec_supply_chain	dependencies_graph	Table	Graph of dependencies between components.	M17-F078	edge_id, dependent_id, dependency_id	-
+M17-DB112	sec_identity	password_history	Table	History of password hashes for rotation policies.	M17-F110	history_id, user_id, password_hash, set_at	FOREIGN KEY (user_id)
+M17-DB113	sec_policy ip_restriction_rules	Table	Restriction rules based on IP.	M17-F053	rule_id, role_id, ip_range, action	-	-
+M17-DB114	sec_monitoring	system_health	Table	Aggregated health status of security systems.	M17-F017	system_id, status, last_check, uptime_percentage	CHECK (status IN ('HEALTHY','DEGRADED','DOWN'))
+M17-DB115	sec_kms	key_authorization	Table	Authorization context for key usage.	M17-F004	auth_id, key_id, service_id, operation, authorized	-
+M17-DB116	sec_incident	threat_models	Table	Stored threat models for applications.	M17-F104	model_id, app_id, model_json, created_at, updated_at	-
+M17-DB117	sec_supply_chain	cve_database	Table	Local cache of CVE information.	M17-F124	cve_id, description, published_date, severity, cvss_vector	UNIQUE(cve_id)
+M17-DB118	sec_audit	data_access_log	Table	Specific log for access to sensitive data tables.	M17-F143	access_id, table_name, row_id, user_id, query_type, timestamp	-
+M17-DB119	sec_identity	public_keys_registry	Table	Registry of public keys for external parties.	M17-F029	key_id, owner, key_usage, public_key_pem, fingerprint	-
+M17-DB120	sec_network	qos_policies	Table	Quality of Service policies for traffic.	M17-F046	policy_id, src_service, dst_service, max_bandwidth, priority	-
+M17-DB121	sec_compliance	audit_plans	Table	Plans for upcoming audits.	M17-F113	plan_id, audit_name, framework, start_date, end_date, auditor	-
+M17-DB122	sec_policy access_review_definitions	Table	Definitions of periodic access reviews.	M17-F148	review_id, role_id, frequency, reviewers	-	-
+M17-DB123	sec_kms	hmac_logs	Table	Logs of HMAC operations for non-repudiation.	M17-F099	hmac_id, key_id, data_hash, signature, operator	-
+M17-DB124	sec_monitoring	uptime_stats	Table	Historical uptime statistics for security services.	M17-F017	service_id, date, downtime_seconds	-
+M17-DB125	sec_audit export_logs	Table	Logs of data export activities.	M17-F137	export_id, requester_id, record_count, format, status	-	-
+M17-DB126	sec_network segment_isolation	Table	Status of segment isolation during incidents.	M17-F059	isolation_id, segment_id, isolated_at, isolated_by, active	CHECK (active IN (true, false))	-
+M17-DB127	sec_supply_chain vendor_risk	Table	Risk assessments of software vendors.	M17-F149	vendor_id, name, risk_score, last_assessed, mitigation_plan	-	-
+M17-DB128	sec_config tls_versions	Table	Allowed TLS versions.	M17-F066	version_id, version_name, enabled	CHECK (enabled IN (true, false))	-
+M17-DB129	sec_identity identity_sync_status	Table	Status of identity sync from HR systems.	M17-F087	sync_id, source_system, records_processed, status, timestamp	-	-
+M17-DB130	sec_policy abac_policies	Table	Attribute-Based Access Control policies.	M17-F080	policy_id, target_resource, condition_logic	-	-
+M17-DB131	sec_compliance gap_analysis	Table	Results of compliance gap analysis.	M17-F074	gap_id, control_id, current_state, target_state, remediation_plan	-	-
+M17-DB132	sec_incident incident_lessons	Table	Lessons learned from incidents.	M17-F059	lesson_id, incident_id, description, action_item, assigned_to	-	-
+M17-DB133	sec_supply_chain build_artifacts	Table	Metadata of build artifacts.	M17-F073	artifact_id, build_id, name, type, checksum	-	-
+M17-DB134	sec_access session_contexts	Table	Contextual data tied to sessions.	M17-F109	context_id, session_id, key, value	-	-
+M17-DB135	sec_kms key_cancellation	Table	Records of cancelled key operations.	M17-F084	op_id, key_id, operation, reason, timestamp	-	-
+M17-DB136	sec_network traffic_sampling	Table	Configuration for traffic sampling for inspection.	M17-F025	sampler_id, target_service, sample_rate	-	-
+M17-DB137	sec_compliance dpia_records	Table	Data Protection Impact Assessments.	M17-F074	dpia_id, process_name, risk_score, mitigation, approval_status	-	-
+M17-DB138	sec_audit privileged_commands	Table	Logs of execution of privileged commands (sudo).	M17-F089	cmd_id, user_id, command, arguments, exit_code, timestamp	-	-
+M17-DB139	sec_identity org_units	Table	Organizational units for role mapping.	M17-F055	ou_id, name, parent_ou_id, description	-	-
+M17-DB140	sec_supply_chain third_party_contracts	Table	Security terms in third-party contracts.	M17-F149	contract_id, vendor, security_clause, sla_terms, expiry	-	-
+M17-DB141	sec_config notification_channels	Table	Configuration for alert notifications.	M17-F079	channel_id, type, endpoint, severity_threshold	CHECK (type IN ('EMAIL','SMS','WEBHOOK','PAGERDUTY'))	-
+M17-DB142	sec_monitoring false_positives	Table	Tracked false positives for ML tuning.	M17-F079	fp_id, alert_id, reason, confirmed_by, timestamp	-	-
+M17-DB143	sec_kms symmetric_keys	Table	Metadata for symmetric encryption keys.	M17-F005	key_id, algorithm, key_length, origin, rotation_date	-	-
+M17-DB144	sec_network micro_segments	Table	Definition of micro-segments.	M17-F032	segment_id, name, description, members_json	-	-
+M17-DB145	sec_policy data_classification_rules	Table	Rules for automatic data classification.	M17-F127	rule_id, data_pattern, classification_level, confidence	-	-
+M17-DB146	sec_compliance regulatory_updates	Table	Updates to regulations affecting the system.	M17-F074	update_id, regulation, description, effective_date, impact_analysis	-	-
+M17-DB147	sec_incident incident_communications	Table	Records of comms during an incident.	M17-F059	comm_id, incident_id, audience, message, sent_at, sender	-	-
+M17-DB148	sec_supply_chain dependency_vulnerabilities	Table	Active vulnerabilities in dependencies.	M17-F124	vuln_id, dependency_id, cve_id, patch_available, introduced_at	-	-
+M17-DB149	sec_access dynamic_permissions	Table	Temporary permissions granted by logic.	M17-F122	perm_id, user_id, resource_id, expires_at, granted_by_logic	-	-
+M17-DB150	sec_kms key_destruction_schedule	Table	Scheduled destruction of keys.	M17-F049	schedule_id, key_id, planned_date, method	-	-
+M17-DB151	sec_network firewall_rulesets	Table	Grouping of firewall rules.	M17-F062	ruleset_id, name, description, priority	-	-
+M17-DB152	sec_audit data_retention_policy	Table	Policies for data retention.	M17-F045	policy_id, data_type, retention_period, archive_required	-	-
+M17-DB153	sec_identity user_risk_scores	Table	Calculated risk scores for users (UEBA).	M17-F045	score_id, user_id, risk_score, factors_json, calculated_at	-	-
+M17-DB154	sec_compliance audit_evidence_files	Table	Actual file blobs for evidence (or pointers).	M17-F137	file_id, evidence_id, filename, file_size, storage_path	-	-
+M17-DB155	sec_kms crypto_provider_status	Table	Health status of crypto providers (HSM/KMS).	M17-F043	provider_id, provider_type, status, latency_ms, last_check	-	-
+M17-DB156	sec_network ssl_interception	Table	Configuration for SSL inspection.	M17-F025	config_id, target_service, inspection_enabled, ca_bundle_id	-	-
+M17-DB157	sec_policy consent_templates	Table	Templates for user consent forms.	M17-F073	template_id, name, content_html, version, active	-	-
+M17-DB158	sec_incident ioc_sources	Table	Sources of Indicators of Compromise.	M17-F059	source_id, name, url, reliability_score, last_sync	-	-
+M17-DB159	sec_supply_chain approved_signers	Table	List of code signers allowed.	M17-F073	signer_id, name, email, public_key_fingerprint	UNIQUE(public_key_fingerprint)	-
+M17-DB160	sec_config security_events_schema	Table	Schema definition for security events.	M17-F011	event_type, schema_version, required_fields, optional_fields	-	-
+M17-DB161	sec_kms key_split_history	Table	History of key splitting/sharing events.	M17-F018	event_id, key_id, action, participants, timestamp	-	-
+M17-DB162	sec_audit query_performance	Table	Performance of audit queries.	M17-F143	query_id, table_name, duration_ms, rows_scanned, timestamp	-	-
+M17-DB163	sec_network bgp_peers	Table	Authorized BGP peers for network security.	M17-F056	peer_id, ip_address, asn, trust_level	-	-
+M17-DB164	sec_compliance control_effectiveness	Table	Measurement of how effective controls are.	M17-F074	control_id, effectiveness_score, last_tested, gaps	-	-
+M17-DB165	sec_supply_chain artifact_ancestry	Table	Lineage of build artifacts.	M17-F073	parent_id, child_id, generation_step	-	-
+M17-DB166	sec_identity account_lockouts	Table	Records of account lockouts.	M17-F024	lockout_id, user_id, reason, locked_at, unlocked_at	-	-
+M17-DB167	sec_monitoring anomaly_model_training	Table	Metadata for ML model training.	M17-F011	model_id, training_start, training_end, dataset_hash, accuracy	-	-
+M17-DB168	sec_kms key_backup_status	Table	Status of key backups.	M17-F039	backup_id, key_id, backup_location, status, timestamp	-	-
+M17-DB169	sec_policy firewall_address_groups	Table	Groups of IP addresses for firewall rules.	M17-F070	group_id, name, ip_ranges_json	-	-
+M17-DB170	sec_compliance vendor_access	Table	Third-party vendor access logs.	M17-F149	access_id, vendor_id, user_id, access_start, access_end, justification	-	-
+M17-DB171	sec_network port_profiles	Table	Allowed port profiles for services.	M17-F032	profile_id, port_range, protocol, description	-	-
+M17-DB172	sec_audit log_forwarding	Table	Configuration for forwarding logs to SIEM.	M17-F011	forwarder_id, destination, protocol, status	-	-
+M17-DB173	sec_supply_chain license_exceptions	Table	Exceptions to license policies.	M17-F040	exception_id, spdx_id, justification, approver	-	-
+M17-DB174	sec_identity service_mesh_config	Table	Configuration for service mesh.	M17-F017	config_id, mesh_name, config_json, version	-	-
+M17-DB175	sec_kms signing_keys	Table	Metadata for signing keys.	M17-F073	key_id, algorithm, key_size, purpose	-	-
+M17-DB176	sec_monitoring dashboard_layout	Table	Layout definition for security dashboards.	M17-F024	layout_id, dashboard_id, layout_json	-	-
+M17-DB177	sec_compliance audit_findings	Table	Findings from audits.	M17-F113	finding_id, audit_id, severity, description, remediation_status	-	-
+M17-DB178	sec_network load_balancer_pools	Table	Backend pools for load balancers.	M17-F119	pool_id, lb_id, member_addresses, health_check	-	-
+M17-DB179	sec_policy attribute_sources	Table	Sources for ABAC attributes (e.g., HR DB).	M17-F080	source_id, name, type, connection_string, sync_freq	-	-
+M17-DB180	sec_access elevation_requests	Table	Requests for privilege elevation.	M17-F013	req_id, user_id, target_role, duration, approval_status	-	-
+M17-DB181	sec_kms key_import_logs	Table	Logs of key import operations.	M17-F084	import_id, key_id, source, imported_by, timestamp	-	-
+M17-DB182	sec_incident incident_timeline	Table	Chronological timeline of incidents.	M17-F059	event_id, incident_id, timestamp, description	-	-
+M17-DB183	sec_network ipsec_tunnels	Table	IPSec tunnel configurations.	M17-F115	tunnel_id, local_ip, remote_ip, psk_ref, status	-	-
+M17-DB184	sec_supply_chain code_owners	Table	Code owners for repositories.	M17-F104	owner_id, repo_id, path_pattern, contact_email	-	-
+M17-DB185	sec_audit privileged_access_groups	Table	Groups with high privileges.	M17-F026	group_id, name, description, privileges_json	-	-
+M17-DB186	sec_compliance audit_certifications	Table	Certifications obtained (ISO27001, etc.).	M17-F074	cert_id, name, issuer, valid_from, valid_to, cert_file_ref	-	-
+M17-DB187	sec_monitoring alert_subscriptions	Table	User subscriptions to alerts.	M17-F079	sub_id, user_id, alert_type, notification_method	-	-
+M17-DB188	sec_network vlan_mappings	Table	VLAN to security zone mappings.	M17-F032	vlan_id, zone_id, description	-	-
+M17-DB189	sec_kms key_export_attempts	Table	Attempts (blocked/allowed) to export keys.	M17-F084	attempt_id, key_id, user_id, attempt_time, success	CHECK (success = false)	-
+M17-DB190	sec_policy custom_policy_rules	Table	User-defined policy rules.	M17-F034	rule_id, rule_logic, language, author_id	-	-
+M17-DB191	sec_access auth_token_introspection	Table	Cache of introspected tokens.	M17-F003	token_hash, active, scopes, expires_at	UNIQUE(token_hash)	-
+M17-DB192	sec_supply_chain build_steps	Table	Steps in a CI/CD pipeline.	M17-F065	step_id, pipeline_id, step_name, command, security_check	-	-
+M17-DB193	sec_compliance risk_register	Table	Organizational risk register.	M17-F074	risk_id, description, likelihood, impact, owner, mitigation	-	-
+M17-DB194	sec_network firewall_objects	Table	Reusable objects for firewalls (addresses, services).	M17-F070	object_id, name, type, value	-	-
+M17-DB195	sec_kms hardware_modules	Table	Inventory of HSM devices.	M17-F004	module_id, serial, model, location, status	-	-
+M17-DB196	sec_audit session_recordings	Table	Links to session recording files.	M17-F089	recording_id, session_id, file_path, start_time, duration	-	-
+M17-DB197	sec_identity external_identities	Table	Mapping of external identities to internal ones.	M17-F067	mapping_id, ext_provider_id, ext_user_id, internal_user_id	UNIQUE(ext_provider_id, ext_user_id)	-
+M17-DB198	sec_monitoring synthetic_transactions	Table	Config of synthetic security checks.	M17-F017	check_id, name, endpoint, expected_status, frequency	-	-
+M17-DB199	sec_network nat_rules	Table	Network Address Translation rules.	M17-F070	rule_id, original_ip, translated_ip, port, protocol	-	-
+M17-DB200	sec_compliance policy_documents	Table	Repository of security policy documents.	M17-F074	doc_id, title, content, version, effective_date	-	-
+M17-E01	sec_core	enum_crypto_key_state	Enum	States for cryptographic keys in the KMS.	M17-F004	ACTIVE, DISABLED, PENDING_DELETION, DESTROYED, PRE_ACTIVE
+M17-E02	sec_core	enum_audit_outcome	Enum	Result of a security operation.	M17-F011	SUCCESS, FAILURE, PARTIAL_SUCCESS, ERROR
+M17-E03	sec_core	enum_incident_severity	Enum	Severity level for security incidents.	M17-F059	INFO, LOW, MEDIUM, HIGH, CRITICAL
+M17-E04	sec_core	enum_cert_status	Enum	Validation status of X.509 certificates.	M17-F003	VALID, EXPIRED, REVOKED, UNKNOWN
+M17-E05	sec_core	enum_policy_action	Enum	Action to take when a policy rule matches.	M17-F050	ALLOW, DENY, ALARM, CHALLENGE_MFA, RATE_LIMIT
+M17-E06	sec_core	enum_attestation_result	Enum	Result of a hardware attestation check.	M17-F005	VALID, INVALID, CONFIG_MISMATCH, REVOKED_KEY
+M17-E07	sec_core	enum_vulnerability_severity	Enum	Severity classification for CVEs.	M17-F124	NEGLIGIBLE, LOW, MEDIUM, HIGH, CRITICAL
+M17-E08	sec_core	enum_session_state	Enum	State of a user or service session.	M17-F038	ACTIVE, IDLE, TERMINATED, LOCKED
+M17-E09	sec_core	enum_compliance_status	Enum	Status of a control or requirement.	M17-F074	COMPLIANT, NON_COMPLIANT, PARTIAL, NOT_APPLICABLE
+M17-E10	sec_core	enum_data_classification	Enum	Classification level for data assets.	M17-F127	PUBLIC, INTERNAL, CONFIDENTIAL, RESTRICTED, TOP_SECRET
+M17-V001	sec_vw	vw_active_zero_trust_policies	View	Lists all currently active Zero-Trust policies with versioning.	M17-F034	policy_id, name, version, active_from, target_service
+M17-V002	sec_vw	vw_high_risk_users	View	Aggregates users with UEBA scores above a critical threshold.	M17-F045	user_id, risk_score, last_anomalous_activity, factor
+M17-V003	sec_vw	vw_critical_vulnerabilities	View	Shows unpatched CRITICAL vulnerabilities affecting production.	M17-F124	cve_id, affected_asset, cvss_score, published_date, days_open
+M17-V004	sec_vw	vw_certificate_expiry_alert	View	Lists certificates expiring within the next 30 days.	M17-F003	spiffe_id, serial_number, not_after, days_remaining, owner
+M17-V005	sec_vw	vw_failed_auth_attempts_24h	View	Count of failed authentication attempts grouped by IP and user.	M17-F024	username, ip_address, attempt_count, last_attempt_time
+M17-V006	sec_vw	vw_service_mesh_traffic_summary	View	Aggregates traffic volume and error rates between services.	M17-F011	src_service, dst_service, total_bytes, error_rate, p99_latency
+M17-V007	sec_vw	vw_key_compliance_status	View	Checks if keys meet rotation and compliance requirements.	M17-F004	key_id, algorithm, days_since_rotation, compliant_flag
+M17-V008	sec_vw	vw_incident_dashboard	View	Summary of open security incidents and their severity.	M17-F059	incident_id, title, severity, age_hours, assignee
+M17-V009	sec_vw	vw_data_access_audit	View	Read-only view for auditors of sensitive data access (PII/Keys).	M17-F006	operator_id, data_type, record_id, timestamp, justification
+M17-V010	sec_vw	vw_sny_sbom_vulnerability	View	Joins SBOM entries with vulnerability scans for a full picture.	M17-F009	component_name, version, cve_id, severity, fix_available
+M17-V011	sec_vw	vw_policy_violations	View	Real-time list of traffic flows violating defined network policies.	M17-F032	flow_id, src_ip, dst_ip, violated_policy_id, action_taken
+M17-V012	sec_vw	vw_jit_active_sessions	View	Currently active Just-In-Time access grants.	M17-F013	grant_id, requester_id, resource, role, expires_in_minutes
+M17-V013	sec_vw	vw_hardware_attestation_failures	View	Recent failures in TEE hardware attestation.	M17-F005	workload_id, failure_reason, timestamp, pcr_mismatch
+M17-V014	sec_vw	vw_gdpr_request_queue	View	Pending Right to be Forgotten or Data Export requests.	M17-F049	request_id, user_id, type, status, requested_date
+M17-V015	sec_vw	vw_admin_privilege_inventory	View	List of users with active admin privileges.	M17-F026	admin_id, role_name, granted_via, last_login
+M17-V016	sec_vw	vw_geo_blocked_attempts	View	Login attempts blocked due to geo-fencing rules.	M17-F012	country_code, attempt_count, blocked_users
+M17-V017	sec_vw	vw_encryption_inventory	View	Status of encryption for all database tables and storage buckets.	M17-F088	asset_name, asset_type, encryption_status, algorithm
+M17-V018	sec_vw	vw_malware_detection_log	View	Log of malware detected via EDR or scanning.	M17-F025	scan_id, affected_file, threat_name, action_taken
+M17-V019	sec_vw	vw_trust_domain_federation	View	Status of federated trust relationships with other clouds.	M17-F091	trust_domain, peer_status, last_handshake
+M17-V020	sec_vw	vw_audit_integrity_check	View	Verifies the cryptographic chain of audit logs.	M17-F010	sequence_number, merkle_root, chain_valid_flag
+M17-V021	sec_vw	vw_key_escrow_status	View	Availability status of key shards for disaster recovery.	M17-F018	key_id, total_shards, available_shards, recovery_possible
+M17-V022	sec_vw	vw_iam_role_entitlements	View	Detailed breakdown of permissions attached to each role.	M17-F055	role_name, permission_count, resources, risk_level
+M17-V023	sec_vw	vw_supply_chain_risk	View	Risk score derived from third-party software vendors.	M17-F149	vendor_name, software_package, risk_score, last_audit
+M17-V024	sec_vw	vw_rate_limiting_stats	View	API endpoints hitting their rate limits.	M17-F016	endpoint, current_rate, limit, throttled_count
+M17-V025	sec_vw	vw_quantum_key_migration	View	Progress of migrating keys to Post-Quantum algorithms.	M17-F014	key_id, current_algo, target_algo, migration_status
+M17-SP01	sec_proc	sp_create_audit_entry	Function	Optimized function to insert audit logs and update the Merkle chain hash.	M17-F010	event_type, actor_id, resource_id, details_json	UUID (log_id)
+M17-SP02	sec_proc	sp_verify_sgx_quote	Function	Validates an Intel SGX quote against known good PCRs and IAS reports.	M17-F005	quote_body, nonce	BOOLEAN (is_valid)
+M17-SP03	sec_proc	sp_rotate_encryption_key	Procedure	Automates the rotation of a data encryption key (DEK) and re-wraps it with the KEK.	M17-F021	key_id	VOID
+M17-SP04	sec_proc	sp_revoke_certificate	Procedure	Marks a certificate as revoked, publishes CRL, and notifies Service Mesh.	M17-F003	serial_number, reason_code	VOID
+M17-SP05	sec_proc	sp_calculate_ueba_score	Function	Computes a real-time risk score based on user activity logs and behavior models.	M17-F045	user_id	NUMERIC (0.0 - 100.0)
+M17-SP06	sec_proc	sp_enforce_jit_access	Procedure	Validates a JIT request, checks approvals, issues temporary credentials, and schedules revocation.	M17-F013	request_id, approver_id	VOID
+M17-SP07	sec_proc	sp_archive_old_logs	Procedure	Moves log entries older than retention policy to cold storage (S3/Glacier).	M17-F045	log_type, cutoff_date	INTEGER (rows_moved)
+M17-SP08	sec_proc	sp_generate_compliance_report	Procedure	Aggregates evidence for a specific audit framework and creates a PDF report.	M17-F113	framework_id, report_type	UUID (report_id)
+M17-SP09	sec_proc	sp_check_abac_policy	Function	Evaluates Attribute-Based Access Control policies for a specific request context.	M17-F080	user_id, resource_id, action, context_json	BOOLEAN (allow)
+M17-SP10	sec_proc	sp_trigger_incident_response	Procedure	Executes a specific SOAR playbook (e.g., isolate host) when an IoC is detected.	M17-F059	ioc_id, playbook_id	VOID
+M17-SP11	sec_proc	sp_import_sbom	Procedure	Parses and validates an incoming SBOM (CycloneDX/SPDX) and updates the database.	M17-F009	sbom_json, artifact_hash	VOID
+M17-SP12	sec_proc	sp_verify_signature	Function	Verifies a digital signature against a known public key.	M17-F073	data_hash, signature, public_key_id	BOOLEAN
+M17-SP13	sec_proc	sp_issue_oauth_token	Function	Generates a signed JWT with claims based on user identity and scope.	M17-F006	user_id, client_id, scope	TEXT (jwt_token)
+M17-SP14	sec_proc	sp_revoke_user_sessions	Procedure	Invalidates all active sessions for a specific user immediately.	M17-F038	user_id, reason	VOID
+M17-SP15	sec_proc	sp_cleanup_expired_tokens	Procedure	Scheduled job to purge expired one-time tokens and refresh tokens from the DB.	M17-F145	VOID	INTEGER (count)
+M17-SP16	sec_proc	sp_scan_container_image	Procedure	Initiates a vulnerability scan on a specific container image hash.	M17-F048	image_hash	UUID (scan_id)
+M17-SP17	sec_proc	sp_update_merkle_root	Procedure	Recalculates and updates the Merkle root for the audit integrity chain.	M17-F051	VOID	VOID
+M17-SP18	sec_proc	sp_check_geo_restriction	Function	Determines if a source IP is allowed based on the user's profile and location rules.	M17-F012	user_id, ip_address	BOOLEAN
+M17-SP19	sec_proc	sp_propagate_secret	Procedure	Securely distributes a secret (e.g., DB password) to authorized services via the Secret Broker.	M17-F008	secret_id, target_service_id	VOID
+M17-SP20	sec_proc	sp_encrypt_column	Function	Encrypts a plaintext value using the current data encryption key for a specific column.	M17-F005	plaintext_value, table_name, column_name	TEXT (ciphertext)
+M17-SP21	sec_proc	sp_decrypt_column	Function	Decrypts a ciphertext value if the caller has the necessary entitlements.	M17-F143	ciphertext_value, table_name, column_name	TEXT (plaintext)
+M17-SP22	sec_proc	sp_create_vuln_ticket	Procedure	Creates a Jira ticket for a newly discovered critical vulnerability.	M17-F124	cve_id, affected_component	VOID
+M17-SP23	sec_proc	sp_enhance_image_security	Procedure	Applies security hardening configs to a container image before signing.	M17-F065	image_id, policy_id	VOID
+M17-SP24	sec_proc	sp_backup_recovery_keys	Procedure	Splits and backs up master keys using Shamir's Secret Sharing to designated trustees.	M17-F018	key_id, trustee_list	VOID
+M17-SP25	sec_proc	sp_analyze_traffic_anomaly	Function	Compares current traffic metrics against historical baselines to flag anomalies.	M17-F011	service_id, window_minutes	TABLE (metric_name, z_score, is_anomaly)
+M17-SP26	sec_proc	sp_schedule_key_destruction	Procedure	Schedules the cryptographic shredding of a key for a specific future date (GDPR).	M17-F049	key_id, destruction_date	VOID
+M17-SP27	sec_proc	sp_validate_network_policy	Function	Checks if a requested connection between two workloads is allowed by Network Policies.	M17-F032	src_workload, dst_workload, port	BOOLEAN
+M17-SP28	sec_proc	sp_sync_identity_provider	Procedure	Pulls user and group changes from external IdP (LDAP/AzureAD) and updates local DB.	M17-F067	provider_id, sync_type	INTEGER (users_synced)
+M17-SP29	sec_proc	sp_rate_limit_check	Function	Implements a token bucket or sliding window algorithm to check rate limits.	M17-F016	user_id, token_limit, window_seconds	BOOLEAN (allowed)
+M17-SP30	sec_proc	sp_quarantine_asset	Procedure	Isolates a compromised asset (host/container) from the network.	M17-F059	asset_id, isolation_type	VOID
+M17-TG01	sec_core	trg_audit_chain_update	Trigger	Automatically updates the previous_hash and current_hash on insert to audit_trail.	M17-F010	BEFORE	INSERT
+M17-TG02	sec_core	trg_key_expiry_alert	Trigger	Fires when a key's not_after date approaches, inserts an entry into anomaly_alerts.	M17-F003	AFTER	UPDATE
+M17-TG03	sec_core	trg_user_failed_login	Trigger	Updates failed_attempts count and locks account if threshold exceeded.	M17-F024	AFTER	INSERT
+M17-TG04	sec_core	trg_vuln_scan_auto	Trigger	Initiates a vulnerability scan automatically when a new container image is added.	M17-F009	AFTER	INSERT
+M17-TG05	sec_core	trg_sensitive_data_log	Trigger	Intercepts inserts/updates on sensitive tables (defined in config) and writes to sensitive_operations.	M17-F143	AFTER	INSERT/UPDATE
+M17-TG06	sec_core	trg_session_expiry	Trigger	Sets session state to 'TERMINATED' if last_activity is too old.	M17-F038	BEFORE	SELECT (Scheduled)
+M17-TG07	sec_core	trg_cert_revocation_propagation	Trigger	When a cert is revoked, it signals the Service Mesh controller to reload CRLs.	M17-F003	AFTER	UPDATE
+M17-TG08	sec_core	trg_update_timestamp	Trigger	Automatically updates the updated_at timestamp column on tables that have it.	General	BEFORE	UPDATE
+M17-TG09	sec_core	trg_incident_escalation	Trigger	Escalates an incident if severity changes to CRITICAL.	M17-F059	AFTER	UPDATE
+M17-TG10	sec_core	trg_key_usage_log	Trigger	Logs every usage (decrypt/encrypt) of a master key to key_usage_logs.	M17-F004	AFTER	UPDATE

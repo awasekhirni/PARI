@@ -1,0 +1,592 @@
+
+
+18.	Module M18	CMMI Level 5 Process Automation
+a.	Summary
+Module M18 represents the pinnacle of organizational maturity within the PARI ecosystem, operationalizing the principles of CMMI Maturity Level 5 (Optimizing). In a high-stakes financial infrastructure handling privacy-preserving transactions, the cost of failure is catastrophic, not merely technical. Consequently, this module transcends traditional DevOps monitoring to establish a quantitatively managed software engineering environment. It serves as the central nervous system for software excellence, utilizing a sophisticated blend of Statistical Process Control (SPC), Artificial Intelligence, and automated governance frameworks to ensure that every code commit, deployment, and operational event is measurable, predictable, and continuously optimized.
+
+The core philosophy of M18 is the shift from reactive defect correction to proactive defect prevention. While traditional systems rely on manual post-mortems after an outage, M18 leverages AI-driven retrospectives that continuously analyze semantic data from code repositories, incident logs, and communication streams (e.g., Jira, Slack) to detect subtle shifts in process quality. It implements rigorous Statistical Process Control (SPC) charts to monitor key variables like code churn, cyclomatic complexity, and defect density. When metrics exceed control limits (indicating a process is "out of control"), the module automatically triggers regression guards and halts deployment pipelines, enforcing a stabilizing feedback loop before software reaches production.
+
+Furthermore, M18 introduces a probabilistic approach to release management through Monte Carlo simulations. By modeling historical velocity, defect injection rates, and infrastructure MTTR (Mean Time To Recovery), the system generates thousands of potential release scenarios. This allows Engineering Leadership to quantify the risk profile of a specific release candidate with confidence intervals (e.g., "95% probability of deployment success with <5 minutes downtime"), transforming release decisions from gut-feeling bets into calculated business moves.
+
+Crucially, the module integrates an automated 5-Why root cause analysis engine. Upon the detection of a defect or operational anomaly, NLP algorithms trace the issue back through the commit history, requirement artifacts, and developer changesets to identify the systemic process failure—be it a lack of training in a specific cryptographic library or a gap in peer-review coverage. These insights feed directly into the Organizational Innovation & Deployment framework, automatically updating training curricula and policy documents. By treating the software development lifecycle (SDLC) as a strictly governed supply chain, Module M18 ensures that PARI maintains a defect escape rate of <0.05%, achieving the reliability required for a sovereign-grade payment utility while fostering a culture of continuous, data-driven improvement.
+b.	Scope
+
+The scope of Module M18 encompasses the entire software lifecycle, from initial requirement definition through deployment, operations, and eventual decommissioning, with a specific focus on process quantification and optimization.
+
+     Quantitative Management: Collection and statistical analysis of process and product metrics across all development stages.
+     Statistical Process Control (SPC): Real-time monitoring of development and operational metrics using control charts to identify special causes of variation.
+     Causal Analysis & Resolution (CAR): Automated root cause analysis (5-Whys) for defects and incidents to prevent recurrence.
+     Risk Modeling: Monte Carlo simulations for release planning, capacity planning, and risk assessment.
+     Defect Prevention: Integration of static/dynamic analysis tools to predict and prevent defect injection.
+     Organizational Training: Management of skill gaps and training schedules based on process performance data.
+     Innovation Management: Governance pipeline for evaluating and integrating process improvements and emerging technologies.
+
+c.	Business Case
+
+In the fintech sector, where PARI operates, trust is the primary currency. A single software defect that compromises user privacy or transaction integrity could destroy the platform's reputation and invite severe regulatory penalties. Traditional QA methods are insufficient for the complexity of a distributed, privacy-preserving system. Module M18 addresses the "Cost of Quality" by investing heavily in prevention and appraisal rather than failing in production.
+
+By automating CMMI Level 5 processes, PARI achieves a dramatic reduction in the "cost of non-quality"—rework, scrap, and emergency patches. The module enables "Shift Left" practices, catching vulnerabilities and logic errors during the commit phase rather than post-deployment. The Monte Carlo risk modeling eliminates "deployment roulette," allowing executives to guarantee SLAs to merchants and governments with statistical backing. Furthermore, the automated nature of the module reduces the administrative overhead of compliance reporting, generating ISO-audit-ready artifacts automatically. The result is a faster time-to-market for security patches, a higher ROI on engineering effort, and a verifiable competitive advantage: a payment system that is provably robust and continuously self-improving.
+d.	KPIs
+
+•	Defect Escape Rate: < 0.05% (Defects found in production vs. total defects found).
+•	Test Coverage: > 95% (Line and branch coverage).
+•	Cycle Time Variance: < 5% (Consistency in delivery sprint-over-sprint).
+•	Process Capability Index (Cpk): > 1.33 for critical quality metrics.
+•	Mean Time To Restore (MTTR) for Process Failures: < 15 minutes.
+•	False Positive Rate (Static Analysis): < 5%.
+•	Release Prediction Accuracy: Within ±10% of Monte Carlo projections.
+•	Automated Root Cause Identification Rate: > 90% of incidents.
+
+e.	Stakeholder Insights
+Stakeholder	Concern	Implications
+Engineering Leadership (CTO/VP)	Unpredictable release quality and "firefighting" mode.	Needs statistical confidence in deployments; requires visibility into technical debt trends.
+Quality Assurance (QA) Leads	High volume of false positives in manual testing.	Shifts focus from manual checking to tool tuning and process optimization.
+Developers	Friction in CI/CD pipelines and vague defect reports.	Expects immediate, actionable feedback and automated governance that doesn't slow down coding.
+Product Owners	Delays caused by late-stage bug discovery.	Relies on accurate velocity predictions and risk assessment for roadmap planning.
+Regulatory Auditors	Lack of verifiable process control evidence.	Requires immutable logs of quality gates, risk assessments, and corrective actions.
+SRE/Operations	Instability following new deployments.	Needs automated rollbacks and rigorous pre-release risk scoring.
+
+f.	Knowledge Representation Graph (mermaid.js)
+graph TD
+    subgraph "Data Sources"
+        A[Git Commits]
+        B[CI/CD Pipelines]
+        C[Jira/Issue Tracker]
+        D[SonarQube/SAST]
+        E[Incident Management]
+    end
+
+    subgraph "M18: CMMI Level 5 Process Automation"
+        F[Metrics Ingestion Engine]
+        G[Statistical Process Control Engine]
+        H[AI Retrospective & NLP Engine]
+        I[Monte Carlo Risk Simulator]
+        J[Automated 5-Why Analyzer]
+        K[Policy & Process Governor]
+    end
+
+    subgraph "Outcomes & Actions"
+        L[Release Go/No-Go Gate]
+        M[Process Adjustment Recommendations]
+        N[Auto-Generated Training Tasks]
+        O[Corrective Action Logs]
+    end
+
+    A --> F
+    B --> F
+    C --> F
+    D --> F
+    E --> F
+
+    F --> G
+    F --> H
+    F --> I
+    F --> J
+
+    G -- "Control Limit Breach" --> K
+    H -- "Sentiment Analysis" --> J
+    I -- "Risk Score > Threshold" --> K
+    J -- "Root Cause Identified" --> K
+
+    K --> L
+    K --> M
+    K --> N
+    K --> O
+
+g.	Comprehensive List of Features
+ID	Feature	Description	Business Case	AI/ML Algorithms	KPIs	Primary Users
+M18-F001	Real-time Metric Ingestion Service	Ingests granular data from Git, CI tools, Jira, and SonarQube into the data warehouse.	Establishes the foundation for quantitative management.	Apache Kafka / Stream Processing	Ingestion Latency < 1s	Data Engineers
+M18-F002	Code Cyclomatic Complexity Monitor	Tracks complexity per function/file to identify high-risk code modules.	High complexity correlates with defect density.	Static Analysis Rules	Complexity Score < 10	Developers
+M18-F003	Automated SPC Chart Generation	Dynamically generates X-bar and R charts for defect density and velocity.	Visualizes process stability; detects "out of control" states.	Statistical Process Control	Chart Render Time < 2s	QA Leads
+M18-F004	Control Limit Breach Alerting	Triggers alerts when process metrics exceed upper/lower control limits.	Enables immediate intervention before defects pile up.	Anomaly Detection (Z-Score)	Alert Accuracy > 98%	Engineering Mgrs
+M18-F005	Monte Carlo Velocity Simulation	Simulates 10,000 future sprints based on historical velocity to forecast completion.	Provides probabilistic delivery dates for roadmap planning.	Monte Carlo Methods	Forecast Error < 10%	Product Owners
+M18-F006	Defect Density Trend Analysis	Analyzes defects per KLOC (Thousand Lines Of Code) over time.	Measures effectiveness of defect prevention activities.	Linear Regression	Defect Reduction Rate	QA Leads
+M18-F007	Code Churn Correlation Engine	Correlates high code churn (re-writing) with defect injection.	Identifies unstable modules requiring refactoring or freeze.	Pearson Correlation	Correlation Coefficient	Tech Leads
+M18-F008	AI-Driven Commit Sentiment Analysis	Analyzes commit messages for negative sentiment indicating developer stress/fatigue.	High stress predicts higher defect rates.	NLP (Sentiment Analysis)	Sentiment Score Tracking	Engineering Leads
+M18-F009	Automated Test Coverage Gate	Blocks PR merges if coverage drops below 95%.	Enforces quality standards at the entry point.	Static Analysis	Gate Enforcement Rate	Developers
+M18-F010	Technical Debt Ratio Calculator	Calculates the cost to fix code vs. rebuild it.	Prioritizes refactoring efforts to maintain agility.	Code Analysis Algorithms	Debt Ratio < 5%	Architects
+M18-F011	Peer Review Depth Analyzer	Measures time spent and lines changed in peer reviews.	Shallow reviews are a major source of escaped defects.	Descriptive Statistics	Review Avg Duration	Developers
+M18-F012	Automated 5-Why Root Cause Trigger	Automatically initiates a 5-Why workflow for Sev1/Sev2 incidents.	Standardizes immediate response to critical failures.	Rule-Based Logic	Trigger Time < 5m	SREs
+M18-F013	NLP-Based Log Clusterization	Groups similar error logs from production to identify patterns.	Reduces noise in incident management.	Unsupervised Learning (DBSCAN)	Clustering Accuracy	SREs
+M18-F014	Release Risk Scoring Model	Aggregates code churn, complexity, and author experience into a single risk score.	Provides a "Go/No-Go" decision support metric.	Weighted Scoring Model	Risk Score Variance	Release Mgrs
+M18-F015	Developer Fatigue Detection	Uses commit frequency and timing to detect overwork.	Prevents burnout-related defects.	Time-Series Analysis	Fatigue Index	HR/Engineering
+M18-F016	Unit Test Flakiness Detector	Identifies tests that pass and fail non-deterministically.	Flaky tests erode trust in CI/CD.	Statistical Flakiness Detection	Flaky Test Count	QA Engineers
+M18-F017	Static Analysis Severity Triaging	Auto-categorizes SAST findings into True Positives vs. False Positives.	Reduces manual security review workload.	Supervised Learning (Random Forest)	Triage Accuracy	Security Engineers
+M18-F018	Dependency Vulnerability Ingestion	Ingests CVEs from NVD and maps them to internal repos.	Ensures the supply chain is secure.	Text Matching	CVE Coverage %	DevSecOps
+M18-F019	Process Capability (Cpk) Calculator	Calculates Cpk for critical process attributes (e.g., build time).	Quantifies the process's ability to meet specifications.	Statistical Process Control	Cpk > 1.33	Process Engineers
+M18-F020	Build Failure Root Cause Prediction	Predicts the likely cause of a build failure (e.g., test, compile, infra).	Speeds up修复 by pointing developers to the right area.	Classification (Logistic Regression)	Prediction Accuracy > 80%	Developers
+M18-F021	Automated Rollback Decision Engine	Recommends rollback based on error rate spikes post-deployment.	Minimizes MTTR (Mean Time To Recovery).	Time-Series Anomaly Detection	Decision Speed < 30s	SREs
+M18-F022	Sprint Burndown Variance Tracker	Tracks deviation from ideal burndown line throughout the sprint.	Identifies scope creep or estimation inaccuracies early.	Variance Analysis	Variance %	Scrum Masters
+M18-F023	Code Duplication Detector	Identifies duplicate blocks of code across the project.	Duplication increases maintenance burden and defect risk.	AST (Abstract Syntax Tree) Matching	Duplication % < 3%	Developers
+M18-F024	Security Policy Violation Auto-Check	Checks commits against hardcoded secrets or insecure APIs.	Prevents security leaks from entering the repo.	Regex / Pattern Matching	Violation Catch Rate	Security Engineers
+M18-F025	Pipeline Efficiency Monitor	Tracks idle time vs. execution time in CI/CD pipelines.	Optimizes resource usage and developer feedback time.	Performance Profiling	Pipeline Efficiency %	DevOps
+M18-F026	Incident MTTR Prediction	Predicts the time required to resolve an incident based on historical data.	Sets accurate customer expectations for resolution.	Regression Analysis	Prediction Error < 20%	Support Leads
+M18-F027	Change Failure Rate (CFR) Monitor	Calculates the % of deployments that result in an incident.	Core DORA metric measuring deployment health.	Event Tracking	CFR < 5%	Engineering Leads
+M18-F028	Deployment Frequency Tracker	Tracks how often the team successfully deploys to production.	Core DORA metric measuring throughput.	Count Aggregation	Deployments/Week	Release Mgrs
+M18-F029	Lead Time for Changes Monitor	Measures time from commit to deployment.	Identifies bottlenecks in the delivery pipeline.	Time Delta Calculation	Lead Time (Days)	Product Owners
+M18-F030	Author Experience Weighting	Adjusts release risk scores based on the experience of the code author.	Junior developers may introduce higher risk changes.	Reputation Scoring	Weight Adjustment	Tech Leads
+M18-F031	Automated Retrospective Summarizer	Generates a summary of issues and action items from sprint data.	Saves time in retrospective meetings.	NLP (Text Summarization)	Summary Coverage	Scrum Masters
+M18-F032	Defect Age Analysis	Tracks how long defects remain open before resolution.	Identifies bottlenecks in the QA workflow.	Aging Analysis	Avg Defect Age	QA Managers
+M18-F033	Test Execution Time Optimization	Identifies slow-running tests and suggests parallelization or pruning.	Speeds up feedback loops.	Regression Analysis	Test Suite Duration	QA Engineers
+M18-F034	Architecture Compliance Checker	Validates code changes against architectural rules (e.g., layering).	Prevents architectural erosion.	Static Analysis	Violation Count	Architects
+M18-F035	API Contract Drift Detector	Detects discrepancies between API specs (OpenAPI) and implementation.	Prevents breaking changes for integrators.	Diff Algorithms	Drift Count	Integration Leads
+M18-F036	Cognitive Load Estimator	Estimates complexity of a PR for reviewers.	Helps assign appropriate reviewers.	Complexity Metrics	Cognitive Load Score	Tech Leads
+M18-F037	Merge Conflict Prediction	Predicts the likelihood of a merge conflict based on branch activity.	Encourages earlier merging/integration.	Classification	Prediction Accuracy	Developers
+M18-F038	Onboarding Effectiveness Tracker	Tracks time-to-first-commit for new hires.	Measures success of onboarding processes.	Time-Series Analysis	Time-to-First-Commit	HR/Engineering
+M18-F039	Open Source License Compliance Check	Scans dependencies for GPL/AGPL compatibility issues.	Prevents legal/IP risks.	Text Matching	License Violations	Legal/Engineering
+M18-F040	Documentation Coverage Analyzer	Measures % of code annotated with documentation.	Ensures maintainability.	Static Analysis	Doc Coverage %	Tech Writers
+M18-F041	Dead Code Elimination Suggester	Identifies functions/methods never called in the codebase.	Reduces attack surface and complexity.	Call Graph Analysis	Dead Code LOC	Developers
+M18-F042	SQL Query Performance Analyzer	Analyzes SQL changes for potential performance regressions.	Prevents slow database transactions.	Query Plan Analysis	Query Cost Delta	DBAs
+M18-F043	Memory Leak Detection Simulation	Simulates memory usage patterns to detect potential leaks.	Prevents OOM (Out of Memory) incidents in production.	Heap Analysis Simulation	Memory Leak Count	Performance Engineers
+M18-F044	Thread Safety Violation Detector	Detects potential race conditions in code.	Critical for high-concurrency payment systems.	Static Analysis (Data Flow)	Race Condition Warnings	Developers
+M18-F045	Regulatory Requirement Traceability	Links code changes to specific regulatory requirements (e.g., GDPR).	Ensures auditability for compliance.	Traceability Matrix	Trace Coverage %	Compliance Officers
+M18-F046	Skill Gap Analysis Engine	Identifies skills missing from the team based on code/issue types.	Guides hiring and training decisions.	Clustering Algorithms	Gap Severity	Engineering Mgrs
+M18-F047	Meeting Load Impact Analyzer	Correlates meeting frequency with code output velocity.	Optimizes team focus time.	Correlation Analysis	Impact Score	Engineering Leads
+M18-F048	Remote Work Collaboration Index	Measures effectiveness of distributed teams (e.g., PR review latency).	Optimizes processes for remote work.	Social Network Analysis	Collaboration Score	HR/Engineering
+M18-F049	Code Ownership Distribution	Ensures no single point of failure (bus factor) in code modules.	Improves resilience.	Git History Analysis	Bus Factor	Tech Leads
+M18-F050	Release Notes Automator	Generates release notes from commit messages and PR titles.	Streamlines communication to stakeholders.	NLP (Text Generation)	Note Accuracy	Release Mgrs
+M18-F051	Latency SLO Error Budget Calculator	Calculates remaining error budget based on latency SLOs.	Guides release pacing during SLO stress.	Time-Series Math	Error Budget %	SREs
+M18-F052	Availability SLO Error Budget Calculator	Calculates remaining budget based on uptime.	Prevents over-deployment during instability.	Event Counting	Error Budget %	SREs
+M18-F053	Hotspot Risk Mapping	Maps files with highest historical defect counts to a heatmap.	Visualizes risk areas for refactoring.	Heatmap Visualization	Hotspot Score	QA Leads
+M18-F054	Time-Zone Awareness Handoff	Optimizes handoff processes between global teams (Follow-the-sun).	Reduces idle time in development.	Scheduling Algorithms	Handover Delay	Engineering Mgrs
+M18-F055	Legacy Code Refactoring Prioritizer	Ranks legacy modules for refactoring based on risk and value.	Systematically pays down technical debt.	Cost-Benefit Algorithm	Priority Score	Architects
+M18-F056	Branch Lifetime Monitor	Tracks how long feature branches live before merging.	Long-lived branches increase merge risk.	Time Delta Analysis	Branch Age	Tech Leads
+M18-F057	PR Size Validator	Warns or blocks PRs exceeding a set size (LOC).	Large PRs are harder to review and contain more bugs.	Thresholding	Avg PR Size	Developers
+M18-F058	Reviewer Assignment Optimizer	Suggests the best reviewers based on code ownership and expertise.	Reduces review time and improves quality.	Graph Algorithms	Review Cycle Time	Tech Leads
+M18-F059	Automated Fix Suggestion	Suggests code fixes for common linting errors.	Accelerates developer velocity.	LLM / Rule-Based	Fix Acceptance Rate	Developers
+M18-F060	Third-Party API Latency Monitor	Tracks latency of external dependencies (e.g., Tax Auth APIs).	Detects degradation in external services.	Synthetic Monitoring	External Latency	Integration Leads
+M18-F061	Data Skew Detection (Jobs)	Detects skew in batch processing jobs (e.g., analytics).	Ensures efficient resource utilization.	Statistical Analysis	Skew Factor	Data Engineers
+M18-F062	Schema Migration Risk Assessor	Assesses risk of database schema migrations.	Prevents data loss during deployments.	Impact Analysis	Risk Score	DBAs
+M18-F063	Feature Flag Adoption Tracker	Tracks usage of feature flags in production.	Ensures cleanup of stale flags.	Event Tracking	Stale Flag Count	Release Mgrs
+M18-F064	A/B Test Statistical Significance	Calculates if A/B test results are statistically significant.	Ensures data-driven product decisions.	Hypothesis Testing	P-Value	Product Managers
+M18-F065	Customer Feedback Sentiment Correlation	Correlates negative feedback with specific releases.	Connects user experience to engineering output.	Sentiment Analysis	Correlation Strength	Product Managers
+M18-F066	Critical Path Analysis (Build)	Identifies the longest sequence of dependent tasks in a build.	Optimizes build parallelization.	Graph Theory	Critical Path Time	DevOps
+M18-F067	Container Image Scanning	Scans Docker images for vulnerabilities at build time.	Ensures supply chain security.	CVE Matching	Vulnerability Count	DevSecOps
+M18-F068	Infrastructure as Code (IaC) Drift Check	Checks if cloud infrastructure matches IaC definitions.	Prevents configuration drift.	State Comparison	Drift Resources	DevOps
+M18-F069	Cost per Transaction Monitor	Tracks compute costs relative to transaction volume.	Optimizes cloud spend.	Cost Allocation	Cost/TX	FinOps
+M18-F070	Developer Productivity Index	Aggregates multiple metrics into a single productivity score.	Provides a high-level view of team health.	Composite Index	Productivity Score	Engineering Mgrs
+M18-F071	Automated Accessibility Audit	Runs accessibility checks on UI components.	Ensures WCAG compliance.	Lighthouse/AXE Engine	Accessibility Score	UI Developers
+M18-F072	SEO Compliance Checker	Checks frontend code for SEO meta-tags and structure.	Ensures discoverability.	Heuristic Analysis	SEO Score	Marketing/Dev
+M18-F073	Browser Compatibility Matrix	Tests critical flows against defined browser matrix.	Ensures broad user access.	Selenium/Grid	Pass Rate %	QA Engineers
+M18-F074	Mobile App Performance Monitor	Tracks startup time and crash rates for mobile wallets.	Critical for user adoption.	APM SDKs	Crash Free Users %	Mobile Developers
+M18-F075	Network Condition Simulator	Tests app behavior under 2G/3G/lossy networks.	Ensures usability in poor connectivity areas.	Network Shaping	Error Rate under 2G	QA Engineers
+M18-F076	Dark Mode Consistency Checker	Validates UI consistency in dark mode.	Ensures UX quality.	Visual Regression	Visual Diff Count	UI Developers
+M18-F077	Localization String Validator	Checks for missing translations or hard-coded strings.	Supports global deployment.	Static Analysis	Missing Translations	Localizers
+M18-F078	Date/Time Formatting Validator	Ensures date/times are localized correctly.	Prevents user confusion.	Regex/Rule Check	Format Violations	Developers
+M18-F079	Currency Precision Validator	Validates decimal precision for financial calculations.	Critical for payment accuracy.	Unit Tests	Precision Errors	Developers
+M18-F080	PII Data Access Logger	Logs all access to Personally Identifiable Information.	GDPR/Privacy compliance.	Dynamic Instrumentation	Log Completeness	Security Engineers
+M18-F081	Right to be Forgotten (RTBF) Automator	Automates the deletion workflow for user data requests.	Legal compliance requirement.	Workflow Engine	Deletion Latency	Privacy Officers
+M18-F082	Consent Management Tracker	Tracks user consent for data processing.	GDPR compliance.	Data Store	Consent Validity %	Compliance Officers
+M18-F083	Algorithmic Bias Detector	Checks AI models for bias against protected groups.	Ethical AI requirement.	Fairness Metrics	Bias Score	Data Scientists
+M18-F084	Model Drift Monitor	Monitors production ML model performance over time.	Ensures fraud detection remains accurate.	KL Divergence	Drift Magnitude	Data Scientists
+M18-F085	Training Data Versioning	Tracks versions of data used to train models.	Reproducibility and auditability.	Data Version Control	Version Integrity	Data Engineers
+M18-F086	Feature Store Sync	Ensures features used in training are available in inference.	Prevents training/serving skew.	Sync Engine	Sync Status	Data Engineers
+M18-F087	Automated Hyperparameter Tuning	Optimizes ML model parameters.	Improves model performance.	Bayesian Optimization	Accuracy Lift	Data Scientists
+M18-F088	Shadow Mode Deployment	Runs new models in parallel without serving traffic.	Safe testing of new models.	Routing Logic	Shadow Latency	ML Engineers
+M18-F089	Canary Release Automation	Gradually rolls out features to a subset of users.	Reduces blast radius of failures.	Traffic Shifting	Canary Success Rate	Release Mgrs
+M18-F090	Blue-Green Deployment Manager	Manages zero-downtime switches between environments.	Ensures high availability.	Infrastructure Orchestration	Switch Time	SREs
+M18-F091	Chaos Engineering Integration	Injects failures (latency, kills) to test resilience.	Proactively finds weaknesses.	Fault Injection	Recovery Success	SREs
+M18-F092	Game Day Scenario Runner	Automates disaster recovery drills.	Trains the team on incidents.	Scenario Engine	Drill Completion	SREs
+M18-F093	Runbook Automation	Converts runbooks into executable scripts.	Reduces manual error during incidents.	Scripting Engine	Auto-Remediation %	SREs
+M18-F094	Alert Noise Reduction	Suppresses duplicate or non-actionable alerts.	Prevents alert fatigue.	Alert Correlation	Noise Ratio	SREs
+M18-F095	Anomaly Detection Baseline Learner	Dynamically adjusts baseline metrics for anomaly detection.	Adapts to changing traffic patterns.	Online Learning	Adaptation Speed	SREs
+M18-F096	Log Retention Policy Enforcer	Manages log lifecycle based on compliance rules.	Controls storage costs.	Policy Engine	Retention Accuracy	DevOps
+M18-F097	Backup Integrity Checker	Verifies that database backups are restorable.	Ensures data safety.	Automated Restore	Restore Success %	DBAs
+M18-F098	Follower Lag Monitor	Monitors replication lag in database clusters.	Prevents data loss in failover.	Replication Metrics	Lag Seconds	DBAs
+M18-F099	Connection Pool Usage Monitor	Tracks database connection pool saturation.	Prevents connection exhaustion.	JMX/Prometheus	Pool Usage %	DBAs
+M18-F100	Cache Hit Rate Analyzer	Monitors Redis/Cache hit ratios.	Optimizes cache strategy.	Cache Metrics	Hit Ratio %	Developers
+M18-F101	Queue Depth Monitor	Tracks length of Kafka/RabbitMQ queues.	Prevents backlog buildup.	Queue Metrics	Queue Size	Integration Leads
+M18-F102	Dead Letter Queue (DLQ) Analyzer	Analyzes messages failing processing.	Identifies integration issues.	Log Analysis	DLQ Size	Integration Leads
+M18-F103	API Throttling Impact Analyzer	Measures impact of rate limiting on users.	Balances protection vs. usability.	Usage Metrics	Throttled Requests	API Mgrs
+M18-F104	Webhook Delivery Tracker	Tracks success rate of outgoing webhooks.	Ensures reliable notifications.	Delivery Logs	Delivery Success %	Integration Leads
+M18-F105	Idempotency Validation	Tests that APIs are truly idempotent.	Prevents double-charging.	Replay Testing	Idempotency Failures	QA Engineers
+M18-F106	Circuit Breaker State Monitor	Monitors state of circuit breakers in the system.	Visualizes system health.	State Tracking	Open Circuits	Architects
+M18-F107	Bulkhead Isolation Monitor	Checks resource isolation between threads/pools.	Prevents cascading failures.	Resource Metrics	Isolation Violations	SREs
+M18-F108	Retry Storm Detector	Detects excessive retry attempts overwhelming a service.	Prevents "thundering herd".	Pattern Matching	Retry Volume	SREs
+M18-F109	Slow Query Logger	Logs queries exceeding a threshold duration.	Identifies performance bottlenecks.	DB Profiler	Slow Query Count	DBAs
+M18-F110	Index Usage Analyzer	Identifies unused or duplicate indexes.	Optimizes write performance.	DB Statistics	Unused Indexes	DBAs
+M18-F111	Table Bloat Analyzer	Detects table bloat requiring vacuuming.	Maintains performance.	DB Statistics	Bloat Ratio	DBAs
+M18-F112	Lock Contention Monitor	Detects database lock waits.	Prevents deadlocks.	DB Metrics	Lock Wait Time	DBAs
+M18-F113	Auto-Explain Trigger	Automatically captures execution plans for slow queries.	Aids in query optimization.	DB Hooks	Plan Capture Count	DBAs
+M18-F114	SSL/TLS Certificate Expiry Monitor	Tracks cert expiry across all services.	Prevents outages due to expired certs.	Cert Scanner	Days to Expiry	SREs
+M18-F115	DNS Resolution Monitor	Tracks DNS lookup latency and failures.	Detects DNS issues.	DNS Checks	Lookup Latency	SREs
+M18-F116	Bandwidth Utilization Tracker	Monitors network interface bandwidth.	Capacity planning.	SNMP/Telegraf	Bandwidth Usage %	Net Admins
+M18-F117	Packet Loss Monitor	Detects packet loss between nodes.	Identifies network issues.	ICMP/Ping	Packet Loss %	Net Admins
+M18-F118	Disk IOPS Latency	Tracks disk read/write latency.	Storage performance.	System Metrics	I/O Latency	SREs
+M18-F119	Disk Space Forecasting	Predicts when disk will run out of space.	Prevents outages.	Linear Regression	Forecast Error	SREs
+M18-F120	CPU Steal Time Monitor	Tracks CPU steal time in cloud environments.	Detects noisy neighbors.	Cloud Metrics	Steal Time %	SREs
+M18-F121	Context Switch Rate Monitor	High context switches indicate CPU thrashing.	Performance tuning.	System Metrics	Switch Rate/sec	SREs
+M18-F122	File Descriptor Usage	Tracks open file descriptors.	Prevents "too many open files" errors.	System Metrics	FD Usage %	SREs
+M18-F123	Thread Dump Collector	Automatically captures thread dumps on deadlock detection.	Debugging concurrency issues.	JVM/Proc tools	Dump Count	Developers
+M18-F124	Heap Dump Collector	Automatically captures heap dumps on OOM detection.	Debugging memory issues.	JVM/Proc tools	Dump Count	Developers
+M18-F125	Garbage Collection Frequency Monitor	Tracks frequency and duration of GC pauses.	Performance tuning.	JVM Metrics	GC Pause Time	Developers
+M18-F126	JIT Compilation Time Monitor	Tracks time spent by JVM in JIT compilation.	Performance tuning.	JVM Metrics	Compile Time	Developers
+M18-F127	Class Leak Detector	Detects if classloader count is growing (PermGen/Metaspace leak).	Memory leak detection.	JVM Metrics	Class Count	Developers
+M18-F128	Memory Fragmentation Monitor	Measures heap fragmentation.	Optimization.	JVM Metrics	Fragmentation %	Developers
+M18-F129	Request Payload Size Analyzer	Tracks size of HTTP request bodies.	Detects abusive payloads or misuse.	Gateway Metrics	Avg Payload Size	API Mgrs
+M18-F130	Response Payload Size Analyzer	Tracks size of HTTP response bodies.	Optimization of bandwidth usage.	Gateway Metrics	Avg Payload Size	API Mgrs
+M18-F131	User Agent Parser	Parses and aggregates user agent strings.	Identifies bot traffic vs. real users.	Log Parsing	Bot Traffic %	Security
+M18-F132	GeoIP Traffic Distribution	Tracks traffic by geographic region.	CDN optimization and compliance.	GeoIP Database	Regional Traffic %	SREs
+M18-F133	API Version Usage	Tracks usage of different API versions.	Deprecation planning.	Gateway Metrics	Version Usage %	Product Mgrs
+M18-F134	Endpoint Latency Heatmap	Visualizes latency for every API endpoint.	Performance visualization.	Visualization Tool	Endpoint P99	API Mgrs
+M18-F135	Error Rate Heatmap	Visualizes error rates for every API endpoint.	Quality visualization.	Visualization Tool	Endpoint Error %	API Mgrs
+M18-F136	Request Flow Tracer	Traces a request across all microservices (Distributed Tracing).	Debugging and latency analysis.	OpenTelemetry/Jaeger	Trace Completeness	Developers
+M18-F137	Service Dependency Graph	Generates a real-time graph of service dependencies.	Impact analysis for changes.	Service Mesh	Dependency Depth	Architects
+M18-F138	Deployment Impact Analyzer	Estimates blast radius of a specific deployment.	Risk assessment.	Dependency Graph	Affected Services	Release Mgrs
+M18-F139	Rollback Impact Analyzer	Estimates downstream effects of a rollback.	Safety check before rollback.	Dependency Graph	Downstream Count	SREs
+M18-F140	Configuration Drift Detection (App)	Detects if app config differs across envs.	Prevents "it works on prod" issues.	Config Diff	Drift Count	DevOps
+M18-F141	Secret Rotation Verifier	Verifies that secrets (keys, passwords) are rotated on schedule.	Security compliance.	Scheduler	Rotation Age	Security Engineers
+M18-F142	Token Expiry Monitor	Tracks JWT/OAuth token expiry.	Prevents auth failures.	Auth Logs	Expiry Events	Security Engineers
+M18-F143	Brute Force Attack Detector	Detects repeated login failures.	Security alerting.	Event Counting	Attack Attempts	Security Engineers
+M18-F144	DDoS Attack Signature Detector	Matches traffic patterns against known DDoS signatures.	Infrastructure protection.	Pattern Matching	Blocked Requests	Security Engineers
+M18-F145	WAF Rule Update Automator	Updates Web App Firewall rules based on new threats.	Reactive security.	Threat Intelligence Feed	Rule Lag	Security Engineers
+M18-F146	Compliance Report Generator	Generates reports for auditors (SOC2, ISO, PCI-DSS).	Audit readiness.	Reporting Engine	Report Generation Time	Compliance Officers
+M18-F147	Access Review Automator	Initiates periodic reviews of user access rights.	Governance compliance.	Workflow Engine	Review Completion %	Compliance Officers
+M18-F148	Separation of Duties Enforcer	Prevents conflicts of interest in access permissions.	Fraud prevention.	Policy Engine	Violation Count	Security Engineers
+M18-F149	Privileged Session Manager	Records and monitors privileged access sessions.	Insider threat prevention.	Session Recording	Session Coverage	Security Engineers
+M18-F150	Vendor Risk Assessor	Scores third-party vendors based on security posture.	Supply chain risk.	Questionnaire Engine	Vendor Risk Score	Procurement
+M18-F151	Code Scan False Positive Feedback	Allows developers to flag false positives to the ML model.	Improves tool accuracy.	Feedback Loop	Feedback Volume	Developers
+M18-F152	Developer Satisfaction Survey	Periodic surveys on tooling and process satisfaction.	Identifies morale issues.	Survey Tool	Satisfaction Score	HR/Engineering
+M18-F153	Innovation Time Tracking	Tracks time spent on R&D vs. feature work.	Ensures balance of innovation.	Time Tracking	R&D Ratio	Engineering Leads
+M18-F154	Open Source Contribution Health	Tracks contributions from external community.	Community management.	Git Analysis	Contribution Rate	Community Mgr
+M18-F155	Documentation Freshness	Checks if docs are updated with code changes.	Ensure docs are current.	Git Timestamps	Stale Doc Count	Tech Writers
+M18-F156	Key Performance Indicator (KPI) Dashboard	Aggregates all critical engineering KPIs.	Executive visibility.	Visualization Tool	Dashboard Refresh	Executives
+M18-F157	Cost Anomaly Detector	Detects unusual spikes in cloud costs.	FinOps.	Anomaly Detection	Cost Variance	FinOps
+M18-F158	Reserved Instance Utilization	Tracks usage of reserved cloud instances.	Cost optimization.	Cloud Billing	Utilization %	FinOps
+M18-F159	Idle Resource Detector	Finds idle compute/storage resources.	Cost optimization.	Resource Tagging	Idle Resource Count	FinOps
+M18-F160	Capacity Planning Recommender	Recommends scaling based on trend analysis.	Proactive scaling.	Time-Series Forecast	Forecast Accuracy	Architects
+
+
+h.	Comprehensive List of Database Objects
+ID	schema_name	object_name	object_type	description	feature_reference	column_names	constraints / notes	junction_tables
+M18-T001	cmmi	metric_raw_data	TABLE	Stores time-series metric data from various sources	M18-F001	timestamp, source_id, metric_name, value, tags	PARTITION BY RANGE (timestamp)
+M18-T002	cmmi	metric_sources	TABLE	Registry of metric sources (Jira, Git, Jenkins)	M18-F001	source_id, name, type, connection_config, is_active	UNIQUE(source_id)
+M18-T003	cmmi	spc_control_limits	TABLE	Stores calculated UCL (Upper Control Limit) and LCL for metrics	M18-F003	metric_name, ucl, lcl, cl, sample_size, last_updated	CHECK (ucl > lcl)
+M18-T004	cmmi	spc_violations	TABLE	Logs when metrics breach control limits	M18-F004	violation_id, timestamp, metric_name, value, severity	FOREIGN KEY (metric_name)
+M18-T005	cmmi	monte_carlo_simulations	TABLE	Stores simulation run parameters and results	M18-F005	run_id, timestamp, scenario_name, success_probability, p50, p95, p99
+M18-T006	cmmi	defect_records	TABLE	Detailed log of discovered defects	M18-F006	defect_id, timestamp, severity, phase_found, source_module, description	CHECK (severity IN ('Critical','High','Med','Low'))
+M18-T007	cmmi	code_churn_metrics	TABLE	Metrics on code changes per commit	M18-F007	commit_id, timestamp, author_id, lines_added, lines_deleted, file_path
+M18-T008	cmmi	commit_sentiments	TABLE	AI analysis of commit messages	M18-F008	commit_id, sentiment_score, sentiment_label (Pos/Neg/Neu), confidence	FOREIGN KEY (commit_id)
+M18-T009	cmmi	test_coverage_reports	TABLE	Aggregated coverage metrics per build	M18-F009	build_id, timestamp, line_coverage, branch_coverage, threshold_met	CHECK (line_coverage >= 0 AND line_coverage <= 100)
+M18-T010	cmmi	technical_debt_metrics	TABLE	Historical debt ratio and cost	M18-F010	snapshot_date, debt_ratio, remediation_cost_est, principal
+M18-T011	cmmi	peer_reviews	TABLE	Metadata on pull request reviews	M18-F011	review_id, pr_id, reviewer_id, timestamp, lines_changed, duration_minutes
+M18-T012	cmmi	five_why_analyses	TABLE	Automated root cause analysis records	M18-F012	analysis_id, incident_id, root_cause_category, why_1, why_2, why_3, why_4, why_5
+M18-T013	cmmi	log_clusters	TABLE	Clustered error logs for pattern analysis	M18-F013	cluster_id, pattern_signature, occurrence_count, last_seen, representative_hash
+M18-T014	cmmi	release_risk_scores	TABLE	Calculated risk scores for release candidates	M18-F014	release_id, timestamp, risk_score, risk_factors_json, decision (Go/No-Go)
+M18-T015	cmmi	developer_fatigue	TABLE	Metrics indicating developer burnout risk	M18-F015	developer_id, week_start, commit_frequency, commit_hour_variance, fatigue_index
+M18-T016	cmmi	flaky_tests	TABLE	Registry of non-deterministic tests	M18-F016	test_id, test_name, last_flaky_date, flake_count, total_runs
+M18-T017	cmmi	sast_findings	TABLE	Static Application Security Testing results	M18-F017	finding_id, timestamp, scanner_name, severity, file_path, line, status (TP/FP)	FOREIGN KEY (status)
+M18-T018	cmmi	dependency_vulnerabilities	TABLE	Known CVEs in dependencies	M18-F018	cve_id, dependency_name, installed_version, fixed_version, severity_score
+M18-T019	cmmi	process_capability_indices	TABLE	Cpk values for critical processes	M18-F019	process_name, cpk, timestamp, spec_lower, spec_upper	CHECK (cpk > 0)
+M18-T020	cmmi	build_failure_predictions	TABLE	ML predictions for build failures	M18-F020	build_id, prediction (Success/Fail), confidence, primary_cause_feature
+M18-T021	cmmi	rollback_decisions	TABLE	Logs of automated rollback triggers	M18-F021	incident_id, timestamp, deployment_id, trigger_metric, decision (Rollback)
+M18-T022	cmmi	sprint_burndowns	TABLE	Daily burndown data	M18-F022	sprint_id, date, remaining_points, ideal_remaining
+M18-T023	cmmi	code_duplications	TABLE	Instances of duplicate code	M18-F023	duplication_id, file_a, file_b, lines_affected, similarity_score
+M18-T024	cmmi	security_policy_violations	TABLE	Logs of hardcoded secrets or insecure APIs	M18-F024	violation_id, commit_id, scanner, policy_rule, status
+M18-T025	cmmi	pipeline_efficiency	TABLE	Metrics on CI/CD pipeline stage duration	M18-F025	pipeline_id, stage_name, duration_seconds, wait_time_seconds
+M18-T026	cmmi	incident_mttr_predictions	TABLE	Predicted time to resolve incidents	M18-F026	incident_id, predicted_mttr_minutes, actual_mttr_minutes, model_version
+M18-T027	cmmi	deployments	TABLE	Master record of all deployments	M18-F027	deployment_id, timestamp, environment, release_id, success_flag, incident_flag
+M18-T028	cmmi	author_reputation	TABLE	Scores based on author experience and history	M18-F030	author_id, reputation_score, commits_count, defect_introduction_rate
+M18-T029	cmmi	retrospective_summaries	TABLE	AI-generated sprint summaries	M18-F031	sprint_id, summary_text, action_items_json, generated_at
+M18-T030	cmmi	defect_aging	TABLE	Tracks age of open defects	M18-F032	defect_id, open_date, current_age_days, category_bucket
+M18-T031	cmmi	test_execution_times	TABLE	Duration of individual test cases	M18-F033	test_id, suite_name, execution_time_ms, timestamp
+M18-T032	cmmi	arch_violations	TABLE	Architecture compliance violations	M18-F034	violation_id, layer_from, layer_to, severity, timestamp
+M18-T033	cmmi	api_contract_drifts	TABLE	Differences between spec and implementation	M18-F035	endpoint_id, spec_hash, impl_hash, drift_detected_flag
+M18-T034	cmmi	pr_cognitive_load	TABLE	Estimated complexity for reviewers	M18-F036	pr_id, cognitive_load_score, files_changed, logical_complexity
+M18-T035	cmmi	merge_conflict_predictions	TABLE	Prediction of merge conflicts	M18-F037	branch_id, target_branch, conflict_probability, last_updated
+M18-T036	cmmi	onboarding_metrics	TABLE	Time-to-first-commit for new hires	M18-F038	developer_id, start_date, first_commit_date, days_to_first_commit
+M18-T037	cmmi	license_compliance	TABLE	Scan results for open source licenses	M18-F039	dependency_id, license_type, compliance_status, risk_level
+M18-T038	cmmi	doc_coverage	TABLE	Documentation coverage stats	M18-F040	module_name, doc_percent, last_analyzed
+M18-T039	cmmi	dead_code_analysis	TABLE	Identified unused code blocks	M18-F041	file_path, function_name, last_called_date, status
+M18-T040	cmmi	sql_performance	TABLE	Performance stats for SQL queries	M18-F042	query_hash, avg_duration_ms, call_count, timestamp
+M18-T041	cmmi	memory_leak_simulation	TABLE	Results of memory analysis simulations	M18-F043	simulation_id, module_name, predicted_leak_rate, confidence
+M18-T042	cmmi	thread_safety_warnings	TABLE	Potential race conditions detected	M18-F044	warning_id, file_path, line_number, race_condition_type
+M18-T043	cmmi	req_traceability	TABLE	Links requirements to code/tests	M18-F045	req_id, artifact_type, artifact_id, coverage_status
+M18-T044	cmmi	skill_gaps	TABLE	Identified gaps in team skills	M18-F046	skill_name, required_level, current_avg_level, gap_severity
+M18-T045	cmmi	meeting_load	TABLE	Time spent in meetings per person	M18-F047	person_id, week_start, total_hours_meeting, total_hours_work
+M18-T046	cmmi	remote_collab_index	TABLE	Metrics on remote team efficiency	M18-F048	team_id, timezone_overlap, async_comm_score
+M18-T047	cmmi	code_ownership	TABLE	Ownership distribution per file	M18-F049	file_path, primary_owner_id, bus_factor
+M18-T048	cmmi	release_notes	TABLE	Auto-generated release notes	M18-F050	release_id, note_content, generated_at, sources_used
+M18-T049	cmmi	slo_error_budgets	TABLE	Error budget state for various SLOs	M18-F051	slo_name, current_budget_pct, target_pct, period_start
+M18-T050	cmmi	risk_hotspots	TABLE	Heatmap data for risky files	M18-F053	file_path, defect_count, churn_score, risk_score
+M18-T051	cmmi	branch_lifetimes	TABLE	Duration of feature branches	M18-F056	branch_id, created_at, merged_at, lifetime_hours
+M18-T052	cmmi	pr_sizes	TABLE	Size of pull requests	M18-F057	pr_id, lines_changed, files_changed, size_category
+M18-T053	cmmi	external_api_latency	TABLE	Latency of third-party APIs	M18-F060	api_name, endpoint, latency_p50, latency_p99, timestamp
+M18-T054	cmmi	job_skew	TABLE	Data skew metrics for batch jobs	M18-F061	job_id, task_id, input_rows, duration_sec, skew_factor
+M18-T055	cmmi	migration_risks	TABLE	Risk assessment for DB migrations	M18-F062	migration_id, risk_score, impact_analysis, blocking_flag
+M18-T056	cmmi	feature_flags	TABLE	Inventory of feature flags	M18-F063	flag_name, created_date, last_used_date, status
+M18-T057	cmmi	ab_test_results	TABLE	Statistical results of A/B tests	M18-F064	experiment_id, variant, conversion_rate, p_value, significance
+M18-T058	cmmi	feedback_correlation	TABLE	Correlation between releases and user feedback	M18-F065	release_id, sentiment_score, feedback_volume, correlation_coef
+M18-T059	cmmi	container_vulnerabilities	TABLE	Security scan results for images	M18-F067	image_id, cve_id, severity, package_name
+M18-T060	cmmi	iac_drift	TABLE	Drift between IaC and real infra	M18-F068	resource_id, drift_type, detected_at
+M18-T061	cmmi	cost_metrics	TABLE	Detailed cost breakdown	M18-F069	resource_id, cost_usd, date, transaction_count
+M18-T062	cmmi	accessibility_scans	TABLE	Results of accessibility scans	M18-F071	page_url, violation_count, wcag_level, timestamp
+M18-T063	cmmi	mobile_performance	TABLE	App performance metrics (Crash free users)	M18-F074	app_version, platform, crash_free_users, timestamp
+M18-T064	cmmi	pii_access_logs	TABLE	Audit log for PII access	M18-F080	access_id, user_id, data_type, timestamp, justification
+M18-T065	cmmi	consent_records	TABLE	User consent tracking	M18-F082	user_id, consent_type, granted_at, ip_address
+M18-T066	cmmi	model_bias_metrics	TABLE	Fairness metrics for ML models	M18-F083	model_id, metric_name, group_attribute, bias_score
+M18-T067	cmmi	model_drift	TABLE	Drift metrics for production models	M18-F084	model_id, drift_metric, value, threshold, timestamp
+M18-T068	cmmi	training_data_versions	TABLE	Versioning of training datasets	M18-F085	version_id, dataset_name, storage_path, creation_date
+M18-T069	cmmi	hyperparameters	TABLE	Tuned hyperparameters for models	M18-F087	model_id, param_name, param_value, accuracy_score
+M18-T070	cmmi	shadow_deployments	TABLE	Shadow mode runs	M18-F088	run_id, model_id, shadow_latency, production_latency
+M18-T071	cmmi	chaos_experiments	TABLE	Record of chaos tests	M18-F091	experiment_id, fault_type, blast_radius, result (Pass/Fail)
+M18-T072	cmmi	game_days	TABLE	Disaster recovery drills	M18-F092	drill_id, scenario, date, participants, outcome
+M18-T073	cmmi	runbook_executions	TABLE	Logs of automated runbook runs	M18-F093	runbook_id, trigger_event, start_time, end_time, success
+M18-T074	cmmi	alert_noise	TABLE	Metrics on alerting noise	M18-F094	alert_id, total_fired, actionable_count, noise_ratio
+M18-T075	cmmi	anomaly_baselines	TABLE	Current baseline for anomaly detection	M18-F095	metric_name, baseline_value, seasonality_period
+M18-T076	cmmi	backup_integrity	TABLE	Verification of backup restores	M18-F097	backup_id, restore_test_date, success_flag, size_gb
+M18-T077	cmmi	replication_lag	TABLE	Database replica lag history	M18-F098	replica_name, lag_bytes, timestamp
+M18-T078	cmmi	connection_pools	TABLE	Pool utilization metrics	M18-F099	pool_name, active_connections, idle_connections, timestamp
+M18-T079	cmmi	cache_stats	TABLE	Cache performance metrics	M18-F100	cache_node, hit_count, miss_count, hit_ratio, timestamp
+M18-T080	cmmi	queue_depths	TABLE	Message queue sizes	M18-F101	queue_name, depth, consumer_lag, timestamp
+M18-T081	cmmi	dlq_messages	TABLE	Dead Letter Queue analysis	M18-F102	message_id, original_queue, error_reason, timestamp
+M18-T082	cmmi	throttling_metrics	TABLE	API rate limiting stats	M18-F103	endpoint_id, requests_limit, requests_throttled, timestamp
+M18-T083	cmmi	webhook_deliveries	TABLE	Webhook delivery status	M18-F104	webhook_id, event_id, status_code, attempts, timestamp
+M18-T084	cmmi	idempotency_tests	TABLE	Results of idempotency tests	M18-F105	test_id, endpoint_id, result (Consistent/Inconsistent), timestamp
+M18-T085	cmmi	circuit_breakers	TABLE	State of circuit breakers	M18-F106	service_name, state (Open/Closed), last_transition, reason
+M18-T086	cmmi	slow_queries	TABLE	Log of slow database queries	M18-F109	query_id, query_hash, duration_ms, timestamp
+M18-T087	cmmi	index_usage	TABLE	Usage stats for DB indexes	M18-F110	index_name, index_scans, tuples_read, tuples_fetched
+M18-T088	cmmi	table_bloat	TABLE	Bloat metrics for tables	M18-F111	table_name, bloat_bytes, bloat_percentage
+M18-T089	cmmi	lock_waits	TABLE	Database lock wait events	M18-F112	lock_type, duration_ms, blocked_query
+M18-T090	cmmi	cert_expiry	TABLE	SSL certificate expiry tracking	M18-F114	domain_name, cert_issuer, expiry_date, days_remaining
+M18-T091	cmmi	network_latency	TABLE	Internal network latency checks	M18-F116	source_host, dest_host, latency_ms, packet_loss_pct
+M18-T092	cmmi	disk_io	TABLE	Disk I/O metrics	M18-F118	device_name, read_ops, write_ops, await_time_ms
+M18-T093	cmmi	disk_forecasts	TABLE	Predicted disk full dates	M18-F119	mount_point, forecast_full_date, confidence
+M18-T094	cmmi	thread_dumps	TABLE	Metadata of collected thread dumps	M18-F123	dump_id, server_name, trigger_reason, file_path
+M18-T095	cmmi	heap_dumps	TABLE	Metadata of collected heap dumps	M18-F124	dump_id, server_name, trigger_reason, file_path
+M18-T096	cmmi	gc_metrics	TABLE	Garbage collection stats	M18-F125	server_name, gc_name, pause_time_sec, timestamp
+M18-T097	cmmi	class_loaders	TABLE	JVM class loader counts	M18-F127	server_name, loaded_count, unloaded_count, timestamp
+M18-T098	cmmi	payload_sizes	TABLE	HTTP payload sizes	M18-F129/130	endpoint_id, direction (req/resp), avg_size_bytes, timestamp
+M18-T099	cmmi	geoip_traffic	TABLE	Traffic volume by country	M18-F132	country_code, request_count, timestamp
+M18-T100	cmmi	api_versions	TABLE	Usage of API versions	M18-F133	version, request_count, timestamp
+M18-T101	cmmi	dependency_graph	TABLE	Service dependency relationships	M18-F137	upstream_service, downstream_service, dependency_type
+M18-T102	cmmi	config_drift	TABLE	Application config drift	M18-F140	config_key, env_expected, env_actual, drift_detected
+M18-T103	cmmi	secret_rotation	TABLE	Secret rotation history	M18-F141	secret_name, last_rotated, next_rotation, status
+M18-T104	cmmi	auth_events	TABLE	Authentication and token events	M18-F142	user_id, event_type, token_expiry, timestamp
+M18-T105	cmmi	brute_force_attempts	TABLE	Logs of failed login attempts	M18-F143	ip_address, username, attempt_count, blocked_flag
+M18-T106	cmmi	ddos_signatures	TABLE	DDoS attack signatures detected	M18-F144	signature_id, attack_type, requests_blocked, timestamp
+M18-T107	cmmi	waf_rules	TABLE	Web App Firewall rules	M18-F145	rule_id, signature, source, active_flag, updated_at
+M18-T108	cmmi	access_reviews	TABLE	Periodic access review records	M18-F147	review_id, reviewer_id, grant_id, decision, timestamp
+M18-T109	cmmi	sod_violations	TABLE	Separation of Duties violations	M18-F148	user_id, conflicting_role_count, violation_date
+M18-T110	cmmi	vendor_risks	TABLE	Vendor risk assessments	M18-F150	vendor_id, risk_score, assessment_date, category
+M18-T111	cmmi	sast_false_positives	TABLE	Feedback loop for SAST	M18-F151	finding_id, user_feedback, timestamp
+M18-T112	cmmi	dev_surveys	TABLE	Developer satisfaction surveys	M18-F152	survey_id, respondent_id, satisfaction_score, comments
+M18-T113	cmmi	innovation_time	TABLE	Time tracking for R&D	M18-F153	developer_id, hours_rd, hours_feature, week_start
+M18-T114	cmmi	cost_anomalies	TABLE	Anomalies in cloud billing	M18-F157	anomaly_id, expected_cost, actual_cost, variance_pct
+M18-T115	cmmi	reserved_instances	TABLE	Utilization of reserved instances	M18-F158	instance_id, type, utilization_pct, coverage
+M18-T116	cmmi	idle_resources	TABLE	Detected idle resources	M18-F159	resource_id, type, last_active_date, estimated_cost_month
+M18-E001	cmmi	defect_severity_enum	ENUM	Severity levels for defects	M18-T006	'Critical', 'High', 'Medium', 'Low'
+M18-E002	cmmi	sentiment_label_enum	ENUM	Labels for sentiment analysis	M18-T008	'Positive', 'Neutral', 'Negative'
+M18-E003	cmmi	finding_status_enum	ENUM	Status of security findings	M18-T017	'True Positive', 'False Positive', 'Pending'
+M18-E004	cmmi	deployment_status_enum	ENUM	Status of a deployment	M18-T027	'Success', 'Failed', 'Rolled Back'
+M18-E005	cmmi	license_risk_enum	ENUM	Risk levels for licenses	M18-T039	'High', 'Medium', 'Low', 'Approved'
+M18-E006	cmmi	circuit_state_enum	ENUM	States for circuit breakers	M18-T106	'Closed', 'Open', 'Half-Open'
+M18-V001	cmmi	v_spc_dashboard	VIEW	Aggregates SPC metrics for dashboard	M18-F003	SELECT metric_name, AVG(value), current_limit FROM ...
+M18-V002	cmmi	v_defect_trend	VIEW	Trend analysis of defects	M18-F006	SELECT date_trunc('week', timestamp), COUNT(*) FROM defect_records
+M18-V003	cmmi	v_release_risk_board	VIEW	Latest risk scores for active releases	M18-F014	SELECT release_id, risk_score FROM release_risk_scores
+M18-V004	cmmi	v_team_velocity	VIEW	Calculated velocity per team	M18-F005	SELECT team_id, sprint_id, story_points_completed
+M18-V005	cmmi	v_alert_summary	VIEW	Summary of recent alerts	M18-F094	SELECT alert_name, COUNT(*), AVG(noise_ratio)
+M18-P001	cmmi	sp_calculate_process_capability	PROCEDURE	Calculates Cpk for a given metric	M18-F019	IN metric_name, OUT cpk_value
+M18-P002	cmmi	sp_update_control_limits	PROCEDURE	Recalculates UCL/LCL based on recent data	M18-F003	IN metric_name, IN sample_size
+M18-P003	cmmi	sp_trigger_retrospective	PROCEDURE	Initiates workflow for retrospective generation	M18-F031	IN sprint_id
+M18-P004	cmmi	sp_archive_metrics	PROCEDURE	Archives raw metrics older than 1 year	M18-F096	IN cutoff_date
+M18-P005	cmmi	sp_purge_retention_data	PROCEDURE	Deletes data past retention policy (GDPR)	M18-F011	IN data_type, IN retention_period
+M18-J001	cmmi	metric_tags	JUNCTION	Links metrics to tags	M18-T001	metric_raw_data_id, tag_id
+M18-J002	cmmi	defect_commits	JUNCTION	Links defects to responsible commits	M18-T006	defect_id, commit_id
+M18-J003	cmmi	feature_mappings	JUNCTION	Maps features to DB objects	M18-T001	feature_id, object_id
+M18-J004	cmmi	role_permissions	JUNCTION	Maps roles to permissions	M18-T108	role_id, permission_id
+M18-J005	cmmi	incident_analysis	JUNCTION	Links incidents to 5-why analyses	M18-T012	incident_id, analysis_id
+M18-T116	cmmi	capacity_recommendations	TABLE	AI recommendations for scaling	M18-F160	resource_type, current_capacity, recommended_capacity, confidence
+M18-T117	cmmi	model_training_runs	TABLE	Log of model training runs	M18-F087	run_id, model_name, parameters_json, start_time, end_time, accuracy
+M18-T118	cmmi	feature_store_syncs	TABLE	Sync status for feature store	M18-F086	sync_id, feature_name, training_status, serving_status, last_sync_time
+M18-T119	cmmi	canary_releases	TABLE	Canary release tracking	M18-F089	canary_id, release_id, traffic_percentage, success_rate, timestamp
+M18-T120	cmmi	blue_green_switches	TABLE	Blue-green deployment switches	M18-F090	switch_id, env, active_color, switch_time, duration_seconds
+M18-T121	cmmi	runbook_definitions	TABLE	Definitions of executable runbooks	M18-F093	runbook_id, name, script_path, parameters, triggers
+M18-T122	cmmi	throttling_policies	TABLE	API throttling configurations	M18-F103	endpoint_id, requests_per_second, burst_limit, policy_type
+M18-T123	cmmi	api_endpoints	TABLE	Registry of all API endpoints	M18-F033	endpoint_id, path, method, service_name, deprecated_flag
+M18-T124	cmmi	service_mesh_config	TABLE	Service mesh routing rules	M18-F089	service_name, route_name, destination_weight, headers
+M18-T125	cmmi	ssl_certificates	TABLE	Inventory of SSL certificates	M18-F114	cert_id, common_name, issuer, san_list, expiry_date, status
+M18-T126	cmmi	dns_records	TABLE	DNS record inventory	M18-F115	record_id, domain, type, value, ttl, monitored_flag
+M18-T127	cmmi	user_agents	TABLE	Parsed user agent strings	M18-F131	ua_string, browser, os, device_type, is_bot
+M18-T128	cmmi	distributed_traces	TABLE	Storage for distributed trace spans	M18-F136	trace_id, span_id, parent_id, service_name, operation, duration_ms
+M18-T129	cmmi	feature_dependencies	TABLE	Dependencies between product features	M18-F137	feature_id, depends_on_feature_id
+M18-T130	cmmi	deployment_impacts	TABLE	Calculated impact of a deployment	M18-F138	deployment_id, affected_service_id, impact_type
+M18-T131	cmmi	rollback_impacts	TABLE	Calculated impact of a rollback	M18-F139	deployment_id, affected_service_id, downtime_estimate
+M18-T132	cmmi	security_scanners	TABLE	Configured security scanners	M18-F017	scanner_id, name, type, api_endpoint, auth_token
+M18-T133	cmmi	scan_schedules	TABLE	Schedule for recurring scans	M18-F017	schedule_id, scanner_id, target, cron_expression
+M18-T134	cmmi	ci_pipelines	TABLE	Registry of CI/CD pipelines	M18-F001	pipeline_id, name, scm_url, stages_json
+M18-T135	cmmi	pipeline_runs	TABLE	Execution history of pipelines	M18-F001	run_id, pipeline_id, status, start_time, end_time, trigger_source
+M18-T136	cmmi	test_suites	TABLE	Test suites definitions	M18-F009	suite_id, name, type (Unit/Integration/E2E), execution_time
+M18-T137	cmmi	test_results	TABLE	Results of test executions	M18-F009	result_id, suite_id, run_id, test_name, status, duration_ms
+M18-T138	cmmi	code_reviews_comments	TABLE	Comments on code reviews	M18-F011	comment_id, review_id, author_id, text, timestamp
+M18-T139	cmmi	issue_tracker_config	TABLE	Config for Jira/Bugzilla integration	M18-F001	tracker_id, type, url, project_key, auth_token
+M18-T140	cmmi	external_issues	TABLE	Imported issues from external trackers	M18-F001	external_id, tracker_id, summary, status, severity, created_date
+M18-T141	cmmi	sprint_backlog	TABLE	Items in a sprint backlog	M18-F022	item_id, sprint_id, story_points, status
+M18-T142	cmmi	team_members	TABLE	Mapping of users to teams	M18-F045	user_id, team_id, role
+M18-T143	cmmi	work_items	TABLE	Generic work items (Features/Bugs/Debt)	M18-F045	item_id, type, title, description, assignee_id, status
+M18-T144	cmmi	repositories	TABLE	Git repositories metadata	M18-F001	repo_id, url, language, main_branch
+M18-T145	cmmi	commits	TABLE	Git commit metadata	M18-F007	commit_id, repo_id, hash, author_id, timestamp, message
+M18-T146	cmmi	pull_requests	TABLE	Pull Request metadata	M18-F057	pr_id, repo_id, source_branch, target_branch, title, status, created_at
+M18-T147	cmmi	pr_commits	TABLE	Link PR to Commits	M18-F057	pr_id, commit_id
+M18-T148	cmmi	pr_files	TABLE	Files changed in a PR	M18-F057	pr_file_id, pr_id, file_path, added_lines, deleted_lines
+M18-T149	cmmi	incidents	TABLE	Operational incidents	M18-F012	incident_id, severity, title, description, created_at, resolved_at
+M18-T150	cmmi	incident_updates	TABLE	Timeline updates for incidents	M18-F012	update_id, incident_id, author_id, message, timestamp
+M18-T151	cmmi	incident_tags	TABLE	Tags for incidents	M18-T149	incident_id, tag_name
+M18-T152	cmmi	error_budget_policies	TABLE	Policies defining error budgets	M18-F051	policy_id, slo_name, target_budget, window_hours
+M18-T153	cmmi	alert_rules	TABLE	Configuration of alerting rules	M18-F094	rule_id, name, metric_name, condition, threshold, severity
+M18-T154	cmmi	alert_firings	TABLE	History of alert firings	M18-F094	firing_id, rule_id, fired_at, resolved_at, acknowledged_by
+M18-T155	cmmi	notification_channels	TABLE	Channels for alerts (Slack, Email)	M18-F094	channel_id, type, endpoint, config_json
+M18-T156	cmmi	alert_routing	TABLE	Maps alerts to channels	M18-F094	rule_id, channel_id
+M18-T157	cmmi	on_call_schedules	TABLE	On-call rotation schedules	M18-F094	schedule_id, rotation_name, timezone, current_user_id
+M18-T158	cmmi	escalation_policies	TABLE	Escalation rules for unacknowledged alerts	M18-F094	policy_id, schedule_id, wait_minutes
+M18-T159	cmmi	change_requests	TABLE	Formal change requests for production	M18-F027	change_id, title, description, requester_id, approved_by, status
+M18-T160	cmmi	change_approvals	TABLE	Approval records for changes	M18-F159	approval_id, change_id, approver_id, decision, timestamp
+M18-T161	cmmi	change_risk_assessments	TABLE	Risk assessment linked to change request	M18-F014	assessment_id, change_id, risk_score, mitigations
+M18-T162	cmmi	compliance_frameworks	TABLE	Compliance standards (SOC2, ISO)	M18-F146	framework_id, name, version, description
+M18-T163	cmmi	compliance_controls	TABLE	Controls within frameworks	M18-F146	control_id, framework_id, control_code, description
+M18-T164	cmmi	control_mappings	TABLE	Maps technical controls to compliance controls	M18-F146	technical_control_id, compliance_control_id
+M18-T165	cmmi	compliance_evidence	TABLE	Evidence files for compliance	M18-F146	evidence_id, control_id, file_path, upload_date, uploaded_by
+M18-T166	cmmi	audit_logs	TABLE	General audit trail for system	M18-T099	log_id, actor_id, action, resource_type, resource_id, timestamp
+M18-T167	cmmi	users	TABLE	System users	M18-T142	user_id, username, email, full_name, department
+M18-T168	cmmi	roles	TABLE	User roles	M18-T108	role_id, name, description
+M18-T169	cmmi	permissions	TABLE	Granular permissions	M18-T108	permission_id, resource, action
+M18-T170	cmmi	role_permissions	TABLE	Granting permissions to roles	M18-T108	role_id, permission_id
+M18-T171	cmmi	user_roles	TABLE	Assigning roles to users	M18-T142	user_id, role_id, assigned_at, expires_at
+M18-T172	cmmi	sessions	TABLE	Active user sessions	M18-T149	session_id, user_id, token, created_at, last_activity, expires_at
+M18-T173	cmmi	teams	TABLE	Engineering teams	M18-T142	team_id, name, manager_id, slack_channel
+M18-T174	cmmi	projects	TABLE	Projects or Products	M18-T143	project_id, name, description, repo_id, owner_id
+M18-T175	cmmi	milestones	TABLE	Project milestones	M18-T174	milestone_id, project_id, name, target_date, status
+M18-T176	cmmi	releases	TABLE	Product releases	M18-F050	release_id, project_id, name, version, release_date, status
+M18-T177	cmmi	release_items	TABLE	Items included in a release	M18-T176	release_id, item_id
+M18-T178	cmmi	environments	TABLE	Deployment environments	M18-T027	env_id, name, type (Dev/Stage/Prod), region
+M18-T179	cmmi	config_vars	TABLE	Configuration variables	M18-F140	var_id, env_id, key, value, is_secret
+M18-T180	cmmi	config_history	TABLE	History of config changes	M18-F140	history_id, var_id, old_value, new_value, changed_by, changed_at
+M18-T181	cmmi	secrets	TABLE	Encrypted secrets storage	M18-F141	secret_id, name, encrypted_value, version, rotation_interval
+M18-T182	cmmi	secret_versions	TABLE	Versions of secrets	M18-F141	version_id, secret_id, encrypted_value, created_at
+M18-T183	cmmi	assets	TABLE	Digital assets (Images, Docs)	M18-F146	asset_id, name, type, storage_path, uploaded_by
+M18-T184	cmmi	tasks	TABLE	Background task queue	M18-F001	task_id, type, payload, status, queued_at, started_at, completed_at
+M18-T185	cmmi	task_results	TABLE	Results of background tasks	M18-F184	result_id, task_id, output, error_message, return_code
+M18-T186	cmmi	annotations	TABLE	User annotations on metrics	M18-T001	annotation_id, metric_name, timestamp, text, author_id
+M18-T187	cmmi	dashboards	TABLE	Dashboard definitions	M18-F156	dashboard_id, name, owner_id, config_json
+M18-T188	cmmi	reports	TABLE	Generated reports	M18-F146	report_id, name, type, generated_at, file_path, params
+M18-T189	cmmi	subscriptions	TABLE	Report subscriptions	M18-F188	subscription_id, report_id, user_id, schedule
+M18-T190	cmmi	webhooks	TABLE	Outgoing webhook definitions	M18-F104	webhook_id, url, events, secret, active
+M18-T191	cmmi	api_keys	TABLE	API keys for external access	M18-F103	key_id, user_id, hashed_key, scopes, expires_at
+M18-T192	cmmi	audit_events	TABLE	Detailed audit events	M18-T166	event_id, event_type, actor_ip, user_agent, details_json
+M18-T193	cmmi	threat_models	TABLE	Threat model documents	M18-F020	model_id, asset_id, threats_json, mitigations_json
+M18-T194	cmmi	pen_tests	TABLE	Penetration test records	M18-F020	test_id, date, tester, summary, findings_count
+M18-T195	cmmi	vulnerabilities	TABLE	General vulnerability tracking	M18-T018	vuln_id, title, description, severity, status, discovered_date
+M18-T196	cmmi	vuln_scans	TABLE	Vulnerability scan executions	M18-F017	scan_id, scanner_id, start_time, end_time, status
+M18-T197	cmmi	vuln_findings	TABLE	Findings from a scan	M18-F017	finding_id, scan_id, vuln_id, confidence
+M18-T198	cmmi	remediation_plans	TABLE	Plans to fix vulnerabilities	M18-T018	plan_id, vuln_id, assignee_id, target_date, status
+M18-T199	cmmi	risk_registers	TABLE	Enterprise risk register	M18-F014	risk_id, category, likelihood, impact, score, owner_id
+M18-T200	cmmi	risk_mitigations	TABLE	Mitigations for risks	M18-F199	mitigation_id, risk_id, description, effectiveness
+M18-T201	cmmi	process_baselines	TABLE	Historical baselines for process metrics	M18-F003	baseline_id, metric_name, baseline_value, valid_from, valid_to
+M18-T202	cmmi	sigma_levels	TABLE	Calculated Sigma levels (DPMO) for processes	M18-F019	process_name, sigma_score, dpmo, calculation_date	CHECK (sigma_score >= 0)
+M18-T203	cmmi	training_catalog	TABLE	Catalog of available training courses	M18-F046	course_id, title, description, duration_hours, delivery_mode
+M18-T204	cmmi	training_records	TABLE	Records of training completed by staff	M18-F046	record_id, user_id, course_id, completion_date, score, certificate_url	UNIQUE(user_id, course_id)
+M18-T205	cmmi	skill_inventory	TABLE	Inventory of skills per user	M18-F046	user_id, skill_name, proficiency_level, last_verified_date
+M18-T206	cmmi	process_asset_library	TABLE	Repository for process documents/templates	M18-F010	asset_id, name, type (Template/Guide), version, file_path, approval_status
+M18-T207	cmmi	tailoring_guidelines	TABLE	Guidelines for tailoring standard processes	M18-F140	guideline_id, project_type, applicable_standards, tailoring_options
+M18-T208	cmmi	checklist_templates	TABLE	Templates for review checklists	M18-F011	template_id, review_type, section_json, created_by
+M18-T209	cmmi	checklist_instances	TABLE	Usage of checklists in actual reviews	M18-F011	instance_id, template_id, pr_id, item_json, passed_flag
+M18-T210	cmmi	gate_reviews	TABLE	Definition of Phase Gates	M18-F159	gate_id, phase_name, criteria_json, approver_role
+M18-T211	cmmi	gate_review_decisions	TABLE	History of gate decisions	M18-F159	decision_id, gate_id, project_id, decision (Pass/Fail/Hold), comments, timestamp
+M18-T212	cmmi	corrective_actions	TABLE	Corrective Action Requests (CAR)	M18-F012	car_id, source_incident_id, description, owner_id, due_date, status
+M18-T213	cmmi	preventive_actions	TABLE	Preventive actions to stop future issues	M18-F012	pa_id, risk_id, description, owner_id, implementation_date
+M18-T214	cmmi	lessons_learned	TABLE	Repository of lessons learned	M18-F031	lesson_id, project_id, context, lesson_learned, impact, created_at
+M18-T215	cmmi	best_practices	TABLE	Approved best practices for reuse	M18-F154	practice_id, domain, description, evidence_url, adoption_count
+M18-T216	cmmi	process_assessments	TABLE	Internal process assessments (e.g., SCAMPI)	M18-F146	assessment_id, assessor_id, scope, date, maturity_level_target
+M18-T217	cmmi	assessment_findings	TABLE	Findings from process assessments	M18-F146	finding_id, assessment_id, process_area, strength_weakness, recommendation
+M18-T218	cmmi	improvement_proposals	TABLE	Process Improvement Proposals (PIPs)	M18-F153	pip_id, proposer_id, title, problem_statement, proposed_solution
+M18-T219	cmmi	pip_status_history	TABLE	Status tracking for PIPs	M18-F153	history_id, pip_id, status, date, comments, changed_by
+M18-T220	cmmi	pilot_projects	TABLE	Pilot projects for testing new processes	M18-F153	pilot_id, pip_id, name, start_date, end_date, success_metrics
+M18-T221	cmmi	pilot_results	TABLE	Results of pilot projects	M18-F153	result_id, pilot_id, metric_before, metric_after, qualitative_feedback
+M18-T222	cmmi	org_process_metrics	TABLE	High-level organizational process performance	M18-F156	metric_id, name, description, aggregation_method, target_value
+M18-T223	cmmi	quality_objectives	TABLE	Strategic Quality Objectives	M18-F156	objective_id, name, target_value, measurement_period, owner_id
+M18-T224	cmmi	quality_trend_analysis	TABLE	Trend data against quality objectives	M18-F156	trend_id, objective_id, date, actual_value, variance
+M18-T225	cmmi	audit_schedules	TABLE	Schedule of internal/external audits	M18-F146	schedule_id, audit_type, auditor_id, target_date, scope
+M18-T226	cmmi	audit_reports	TABLE	Final audit reports	M18-F146	report_id, schedule_id, findings_json, rating, submitted_date
+M18-T227	cmmi	compliance_gaps	TABLE	Identified gaps in compliance	M18-F146	gap_id, framework_id, control_id, description, severity
+M18-T228	cmmi	gap_remediation	TABLE	Remediation plans for gaps	M18-F146	remediation_id, gap_id, action_plan, owner_id, target_date, status
+M18-T229	cmmi	vendor_contract_terms	TABLE	Terms of vendor contracts related to SLA/Security	M18-F150	contract_id, vendor_id, sla_terms, security_requirements, expiry_date
+M18-T230	cmmi	vendor_performance	TABLE	Vendor performance tracking	M18-F150	perf_id, vendor_id, period, availability_score, quality_score, cost_score
+M18-T231	cmmi	sla_definitions	TABLE	Service Level Agreements (Internal/External)	M18-T234	sla_id, service_name, metric, threshold, penalty_clause
+M18-T232	cmmi	sla_breaches	TABLE	Records of SLA breaches	M18-T234	breach_id, sla_id, breach_date, actual_value, threshold_value
+M18-T233	cmmi	capacity_plans	TABLE	Forward-looking capacity plans	M18-F160	plan_id, period, resource_type, forecasted_demand, proposed_action
+M18-T234	cmmi	technology_radar	TABLE	Tracking emerging technologies	M18-F049	tech_id, name, category (Adopt/Trial/Assess/Hold), rationale, date_added
+M18-T235	cmmi	deprecation_notices	TABLE	Notices for deprecated libs/tools	M18-F018	notice_id, component_name, version, deprecation_date, replacement
+M18-T236	cmmi	cost_allocation_rules	TABLE	Rules for allocating costs to cost centers	M18-F069	rule_id, resource_tag, cost_center_id, allocation_percentage
+M18-T237	cmmi	chargeback_records	TABLE	Records of costs charged back to teams	M18-F069	charge_id, team_id, period, amount_usd, description
+M18-T238	cmmi	carbon_emission_metrics	TABLE	Green IT metrics (CO2e)	M18-F241	metric_id, resource_id, emission_kg_co2e, timestamp
+M18-T239	cmmi	sustainability_targets	TABLE	Green IT targets	M18-F241	target_id, year, emission_target_kg, status
+M18-T240	cmmi	security_incidents	TABLE	Detailed security incident records	M18-F143	incident_id, type, severity, description, containment_status
+M18-T241	cmmi	threat_model_reviews	TABLE	Reviews of threat models	M18-F193	review_id, model_id, reviewer_id, findings, approval_status
+M18-T242	cmmi	pen_test_schedule	TABLE	Schedule of penetration tests	M18-F194	test_id, target_scope, scheduled_date, tester_firm, status
+M18-T243	cmmi	compliance_mapping_matrix	TABLE	Mapping controls to laws/regs	M18-F146	map_id, regulation, control_id, requirement_text
+M18-T244	cmmi	data_classification	TABLE	Classification of data assets	M18-F247	asset_id, classification_level (Public/Confidential), owner_id
+M18-T245	cmmi	privacy_impact_assessments	TABLE	DPIA records	M18-F248	dpia_id, project_name, assessed_by, risk_score, mitigation_plan
+M18-T246	cmmi	data_subject_requests	TABLE	GDPR DSAR tracking	M18-F249	dsar_id, request_type, requester_id, status, completion_date
+M18-T247	cmmi	consent_logs	TABLE	Detailed audit of consents	M18-F082	log_id, user_id, consent_point, action (Grant/Revoke), timestamp
+M18-T248	cmmi	model_features	TABLE	Features used in ML models	M18-F087	feature_id, model_id, feature_name, importance_score, data_type
+M18-T249	cmmi	model_predictions	TABLE	Logged predictions for audit	M18-F084	prediction_id, model_id, input_data_hash, output, confidence, timestamp
+M18-T250	cmmi	feature_importance_history	TABLE	History of feature importance changes	M18-F087	history_id, feature_id, importance_score, timestamp
+M18-T251	cmmi	retraining_triggers	TABLE	Events triggering model retraining	M18-F084	trigger_id, model_id, trigger_type (Drift/Accuracy/Schedule), timestamp
+M18-T252	cmmi	communication_logs	TABLE	Logs of notifications sent (Slack/Email)	M18-F155	log_id, channel_id, recipient, message_id, status
+M18-T253	cmmi	survey_questions	TABLE	Bank of questions for surveys	M18-F152	question_id, text, category, scale_type
+M18-T254	cmmi	survey_responses	TABLE	Individual responses to surveys	M18-F152	response_id, survey_id, user_id, question_id, answer
+M18-T255	cmmi	dashboard_subscriptions	TABLE	User subscriptions to dashboard updates	M18-F156	sub_id, dashboard_id, user_id, frequency (Daily/Weekly)
+M18-T256	cmmi	api_rate_limits	TABLE	Per-client rate limits	M18-F103	client_id, endpoint, limit_per_second, window_seconds
+M18-T257	cmmi	quota_usage	TABLE	Usage of quotas per client	M18-F103	usage_id, client_id, request_count, timestamp
+M18-T258	cmmi	geo_fencing_rules	TABLE	Rules for restricting access by region	M18-F132	rule_id, country_code, action (Allow/Deny), service
+M18-T259	cmmi	ip_reputations	TABLE	Reputation scores of IP addresses	M18-F143	ip_address, reputation_score, last_updated, source
+M18-T260	cmmi	malware_signatures	TABLE	Known malware signatures/files	M18-F145	signature_id, hash_md5, hash_sha1, threat_name
+M18-T261	cmmi	firewall_rules	TABLE	Configuration of firewall rules	M18-F145	rule_id, source, destination, port, action, enabled
+M18-T262	cmmi	firewall_audits	TABLE	Audit trail of firewall changes	M18-F261	audit_id, rule_id, change_type, changed_by, timestamp
+M18-T263	cmmi	dns_blacklists	TABLE	Domains on DNS blacklists	M18-F144	domain_name, list_source, added_date
+M18-T264	cmmi	backup_policies	TABLE	Policies for data backups	M18-F097	policy_id, resource_type, frequency, retention_days, storage_class
+M18-T265	cmmi	backup_jobs	TABLE	Execution of backup jobs	M18-F097	job_id, policy_id, start_time, end_time, status, size_bytes
+M18-T266	cmmi	restore_jobs	TABLE	Execution of restore jobs	M18-F097	job_id, backup_id, target_location, start_time, end_time, status
+M18-T267	cmmi	patch_management	TABLE	OS and application patch status	M18-F018	server_id, patch_id, installed_date, status
+M18-T268	cmmi	vulnerability_scans	TABLE	Scheduled vulnerability scans	M18-F017	scan_id, target, scanner_type, start_time, end_time
+M18-T269	cmmi	scan_results	TABLE	Detailed results of scans	M18-F017	result_id, scan_id, hostname, vulnerability_id, port, protocol
+M18-T270	cmmi	compliance_questionnaires	TABLE	Third-party questionnaires	M18-F150	questionnaire_id, vendor_id, received_date, due_date, status
+M18-T271	cmmi	questionnaire_responses	TABLE	Responses to compliance questionnaires	M18-F270	response_id, question_id, answer, evidence_link
+M18-T272	cmmi	knowledge_base	TABLE	Organizational knowledge base	M18-F206	article_id, title, content, tags, author_id, created_at
+M18-T273	cmmi	kb_feedback	TABLE	User feedback on KB articles	M18-F272	feedback_id, article_id, user_id, rating (1-5), comment
+M18-T274	cmmi	code_refactors	TABLE	Tracking of code refactoring efforts	M18-F055	refactor_id, file_path, reason, complexity_reduction, timestamp
+M18-T275	cmmi	architecture_decisions	TABLE	Architectural Decision Records (ADR)	M18-F034	adr_id, title, context, decision, consequences, date
+M18-T276	cmmi	tech_debt_payments	TABLE	Sprints dedicated to paying tech debt	M18-F010	payment_id, sprint_id, debt_items_addressed, hours_spent
+M18-T277	cmmi	incident_postmortems	TABLE	Storage of postmortem documents	M18-F012	postmortem_id, incident_id, timeline, root_cause, action_items
+M18-T278	cmmi	meeting_notes	TABLE	Notes from engineering meetings	M18-F047	meeting_id, title, date, attendees, notes_url
+M18-T279	cmmi	okrs	TABLE	Objectives and Key Results	M18-F156	okr_id, period, objective, owner_id, progress
+M18-T280	cmmi	key_results	TABLE	Key results linked to OKRs	M18-F279	kr_id, okr_id, description, target_value, current_value
+M18-V006	cmmi	v_org_health_score	VIEW	Aggregates metrics into a single health score	M18-F156	SELECT AVG(score) FROM org_process_metrics
+M18-V007	cmmi	v_compliance_gap_summary	VIEW	Summary of compliance gaps by framework	M18-F146	SELECT framework, COUNT(*) FROM compliance_gaps GROUP BY framework
+M18-V008	cmmi	v_team_velocity_trend	VIEW	3-month trend of team velocity	M18-F022	SELECT team_id, date_trunc('month', week_start), SUM(points) ...
+M18-V009	cmmi	v_risk_heatmap	VIEW	Risk matrix (Likelihood vs Impact)	M18-F199	SELECT likelihood, impact, COUNT(*) FROM risk_registers GROUP BY...
+M18-V010	cmmi	v_training_compliance	VIEW	Compliance with required training	M18-F046	SELECT user_id, COUNT(required_courses) ...
+M18-P006	cmmi	sp_calculate_sigma	PROCEDURE	Calculates Sigma level from defect data	M18-F202	IN process_name, OUT sigma_level
+M18-P007	cmmi	sp_generate_sreport	PROCEDURE	Generates status report for a project	M18-F156	IN project_id, OUT report_json
+M18-P008	cmmi	sp_update_skill_matrix	PROCEDURE	Updates skill matrix based on recent commits	M18-F046	IN user_id
+M18-P009	cmmi	sp_trigger_retraining	PROCEDURE	Triggers model retraining pipeline	M18-F251	IN model_id
+M18-P010	cmmi	sp_archive_old_logs	PROCEDURE	Archives old logs to cold storage	M18-F096	IN cutoff_date
+M18-E007	cmmi	compliance_status_enum	ENUM	Status of compliance gap remediation	M18-F228	'Open', 'In Progress', 'Closed', 'Accepted Risk'
+M18-E008	cmmi	tech_radar_category_enum	ENUM	Categories for Technology Radar	M18-F234	'Adopt', 'Trial', 'Assess', 'Hold'
+M18-E009	cmmi	dsar_status_enum	ENUM	Status of Data Subject Access Requests	M18-F249	'Pending', 'Processing', 'Completed', 'Rejected'
+M18-E010	cmmi	gate_decision_enum	ENUM	Decisions for Phase Gates	M18-F159	'Pass', 'Fail', 'Conditional Pass'
+M18-J006	cmmi	user_skills	JUNCTION	Links users to skills	M18-T205	user_id, skill_id
+M18-J007	cmmi	project_milestones	JUNCTION	Links projects to milestones	M18-F175	project_id, milestone_id
+M18-J008	cmmi	vulnerability_fixes	JUNCTION	Links vulnerabilities to remediation plans	M18-F198	vulnerability_id, plan_id
+M18-J009	cmmi	training_assignments	JUNCTION	Assigns training to roles/users	M18-F046	role_id, course_id
+M18-J010	cmmi	compliance_frameworks_map	JUNCTION	Maps frameworks to controls	M18-F243	framework_id, control_id
+M18-J011	cmmi	okr_key_results	JUNCTION	Links OKRs to Key Results	M18-F280	okr_id, kr_id
+M18-J012	cmmi	survey_questions_map	JUNCTION	Maps questions to a survey	M18-F152	survey_id, question_id
+M18-J013	cmmi	dashboard_widgets	JUNCTION	Maps widgets to dashboards	M18-F187	dashboard_id, widget_id
+M18-J014	cmmi	alert_subscribers	JUNCTION	Users subscribed to alerts	M18-F154	alert_rule_id, user_id
+M18-J015	cmmi	deployment_artifacts	JUNCTION	Links deployments to artifacts	M18-F027	deployment_id, artifact_id
+M18-J016	cmmi	incident_tags_map	JUNCTION	Tags for incidents	M18-F149	incident_id, tag_id
+M18-J017	cmmi	change_reviewers	JUNCTION	Reviewers for a change request	M18-F159	change_id, user_id
+M18-J018	cmmi	asset_tags	JUNCTION	Tags for assets	M18-F244	asset_id, tag_id
+M18-J019	cmmi	risk_mitigation_map	JUNCTION	Links risks to mitigations	M18-F199	risk_id, mitigation_id
+M18-J020	cmmi	audit_scoped_resources	JUNCTION	Resources in scope for an audit	M18-F225	audit_id, resource_id

@@ -1,0 +1,652 @@
+9.	Module M09	Granular Access Control (RBAC + ABAC)
+a.	Summary
+the Granular Access Control system, serves as the foundational security gatekeeper for the PARI (Privacy Preserving Payment Anonymous Regulatory Insights) platform. It represents a paradigm shift from traditional, static identity management to a dynamic, context-aware, and cryptographically secure authorization framework. In a financial ecosystem where the tension between privacy (payer anonymity) and accountability (payee identification) is paramount, M09 ensures that the right entities access the right data at the right time, strictly enforcing the principle of least privilege and zero trust.
+
+At its core, M09 implements a hybrid model combining Role-Based Access Control (RBAC) for structural hierarchy and Attribute-Based Access Control (ABAC) for granular, contextual decision-making. While RBAC efficiently manages broad functional assignments (e.g., "Cashier," "Auditor," "Compliance Officer"), ABAC introduces the necessary nuance required by international regulations, evaluating attributes such as user clearance, data sensitivity, geographical jurisdiction, time of access, and device trust score. For instance, a Tax Auditor may possess the role to view transactions, but an ABAC policy will restrict their access solely to records within their legal jurisdiction and only during business hours, unless a specific, cryptographically signed emergency override is invoked.
+
+A distinguishing feature of M09 is its deep integration with PostgreSQL Row-Level Security (RLS). Unlike application-layer security which can be bypassed, M09 pushes enforcement down to the database layer. Security policies are compiled directly into the database query planner, ensuring that even if the application server is compromised, the database will refuse to return unauthorized rows. This "defense-in-depth" approach is critical for protecting the unlinkability of payer identities. The system utilizes advanced masking techniques, dynamically redacting PII (Personally Identifiable Information) based on the requester's privileges, ensuring that a merchant sees payment details necessary for settlement but never the payer’s legal identity.
+
+The module is designed with a "Zero Standing Privilege" philosophy. Users rarely hold persistent high-privilege access. Instead, M09 orchestrates a Just-In-Time (JIT) access model. When an administrator needs to perform a sensitive task, they must request access, providing a business justification. The system, integrated with EU Digital Identity Wallets (eIDAS 2.0), validates the user’s identity via strong cryptographic proof (e.g., Qualified Web Authentication). Upon approval, temporary credentials are issued with a strict expiration window, automatically revoking access upon task completion.
+
+Integration with eIDAS 2.0 transforms the module into a sovereign identity gateway. It accepts digital signatures and attributes from national identity wallets, verifying them against trusted European Member State registries. This eliminates the reliance on static passwords, replacing them with phishing-resistant, hardware-backed cryptographic assertions. Furthermore, the module features an AI-driven behavioral analysis engine that establishes a baseline of normal activity for every identity. It detects anomalies—such as impossible travel trajectories, bulk data exports from a new device, or access attempts during non-working hours—and triggers step-up authentication challenges or automatic account lockdowns.
+
+From a governance perspective, M09 is fully CMMI Level 5 compliant. It provides immutable audit trails of every authorization decision, every policy change, and every data access attempt. This allows independent auditors to reconstruct the "state of access" at any point in the past, a requirement for anti-corruption investigations and financial forensics. By unifying rigorous access control with privacy-preserving technology, Module M09 ensures that PARI remains a fortress of trust, enabling the free flow of value while guaranteeing the integrity and confidentiality of the ecosystem.
+
+b.	Scope
+
+The scope of Module M09 encompasses the entire Identity and Access Management (IAM) lifecycle within the PARI ecosystem, specifically focusing on authorization (AuthZ) and its integration with authentication (AuthN).
+
+
+
+    In Scope:
+         Design and implementation of hybrid RBAC/ABAC policy models.
+         PostgreSQL RLS policy definition, enforcement, and management.
+         Integration with eIDAS 2.0 European Digital Identity Wallets for strong authentication.
+         Just-In-Time (JIT) and Zero Standing Privilege workflow orchestration.
+         Dynamic data masking and column-level security.
+         Centralized audit logging and forensic trail generation for access events.
+         Administration interfaces for policy creation, simulation, and governance.
+         AI/ML-driven anomaly detection for behavioral security.
+         Cryptographic key management integration for session signing.
+
+
+
+    Out of Scope:
+         Core Identity Provider (IdP) functionality (e.g., user registration, password storage—which is handled by Module M05 or external IdPs).
+         Network-level security (Firewalls, DDoS protection—handled by Infrastructure).
+         Application-level UI rendering (handled by Module M04).
+
+
+c.	Business Case
+
+The scope of Module M09 encompasses the entire Identity and Access Management (IAM) lifecycle within the PARI ecosystem, specifically focusing on authorization (AuthZ) and its integration with authentication (AuthN).
+
+
+
+    In Scope:
+         Design and implementation of hybrid RBAC/ABAC policy models.
+         PostgreSQL RLS policy definition, enforcement, and management.
+         Integration with eIDAS 2.0 European Digital Identity Wallets for strong authentication.
+         Just-In-Time (JIT) and Zero Standing Privilege workflow orchestration.
+         Dynamic data masking and column-level security.
+         Centralized audit logging and forensic trail generation for access events.
+         Administration interfaces for policy creation, simulation, and governance.
+         AI/ML-driven anomaly detection for behavioral security.
+         Cryptographic key management integration for session signing.
+
+
+
+    Out of Scope:
+         Core Identity Provider (IdP) functionality (e.g., user registration, password storage—which is handled by Module M05 or external IdPs).
+         Network-level security (Firewalls, DDoS protection—handled by Infrastructure).
+         Application-level UI rendering (handled by Module M04).
+
+
+
+d.	KPIs
+
+     Mean Time to Detect (MTTD) Unauthorized Access: < 1 minute (via AI anomaly detection).
+     Policy Evaluation Latency: < 5ms (p99) for real-time transaction filtering.
+     False Positive Rate (Access Denials): < 0.01% (preventing business disruption).
+     Zero Standing Privilege Adherence: 100% of admin accounts require JIT elevation.
+     Audit Log Completeness: 100% of access decisions immutably recorded.
+     JIT Access Revocation Latency: < 500ms (time to revoke active session on privilege loss).
+     Malicious Access Attempt Block Rate: > 99.9%.
+
+
+e.	Stakeholder Insights
+
+Stakeholder	Concern	Implications
+Internal Admins	"I need access to do my job, but I don't want to be blamed for a breach."	Requires JIT workflows that provide clear audit trails for their actions, protecting them from liability while enabling productivity.
+Regulators / Auditors	"Can you prove who accessed what data and when?"	Requires immutable, queryable logs with cryptographic proof of integrity to satisfy GDPR and financial audit requirements.
+Merchants	"I don't want my competitors seeing my sales data."	Requires strict multi-tenant data isolation enforced at the database level to prevent data leakage between merchants.
+Payers (Citizens)	"Is my financial history being spied on by bank employees?"	Requires strict anonymity enforcement and comprehensive masking to prevent insiders from resolving payer identities.
+Data Protection Officers (DPO)	"Are we respecting cross-border data transfer laws?"	Requires dynamic enforcement of data residency and jurisdiction policies (ABAC) to block illegal international access.
+
+
+f.	Knowledge Representation Graph (mermaid.js)
+graph TD
+    subgraph "Identity Layer"
+        User[User / System]
+        EIDAS[eIDAS 2.0 Wallet]
+        AppClient[PARI App / API Gateway]
+    end
+
+    subgraph "M09: Access Control Module"
+        AuthN[Authentication Service]
+        ContextEngine[Context & Attribute Engine]
+        PolicyEngine[Policy Decision Point PDP]
+        PolicyRepo[Policy Repository RBAC/ABAC]
+        JITEngine[JIT Access Orchestrator]
+        AIEngine[AI Anomaly Detection]
+    end
+
+    subgraph "Data Layer"
+        PG[(PostgreSQL Database)]
+        RLS[Row Level Security Policies]
+        AuditLog[Immutable Audit Log]
+    end
+
+    User --1. Credential/Token--> AuthN
+    EIDAS --2. Qualified Signature--> AuthN
+    AuthN --3. Auth Token + Attributes--> AppClient
+    AppClient --4. Access Request Context--> PolicyEngine
+
+    ContextEngine --5. Enrich User/Resource/Env Attributes--> PolicyEngine
+    PolicyRepo --6. Load Policies--> PolicyEngine
+    JITEngine --7. Elevate Privileges--> PolicyEngine
+
+    PolicyEngine --8. Allow/Deny Decision--> PG
+    PolicyEngine --9. RLS Filter Constraints--> RLS
+    RLS --10. Filtered Data--> PG
+
+    PG --11. Query Results--> AppClient
+
+    PolicyEngine --12. Log Decision--> AuditLog
+    AIEngine --13. Analyze Logs/Behavior--> PolicyEngine
+    AIEngine --14. Trigger Lock/Step-up--> AuthN
+
+
+g.	Comprehensive List of Features
+
+id	Feature	Description	Business Case	AI/ML Algorithms	KPIs	Primary Users
+F001	Role Definition Framework	CRUD interface for creating hierarchical RBAC roles.	Standardizes job functions across the organization.	None	Role creation time	System Admins
+F002	Permission Granularity	Atomic permissions for every API endpoint and DB operation.	Enables precise capability assembly.	None	Permission count	Architects
+F003	Role Hierarchy Inheritance	Support for nested roles (e.g., Admin > Super-User > User).	Reduces administrative overhead in permission assignment.	Graph Traversal	Depth of tree	Security Engineers
+F004	Dynamic Attribute Ingestion	Ingests user attributes (clearance, dept, location) in real-time.	Essential for ABAC context evaluation.	None	Sync latency < 100ms	Integration Layer
+F005	Environmental Context Tracking	Captures IP, Time, Device Integrity, Geo-location.	Detects impossible travel and anomalous access.	Random Forest	Accuracy > 99%	Security Ops
+F006	PostgreSQL RLS Integration	Automatic generation of RLS policies based on ABAC rules.	Database-level enforcement prevents bypass.	None	Policy sync time	DBAs
+F007	Column-Level Masking	Dynamic redaction of PII columns based on viewer privileges.	Protects privacy while allowing aggregate analysis.	None	Masking overhead < 1ms	Data Analysts
+F008	eIDAS 2.0 Auth Bridge	Validates electronic signatures and attributes from EU Wallets.	Meets regulatory requirements for strong customer authentication.	Cryptographic Verif	Auth success rate	EU Citizens
+F009	Step-Up Authentication	Triggering MFA based on transaction sensitivity or context risk.	Balances UX friction with security needs.	Logistic Regression	Step-up trigger rate	End Users
+F010	Just-In-Time (JIT) Access	Temporary privilege elevation for a limited duration.	Minimizes standing privilege attack surface.	None	Elevation duration	Privileged Users
+F011	JIT Approval Workflow	Multi-level approval chains for high-risk access requests.	Enforces segregation of duties.	None	Approval time	Managers
+F012	Time-Bound Session Enforcement	Hard timeouts for active sessions; auto-revocation.	Prevents session hijacking and zombie sessions.	None	Timeout precision < 1s	All Users
+F013	Geo-Fencing Policies	Denies access requests from unauthorized geographic zones.	Enforces data sovereignty and regional regulations.	Geospatial DB	Geo-lookup latency	Compliance
+F014	Device Trust Verification	Checks device posture (OS version, root detection) before auth.	Reduces risk of compromised endpoint access.	Heuristics Engine	Trust score calculation	End Users
+F015	Immutable Audit Logging	WORM (Write Once Read Many) storage for access events.	Essential for non-repudiation in court/audits.	None	Log integrity check	Auditors
+F016	Access Decision Analytics	Dashboard visualizing allow/deny trends by role.	Identifies policy misconfigurations and friction.	Clustering	Report refresh rate	Security Ops
+F017	Policy Simulation / Dry-Run	Testing policy changes against production data without enforcement.	Prevents accidental lockdowns of production systems.	None	Simulation accuracy	Policy Admins
+F018	Attribute-Based Policy Builder	Visual drag-and-drop interface for creating ABAC rules (IF user=X AND resource=Y THEN action=Z).	Democratizes security policy creation.	None	Rule complexity score	Compliance Officers
+F019	Break-Glass Emergency Access	Highly monitored, time-limited override for emergencies.	Ensures business continuity during outages/attacks.	Anomaly Detection	Override usage count	Crisis Managers
+F020	Automated De-provisioning	Revoking access immediately upon employee termination/leaver status.	Prevents orphaned account access.	None	Revocation latency	HR / IT
+F021	Session Concurrency Limits	Restricts number of active sessions per user.	Prevents credential sharing and fraud.	None	Violation count	Risk Managers
+F022	Behavioral Biometrics Analysis	Analyzes typing patterns and mouse movement for continuous auth.	Passive detection of session hijacking.	LSTM Neural Net	FAR/FRR rates	End Users
+F023	Policy Conflict Resolution	Engine to resolve conflicting rules (Allow vs Deny).	Ensures deterministic and predictable security behavior.	Bayesian Logic	Conflict rate	Architects
+F024	Fine-Grained API Scope Control	OAuth 2.0 scope validation per API request.	Limits third-party app access to minimal data.	None	Scope validation time	Developers
+F025	Dynamic Jurisdiction Filtering	Hides data rows based on user's legal jurisdiction.	Enforces cross-border data transfer laws (GDPR).	None	Filter efficiency	Legal Counsel
+F026	Consent Management Integration	Respecting user consent choices for data processing.	Legal requirement for GDPR compliance.	None	Consent sync time	DPOs
+F027	Credential Stuffing Defense	Detects rapid failed login attempts across accounts.	Protects against automated brute force attacks.	Random Forest	Detection speed	SecOps
+F028	Peer Group Analysis	Compares user access behavior against similar peers.	Detects anomalous privilege usage (privilege creep).	K-Means Clustering	Alert precision	Insiders Threat Team
+F029	Least Privilege Recommendation	AI suggests removing unused permissions.	Hygiene maintenance to reduce attack surface.	Association Rules	Adoption rate	Admins
+F030	Cryptographic Proof of Authority	Generating signed tokens for access grants.	Prevents token forgery and replay attacks.	None	Key generation time	Security Engineers
+F031	Zero Trust Network Integration	Integration with SPIFFE/SPIRE for mTLS identities.	Extends trust to service-to-service communication.	None	Identity issuance time	Platform Ops
+F032	Offline Policy Evaluation	Caching policies locally for disconnected operations.	Ensures availability for field agents/merchants.	None	Cache hit ratio	Mobile Users
+F033	Audit Log Anonymization	Stripping PII from logs viewed by junior analysts.	Protects privacy within internal security teams.	NER (Named Entity Recog)	Anonymization accuracy	Security Managers
+F034	Recursive Permission Check	Efficiently checking nested permissions in deep hierarchies.	Maintains performance with complex role structures.	Graph Algo	Query execution time	Backend Devs
+F035	Real-time Policy Push	Instant distribution of policy updates to all nodes.	Critical for revoking access during active incidents.	Pub/Sub	Propagation latency	Security Ops
+F036	Data Sovereignty Engine	Routes data queries based on data residency rules.	Ensures data never leaves legal boundaries.	GeoIP Routing	Compliance score	Architects
+F037	Secure Admin Portal	Hardened interface for managing M09 configuration.	Prevents compromise of the control plane itself.	None	Vulnerability scan score	Sysadmins
+F038	Justified Access Requirement	Mandatory text field explaining "Why" for JIT requests.	Deters casual use of high privileges.	NLP Sentiment Analysis	Justification quality	Managers
+F039	Multi-Factor Auth Method Diversity	Support for TOTP, FIDO2, SMS, Push, Biometrics.	Ensures fallback options and accessibility.	None	Auth success rate	All Users
+F040	Attribute Service Abstraction	Decoupling identity sources (LDAP, AD, DB).	Allows easy swapping of identity providers.	None	Adapter count	Integration Devs
+F041	Policy Versioning & Rollback	Git-like history for policy changes.	Ability to quickly revert bad policy deployments.	None	Rollback time < 1min	Policy Admins
+F042	Separation of Duties (SoD) Enforcement	Prevents conflicting roles (e.g., Requestor + Approver).	Internal control requirement for financial integrity.	Constraint Logic	Violation attempts	Compliance
+F043	Shadow IT Discovery	Identifying unauthorized access paths or tools.	Closes security gaps in the perimeter.	Network Traffic Clustering	Discovery rate	SecOps
+F044	Intelligent Session Locking	Locking session if user leaves desk (inactivity + webcam check).	Physical security for office environments.	Computer Vision	Lock speed	Office Workers
+F045	API Rate Limiting by Role	Different limits for different user tiers.	Protects infrastructure from abuse.	Token Bucket	429 Error rate	API Gatekeepers
+F046	Revocation List Caching	Caching CRLs or OCSP responses for validity checks.	Balances security with performance.	None	Cache freshness	Infra Engineers
+F047	Cross-Tenant Isolation	Strict logical separation of data for different clients.	SaaS security requirement.	None	Tenant leakage (0)	Platform Architects
+F048	Personal Data Access Right	User right to see who accessed their data.	GDPR transparency requirement.	None	Request response time	Privacy Officers
+F049	Fraud Alert Linking	Connecting access alerts with transaction fraud flags.	Correlates internal abuse with external fraud.	Graph Link Analysis	Correlation count	Fraud Analysts
+F050	Policy Natural Language Generator	Converts technical ABAC rules to readable text.	Helps auditors understand complex logic.	NLG (Natural Lang Gen)	Readability score	Auditors
+F051	Database Row Hashing	Storing hash of row data in audit logs for integrity.	Proves data hasn't been tampered with since access.	SHA-3	Hash generation time	DBAs
+F052	Dynamic Secret Injection	Injecting DB credentials only at runtime (Vault).	Prevents credentials in code/config.	None	Secret rotation time	DevOps
+F053	Smart Contract Policy Logic (Optional)	Embedding access rules in chaincode for hybrid setups.	Future-proofing for blockchain elements.	Solidity	Gas optimization	R&D
+F054	Risk-Based Authentication (RBA)	Scoring login attempt risk in real-time.	Reduces friction for low-risk users.	Isolation Forest	Risk score accuracy	Product Managers
+F055	Admin Privilege Scheduling	Pre-approving maintenance windows for privileged access.	Reduces need for ad-hoc approvals.	Scheduling Algo	Schedule adherence	IT Managers
+F056	Alert Fatigue Management	Suppressing redundant or low-risk alerts.	Ensures analysts focus on real threats.	Alert Clustering	Reduction rate	SOC Analysts
+F057	FIDO2/WebAuthn Integration	Passwordless authentication support.	Eliminates phishing risk for passwords.	Cryptography	Auth time < 2s	Security Leads
+F058	Context-Aware Password Policies	Enforcing stricter rules based on access sensitivity.	Dynamic security posture.	Decision Tree	Policy match rate	Admins
+F059	Decentralized Identity (DID) Resolver	Resolving DIDs for user authentication.	Interoperability with self-sovereign identity.	Blockchain Resolver	Resolve latency	Innovators
+F060	Automated Compliance Reporting	Generating reports for ISO 27001, SOC2, etc.	Reduces manual audit preparation time.	Templates	Report error rate	Compliance Teams
+F061	Anomaly Feedback Loop	Analysts can mark alerts as true/false positives to retrain AI.	Continuous improvement of detection models.	Reinforcement Learning	Model drift metric	Data Scientists
+F062	Browser Fingerprinting	Passive identification of client browser traits.	Defense against session hijacking.	Hashing	Stability score	Backend Devs
+F063	IP Reputation Checking	Blocking access from known malicious IPs.	First line of defense against bots.	External API Feed	Block rate	NetSec
+F064	Emergency Access Token (One-time)	Physical/hardware token for disaster recovery.	Access when digital systems are down.	None	Token validity	DR Managers
+F065	Role Mining Automation	Analyzing existing access to suggest optimal role definitions.	Cleanup of legacy permission structures.	K-Means	Efficiency gain	IAM Consultants
+F066	Just-in-Time Delegation	Temporary delegation of authority (e.g., Manager to Subordinate).	Business continuity during absences.	Workflow Engine	Delegation tracking	HR Managers
+F067	Resource Tagging Propagation	Inheriting security tags from parent resources.	Simplifies management of hierarchical data.	Graph Traversal	Tag consistency	Data Stewards
+F068	Access Request Bundle	Requesting multiple permissions in a single workflow.	Improves UX for onboarding.	None	Request completion time	End Users
+F069	Bulk Policy Update	Applying changes to multiple roles/policies at once.	Efficiency during mass updates.	Transaction Logic	Rollback success	Policy Admins
+F070	Secure File Transfer Proxy	Enforcing access checks on file downloads/uploads.	Prevents data exfiltration.	DLP (Data Loss Prev)	Block accuracy	DLP Officers
+F071	Screen Sharing Detection	Detecting if screen is being shared during sensitive tasks.	Prevents visual hacking.	OS Hooks	Detection latency	Security Agents
+F072	Voice Biometrics for Step-up	Voice print verification for phone-based support.	Secure authentication for call centers.	GMM Models	False Accept Rate	Support Agents
+F073	Keystroke Dynamics	Analyzing typing rhythm for continuous auth.	Subtle anomaly detection.	Statistical Analysis	Template stability	Researchers
+F074	Location Fuzzing	Intentionally lowering location precision for storage.	Privacy preservation compliance.	Geo-Hashing	Privacy gain score	Privacy Engineers
+F075	Access Expiration Notification	Alerting users before their access expires.	Prevents disruption of work.	Cron Jobs	Notification delivery	End Users
+F076	Shadow Access Reporting	Reporting on dormant accounts that suddenly become active.	Indicator of account takeover.	Time Series Analysis	Alert speed	SOC
+F077	Query Result Size Limit	Limiting number of rows returned by role.	Prevents bulk data scraping.	Count Limit	Enforcement accuracy	DBAs
+F078	JSON Web Token (JWT) Validation	Centralized validation of token signatures and claims.	Standardized secure token handling.	None	Validation time	API Developers
+F079	Access Review Campaigns	Periodic triggers for managers to review user access.	Regular hygiene maintenance for IAM.	None	Completion rate	Compliance
+F080	Sandbox Policy Testing	Isolated environment to test new ABAC rules.	Safe innovation in policy logic.	Containerization	Spin-up time	Developers
+F081	Quantum-Resistant Signatures	Use of post-quantum algos for signing tokens (future-proof).	Preparing for Y2Q.	Lattice-based Crypto	Signature size	Cryptographers
+F082	Smart Lockout Logic	Intelligent account lockout thresholds based on threat intel.	Prevents DoS via lockout while blocking brute force.	Heuristics	Lockout accuracy	Identity Admins
+F083	Attribute Inference Blocking	Preventing AI from inferring sensitive attributes from access patterns.	Privacy protection against metadata analysis.	Differential Privacy	Inference resistance	Privacy Officers
+F084	Custom Attribute Validation	Regex/Logic validation for user-defined attributes.	Ensures data quality of ABAC inputs.	Validator Engine	Error catch rate	Developers
+F085	GraphQL Depth Limiting	Limiting query depth for API access.	Preventing complexity attacks.	AST Analysis	Query rejection rate	API Security
+F086	Mutual TLS (mTLS) Enforcement	Requiring client certificates for service-to-service.	Zero Trust network enforcement.	PKI	Handshake time	NetOps
+F087	Dynamic Secret Rotation	Automatic rotation of DB secrets used by the app.	Limits exposure time of credentials.	Vault SDK	Rotation success	DevSecOps
+F088	Role Explosion Mitigation	AI suggests merging similar roles to reduce bloat.	Maintainability of IAM system.	Clustering	Reduction %	Architects
+F089	Hardware Security Module (HSM) Integration	Storing master keys for signing tokens in HSM.	Highest level of cryptographic assurance.	None	Signing latency	Security Architects
+F090	User Behavior Anomaly Dashboard	Visual view of risk scores over time per user.	Quick threat hunting interface.	Visualization	Render time	Analysts
+F091	Cross-Domain Single Sign-On (SSO)	SAML/OIDC support for external partners.	B2B integration requirement.	Federation Protocol	SSO latency	Partner Mgrs
+F092	Mobile App Certificate Pinning	Preventing MITM attacks on mobile API calls.	Hardening mobile client.	SSL Pinning	Pin validation	Mobile Devs
+F093	Access Recovery Workflow	Secure process for recovering lost access (Self-service).	Reduces helpdesk load.	Knowledge Based Auth	Recovery rate	Helpdesk
+F094	Privacy Preserving Auditing	Using zero-knowledge proofs to prove audit integrity.	Advanced privacy for audit logs.	ZK-SNARKs	Proof generation	Researchers
+F095	Resource Ownership Verification	Checking if user "owns" the resource before allowing edit.	Standard application security check.	None	Check speed	Backend Devs
+F096	API Key Scoping	Restricting API keys to specific IPs and services.	Limiting blast zone of leaked keys.	Network ACL	Enforcement rate	API Mgrs
+F097	Webhook Security	Verifying signatures of incoming webhooks.	Preventing supply chain attacks.	HMAC Verification	Verification time	Integration Eng
+F098	Denial of Service (DoS) Resilience	Rate limiting and caching for policy checks.	Availability under attack.	Token Bucket	Uptime 99.99%	SREs
+F099	Time Skew Tolerance	Handling clock differences in distributed token validation.	Preventing false negatives.	Clock Skew Logic	Error rate	Distributed Eng
+F100	Policy Impact Analysis	Showing which users/resources are affected by a policy change.	Risk assessment before deployment.	Graph Search	Analysis time	Policy Admins
+F101	Automated User Provisioning	Creating accounts with default least-privilege roles.	Speeding up onboarding.	SCIM	Provisioning time	HR IT
+F102	Explicit Deny Policies	Ability to create "Deny" rules that override "Allow".	Handling specific edge cases and sanctions.	Rule Engine	Deny precedence	Compliance
+F103	Data Retention Enforcement	Auto-deleting access logs older than X years.	Legal compliance for data retention.	TTL/Expiry	Deletion accuracy	DPO
+F104	Real-time Collaboration Blocking	Preventing two admins from editing same policy.	Concurrency control.	Locking	Conflict rate	UI Devs
+F105	Biometric Liveness Detection	Ensuring biometric auth is from a live human.	Anti-spoofing.	Active Contours	Liveness score	Mobile Devs
+F106	Contextual Help for Errors	Explaining why access was denied to the user.	Improves UX and reduces support tickets.	NLP	Help relevance	UX Designers
+F107	Offline Revocation Token	Short-lived tokens used to revoke rights when offline.	Edge case handling for disconnected ops.	Merkle Tree	Sync latency	Field Ops
+F108	Policy as Code (PaC)	Storing policies in Git repo for CI/CD.	Modern infrastructure as code practice.	GitOps	Sync success	DevOps
+F109	Third-Party Risk Scoring	Scoring external OAuth apps based on permission requests.	Preventing over-granting to vendors.	Weighted Score	Alert count	Vendor Mgrs
+F110	Dynamic Salt for Hashes	Changing salts per hash iteration for audit logs.	Defense against rainbow tables.	Crypto Utils	Hash strength	Security Eng
+F111	User Self-Service Group Management	Letting users manage their own dynamic groups (limited).	Reduces admin overhead.	Logic Gates	Change latency	Admins
+F112	Synthetic Transaction Monitoring	Running fake auth transactions to monitor health.	Proactive health checks.	Selenium/Playwright	Check frequency	SREs
+F113	Certificate Authority (CA) Management	Managing internal CAs for mTLS.	Internal PKI operations.	CFSSL	Issuance speed	NetSec
+F114	Advanced Persistent Threat (APT) Detection	Long-term correlation of low-and-slow access anomalies.	Detecting sophisticated attackers.	Graph Theory	Detection window	Intel Analysts
+F115	Access Entropy Calculation	Measuring randomness/predictability of access patterns.	Detecting automated/bot behavior.	Shannon Entropy	Score variance	Data Scientists
+F116	Role Template Library	Pre-built roles for common job functions (e.g., Auditor).	Accelerates deployment.	None	Template usage	Architects
+F117	Field Level Encryption (FLE)	Encrypting specific sensitive fields before DB storage.	Defense against DB admin snooping.	AES-256	Encryption latency	Crypto Eng
+F118	Distributed Trace Context	Passing trace IDs through auth calls for observability.	Debugging distributed failures.	OpenTelemetry	Trace completeness	Observability
+F119	Customizable Login Flows	Drag-and-drop login page builder.	Branding and UX flexibility.	UI Builder	Page load time	Product Mgrs
+F120	Identity Bridge (Legacy)	Connecting to mainframe/legacy auth systems.	Migration support.	Adapters	Bridge uptime	Mainframe Eng
+F121	Smart Password Analysis	Checking passwords against leaked breach corpuses.	Preventing reuse of compromised passwords.	HaveIBeenPwned API	Check speed	Security Eng
+F122	Policy Dependency Mapping	Visualizing which policies depend on others.	Change management.	Graph Viz	Dependency depth	Architects
+F123	Rate Limit Per User	Individual limits to prevent noisy neighbors.	Fair usage of resources.	Sliding Window	Limit accuracy	API Eng
+F124	Access Certification	Digital sign-off by managers on user rights.	Formal compliance requirement.	Digital Sig	Signature validity	Compliance
+F125	Session Recording	Recording admin sessions (video/logs).	Forensic evidence.	Container Record	Storage cost	SecOps
+F126	Branding/themes for Auth Screens	Customizing login for different tenants.	White-labeling for B2B.	CSS Engine	Render speed	Product
+F127	CAPTCHA Integration	Bot challenge for suspicious logins.	Basic bot deterrent.	reCAPTCHA/hCaptcha	Solve rate	Web Devs
+F128	Passwordless Magic Link	Email-based one-time login.	Low-friction auth for low-risk users.	JWT	Email delivery time	Product
+F129	Access Revocation Workflow	UI for instant mass revocation (e.g., contractor leave).	Emergency response.	Bulk Action	Revocation time	IT Ops
+F130	Just-in-Time Secret Access	Temporary access to secrets in Vault.	Operational security for DB credentials.	Vault SDK	Lease duration	DBAs
+F131	Biometric Template Encryption	Encrypting stored biometric templates.	Privacy of biometric data.	AES-GCM	Template size	Mobile Devs
+F132	Policy Test Case Generator	Auto-generating test cases for policies.	QA automation.	Generative AI	Coverage %	QA Engineers
+F133	Dynamic Data Labeling	Auto-labeling data fields (Confidential, Public) based on content.	Enabling ABAC on unstructured data.	NLP Classification	Label accuracy	Data Stewards
+F134	Federated Query Governance	Controlling access to cross-database queries.	Data warehouse security.	Query Parser	Block rate	Data Eng
+F135	Identity Wallet Pairing	QR code flow to pair mobile wallet with desktop session.	Seamless 2FA.	WebSocket	Pairing time	UX Eng
+F136	Logic Bomb Detection	Detecting code/logic that triggers access changes on a date.	Insider threat prevention.	Static Analysis	Detection rate	Security Eng
+F137	Cloud Provider IAM Sync	Syncing roles with AWS/Azure/GCP IAM.	Cloud infrastructure governance.	Cloud SDK	Sync latency	Cloud Eng
+F138	Access Pattern Normalization	Normalizing time-series access data for ML.	Improving anomaly detection accuracy.	Min-Max Scaling	Processing speed	Data Scientists
+F139	Policy Diff Tool	Comparing two versions of a policy set.	Code review assistance.	Text Diff	Diff accuracy	Reviewers
+F140	Privacy Impact Assessment (PIA) Tool	Assessing impact of new access rights on privacy.	GDPR compliance by design.	Heuristics	Assessment score	DPO
+F141	Decentralized Access Tokens	Verifiable Credentials (VCs) for access.	User-centric identity model.	DID/VC	Verification time	Researchers
+F142	Audit Log Compression	Compressing logs for storage cost reduction.	Cost optimization.	ZSTD/LZ4	Compression ratio	Archivist
+F143	Machine Identity Management	Managing auth for bots/IoT devices.	securing non-human actors.	mTLS	Cert issuance	IoT Eng
+F144	Secure Delegation Tokens	Tokens that allow passing auth to a subprocess.	Complex workflow enablement.	Signed JWT	Validation time	Backend Devs
+F145	Role Activation Code	Requiring a code to activate a high-privilege role.	Two-man rule implementation.	Random Gen	Code entropy	Security Mgrs
+F146	Watermarking of Exported Data	Embedding user ID in downloaded files.	Leak tracing.	Steganography	Visibility	DLP
+F147	Browser Isolation for Admins	Running admin sessions in remote browser.	Endpoint protection for admins.	Remote Browser	Latency overhead	IT Ops
+F148	Consent Receipt Generation	Providing proof of consent for auth.	GDPR transparency.	IETF Receipts	Generation time	Legal
+F149	Adaptive UI based on Role	Hiding/showing UI elements based on permissions.	Reducing user confusion.	Frontend Logic	Render correctness	Frontend Devs
+F150	End-to-End Encryption Key Management	Managing keys for E2EE where access control decrypts.	Privacy architecture support.	KMS	Key rotation	Crypto Eng
+
+
+
+h.	Comprehensive List of Database Objects
+id	schema_name	object_name	object_type	description	feature_reference	column_names	constraints / notes	junction_tables
+DB001	iam	users	Table	Core identity store for all system actors.	F001	user_id, username, email, status, created_at, updated_at	PK: user_id, UNQ: username/email
+DB002	iam	roles	Table	Definition of security roles.	F001	role_id, role_name, description, is_system, created_at	PK: role_id, UNQ: role_name
+DB003	iam	permissions	Table	Atomic permissions for resources/actions.	F002	perm_id, resource, action, description, created_at	PK: perm_id, UNQ: (resource, action)
+DB004	iam	user_roles	Table	Mapping of users to roles.	F001	user_id, role_id, assigned_at, assigned_by	PK: (user_id, role_id), FKs: user_id, role_id
+DB005	iam	role_permissions	Table	Granting permissions to roles.	F001	role_id, perm_id, granted_at	PK: (role_id, perm_id), FKs: role_id, perm_id
+DB006	iam	role_hierarchy	Table	Nested role relationships.	F003	parent_role_id, child_role_id	PK: (parent_role_id, child_role_id), FKs: role_id, role_id	No cycles (Trigger)
+DB007	iam	user_attributes	Table	Dynamic ABAC attributes for users.	F004	user_id, attr_name, attr_value, valid_from, valid_to	PK: (user_id, attr_name), FK: user_id	Index: attr_name
+DB008	iam	sessions	Table	Active session tracking.	F012	session_id, user_id, token_hash, ip_address, user_agent, created_at, expires_at	PK: session_id, FK: user_id	TTL Index
+DB009	iam	access_logs	Table	Immutable audit log of access decisions.	F015	log_id, user_id, resource, action, decision, policy_id, timestamp, details_json	PK: log_id, FK: user_id	Append-only
+DB010	iam	jit_requests	Table	Just-in-Time access requests.	F010	request_id, user_id, target_role_id, justification, status, approved_by, expires_at	PK: request_id, FK: user_id
+DB011	iam	policies	Table	Central storage for ABAC policy rules.	F018	policy_id, name, effect, condition_json, priority, created_at	PK: policy_id
+DB012	iam	policy_conflicts	Table	Detected conflicts in policy logic.	F023	conflict_id, policy_a_id, policy_b_id, description, resolved	PK: conflict_id
+DB013	iam	devices	Table	Registered devices for trust scoring.	F014	device_id, user_id, fingerprint, trust_score, last_seen	PK: device_id, FK: user_id
+DB014	iam	geo_fences	Table	Geographic boundaries for access.	F013	fence_id, name, polygon_geojson, allowed	PK: fence_id	PostGIS type
+DB015	iam	audit_masks	Table	Config for dynamic data masking.	F007	mask_id, role_id, table_name, column_name, mask_function	FK: role_id
+DB016	iam	eidas_credentials	Table	Links PARI accounts to eIDAS identifiers.	F008	cred_id, user_id, eidas_id, country, certificate_pem	PK: cred_id, FK: user_id
+DB017	iam	step_up_challenges	Table	MFA challenges issued.	F009	challenge_id, session_id, challenge_type, status, passed_at	PK: challenge_id, FK: session_id
+DB018	iam	access_reviews	Table	Periodic review campaigns.	F079	review_id, reviewer_id, user_id, role_id, decision, reviewed_at	PK: review_id
+DB019	iam	breach_attempts	Table	Failed login tracking.	F027	attempt_id, username, ip_address, timestamp, failure_reason	Index: ip, timestamp
+DB020	iam	api_keys	Table	API keys for service accounts.	F096	key_id, key_hash, owner_id, scopes, rate_limit, expires_at	PK: key_id	Hashed secret
+DB021	iam	consent_records	Table	User consent tracking.	F026	consent_id, user_id, purpose, granted_at, revoked_at	FK: user_id
+DB022	iam	secrets	Table	Encrypted storage for sensitive vault data.	F052	secret_id, name, encrypted_value, nonce, created_at	PK: secret_id
+DB023	iam	attribute_changes	Table	History of user attribute modifications.	F004	change_id, user_id, attr_name, old_val, new_val, changed_at	FK: user_id
+DB024	iam	rule_exclusions	Table	Explicit deny rules (Blacklisting).	F102	exclusion_id, user_id, resource_id, reason	FK: user_id
+DB025	iam	session_locks	Table	Admin-initiated session locks.	F044	lock_id, session_id, reason, locked_at	FK: session_id
+DB026	iam	dynamic_groups	Table	User-defined or computed groups.	F111	group_id, name, criteria_json, owner_id	PK: group_id
+DB027	iam	user_groups	Table	Mapping users to dynamic groups.	F111	user_id, group_id	PK: (user_id, group_id)
+DB028	iam	risk_scores	Table	Historical risk scores for AI model.	F054	score_id, user_id, score, factors_json, calculated_at	FK: user_id
+DB029	iam	anomaly_alerts	Table	Generated alerts from AI engine.	F061	alert_id, user_id, anomaly_type, severity, status	FK: user_id
+DB030	iam	cert_revocation_list	Table	Cached CRLs for external CAs.	F046	crl_id, issuer, serial_number, revocation_date	Index: issuer
+DB031	iam	access_request_bundles	Table	Bundled permission requests.	F068	bundle_id, requestor_id, status, submitted_at	FK: requestor_id
+DB032	iam	bundle_items	Table	Items inside a bundle request.	F068	item_id, bundle_id, permission_id	FK: bundle_id, perm_id
+DB033	iam	tenant_configs	Table	Multi-tenant isolation settings.	F047	tenant_id, settings_json, is_active	PK: tenant_id
+DB034	iam	offline_tokens	Table	Short-lived offline revocation tokens.	F107	token_id, user_id, expiry_seq	FK: user_id
+DB035	iam	policy_simulations	Table	Results of policy dry-runs.	F017	sim_id, policy_id, user_id, result	FK: policy_id
+DB036	iam	biometric_templates	Table	Encrypted biometric data.	F131	bio_id, user_id, template_encrypted	FK: user_id
+DB037	iam	data_labels	Table	Labels for data classification.	F133	label_id, resource_id, label_name, confidence	FK: resource_id
+DB038	iam	delegated_access	Table	Temporary delegation records.	F066	delegation_id, delegator_id, delegatee_id, role_id, expires_at	FK: delegator_id
+DB039	iam	break_glass_logs	Table	Audit of emergency overrides.	F019	log_id, user_id, reason, duration	FK: user_id
+DB040	iam	resource_tags	Table	Tags for ABAC matching.	F067	resource_id, tag_key, tag_value	Index: tag_key, value
+DB041	iam	access_stats	Table	Aggregated statistics for dashboard.	F016	stat_date, role_id, access_count	PK: (stat_date, role_id)	Materialized
+DB042	iam	notification_queue	Table	Queue for access alerts.	F075	msg_id, user_id, message, sent_at	FK: user_id
+DB043	iam	password_history	Table	History of password hashes to prevent reuse.	F121	history_id, user_id, password_hash	FK: user_id
+DB044	iam	admin_actions	Table	Specific audit for admin activities.	F125	action_id, admin_id, action_type, target_id, timestamp	FK: admin_id
+DB045	iam	webhooks	Table	Webhook endpoints for events.	F097	hook_id, url, secret_hash, events	PK: hook_id
+DB046	iam	failed_analytics	Table	Analysis of failed auth reasons.	F106	reason_code, count, date	Aggregate
+DB047	iam	compliance_reports	Table	Generated compliance artifacts.	F060	report_id, type, file_url, generated_at	PK: report_id
+DB048	iam	feature_flags	Table	Toggles for security features.	F119	flag_name, is_enabled, description	PK: flag_name
+DB049	iam	sop_documents	Table	Standard Operating Procedures linked to roles.	F055	doc_id, role_id, file_url	FK: role_id
+DB050	iam	captcha_challenges	Table	CAPTCHA session tracking.	F127	captcha_id, session_id, solved	FK: session_id
+DB051	iam	magic_links	Table	One-time login tokens.	F128	link_id, user_id, token_hash, used	FK: user_id
+DB052	iam	pairwise_identifiers	Table	Pseudonymous IDs for privacy (ZKP).	F094	pairwise_id, user_id, relying_party_id	FK: user_id
+DB053	iam	lease_records	Table	Lease tracking for JIT secrets.	F130	lease_id, secret_id, lessee_id, expires_at	FK: secret_id
+DB054	iam	consent_receipts	Table	Machine-readable consent receipts.	F148	receipt_id, user_id, consent_jws	FK: user_id
+DB055	iam	cloud_sync_status	Table	Sync status for external IAM (AWS/Azure).	F137	sync_id, provider, status, last_synced
+DB056	iam	logic_bombs	Table	Detected suspicious scheduled tasks.	F136	bomb_id, user_id, trigger_time, status	FK: user_id
+DB057	iam	training_data	Table	Anonymized data for ML model training.	F061	record_id, features_json, label	Strict Access
+DB058	iam	version_audit	Table	Schema version tracking for migration.	F053	version_num, deployed_at
+DB059	iam	ip_reputation	Table	Cached reputation of IP addresses.	F063	ip_address, score, provider	PK: ip_address
+DB060	iam	device_trust_history	Table	Historical trust scores of devices.	F014	history_id, device_id, score, timestamp	FK: device_id
+DB061	iam	audit_signatures	Table	Cryptographic signatures over audit logs.	F094	signature_id, log_batch_id, signature
+DB062	iam	password_policies	Table	Configurable password rules.	F058	policy_id, role_id, min_length, complexity_regex	FK: role_id
+DB063	iam	auth_counts	Table	Counter for rate limiting per user.	F123	user_id, window_start, count	FK: user_id	TTL
+DB064	ref	countries	Table	Reference data for ISO country codes.	F013	code, name	PK: code
+DB065	ref	timezones	Table	Reference timezones.	F018	tz_name
+DB066	ref	locales	Table	Supported languages for UI.	F119	locale_code, name	PK: locale_code
+DB067	ref	mfa_methods	Table	Supported MFA methods.	F039	method_id, name, enabled
+DB068	iam	user_settings	Table	User UI preferences.	F119	user_id, theme, locale	FK: user_id
+DB069	iam	public_keys	Table	Public keys for users (for JWT verification).	F030	key_id, user_id, key_pem	FK: user_id
+DB070	iam	private_keys_enc	Table	Encrypted private keys (if needed).	F089	key_id, key_encrypted
+DB071	iam	federation_providers	Table	External SSO providers (SAML/OIDC).	F091	provider_id, metadata_url, protocol	PK: provider_id
+DB072	iam	federated_users	Table	Mapping of external IDs to local users.	F091	local_user_id, provider_id, external_id	PK: (local_user_id, provider_id)
+DB073	iam	role_templates	Table	Templates for creating new roles.	F116	template_id, name, permissions_json	PK: template_id
+DB074	iam	pending_approvals	Table	Staging area for role requests.	F011	req_id, requestor_id, role_id	FK: requestor_id
+DB075	iam	approval_chain	Table	Sequential approvers for a request.	F011	req_id, approver_id, order	FK: req_id
+DB076	iam	session_activities	Table	Heartbeats/activities within a session.	F012	activity_id, session_id, action	FK: session_id
+DB077	iam	deleted_users	Table	Archive of deleted users for audit.	F020	old_user_id, deleted_at, deleted_by
+DB078	iam	archived_logs	Table	Cold storage for old access logs.	F103	log_id, log_data_json, archived_date
+DB079	iam	encryption_keys	Table	Metadata for data encryption keys.	F117	key_id, key_version, status	PK: key_id
+DB080	iam	masking_functions	Table	Definitions of custom masking logic.	F007	func_name, logic_code
+DB081	iam	access_changes	Table	Log of permission grants/revokes.	F020	change_id, user_id, perm_id, delta	FK: user_id
+DB082	iam	risk_factors	Table	Definition of factors influencing risk score.	F054	factor_id, name, weight
+DB083	iam	quarantine_users	Table	Users blocked due to compromise suspicion.	F026	user_id, reason, quarantined_at	FK: user_id
+DB084	iam	synthetic_users	Table	Users used for synthetic monitoring.	F112	user_id, is_synthetic, tag	FK: user_id
+DB085	iam	dependency_graph	Table	Pre-calculated policy dependencies.	F122	parent_id, child_id, depth
+DB086	iam	login_flows	Table	Configured login flows per tenant.	F119	flow_id, tenant_id, steps_json	FK: tenant_id
+DB087	iam	consent_versions	Table	Versioning of consent text.	F148	version_id, text_hash, effective_date
+DB088	iam	user_consent_history	Table	Linking user to specific consent version.	F148	id, user_id, consent_id, version_id	FK: user_id
+DB089	iam	audit_filters	Table	Saved filters for audit log viewers.	F016	filter_id, user_id, filter_json	FK: user_id
+DB090	iam	export_jobs	Table	Asynchronous export jobs for logs.	F103	job_id, user_id, status, file_url	FK: user_id
+DB091	iam	test_cases	Table	Auto-generated test cases for policies.	F132	case_id, policy_id, input_json, expected_output	FK: policy_id
+DB092	iam	test_results	Table	Results of running test cases.	F132	result_id, case_id, actual_output, passed	FK: case_id
+DB093	iam	incident_links	Table	Linking alerts to security incidents.	F114	incident_id, alert_id	FK: alert_id
+DB094	iam	watchlist_users	Table	Users requiring additional scrutiny.	F114	user_id, added_by, reason	FK: user_id
+DB095	iam	session_videos	Table	References to recorded session videos.	F125	video_id, session_id, storage_path	FK: session_id
+DB096	iam	custom_fields	Table	User-defined attribute fields.	F084	field_id, name, type, validation_regex	PK: field_id
+DB097	iam	field_values	Table	Values for custom fields per user.	F084	value_id, user_id, field_id, value	FK: user_id, field_id
+DB098	iam	rate_limits	Table	Rate limit configurations.	F123	limit_id, role_id, requests_per_minute	FK: role_id
+DB099	iam	throttled_requests	Table	Log of throttled requests.	F123	req_id, user_id, timestamp	FK: user_id
+DB100	iam	backup_codes	Table	Backup codes for MFA recovery.	F093	code_id, user_id, code_hash, used	FK: user_id
+DB101	iam	event_subscriptions	Table	Webhooks subscriptions for specific events.	F097	sub_id, user_id, event_type	FK: user_id
+DB102	iam	delivery_logs	Table	Logs of webhook delivery attempts.	F097	log_id, sub_id, status, response_code	FK: sub_id
+DB103	iam	notification_templates	Table	Templates for emails/SMS alerts.	F075	template_id, event_type, subject, body	PK: template_id
+DB104	iam	user_notifications	Table	Notification history for users.	F075	notif_id, user_id, template_id, sent_at	FK: user_id
+DB105	iam	pairing_tokens	Table	Tokens for mobile pairing flow.	F135	token_id, user_id, qr_string	FK: user_id
+DB106	iam	paired_devices	Table	Established pairings.	F135	pair_id, user_id, device_id	FK: user_id
+DB107	iam	machine_identities	Table	Service accounts / Bots.	F143	machine_id, name, owner_id	PK: machine_id
+DB108	iam	machine_certs	Table	Certificates for machine identities.	F143	cert_id, machine_id, cert_pem	FK: machine_id
+DB109	iam	logic_bomb_rules	Table	Patterns defining a logic bomb.	F136	rule_id, pattern_regex
+DB110	iam	scan_results	Table	Static analysis results of policies.	F136	scan_id, policy_id, finding	FK: policy_id
+DB111	iam	pi_assessments	Table	Privacy Impact Assessment records.	F140	assessment_id, change_id, impact_score
+DB112	iam	key_lease	Table	Leases for JIT secrets (legacy).	F130	lease_id, secret_id, expires	FK: secret_id
+DB113	iam	activation_codes	Table	One-time codes for role activation.	F145	code_id, user_id, role_id, code_hash	FK: user_id
+DB114	iam	watermarks	Table	Watermark config for exports.	F146	watermark_id, user_id, template	FK: user_id
+DB115	iam	isolated_sessions	Table	Sessions running in remote browser.	F147	iso_session_id, local_session_id	FK: local_session_id
+DB116	iam	ui_permissions	Table	Fine-grained UI element permissions.	F149	ui_perm_id, role_id, element_path	FK: role_id
+DB117	iam	e2e_keys	Table	End-to-end encryption keys.	F150	key_id, owner_id, public_key	FK: owner_id
+DB118	iam	key_rotation_log	Table	History of key rotations.	F150	rotation_id, key_id, rotated_at	FK: key_id
+DB119	iam	feature_usage	Table	Tracking usage of M09 features.	F060	feature_id, usage_count, date
+DB120	iam	cleanup_jobs	Table	Scheduled cleanup tasks for logs/tokens.	F103	job_id, last_run, status
+DB121	iam	role_recommendations	Table	AI suggestions for role changes.	F029	rec_id, user_id, suggested_role, confidence	FK: user_id
+DB122	iam	user_entropy	Table	Calculated entropy of user behavior.	F115	entropy_id, user_id, score, date	FK: user_id
+DB123	iam	policy_diffs	Table	Stored diffs between policy versions.	F139	diff_id, policy_a, policy_b, diff_json
+DB124	iam	sop_audits	Table	Audit of SOP adherence.	F055	audit_id, user_id, sop_id, followed	FK: user_id
+DB125	iam	failed_qr	Table	Failed QR scan attempts.	F135	fail_id, ip_address, timestamp
+DB126	iam	consent_withdrawals	Table	Records of consent withdrawal.	F026	withdraw_id, user_id, consent_id	FK: user_id
+DB127	iam	geo_location_cache	Table	Cache for IP to Geo lookups.	F013	ip_address, lat, long	PK: ip_address
+DB128	iam	device_fingerprints	Table	Raw fingerprints for correlation.	F014	fp_id, hash, attributes
+DB129	iam	shadow_it_reports	Table	Reports of unauthorized access tools.	F043	report_id, tool_name, detected_at
+DB130	iam	smart_lockout_events	Table	Events triggering smart lockout.	F082	event_id, user_id, trigger_reason	FK: user_id
+DB131	iam	breach_corpuses	Table	Cached lists of breached passwords.	F121	hash_prefix, hashes
+DB132	iam	admin_consoles	Table	Registered admin consoles for risk assessment.	F147	console_id, ip_address, risk_score
+DB133	iam	password_strength	Table	Strength history of passwords.	F058	entry_id, user_id, strength_score	FK: user_id
+DB134	iam	audit_summaries	Table	Daily/Weekly summaries of access.	F016	summary_id, date, role_id, stats	FK: role_id
+DB135	iam	federated_logs	Table	Logs from external IdPs.	F091	fed_log_id, provider_id, event_json	FK: provider_id
+DB136	iam	session_hijack_alerts	Table	Alerts related to session hijacking.	F012	alert_id, session_id, anomaly	FK: session_id
+DB137	iam	role_usage_stats	Table	Usage stats for roles (cleanup candidates).	F088	stat_id, role_id, active_users	FK: role_id
+DB138	iam	custom_tokens	Table	Custom JWT claims definitions.	F078	claim_name, value_type
+DB139	iam	token_claims	Table	Claims assigned to roles/users.	F078	claim_id, target_id, claim_name, value
+DB140	iam	policy_tests	Table	History of policy tests executed.	F132	test_id, policy_id, result	FK: policy_id
+DB141	iam	audit_trail_hashes	Table	Merkle tree roots for audit integrity.	F094	root_id, tree_hash, timestamp
+DB142	iam	anomaly_feedback	Table	Human feedback on AI alerts.	F061	feedback_id, alert_id, is_true_positive	FK: alert_id
+DB143	iam	model_versions	Table	Versioning of the AI anomaly model.	F061	version_id, model_name, deployed_at
+DB144	iam	training_metrics	Table	Metrics for AI model training.	F061	metric_id, version_id, accuracy, f1_score	FK: version_id
+DB145	iam	feature_flags_history	Table	History of feature flag changes.	F119	change_id, flag_name, old_val, new_val
+DB146	iam	risk_thresholds	Table	Configurable thresholds for risk actions.	F054	level_id, score_min, action
+DB147	iam	context_cache	Table	Cache for ABAC context evaluation.	F005	cache_key, context_json, ttl
+DB148	iam	dynamic_salt_history	Table	History of salt rotations.	F110	rotation_id, timestamp
+DB149	iam	api_scopes	Table	Definition of OAuth scopes.	F024	scope_id, name, description	PK: scope_id
+DB150	iam	client_applications	Table	Registered OAuth client apps.	F024	client_id, client_secret_hash, redirect_uris	PK: client_id
+DB151	iam	client_scopes	Table	Scopes allowed for specific clients.	F024	client_id, scope_id	FK: client_id
+DB152	iam	access_tokens	Table	Active OAuth access tokens.	F024	token_id, user_id, client_id, scopes	FK: user_id	TTL
+DB153	iam	refresh_tokens	Table	Refresh tokens for session renewal.	F024	token_id, user_id, client_id	FK: user_id
+DB154	iam	auth_codes	Table	Authorization codes for OAuth flow.	F024	code_id, user_id, client_id, code_challenge	FK: user_id	TTL
+DB155	iam	saml_assertions	Table	Incoming SAML assertion IDs for replay prevention.	F091	assertion_id, expires_at
+DB156	iam	saml_metadata	Table	Stored SAML provider metadata.	F091	provider_id, metadata_xml	FK: provider_id
+DB157	iam	oidc_discovery	Table	Cached OIDC discovery documents.	F091	provider_id, discovery_json	FK: provider_id
+DB158	iam	pairwise_id_subjects	Table	Mapping for pairwise subject IDs.	F052	sub_id, sector_id, user_id	FK: user_id
+DB159	iam	sector_identifiers	Table	Allowed sector identifiers for pairwise IDs.	F052	sector_id, redirect_uri
+DB160	iam	jwks_keys	Table	JSON Web Key Set for internal signing.	F078	kid, key_type, public_key, private_key_enc	PK: kid
+DB161	iam	external_jwks	Table	Cached external JWKS (for eIDAS verification).	F008	provider_url, keys_json
+DB162	iam	consent_receipt_issuer	Table	Config for receipt issuer.	F148	issuer_id, issuer_key_id	FK: jwks_keys
+DB163	iam	consent_jwt	Table	Issued consent JWTs.	F148	jwt_id, jti, issued_at
+DB164	iam	audit_signature_chain	Table	Chain of custody for audit logs.	F094	link_id, prev_hash, current_hash
+DB165	iam	zero_trust_scores	Table	Aggregated zero-trust scores for sessions.	F031	session_id, zt_score	FK: session_id
+DB166	iam	spiffe_ids	Table	SPIFFE identities for services.	F031	spiffe_id, service_name, parent_id	PK: spiffe_id
+DB167	iam	spiffe_bundles	Table	SPIFFE trust bundles.	F031	bundle_id, bundle_jwt
+DB168	iam	service_svids	Table	Short-lived SVIDs for services.	F031	svid_id, spiffe_id, cert_pem, expires	FK: spiffe_id
+DB169	iam	x509_certs	Table	General x509 certificate store.	F086	cert_id, serial, ca_id, subject	Index: serial
+DB170	iam	certificate_authorities	Table	Internal CAs.	F113	ca_id, name, cert_pem, key_enc	PK: ca_id
+DB171	iam	crl_distribution_points	Table	URLs for CRLs.	F046	ca_id, url	FK: ca_id
+DB172	iam	ocsp_responses	Table	Cached OCSP responses.	F046	serial_id, response, next_update
+DB173	iam	ocsp_stapling	Table	Data for OCSP stapling.	F046	staple_id, cert_id, response	FK: cert_id
+DB174	iam	tls_handshakes	Table	Logs of TLS handshakes for anomaly detection.	F086	handshake_id, client_ip, cipher_suite
+DB175	iam	cipher_suites	Table	Allowed/disallowed cipher suites.	F086	suite_id, name, allowed
+DB176	iam	tls_versions	Table	Allowed TLS versions.	F086	version_id, version_num, allowed
+DB177	iam	pki_hierarchy	Table	CA hierarchy structure.	F113	parent_ca_id, child_ca_id	FK: ca_id
+DB178	iam	key_usage	Table	Key usage extensions for certs.	F086	usage_id, name, oid
+DB179	iam	cert_attributes	Table	Custom attributes in x509 certs.	F086	attr_id, oid, value
+DB180	iam	pkcs12_blobs	Table	Encrypted PKCS12 archives for export.	F089	blob_id, user_id, container_enc	FK: user_id
+DB181	iam	hardware_tokens	Table	Physical security tokens (YubiKey).	F057	token_id, user_id, public_id	FK: user_id
+DB182	iam	totp_secrets	Table	TOTP shared secrets.	F039	secret_id, user_id, secret_enc	FK: user_id
+DB183	iam	backup_tokens	Table	Backup recovery tokens.	F093	backup_id, user_id, token_hash	FK: user_id
+DB184	iam	push_challenges	Table	Mobile push notification challenges.	F039	push_id, user_id, status	FK: user_id
+DB185	iam	biometric_challenges	Table	Biometric auth challenges.	F105	bio_challenge_id, user_id, template_enc	FK: user_id
+DB186	iam	voiceprints	Table	Voice biometric templates.	F072	voice_id, user_id, print_enc	FK: user_id
+DB187	iam	keystroke_templates	Table	Keystroke dynamics templates.	F073	key_id, user_id, template_enc	FK: user_id
+DB188	iam	location_history	Table	Historical location data for users.	F013	loc_id, user_id, lat, long, accuracy	FK: user_id
+DB189	iam	ip_history	Table	History of IP addresses used by user.	F027	ip_hist_id, user_id, ip_address	FK: user_id
+DB190	iam	user_agent_history	Table	History of User-Agents.	F012	ua_hist_id, user_id, user_agent	FK: user_id
+DB191	iam	device_history	Table	History of device IDs.	F014	dev_hist_id, user_id, device_id	FK: user_id
+DB192	iam	risk_events	Table	High-level risk events.	F054	event_id, user_id, risk_score, reason	FK: user_id
+DB193	iam	incident_responses	Table	Automated response actions taken.	F114	response_id, incident_id, action	FK: incident_id
+DB194	iam	playbook_runs	Table	Execution of security playbooks.	F114	run_id, playbook_id, status
+DB195	iam	playbooks	Table	Security response playbooks.	F114	playbook_id, name, steps_json	PK: playbook_id
+DB196	iam	quarantine_rules	Table	Rules triggering automatic quarantine.	F083	rule_id, condition, action
+DB197	iam	allowlist_ips	Table	Allowed IP ranges for admin access.	F086	range_id, cidr, description
+DB198	iam	denylist_ips	Table	Blocked IP ranges.	F063	range_id, cidr, reason
+DB199	iam	rate_limit_rules	Table	Global rate limit rules.	F098	rule_id, limit, window
+DB200	iam	dynamic_rate_limits	Table	User-specific rate limits (JIT).	F123	dlimit_id, user_id, limit	FK: user_id
+VW001	iam	v_user_permissions	View	Denormalized view of all user permissions.	F016	user_id, perm_list	Joins: roles, perms
+VW002	iam	v_user_roles	View	Current active roles for users.	F001	user_id, role_list	Joins: user_roles
+VW003	iam	v_active_sessions	View	Currently active sessions.	F012	session_id, user_id, ip	Filter: expires_at > now
+VW004	iam	v_audit_summary	View	Aggregated audit stats.	F016	date, count, role_id	Group by date
+VW005	iam	v_policy_conflicts	View	Active policy conflicts.	F023	policy_a, policy_b	Where resolved=false
+VW006	iam	v_risky_users	View	Users with high recent risk scores.	F054	user_id, latest_score	Join: risk_scores
+VW007	iam	v_user_attributes	View	Flattened user attributes.	F004	user_id, attr_1, attr_2	Pivot
+VW008	iam	v_role_hierarchy	View	Recursive closure of role hierarchy.	F003	ancestor, descendant	Recursive CTE
+VW009	iam	v_jit_pending	View	Pending JIT approval requests.	F011	request_id, user_id	Where status='pending'
+VW010	iam	v_device_trust	View	Latest trust score per device.	F014	device_id, user_id, score	Window Function
+FN001	iam	fn_check_access	Function	Core logic to evaluate RBAC/ABAC.	F018	user_id, resource, action	Returns boolean
+FN002	iam	fn_mask_column	Function	Applies masking logic based on role.	F007	role_id, value, column_name	Returns text
+FN003	iam	fn_validate_jwt	Function	Validates JWT signature and claims.	F078	token_str	Returns json
+FN004	iam	fn_verify_eidas	Function	Verifies eIDAS signature chain.	F008	cert_pem, signature	Returns boolean
+FN005	iam	fn_update_risk_score	Function	Calculates and updates user risk score.	F054	user_id	Returns numeric
+FN006	iam	fn_anomaly_detect	Function	Runs ML model on session data.	F061	session_id	Returns boolean
+FN007	iam	fn_log_access	Function	Immutable insert to access_logs.	F015	params	Returns void (Trigger)
+FN008	iam	fn_revoke_session	Function	Marks session as revoked.	F012	session_id	Returns boolean
+FN009	iam	fn_rotate_keys	Function	Rotates signing keys.	F150	key_id	Returns boolean
+FN010	iam	fn_hash_password	Function	Secure password hashing.	F121	password	Returns text
+FN011	iam	fn_geo_check	Function	Checks if IP/location is allowed.	F013	ip, user_id	Returns boolean
+FN012	iam	fn_eval_abac	Function	Evaluates ABAC conditions.	F018	attributes, rule	Returns boolean
+FN013	iam	fn_is_role_active	Function	Checks if role is within valid time.	F001	role_id	Returns boolean
+FN014	iam	fn_get_user_context	Function	Aggregates all user attributes/context.	F004	user_id	Returns json
+FN015	iam	fn_generate_jwt	Function	Generates signed JWT.	F078	payload	Returns text
+FN016	iam	fn_check_step_up	Function	Determines if step-up auth is needed.	F009	user_id, resource	Returns boolean
+FN017	iam	fn_encrypt_field	Function	Encrypts a field for FLE.	F117	value, key_id	Returns bytea
+FN018	iam	fn_decrypt_field	Function	Decrypts a field.	F117	value_enc, key_id	Returns text
+FN019	iam	fn_get_ancestors	Function	Returns all parent roles.	F003	role_id	Returns table
+FN020	iam	fn_get_descendants	Function	Returns all child roles.	F003	role_id	Returns table
+SP001	iam	sp_grant_role	Procedure	Grants role to user with audit.	F001	user_id, role_id	Transaction
+SP002	iam	sp_revoke_role	Procedure	Revokes role from user.	F020	user_id, role_id	Transaction
+SP003	iam	sp_create_jit_request	Procedure	Creates JIT access request.	F011	user_id, role_id	Transaction
+SP004	iam	sp_approve_jit	Procedure	Approves JIT request.	F011	request_id, admin_id	Transaction
+SP005	iam	sp_lock_user	Procedure	Locks user account.	F026	user_id, reason	Transaction
+SP006	iam	sp_archive_logs	Procedure	Moves old logs to archive.	F103	cutoff_date	Batch
+SP007	iam	sp_rotate_tls_certs	Procedure	Initiates TLS cert rotation.	F086	service_id	External call
+SP008	iam	sp_cleanup_sessions	Procedure	Deletes expired sessions.	F012	Cron job
+SP009	iam	sp_generate_report	Procedure	Generates compliance report.	F060	type, date_range	File output
+SP010	iam	sp_import_users	Procedure	Bulk user import from CSV.	F101	csv_data	Transaction
+TR001	iam	tr_audit_access	Trigger	Auto-log access on table select (via view).	F015	On SELECT	Calls fn_log_access
+TR002	iam	tr_timestamp_user	Trigger	Auto-update updated_at on users.	F023	Before UPDATE
+TR003	iam	tr_enforce_rls	Trigger	Dynamic RLS policy application helper.	F006	Before INSERT/UPDATE
+TR004	iam	tr_encrypt_column	Trigger	Auto-encrypt sensitive columns.	F117	Before INSERT/UPDATE
+TR005	iam	tr_log_password_change	Trigger	Log password hash changes.	F121	After UPDATE
+EN001	iam	enum_access_action	Enum	Types of access actions (READ, WRITE).	F002	READ, WRITE, DELETE, EXECUTE
+EN002	iam	enum_decision	Enum	Auth decision outcome.	F015	ALLOW, DENY, ABSTAIN
+EN003	iam	enum_status	Enum	General status flags.	F001	ACTIVE, INACTIVE, SUSPENDED
+EN004	iam	enum_session_status	Enum	Session states.	F012	ACTIVE, REVOKED, EXPIRED
+EN005	iam	enum_mfa_method	Enum	Supported MFA types.	F039	TOTP, FIDO2, SMS, EMAIL
+EN006	iam	enum_log_level	Enum	Severity of logs.	F015	INFO, WARN, ERROR, CRITICAL
+EN007	iam	enum_risk_level	Enum	Risk severity.	F054	LOW, MEDIUM, HIGH, CRITICAL
+EN008	iam	enum_role_type	Enum	Role categorization.	F001	SYSTEM, CUSTOM, DYNAMIC
+EN009	iam	enum_jit_status	Enum	Request states.	F011	PENDING, APPROVED, REJECTED, EXPIRED
+EN010	iam	enum_attr_type	Enum	Data type for attributes.	F084	STRING, INTEGER, JSON, DATE
+DB201	iam	kg_entities	Table	Nodes for the Knowledge Representation Graph (Users, Roles, Resources).	F122, F140	entity_id, entity_type, label, properties_json, created_at	PK: entity_id
+DB202	iam	kg_relationships	Table	Edges defining connections in the Knowledge Graph (e.g., User HAS_ROLE Admin).	F122, F140	edge_id, source_entity_id, target_entity_id, relation_type, weight	PK: edge_id	FK: entity_id
+DB203	iam	audit_trail_chain	Table	Cryptographic chain (Merkle Tree roots) for immutable audit verification.	F015, F094	chain_id, prev_hash, current_hash, root_hash, timestamp	PK: chain_id
+DB204	iam	behavioral_profiles	Table	Aggregated profiles for behavioral biometrics (typing speed, mouse movement).	F022, F073	profile_id, user_id, feature_vector, model_version, last_updated	PK: profile_id, FK: user_id
+DB205	iam	raw_keystroke_logs	Table	High-frequency raw data for deep learning behavioral analysis (short retention).	F073	log_id, session_id, key_code, press_duration, timestamp	FK: session_id	TTL 7 days
+DB206	iam	consent_purposes	Table	Granular purposes for which consent is granted (GDPR Art. 5(1)(b)).	F026	purpose_id, code, description, legal_basis	PK: purpose_id
+DB207	iam	consent_grants	Table	Mapping of user consent to specific purposes.	F026	grant_id, user_id, purpose_id, granted_at, revoked_at	PK: grant_id	FK: user_id
+DB208	iam	threat_intel_cache	Table	Cached threat intelligence from external providers (IPs, Hashes).	F063, F114	threat_id, ioc_type (IP/HASH), value, severity, source, last_seen	PK: threat_id	Index: value
+DB209	iam	secret_versions	Table	Version history for secrets to support rollback.	F087	version_id, secret_id, version_num, encrypted_value, created_at	PK: version_id, FK: secret_id
+DB210	iam	key_escrow	Table	Securely stored fragments of master keys for disaster recovery.	F089	fragment_id, key_id, shard_enc, holder_id	PK: fragment_id	Split knowledge
+DB211	iam	dynamic_secrets	Table	Short-lived secrets generated for DB connections (e.g., via Vault).	F052	lease_id, db_name, username, password_hash, issued_at, expires_at	PK: lease_id	TTL
+DB212	iam	admin_audit_review	Table	Marking logs as reviewed by an auditor.	F015	review_id, reviewer_id, log_batch_id, reviewed_at, notes	FK: reviewer_id
+DB213	iam	policy_impact_assessment	Table	Results of simulating a policy change across the user base.	F100, F140	assessment_id, policy_id, affected_users_count, risk_score	FK: policy_id
+DB214	iam	role_mining_candidates	Table	AI-suggested roles based on permission clustering.	F065	candidate_id, name, similar_permissions_json, confidence_score
+DB215	iam	privilege_escalation_log	Table	Specific log for any elevation of privileges (JIT or Permanent).	F010, F011	escalation_id, user_id, from_role, to_role, approved_by	FK: user_id
+DB216	iam	quarantine_activities	Table	Actions taken while a user is in quarantine.	F083	activity_id, user_id, attempted_action, blocked	FK: user_id
+DB217	iam	password_breaches	Table	Log of password changes triggered by breach detection.	F121	breach_id, user_id, breach_source, forced_change_at	FK: user_id
+DB218	iam	session_anomalies	Table	Specific anomalies detected within a session.	F012	anomaly_id, session_id, type (jump, share, speed), detected_at	FK: session_id
+DB219	iam	smart_lockout_history	Table	History of smart lockout triggers and releases.	F082	event_id, user_id, reason, locked_at, released_at	FK: user_id
+DB220	iam	access_request_comments	Table	Comments/justification attached to JIT requests.	F011	comment_id, request_id, author_id, comment_text	FK: request_id
+DB221	iam	delegation_chain	Table	Tracking chains of delegated authority (A delegates to B, B to C).	F066	chain_id, root_user_id, current_holder_id, depth	FK: user_id
+DB222	iam	feature_metrics	Table	Granular metrics for feature flag usage.	F119	metric_id, flag_name, user_segment, exposure_count
+DB223	iam	api_rate_limit_history	Table	Historical data for rate limit tuning.	F123	history_id, user_id, limit_id, requested_at	FK: user_id
+DB224	iam	compliance_mappings	Table	Mapping of permissions to compliance controls (ISO 27001 A.9).	F060	mapping_id, perm_id, control_id, control_framework	FK: perm_id
+DB225	iam	control_frameworks	Table	Reference data for compliance frameworks.	F060	framework_id, name, version, description	PK: framework_id
+DB226	iam	evidence_locker	Table	Secure storage for evidence required for audits.	F060	evidence_id, artifact_url, control_id, upload_date	FK: control_id
+DB227	iam	shadow_it_patterns	Table	Learned patterns of unauthorized tool usage.	F043	pattern_id, tool_signature, risk_score
+DB228	iam	session_recordings	Table	Metadata for recorded admin sessions.	F125	rec_id, session_id, storage_path, size, duration	FK: session_id
+DB229	iam	synthetic_monitoring	Table	Config and results for synthetic auth tests.	F112	test_id, script_id, last_run, result, latency
+DB230	iam	pairwise_subject_cache	Table	Cache for pairwise subject identifiers to speed up lookup.	F052	cache_id, sector_id, user_id, subject_id	FK: user_id
+DB231	iam	oauth_authorization_details	Table	Detailed authorization parameters per OAuth spec.	F024	auth_id, client_id, details_json	FK: client_id
+DB232	iam	saml_attribute_mapping	Table	Mapping of SAML attributes to local user attributes.	F091	map_id, provider_id, saml_attr, local_attr	FK: provider_id
+DB233	iam	oidc_claims_mapping	Table	Mapping of OIDC claims to local user attributes.	F091	map_id, provider_id, claim_name, local_attr	FK: provider_id
+DB234	iam	user_event_stream	Table	Kafka-sourced event stream for users (CDC).	F012	event_id, user_id, event_type, payload_json, timestamp	FK: user_id	Append only
+DB235	iam	access_denial_feedback	Table	User feedback on access denial (Is this an error?).	F106	feedback_id, user_id, denied_action_id, is_error	FK: user_id
+DB236	iam	password_complexity_rules	Table	Detailed rules for password composition.	F058	rule_id, role_id, min_upper, min_digit, min_special	FK: role_id
+DB237	iam	session_fixation_tokens	Table	Tokens used to prevent session fixation attacks.	F012	token_id, session_id, old_token_hash	FK: session_id
+DB238	iam	ip_risk_scores	Table	Cached risk scores for IP addresses.	F063	ip_score_id, ip_address, score, category	PK: ip_address
+DB239	iam	device_drift_detection	Table	Tracking changes in device hardware profile.	F014	drift_id, device_id, observed_attr, expected_attr	FK: device_id
+DB240	iam	backup_audit_trail	Table	Backup of immutable logs for disaster recovery.	F103	backup_id, log_batch_id, backup_date	FK: log_batch_id
+DB241	iam	ml_model_features	Table	Feature set definitions used by ML models.	F061	feature_id, model_id, feature_name, weight	FK: model_id
+DB242	iam	ml_model_drift	Table	Tracking drift of ML model accuracy over time.	F061	drift_id, model_id, accuracy, timestamp	FK: model_id
+DB243	iam	knowledge_graph_updates	Table	Log of changes to the KG for eventual consistency.	F122	update_id, entity_id, change_type, timestamp	FK: entity_id
+DB244	iam	admin_console_sessions	Table	Sessions specifically within the isolated admin browser.	F147	console_session_id, admin_id, host_ip	FK: admin_id
+DB245	iam	secure_email_logs	Table	Logs of security-sensitive emails (OTP, Alerts).	F075	email_id, recipient, template_id, sent_status	FK: template_id
+DB246	iam	captcha_challenges	Table	Captcha generation and validation records.	F127	challenge_id, session_id, solution_hash	FK: session_id
+DB247	iam	magic_link_usage	Table	Tracking of one-time magic link usage.	F128	link_id, user_id, used_ip, used_at	FK: user_id
+DB248	iam	biometric_liveness_checks	Table	Records of liveness detection challenges.	F105	check_id, user_id, result, score	FK: user_id
+DB249	iam	zero_knowledge_proofs	Table	ZKP verification data for privacy-preserving auth.	F094	zkp_id, user_id, proof_json, verified	FK: user_id
+DB250	iam	dynamic_salt_versions	Table	Versions of dynamic salts used for obfuscation.	F110	salt_ver_id, salt_value, active_from	PK: salt_ver_id
+VW011	iam	v_user_effective_perms	View	Computes all permissions for a user including role inheritance.	F003, F001	user_id, perm_id	Recursive CTE
+VW012	iam	v_compliance_gap	View	Identifies users with access but no recent training/attestation.	F060	user_id, role_id, days_since_attestation	Joins: access_reviews
+VW013	iam	v_high_risk_sessions	View	Active sessions with risk score > threshold.	F054, F012	session_id, user_id, ip, risk_score	Filter: risk > 80
+VW014	iam	v_role_exploded	View	Users and all their transitive roles.	F003	user_id, role_id, depth	Recursive
+VW015	iam	v_audit_trail_pii	View	Audit logs with PII identified/redacted based on viewer role.	F007	log_id, timestamp, action, user_masked	Applies masking
+VW016	iam	v_policy_conflicts_report	View	Human-readable report of active policy conflicts.	F023	policy_a_name, policy_b_name, conflict_desc	Joins: policies
+VW017	iam	v_user_access_history	View	Timeline of a user's access changes.	F020	user_id, change_date, change_type, details	Order by date desc
+VW018	iam	v_knowledge_graph	View	Exportable view of the KG for visualization tools.	F122	source, edge, target, properties	JSON output
+VW019	iam	v_failed_login_heatmap	View	Aggregation of failed logins by geo/location.	F027	geo_region, fail_count	Group by geo
+VW020	iam	v_jit_expiring_soon	View	JIT access grants expiring in the next hour.	F010	request_id, user_id, expires_at	Filter: expires < now + 1h
+FN021	iam	fn_add_noise	Function	Adds Laplacian noise to query results for differential privacy.	F083	value, epsilon	Returns numeric
+FN022	iam	fn_merkle_root	Function	Calculates Merkle root of a batch of log IDs.	F094	log_ids	Returns text
+FN023	iam	fn_bfs_shortest_path	Function	Breadth-first search for shortest path in KG.	F122	start_node, end_node	Returns table
+FN024	iam	fn_check_sod	Function	Checks for Segregation of Duties violations.	F042	user_id, roles	Returns boolean
+FN025	iam	fn_evaluate_ml_risk	Function	Calls external Python/R model for risk scoring.	F061	features_json	Returns numeric
+FN026	iam	fn_derive_pairwise_id	Function	Generates a pairwise subject ID.	F052	user_id, sector_id	Returns text
+FN027	iam	fn_rotate_crl	Function	Fetches and updates CRL from URL.	F046	url	Returns boolean
+FN028	iam	fn_verify_password_strength	Function	Checks password against breached corpuses and zxcvbn.	F121	password	Returns json
+FN029	iam	fn_generate_totp	Function	Generates TOTP code for testing/verification.	F039	secret	Returns integer
+FN030	iam	fn_extract_geo	Function	Extracts country/city from IP address using GeoIP lib.	F013	ip_address	Returns json
+FN031	iam	fn_apply_masking	Function	Generic masking function based on data type.	F007	value, mask_type	Returns text
+FN032	iam	fn_create_jwt_sig	Function	Signs JWT payload with private key.	F078	payload, key_id	Returns text
+FN033	iam	fn_verify_jwt_sig	Function	Verifies JWT signature with public key.	F078	token, key_id	Returns boolean
+FN034	iam	fn_audit_log_hash	Function	Returns SHA-256 hash of a log row.	F015	log_id	Returns bytea
+FN035	iam	fn_is_admin	Function	Helper to check if user has any admin role.	F011	user_id	Returns boolean
+FN036	iam	fn_cleanup_old_data	Function	Deletes data older than retention period.	F103	table_name, days	Returns integer
+FN037	iam	fn_sync_user_attributes	Function	Syncs attrs from external source (LDAP).	F004	user_id, source_attrs	Returns void
+FN038	iam	fn_decompose_path	Function	Parses API path to resource identifiers.	F002	path_string	Returns json
+FN039	iam	fn_calculate_entropy	Function	Calculates Shannon entropy of a string.	F115	input_string	Returns numeric
+FN040	iam	fn_get_secret	Function	Retrieves decrypted secret from Vault/KMS.	F052	secret_path	Returns text
+SP011	iam	sp_perform_access_review	Procedure	Initiates periodic access review for a manager.	F079	manager_id	Emails users
+SP012	iam	sp_rotate_master_key	Procedure	Rotates the master encryption key and re-encrypts data.	F089	new_key_id	Transaction
+SP013	iam	sp_quarantine_user	Procedure	Locks user and revokes all sessions.	F083	user_id, reason	Transaction
+SP014	iam	sp_import_graph_data	Procedure	Bulk loads nodes/edges for Knowledge Graph.	F122	file_uri	Transaction
+SP015	iam	sp_generate_compliance_report	Procedure	Creates ISO/SOC2 report based on evidence locker.	F060	framework_id, start_date	File output
+SP016	iam	sp_cleanup_expired_jit	Procedure	Revokes JIT grants that have expired.	F010	Job scheduler	Transaction	
+SP017	iam	sp_reindex_search	Procedure	Updates full-text search indexes for logs.	F016	index_name	Maintenance
+SP018	iam	sp_sync_with_ad	Procedure	Pulls delta changes from Active Directory.	F040	last_sync_hash	Transaction
+SP019	iam	sp_promote_model	Procedure	Promotes a new ML model version to production.	F061	model_version	Transaction
+SP020	iam	sp_export_audit_trail	Procedure	Exports filtered audit trail to secure storage.	F090	filters_json	Async Job
+SP021	iam	sp_handle_breached_password	Procedure	Forces password reset and notifies user.	F121	user_id	Transaction
+SP022	iam	sp_update_trust_score	Procedure	Recalculates device trust score based on recent history.	F014	device_id	Transaction
+SP023	iam	sp_analyze_role_usage	Procedure	Runs clustering algos to find unused roles.	F088	dataset_id	Transaction
+SP024	iam	sp_archive_session_videos	Procedure	Moves video blobs to cold storage.	F125	cutoff_date	Job
+SP025	iam	sp_reconcile_consents	Procedure	Compares consents with Privacy Policy versions.	F026	policy_version	Report
+TR006	iam	tr_update_timestamp	Trigger	Generic trigger to update updated_at columns.	F023	Before Update/Insert
+TR007	iam	tr_log_password_change	Trigger	Specific audit trigger for password updates.	F121	After Update on users
+TR008	iam	tr_prevent_role_change	Trigger	Prevents modification of system roles if flagged.	F001	Before Update on roles
+TR009	iam	tr_hash_audit_row	Trigger	Creates hash of row for integrity check on insert.	F015	After Insert on access_logs
+TR010	iam	tr_propagate_attr_change	Trigger	Propagates critical attribute changes to external systems.	F004	After Update on user_attributes
+EN011	iam	enum_biometric_type	Enum	Types of biometric data.	F073	FACE, VOICE, FINGERPRINT, IRIS
+EN012	iam	enum_graph_relation	Enum	Relationship types for Knowledge Graph.	F122	MEMBER_OF, OWNS, MANAGES, ACCESSES
+EN013	iam	enum_ioc_type	Enum	Indicator of Compromise types.	F114	IP_HASH, DOMAIN, URL, EMAIL
+EN014	iam	enum_mask_type	Enum	Masking algorithms.	F007	REDACT, HASH, PARTIAL, NULLIFY
+EN015	iam	enum_compliance_framework	Enum	Supported frameworks.	F060	ISO27001, SOC2, GDPR, PCI_DSS
+EN016	iam	enum_ml_algorithm	Enum	ML algorithms used for detection.	F061	ISOLATION_FOREST, RANDOM_FOREST, LSTM
+EN017	iam	enum_secret_type	Enum	Types of secrets stored.	F052	API_KEY, DB_PASSWORD, CERTIFICATE, TOKEN
+EN018	iam	enum_auth_protocol	Enum	Protocols for Federation.	F091	SAML, OIDC, CAS, OAUTH2
+EN019	iam	enum_evidence_status	Enum	Status of audit evidence.	F060	DRAFT, FINAL, ARCHIVED
+EN020	iam	enum_anomaly_severity	Enum	Severity of detected anomalies.	F061	INFO, LOW, MEDIUM, HIGH, CRITICAL

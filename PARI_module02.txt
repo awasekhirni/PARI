@@ -1,0 +1,585 @@
+
+
+2.	Module M02	Regulatory Policy Engine (RPE)
+a.	Summary
+The Regulatory Policy Engine (RPE) serves as the central intelligence and governance layer of the Privacy Preserving Payment Anonymous Regulatory Insights (PARI) ecosystem. In a globalized digital economy, payment systems face the daunting challenge of navigating a labyrinthine and constantly shifting landscape of financial regulations, data protection laws, and tax mandates. Traditional financial infrastructure typically addresses this through rigid, hard-coded logic that requires expensive, time-consuming software updates to accommodate even minor legislative changes. This approach creates a critical bottleneck for innovation and exposes institutions to significant compliance risk. The RPE solves this "Regulatory Fragmentation" challenge by decoupling the business logic of payment processing from the logic of regulatory compliance. It establishes a dynamic, extensible framework where compliance requirements are treated as modular, versioned, and hot-swappable assets rather than intrinsic code dependencies.
+
+At its core, the RPE utilizes a sophisticated Attribute-Based Access Control (ABAC) model. Unlike Role-Based Access Control (RBAC), which relies on static user roles, ABAC evaluates policies based on a combination of user attributes (e.g., risk profile, citizenship), resource attributes (e.g., transaction amount, destination jurisdiction), and environmental context (e.g., time, geolocation, threat level). This granularity allows the PARI system to make highly nuanced decisions. For instance, a transaction that is permissible for a low-risk user within the EU might be automatically flagged or subjected to additional verification if the same user attempts a transfer to a high-risk jurisdiction, all without altering the core transaction protocol.
+
+A defining capability of the RPE is its deep integration with ISO 20022, the global standard for payments messaging. The engine automatically ingests complex ISO 20022 data schemas and applies jurisdiction-specific regulatory metadata tags to every transaction event. This ensures that data leaving the PARI system is immediately readable and actionable by central banks, tax authorities, and clearing houses, facilitating interoperability with legacy financial rails while maintaining the system's native privacy guarantees. The engine manages the "Regulatory Metadata Layer," a rich semantic wrapper that provides legal context to encrypted data streams, enabling tax authorities to verify VAT compliance without decrypting sensitive payer identity information.
+
+Furthermore, the RPE is engineered with CMMI Level 5 discipline. It treats regulatory rules themselves as high-value software artifacts. Every policy change undergoes rigorous version control, automated testing against regression suites, and impact analysis before deployment. The engine employs a "Sandbox mode" where new regulations can be simulated against historical transaction data to predict behavioral changes and economic impact before they go live. This predictive capability is crucial for maintaining stability in the face of volatile legislative environments.
+
+Security and privacy are paramount within the RPE design. It employs "Zero-Knowledge Policy Verification," where the system can prove that a transaction complies with a specific regulation (e.g., AML screening) without revealing the specific rule set or the underlying sensitive data to unauthorized parties. This protects the intellectual property of the compliance logic while maintaining transparency for auditors. The engine also integrates directly with external regulatory endpoints—such as national sanction lists, politically exposed persons (PEP) databases, and tax validation APIs—ensuring that the system operates on the absolute latest data in real-time.
+
+Ultimately, the RPE transforms regulatory compliance from a reactive cost center into a strategic asset. By enabling "Legal Operation in 100+ Jurisdictions without Code Forks," it allows PARI to scale globally with unprecedented speed. It empowers regulators with real-time, granular oversight, assures merchants of automated tax accuracy, and protects citizens through the enforcement of strict data protection standards like GDPR. It is the governance backbone that makes a privacy-preserving, global digital currency viable in the modern world.
+b.	Scope
+The scope of Module M02 encompasses the end-to-end lifecycle of regulatory compliance management within the PARI infrastructure.
+
+In-Scope:
+
+     Policy Management: Creation, versioning, storage, and retirement of jurisdiction-specific regulatory rules.
+     ABAC Execution Engine: Real-time evaluation of policies against user, resource, and environment attributes.
+     ISO 20022 Integration: Parsing, validating, and enriching payment messages with standard regulatory tags.
+     External Connectivity: APIs and adapters for fetching updates from global sanction lists, tax authorities, and AML databases.
+     Audit & Reporting: Generation of immutable compliance proofs and audit trails for internal and external regulators.
+     Sandboxing: Simulation environment for testing new policies against production data snapshots.
+     Data Privacy Enforcement: Automated enforcement of GDPR Right-to-be-Forgotten and Data Localization rules at the database layer.
+
+
+Out-of-Scope:
+
+     Core Transaction Processing: The actual movement of funds (handled by Module M01).
+     Fraud Detection: Specific heuristic anomaly detection (handled by Module M03), though RPE provides the regulatory rules regarding fraud thresholds.
+     User Interface Design: While RPE provides APIs for Admin Dashboards, the frontend UI components are part of Module M04 or M09.
+     Physical Security: Hardware security module (HSM) management is part of the broader Zero-Trust fabric (Module M17), though RPE utilizes it.
+
+c.	Business Case
+
+The Problem:
+Global financial institutions and fintechs operate in a regulatory minefield. The "one-size-fits-all" approach to payment processing fails because laws vary wildly by jurisdiction (e.g., Swiss DPA vs. US BSA vs. India’s PMLA). Adapting legacy systems to these changes takes months of development time, costs millions in engineering resources, and introduces significant operational risk. Furthermore, the tension between privacy laws (GDPR) and Anti-Money Laundering (AML) transparency requirements creates a "Privacy Compliance Paradox" that stymies innovation.
+
+The Solution:
+The Regulatory Policy Engine (RPE) abstracts compliance into a configurable, dynamic layer. By decoupling regulations from code, PARI can enter new markets instantly by simply uploading a new "Regulation Pack" (a JSON-LD/JSON schema compliant set of rules). The use of ABAC allows for highly specific, risk-based enforcement that satisfies strict regulators without burdening low-risk users with friction.
+
+Value Proposition:
+
+    Market Agility: Reduce time-to-market for new geographical regions from months to hours.
+    Cost Reduction: Eliminate the need for custom compliance code forks for every country; reduce developer overhead by ~40%.
+    Risk Mitigation: Ensure 100% consistency with applicable laws using validated, testable policy code.
+    Revenue Protection: Automated tax reporting prevents merchant fines and facilitates instant VAT settlement.
+    Trust: Demonstrate "Privacy-by-Design" to citizens and "Auditability" to regulators simultaneously, increasing user adoption and regulatory goodwill.
+
+d.	KPIs
+
+     Policy Activation Latency: < 100ms (Time to retrieve and apply a policy rule).
+     Rule Coverage Completeness: 100% (All identified regulatory requirements mapped to executable logic).
+     False Positive Rate (Compliance Blocking): < 0.1% (Legitimate transactions incorrectly blocked).
+     Jurisdiction Onboarding Time: < 1 business day (Time from requirement analysis to production deployment).
+     Policy Update Frequency: Daily (Ability to push hotfixes for sanction list updates).
+     Audit Query Response Time: < 2 seconds (Time to retrieve full compliance history for a transaction).
+     System Availability: 99.999% (Critical compliance infrastructure).
+
+
+e.	Stakeholder Insights
+
+Stakeholder	Concern	Implications
+Regulators	Need assurance that the system adheres to local AML, KYC, and tax laws without needing to audit raw code constantly.	Requires a transparent, standards-based (ISO 20022) reporting interface and read-only access to policy logic.
+Compliance Officers	Overwhelmed by changing laws and manual reporting; fear of regulatory fines for non-compliance.	Needs a GUI to manage rules, real-time dashboards of compliance status, and automated audit trail generation.
+Merchants	Want to sell globally but fear having their funds frozen or transactions blocked by ambiguous rules.	Needs clear error codes explaining why a transaction failed and automated tax calculation to avoid penalties.
+Citizens	Desire privacy but worry about intrusive surveillance or "de-banking" due to algorithmic bias.	Needs granular consent management (GDPR) and the ability to challenge automated compliance decisions.
+Developers	Difficulty integrating complex, changing legal logic into software without introducing bugs.	Needs a clean API, comprehensive documentation (Swagger/OpenAPI), and a sandbox environment to test against new policies.
+Auditors	Need to verify that the system is actually doing what it claims (enforcing specific laws).	Requires immutable logs of every policy decision and cryptographic proof of policy integrity.
+
+
+f.	Knowledge Representation Graph (mermaid.js)
+
+graph TD
+    RegAuthority[Regulatory Authority] -->|Defines| Legislation[Legislation / Statute]
+    Legislation -->|Mapped to| Regulation[Regulation Pack (JSON-LD)]
+
+    subgraph RPE_Module [Regulatory Policy Engine (M02)]
+        Regulation -->|Loads| PolicyEngine[Policy Execution Engine]
+        Attributes[Attribute Store<br/>(User, Resource, Env)] -->|Feeds| PolicyEngine
+        ISO20022[ISO 20022 Mapper] -->|Enriches| PolicyEngine
+        SanctionList[Global Watchlists] -->|Updates| PolicyEngine
+
+        PolicyEngine -->|Evaluates| DecisionPoint[Policy Decision Point]
+        DecisionPoint -->|Permits/Denies| Transaction[PARI Transaction Flow]
+        DecisionPoint -->|Tags| Metadata[Regulatory Metadata Layer]
+    end
+
+    Metadata -->|Appended to| Transaction
+    Transaction -->|Logged| AuditLedger[Immutable Audit Ledger]
+
+    RegulatorInterface[Regulator Portal] -->|Queries| AuditLedger
+    ComplianceUI[Compliance Officer UI] -->|Manages| Regulation
+
+
+g.	Comprehensive List of Features
+
+ID	Feature	Description	Business Case	AI/ML Algorithms	KPIs	Primary Users
+M02-F001	Dynamic Policy Loader	Hot-reloads compliance rules without system restart.	Minimizes downtime during regulatory updates.	N/A	Reload Time < 1s	DevOps Engineers
+M02-F002	Jurisdictional Rule Segregation	Isolates rules by country/region to prevent cross-contamination.	Ensures GDPR doesn't accidentally apply to US users.	N/A	0% Cross-jurisdiction leakage	Compliance Officers
+M02-F003	ABAC Policy Evaluation Core	Evaluates logic based on User, Resource, Action, and Environment attributes.	Allows complex, context-aware compliance (e.g., transaction limits based on time).	Decision Trees	Eval Latency < 10ms	System Core
+M02-F004	JSON-LD Policy Schema Validation	Validates uploaded regulation packs against W3C standards.	Ensures only syntactically correct policies are deployed.	Schema Validators	100% Valid Uploads	Architects
+M02-F005	ISO 20022 Metadata Mapper	Auto-maps internal transaction data to ISO 20022 fields.	Guarantees interoperability with global banking systems.	NLP / Entity Mapping	Mapping Accuracy > 99.9%	Integration Specialists
+M02-F006	Sanctions List Auto-Sync	Hourly sync of OFAC, EU, UN sanctions lists.	Keeps blocked entities up to date automatically.	Change Data Capture	Sync Latency < 1hr	Compliance Officers
+M02-F007	Fuzzy Matching Engine	Matches names against sanctions lists despite typos/aliases.	Prevents bad actors from evading detection via minor spelling changes.	Levenshtein Distance, Soundex	False Negative Rate < 0.01%	Fraud Analysts
+M02-F008	Transaction Limit Enforcer	Dynamically enforces daily/monthly volume limits per jurisdiction.	Mitigates risk and complies with AML structuring rules.	N/A	Enforcement Accuracy 100%	Risk Managers
+M02-F009	VAT/GST Calculator Module	Calculates tax based on merchant location and customer IP/domicile.	Automates tax collection to reduce merchant liability.	Rule Engine	Calc Accuracy 100%	Merchants
+M02-F010	Real-time Tax Reporting API	Pushes transaction data to tax authorities (e.g., Spain SII).	Eliminates end-of-month filing burden.	N/A	Report Success Rate > 99.9%	Tax Authorities
+M02-F011	Travel Rule Enforcer	Transmits required originator/beneficiary info for cross-border wires.	Complies with FATF Travel Rule standards.	N/A	Compliance Rate 100%	Banks
+M02-F012	PII Data Masking	Masks personally identifiable information for non-compliant roles.	Enforces GDPR "Need to Know" principles.	Differential Privacy	Masking Accuracy 100%	Database Admins
+M02-F013	Data Residency Controller	Ensures data is stored only in approved geographic zones.	Complies with data localization laws (e.g., China, Russia).	Geo-IP Mapping	Violations = 0	Legal Teams
+M02-F014	Consent Management Module	Tracks user consent for data processing (GDPR Art. 7).	Legal basis for data processing must be proven.	N/A	Consent Log Integrity 100%	Privacy Officers
+M02-F015	Right to be Forgotten (RTBF) Handler	Automates deletion requests across all databases.	Complies with GDPR Art. 17 within strict timelines.	N/A	Deletion Time < 30 days	DPOs
+M02-F016	Policy Versioning Control	Git-like versioning for all regulatory logic.	Allows rollback and audit of historical rules.	N/A	Version Traceability 100%	Auditors
+M02-F017	Sandbox Simulation Mode	Tests new rules against historical data before live deployment.	Predicts impact and prevents production outages.	Monte Carlo Sim	Prediction Accuracy > 95%	QA Engineers
+M02-F018	Compliance Dashboard UI	Visualizes real-time compliance status and blocked transactions.	Provides visibility into operational health.	N/A	Dashboard Latency < 1s	Compliance Officers
+M02-F019	Alerting & Notification System	Sends alerts for critical compliance failures (e.g., policy engine down).	Reduces MTTR (Mean Time To Recover).	Anomaly Detection	Alert Latency < 1 min	SREs
+M02-F020	Immutable Audit Logger	Writes every policy decision to a write-once log (Blockchain/Append-only).	Provides non-repudiable evidence for regulators.	Hashing (SHA-3)	Log Integrity 100%	Auditors
+M02-F021	Role-Based Policy Editor	GUI for editing rules based on user permissions.	Democratizes policy updates without coding.	N/A	Edit Error Rate < 1%	Compliance Analysts
+M02-F022	Regulatory Impact Analyzer	Analyzes potential revenue impact of a proposed rule.	Helps regulators understand economic consequences.	Regression Analysis	Report Generation Time < 5m	Policymakers
+M02-F023	Machine Learning Policy Optimizer	Suggests rule threshold adjustments to reduce false positives.	Improves user experience while maintaining compliance.	Reinforcement Learning	False Positives Reduced by 10%	Data Scientists
+M02-F024	Cross-Border Payment Controller	Applies specific FX and reporting rules for international transfers.	Ensures seamless cross-border commerce.	N/A	Processing Time < 2s	Settlement Banks
+M02-F025	KYC Document Verification	Orchestrates checks against passport/ID databases.	Satisfies initial onboarding AML requirements.	OCR, Biometrics	Verification Time < 30s	Onboarding Team
+M02-F026	Politically Exposed Person (PEP) Screener	Checks customers against global PEP lists.	Identifies high-risk individuals requiring enhanced due diligence.	N/A	Screening Coverage 100%	Compliance Officers
+M02-F027	Adverse Media Checker	Scans news sources for negative mentions of entities.	catches risks not yet on official lists.	Sentiment Analysis (NLP)	News Latency < 24h	Risk Managers
+M02-F028	Transaction Monitoring Rule Builder	Drag-and-drop interface for creating AML scenarios.	Allows rapid response to new money laundering typologies.	N/A	Scenario Creation Time < 15m	Fraud Analysts
+M02-F029	Reporting Schedule Manager	Automates periodic reporting (daily, monthly, yearly).	Prevents missed regulatory deadlines.	Cron Jobs	Missed Deadlines = 0	Compliance Officers
+M02-F030	Regulatory Taxonomy Manager	Manages hierarchical tags for regulations (e.g., EU > PSD2 > SCA).	Organizes complex rule sets logically.	N/A	Search Accuracy > 95%	Architects
+M02-F031	API Rate Limiting by Jurisdiction	Throttles API calls based on regional capacity limits.	Prevents system overload and complies with fairness rules.	Token Bucket	Limit Enforcement 100%	Platform Ops
+M02-F032	Geo-Fencing Enforcement	Blocks transactions originating from sanctioned regions.	Enforces trade embargoes automatically.	Geo-IP DB	Blocking Accuracy > 99%	System Core
+M02-F033	Cryptographic Proof Generator	Generates ZK-Proofs of compliance for privacy-preserving audits.	Allows audit without revealing sensitive data.	zk-SNARKs	Proof Gen Time < 500ms	Cryptographers
+M02-F034	Dynamic Risk Scoring	Assigns real-time risk scores to users/transactions.	Enables step-up authentication based on risk.	Random Forest	Score Update Latency < 50ms	Fraud Engines
+M02-F035	Whitelist/Blacklist Manager	Maintains manual overrides for specific entities.	Allows handling of edge cases and false positives.	N/A	Update Propagation < 1s	Compliance Officers
+M02-F036	Policy Conflict Resolver	Detects and resolves conflicting rules (e.g., Allow vs Deny).	Prevents undefined behavior in the engine.	Logic Solver	Conflict Resolution Time < 100ms	System Core
+M02-F037	Historical Data Archiver	Moves cold compliance data to long-term storage.	Reduces costs while meeting retention laws.	N/A	Archive Success Rate 100%	DBAs
+M02-F038	Regulatory Feed Ingestion	Parses incoming feeds from regulatory bodies.	Automates uptake of new rules.	XML/JSON Parser	Feed Error Rate < 0.1%	Integration Specialists
+M02-F039	Smart Contract Legal Wrapper	Embeds legal terms into transaction metadata.	Creates legally binding digital contracts.	N/A	Contract Validity 100%	Legal Teams
+M02-F040	User Consent Revocation Handler	Instantly stops processing if user withdraws consent.	Critical for GDPR compliance.	N/A	Revocation Latency < 1s	Privacy Officers
+M02-F041	Age Verification Module	Validates user age for restricted goods/services.	Complies with age-gating laws.	ID Estimation	Verification Accuracy > 99%	Merchants
+M02-F042	Product Classification Engine	Classifies goods/services for correct VAT codes.	Ensures correct tax rates are applied.	NLP Classification	Classification Accuracy > 95%	Tax Authorities
+M02-F043	Regulatory Horizon Scanner	AI scans for upcoming legislative changes.	Provides proactive preparation time.	Web Scraping, NLP	Alert Horizon > 3 months	Strategy Teams
+M02-F044	Breach Notification Automator	Automates the 72-hour breach notification process (GDPR).	Reduces penalties for data breaches.	N/A	Notification Time < 72h	Security Teams
+M02-F045	Secure Data Exchange Gateway	Transmits data to tax authorities using secure channels.	Ensures data in transit is protected.	TLS 1.3, AS2	Transmission Success 100%	Security Architects
+M02-F046	Merchant Category Code (MCC) Validator	Enforces restrictions based on business type.	Blocks illegal transactions (e.g., gambling where prohibited).	N/A	Validation Accuracy 100%	Risk Managers
+M02-F047	License Verification	Checks merchant licenses for validity.	Prevents transactions with unlicensed operators.	API Integration	Check Latency < 2s	Onboarding Team
+M02-F048	Beneficial Owner Extractor	Identifies ultimate beneficial owners (UBO) of companies.	Satisfies corporate transparency rules.	Graph Analysis	Extraction Accuracy > 90%	Compliance Officers
+M02-F049	Transaction Chain Analyzer	Tracks flow of funds through hops.	Detects layering in money laundering.	Graph Algorithms	Chain Depth Traceability 100%	Fraud Analysts
+M02-F050	Suspicious Activity Report (SAR) Generator	Auto-generates SAR drafts for compliance officer review.	Reduces administrative burden of reporting.	NLP Summarization	Draft Accuracy > 80%	Compliance Officers
+M02-F051	Currency Restriction Enforcer	Blocks specific currencies based on jurisdiction.	Complies with sanctions (e.g., no USD for specific entities).	N/A	Enforcement Accuracy 100%	System Core
+M02-F052	Dual-Use Goods Checker	Flags transactions involving potentially military items.	Enforces export control regulations.	Keyword Matching	Flagging Accuracy > 90%	Trade Compliance
+M02-F053	Regulatory Heatmap Visualizer	Shows compliance risk by geographic region.	Guides business expansion and risk mitigation.	Clustering	UI Refresh Rate < 5s	Executives
+M02-F054	Audit Trail Exporter	Exports logs in formats required by auditors (CSV, PDF, JSON).	Facilitates external audits.	N/A	Export Time < 5m	External Auditors
+M02-F055	Policy Testing Framework	Unit and integration test harness for policies.	Ensures new rules don't break existing ones.	JUnit, PyTest	Code Coverage > 90%	QA Engineers
+M02-F056	Compliance Fee Calculator	Calculates regulatory fees (e.g., interchange, levies).	Ensures correct fee collection and remittance.	Arithmetic	Calc Accuracy 100%	Finance Teams
+M02-F057	Dispute Resolution Workflow	Orchestrates steps for regulatory disputes.	Standardizes handling of customer complaints.	State Machine	Workflow Completion Rate 100%	Support Teams
+M02-F058	Regulatory Dictionary API	Provides definitions of terms used in policies.	Ensures semantic understanding across teams.	N/A	API Uptime 99.99%	Developers
+M02-F059	Evidence Locker	Stores documents supporting compliance decisions.	Crucial for defending decisions in court.	Object Storage	Retrieval Time < 2s	Legal Teams
+M02-F060	Dynamic Disclosure Controller	Controls what data is shown to whom based on consent.	Implements Granular Privacy Controls.	ABAC	Disclosure Accuracy 100%	Privacy Officers
+M02-F061	Complaint Handling Module	Logs and tracks regulatory complaints from users.	Manages regulatory risk from feedback.	N/A	Response SLA Adherence 100%	Support Teams
+M02-F062	Third-Party Risk Assessor	Evaluates risk of partners/affiliates.	Manages supply chain compliance risk.	Random Forest	Assessment Time < 24h	Vendor Mgmt
+M02-F063	Regulatory Cap Management	Enforces maximum exposure limits per counterparty.	Prevents concentration risk.	N/A	Limit Breaches = 0	Risk Managers
+M02-F064	Encryption Key Policy Enforcer	Manages key rotation based on compliance standards.	Ensures cryptographic hygiene.	KMS Integration	Rotation Compliance 100%	SecOps
+M02-F065	Accessibility Compliance Checker	Ensures compliance with WCAG for user interfaces.	Prevents discrimination lawsuits.	Linting Tools	WCAG Pass Rate 100%	UI/UX Teams
+M02-F066	Consumer Credit Directive Checker	Checks credit licensing for lenders.	Ensures lending compliance.	DB Lookup	Check Accuracy 100%	Lending Partners
+M02-F067	PSD2 SCA Exemption Logic	Identifies transactions exempt from Strong Customer Authentication.	Balances security with user experience (frictionless flow).	Rule Engine	Exemption Accuracy 100%	Product Owners
+M02-F068	Instant Payment Rule Validator	Applies specific rules for SEPA Instant / FedNow.	Prevents rejection of fast payments.	N/A	Validation Speed < 50ms	Payment Ops
+M02-F069	Netting Controller	Validates if netting is allowed for specific instruments.	Optimizes settlement while complying with regulations.	N/A	Validation Accuracy 100%	Treasury
+M02-F070	Regulatory Sandbox Provisioner	Spawns isolated environments for testing new features.	Allows innovation without breaking production compliance.	Containerization	Provisioning Time < 2m	R&D Teams
+M02-F071	Data Portability Handler	Exports user data in machine-readable format (GDPR).	Facilitates user switching between providers.	JSON/XML Gen	Export Integrity 100%	Privacy Officers
+M02-F072	Automated Compliance Reporting	Emails/Pushes daily summaries to C-suite.	Keeps leadership informed of risk posture.	NLP Summarization	Report Delivery 100%	Executives
+M02-F073	Policy Dependency Mapper	Maps which policies depend on others.	Prevents accidental breakage during updates.	Graph DB	Dependency Accuracy 100%	Architects
+M02-F074	Regulatory Change Impact Bot	Notifies teams of upcoming changes affecting their modules.	Coordinates cross-functional response.	Slack/Teams API	Notification Latency < 1h	Engineering Leads
+M02-F075	AML Transaction Pattern Detector	Detects structuring (smurfing) or layering.	Identifies complex money laundering behaviors.	Sequence Mining	Detection Recall > 95%	AML Analysts
+M02-F076	Sanctions Ownership Piercer	Looks through shell companies to find sanctioned owners.	Deepens due diligence.	Graph Algorithms	Depth Level 5+	Investigators
+M02-F077	Regulatory Fee Calculator	Dynamic calculation of fees based on transaction volume.	Ensures correct remittance to regulatory bodies.	Aggregation	Accuracy 100%	Finance
+M02-F078	Electronic Signature Verifier	Verifies e-signatures on contracts (eIDAS compliant).	Ensures contract validity.	PKI	Verification Time < 1s	Legal Teams
+M02-F079	Cross-Border AML Controller	Applies stricter rules for cross-jurisdiction flows.	Addresses higher risk in international transfers.	Rule Engine	Rule Trigger Rate 100%	Compliance Officers
+M02-F080	Regulatory Tagging Service	Tags transactions with applicable regulation IDs.	Enables easy filtering and reporting.	N/A	Tagging Accuracy 100%	Data Engineers
+M02-F081	Policy Expiration Manager	Automatically retires temporary/emergency regulations.	Prevents indefinite application of emergency powers.	Cron Job	Expiration Accuracy 100%	Compliance Officers
+M02-F082	Regulatory Text Interpreter	NLP engine to suggest policy code from legal text.	Accelerates the implementation of new laws.	Large Language Models (LLM)	Suggestion Accuracy > 70%	Compliance Engineers
+M02-F083	Disallowed Jurisdiction Checker	Blocks IP addresses or IDs from disallowed regions.	Enforces embargoes.	Geo-IP	Blocking Success 100%	System Core
+M02-F084	Transaction Purpose Validator	Validates remittance purpose codes.	Ensures payments are for legitimate reasons.	N/A	Validation Accuracy 100%	Payment Ops
+M02-F085	Regulatory Threshold Watcher	Monitors volumes approaching regulatory thresholds.	Proactive management of license limits.	Time Series	Alert Accuracy > 95%	Risk Managers
+M02-F086	Internal Audit Scheduler	Schedules and executes internal compliance audits.	Ensures continuous readiness for external audits.	N/A	Audit Completion Rate 100%	Internal Audit
+M02-F087	Regulatory License Tracker	Tracks expiration of various operational licenses.	Prevents operation without a valid license.	N/A	Renewal Notice 30 days prior	Legal Teams
+M02-F088	Competition Law Checker	Monitors for price-fixing or market manipulation signals.	Antitrust compliance.	Anomaly Detection	False Positive Rate < 5%	Legal Teams
+M02-F089	Regulatory Fallback Mechanism	Switches to "Safe Mode" if primary policy engine fails.	Ensures system stops rather than violates rules.	Circuit Breaker	Failover Time < 100ms	SREs
+M02-F090	Whistleblower Protection Interface	Secure channel for reporting misconduct.	Encourages ethical reporting.	Anonymous Routing	Uptime 99.99%	HR/Compliance
+M02-F091	Environmental, Social, Governance (ESG) Filter	Blocks transactions with non-compliant ESG entities.	Supports sustainable finance goals.	External API Integration	Filter Accuracy > 90%	ESG Analysts
+M02-F092	Crypto-Asset Travel Rule	Applies FATF rules specifically for crypto-assets.	Bridges gap between fiat and crypto compliance.	Blockchain Analysis	Compliance Rate 100%	Crypto Desk
+M02-F093	Regulatory API Gateway	Unified entry point for all regulatory calls.	Simplifies integration for external bodies.	API Gateway	Uptime 99.99%	Platform Architects
+M02-F094	Data Subject Access Request (DSAR) Portal	Workflow for managing user data access requests.	Streamlines GDPR compliance operations.	N/A	Request SLA Adherence 100%	Privacy Officers
+M02-F095	Dynamic Blacklist Propagator	Pushes blacklist updates to edge nodes instantly.	Ensures fresh blocking across the distributed network.	Pub/Sub	Propagation Latency < 1s	Network Ops
+M02-F096	Regulatory Incident Logger	Logs specific compliance incidents (near misses).	Provides data for process improvement (CMMI).	N/A	Log Integrity 100%	Quality Assurance
+M02-F097	Customer Identification Program (CIP) Manager	Manages the lifecycle of KYC data.	Core component of US AML compliance.	N/A	Data Freshness 100%	Onboarding Team
+M02-F098	Enhanced Due Diligence (EDD) Trigger	Automatically triggers EDD for high-risk profiles.	Ensures appropriate scrutiny for risky clients.	Risk Scoring	Trigger Accuracy > 95%	Compliance Officers
+M02-F099	Regulatory Fee Remitter	Automates the actual payment of collected fees.	Removes manual friction from tax/payment of fees.	Payment API	Payment Success Rate 100%	Finance Teams
+M02-F100	Policy Diff Viewer	Visualizes differences between policy versions.	Aids in approval and review of changes.	Text Diff	Render Time < 1s	Compliance Officers
+M02-F101	Regulatory Knowledge Base	Searchable repository of regulations and interpretations.	Centralizes institutional knowledge.	Vector Search	Search Relevance > 90%	All Staff
+M02-F102	Mobile Device Compliance Check	Checks if user device is rooted/jailbroken (security risk).	Part of transaction security context (ABAC).	Device Fingerprinting	Check Latency < 200ms	Security Core
+M02-F103	Biometric Verification Policy	Enforces biometric auth for high-value transactions.	Satisfies SCA and local security laws.	Bio SDK	Verification Time < 2s	Product Owners
+M02-F104	Regulatory Hold Manager	Places funds on hold based on legal orders.	Freezes assets immediately upon court order.	N/A	Hold Execution Time < 1s	Legal Ops
+M02-F105	Tax Residency Certificator	Validates digital tax residency certificates.	Automates double taxation avoidance.	X.509 Validation	Validation Accuracy 100%	Tax Teams
+M02-F106	Regulatory Sandbox Telemetry	Monitors behavior of entities in the regulatory sandbox.	Prevents abuse of testing environments.	Anomaly Detection	Alert Latency < 1m	R&D Teams
+M02-F107	Policy Rollback Mechanism	Instant reversion to previous policy version.	Mitigates damage from faulty policy deployment.	Git Rollback	Rollback Time < 5s	DevOps
+M02-F108	Supply Chain Compliance Mapper	Maps payments to supply chain tiers.	Identifies exposure to sanctioned upstream entities.	Graph DB	Tier Traceability Level 5	Supply Chain
+M02-F109	Regulatory Limits Dashboard	Visual view of remaining limits (e.g., FX, Vol).	Helps treasury manage daily liquidity constraints.	Real-time Aggregation	Data Latency < 1s	Treasury
+M02-F110	Foreign Exchange (FX) Rule Engine	Enforces documentation and timing rules for FX trades.	Complies with FX market conduct rules.	N/A	Compliance Rate 100%	Trading Desk
+M02-F111	Regulatory Content Scanning	Scans transaction memos/descriptions for forbidden keywords.	Prevents illegal trade (e.g., weapons keywords).	NLP	Scan Accuracy > 95%	Risk Managers
+M02-F112	Insider Trading Detector	Cross-references payment times with corporate events.	Prevents market abuse.	Correlation Analysis	Detection Latency < 1h	Compliance Officers
+M02-F113	Regulatory Workflow Approver	Multi-signature approval for high-impact policy changes.	Ensures checks and balances before deployment.	Multi-sig Wallet	Approval Time < 24h	Compliance Committee
+M02-F114	Jurisdictional Fallback Engine	Routes transactions to compliant processing paths if primary path fails.	Ensures business continuity without violation.	Rule Engine	Fallback Success Rate 100%	System Core
+M02-F115	Regulatory Benchmarking	Compares performance against industry standards.	Identifies gaps in compliance posture.	Statistical Analysis	Benchmark Frequency Monthly	Executives
+M02-F116	Compliance Training Tracker	Tracks staff completion of mandatory compliance training.	HR requirement for regulated entities.	LMS Integration	Completion Rate 100%	HR/Compliance
+M02-F117	Regulatory Event Correlator	Correlates external events (news) with internal transactions.	Contextualizes transaction monitoring.	Event Streaming	Correlation Latency < 5m	Fraud Analysts
+M02-F118	Dynamic Disclosure Generator	Generates legal disclosures for specific products.	Ensures consumers are properly informed.	Template Engine	Generation Time < 500ms	Product Teams
+M02-F119	Privacy Impact Assessment (PIA) Tool	Assesses privacy impact of new features/policies.	Mandatory under GDPR for new processing.	Risk Matrix	Assessment Time < 1 week	Privacy Officers
+M02-F120	Regulatory Test Case Generator	Auto-generates test cases from policy text.	Speeds up verification of compliance logic.	GenAI	Test Coverage > 80%	QA Engineers
+M02-F121	Sanction Ownership Resolver	Resolves complex corporate structures for sanctions.	Penetrates shell companies.	Graph Analysis	Resolution Depth 10 layers	Investigators
+M02-F122	Data Subject Rights Portal	Centralized portal for users to exercise rights (Access, Delete, Port).	Streamlines GDPR interaction.	N/A	Portal Availability 99.99%	Privacy Officers
+M02-F123	Regulatory Notification Service	Pushes critical updates to stakeholders.	Ensures timely awareness of changes.	Pub/Sub	Delivery Rate 100%	Compliance Officers
+M02-F124	Cross-Jurisdiction Rule Harmonizer	Identifies conflicts between overlapping jurisdictions.	Prevents legal double-jeopardy for transactions.	Logic Solver	Conflict Detection 100%	Legal Teams
+M02-F125	Regulatory Capacity Manager	Manages compute resources allocated to policy engine.	Ensures engine meets SLA under load.	Kubernetes Autoscaling	Scale-up Time < 1 min	SREs
+M02-F126	Compliance Cost Allocator	Allocates cost of compliance processes to business units.	Shows true cost of doing business in regions.	Activity Based Costing	Calculation Accuracy 100%	Finance
+M02-F127	Regulatory Exception Manager	Manages workflow for granting exceptions to policies.	Handles legitimate edge cases formally.	Workflow Engine	Approval SLA < 48h	Line Managers
+M02-F128	Policy Distribution Network	Ensures all nodes have the latest policy version.	Consistency in distributed systems.	Gossip Protocol	Sync Consistency 100%	Network Ops
+M02-F129	Regulatory Data Retention Scheduler	Automates the deletion of data past retention periods.	Reduces liability and storage costs.	Cron Job	Deletion Accuracy 100%	DPOs
+M02-F130	Smart Contract Auditor Interface	Audits on-chain logic for off-chain compliance.	Bridges Defi and TradFi regulations.	Static Analysis	Audit Coverage 100%	Blockchain Team
+M02-F131	Regulatory Identity Mapping	Maps user IDs across different regulatory contexts.	Maintains identity while respecting contexts.	Hash Functions	Mapping Accuracy 100%	Identity Mgmt
+M02-F132	Automated Reporting Archive	Stores historical reports securely.	Long-term evidence of compliance.	Immutable Storage	Retrieval Integrity 100%	Records Mgmt
+M02-F133	Regulatory Feed Validator	Validates incoming regulatory data feeds.	Prevents corruption from bad source data.	Schema Validation	Rejection Rate 100% (bad data)	Integration Specialists
+M02-F134	Dynamic Policy Translator	Translates policies into different execution languages (e.g., Java to Python).	Enables polyglot architecture compliance.	Transpilers	Translation Accuracy 100%	Architects
+M02-F135	Regulatory Gamification	Rewards staff for identifying compliance gaps.	Encourages culture of compliance.	Points System	Engagement Rate > 60%	HR/Compliance
+M02-F136	Compliance Chatbot	Answers staff questions about regulations.	Improves efficiency of compliance teams.	LLM / RAG	Answer Accuracy > 85%	All Staff
+M02-F137	Regulatory Risk Heatmap	Visual representation of risk across products and regions.	Strategic decision support.	Visualization	Data Freshness Daily	Executives
+M02-F138	Transaction Reconciliation Rule	Defines how transactions must match bank statements.	Ensures financial integrity.	Matching Algorithm	Reconciliation Accuracy 100%	Finance
+M02-F139	Regulatory Audit Trail Exporter	Exports trails to specific formats for different regulators.	Standardizes data exchange.	Format Converters	Export Success Rate 100%	External Auditors
+M02-F140	Policy Conflict Detector	Pre-deployment check for logical contradictions in rules.	Prevents deployment of broken logic.	SAT Solver	Detection Rate 100%	QA Engineers
+M02-F141	Regulatory Deadline Watcher	Tracks deadlines for submissions (e.g., tax returns).	Prevents penalties for late filing.	Calendar	Reminder Accuracy 100%	Compliance Officers
+M02-F142	Compliance Document Generator	Auto-generates compliance certificates for users.	Provides proof of good standing.	PDF Gen	Generation Time < 5s	Customer Support
+M02-F143	Regulatory Sandbox API	Allows partners to test against policy engine safely.	Fosters ecosystem integration.	API Gateway	API Uptime 99.9%	Developer Relations
+M02-F144	Dynamic KYC Refresh	Triggers re-KYC based on risk profile or time.	Keeps customer data current.	Trigger Engine	Refresh Accuracy 100%	Onboarding Team
+M02-F145	Regulatory Limit Breach Alert	Immediate notification if transaction exceeds limits.	Real-time risk control.	Alerting	Alert Latency < 100ms	Risk Managers
+M02-F146	Policy Usage Analytics	Tracks which policies are invoked most frequently.	Identifies redundant or unused rules.	Analytics	Reporting Frequency Daily	Architects
+M02-F147	Cross-Border Tax Rule Engine	Calculates withholding tax for international payments.	Complies with double tax treaties.	Rule Engine	Withholding Accuracy 100%	Tax Teams
+M02-F148	Regulatory Change Log	Immutable history of every policy change.	Complete audit trail.	Blockchain/Merkle	Log Integrity 100%	Auditors
+M02-F149	Compliance Scorecard	Assigns a score to business units based on compliance.	Internal KPI management.	Scoring Algorithm	Score Accuracy 100%	Management
+M02-F150	Regulatory Disaster Recovery	Failover site for policy engine in case of disaster.	Business continuity for compliance.	Geo-Redundancy	RTO < 1 hour	SREs
+M02-F151	Regulator Sandbox Portal	Dedicated environment for tax authorities to simulate queries/test APIs.	Increases regulator confidence and reduces integration friction.	N/A	Sandbox Uptime 100%	Regulators
+M02-F152	Synthetic Data Generator	Generates privacy-compliant fake data for stress testing policies.	Allows rigorous testing without exposing real user data (GDPR compliant).	GANs (Generative Adversarial Networks)	Data Similarity Score > 90%	QA Engineers
+M02-F153	AI Legislative Forecaster	Predicts likelihood of new laws based on legislative activity.	Proactive preparation for upcoming regulatory changes.	NLP, Time Series Forecasting	Prediction Accuracy > 75%	Strategy Teams
+M02-F154	Regulator Secure Chatbot	LLM-based assistant for regulators to query platform data securely.	Reduces support load and improves data accessibility for auditors.	RAG (Retrieval-Augmented Generation)	Query Resolution Rate > 80%	Regulators
+M02-F155	Granular Consent Manager	Manages consent down to individual data field level.	Enforces strict "Data Minimization" principles.	N/A	Consent Audit Latency < 1s	Privacy Officers
+M02-F156	Instant Payment Reversal (Regulatory)	Automated reversal trigger if a compliance check fails post-settlement.	Mitigates loss in case of delayed sanctions hits.	Rule Engine	Reversal Time < 10s	Settlement Ops
+M02-F157	Automated Penalty Calculator	Estimates potential fines for non-compliant scenarios.	Quantifies risk for business units to encourage compliance.	Decision Trees	Calc Accuracy vs Real Fines > 90%	Risk Managers
+M02-F158	Distributed Ledger Evidence	Anchors audit hashes to a public/permissionless blockchain for immutability.	Provides "crypto-proof" of data integrity that courts can trust.	Hashing	Anchor Confirmation < 1h	Legal Teams
+M02-F159	Carbon Tax Compliance	Tracks and reports transactional carbon footprint for CBAM compliance.	Meets emerging EU/Global green finance standards.	Emission Factors DB	Reporting Accuracy 100%	ESG Officers
+M02-F160	Cross-Border Limit Aggregator	Sums limits across multiple jurisdictions for global exposure.	Prevents regulatory arbitrage via jurisdiction hopping.	Stream Processing	Exposure Visibility Real-time	Treasury
+M02-F161	Policy A/B Testing	Tests variations of a policy in "shadow mode" before release.	Optimizes user experience (friction) while maintaining safety.	Statistical Analysis (T-Tests)	Statistical Significance > 95%	Product Owners
+M02-F162	VPAT Accessibility Manager	Generates Voluntary Product Accessibility Templates for regulator portals.	Ensures the platform is accessible to disabled users/compliance officers.	Scanning Tools	VPAT Completion Rate 100%	Accessibility Specialists
+M02-F163	Voice Compliance Assistant	Voice-to-text interface for compliance queries (hands-free operation).	Improves accessibility and efficiency for traders/support.	Speech-to-Text (ASR)	Command Recognition > 95%	Traders
+M02-F164	Compliance Fee Dispute	Workflow for merchants to dispute automatic compliance fee deductions.	Provides fairness and transparency in fee collection.	N/A	Dispute Resolution SLA < 5 days	Merchants
+M02-F165	Supply Chain Due Diligence	Tracks payments to ensure supply chain transparency (e.g., no conflict minerals).	Meets modern human rights/supply chain due diligence laws.	Graph Analysis	Supply Chain Traceability 100%	Procurement
+M02-F166	Wholesale Market Monitor	Monitors large inter-bank transactions for market abuse.	Detects spoofing/layering in institutional flows.	LSTM Networks	Detection Latency < 1s	Market Surveillance
+M02-F167	DeFi Bridge Scanner	Scans bridges between PARI and DeFi protocols for AML risks.	Manages the risk of crypto on/off ramps.	Heuristic Analysis	Bridge Risk Score Accuracy > 90%	Crypto Desk
+M02-F168	Employee Trading Watch	Monitors employee trades against blackout periods (insider trading).	Ensures internal staff comply with market conduct rules.	Pattern Matching	Violation Detection Rate 100%	HR/Compliance
+M02-F169	Regulatory Knowledge Graph Updater	Auto-updates the internal knowledge graph with new regulations.	Keeps the semantic search and AI tools current.	Ontology Mapping	Update Latency < 24h	Knowledge Managers
+M02-F170	Security Token Compliance	Enforces investor accreditation and holding limits for tokens.	Enables compliant Security Token Offerings (STOs).	Smart Contracts	Compliance Check Time < 2s	Capital Markets
+M02-F171	DAO Governance Compliance	Verifies that DAO votes comply with corporate governance laws.	Allows decentralized organizations to operate legally.	Blockchain Analysis	Vote Validation 100%	DAO Operators
+M02-F172	Crypto Asset Recovery Tracing	Logs forensic data required for asset recovery by law enforcement.	Facilitates cooperation with cyber-crime units.	Graph Clustering	Trace Completeness > 80%	Law Enforcement Liaison
+M02-F173	Privacy-Preserving Aggregation	Uses Homomorphic Encryption to aggregate stats without decrypting inputs.	Allows analytics on sensitive data without privacy breach.	Paillier Encryption	Encryption Overhead < 20%	Data Scientists
+M02-F174	Legacy Mapper	Maps old SWIFT MT fields to new ISO 20022 elements.	Ensures smooth transition from legacy standards.	Deterministic Mapping	Mapping Coverage 100%	Migration Teams
+M02-F175	Compliance Root Cause AI	Performs automated "5-Why" analysis on compliance failures.	Drives CMMI Level 5 process improvement.	Causal Inference	Root Cause Identification > 70%	Quality Assurance
+M02-F176	Global Regulatory Scanner	Web scraper scanning government gazettes worldwide for changes.	First-mover advantage in reacting to new laws.	Web Scraping, NLP	New Law Alert < 12h publish	Legal Teams
+M02-F177	Data Location Verifier	Geographically verifies physical storage of data (ping/trace).	Strict enforcement of data sovereignty laws.	Geo-IP Tracing	Verification Accuracy 99.9%	Infrastructure
+M02-F178	Algorithmic Transparency Log	Records inputs and outputs of AI decisions (Explainable AI).	Meets "Right to Explanation" requirements in GDPR/AI Act.	SHAP Values logging	Log Completeness 100%	AI Ethicists
+M02-F179	Smart Contract Oracle	Provides compliance data feeds to public blockchains.	Enables trustless execution of external finance contracts.	Chainlink Adaptation	Oracle Latency < 30s	Blockchain Devs
+M02-F180	Quantum-Safe Archive	Prepares archive data for post-quantum migration.	Future-proofs long-term (7-10 year) data retention.	Lattice-based Crypto	Migration Readiness 100%	Cryptographers
+
+
+h.	Comprehensive List of Database Objects
+ID	Schema Name	Object Name	Object Type	Description	Feature Reference	Column Names	Constraints / Notes	Junction Tables
+M02-DB-001	regulatory	jurisdictions	Table	List of supported countries/regions with ISO codes.	M02-F002	id, iso_code, name, region, status, created_at	PK: id	N/A
+M02-DB-002	regulatory	regulations	Table	Master table for laws and directives (GDPR, PSD2, BSA).	M02-F016	id, code, name, jurisdiction_id, effective_date, expiry_date, status	PK: id, FK: jurisdiction_id	N/A
+M02-DB-003	regulatory	policy_rules	Table	The individual logic rules (ABAC policies).	M02-F003	id, regulation_id, rule_type, logic_json, priority, version, hash	PK: id, FK: regulation_id	N/A
+M02-DB-004	regulatory	policy_versions	Table	Version history for auditability and rollback.	M02-F016	id, policy_id, version_number, logic_json, created_by, created_at	PK: id, FK: policy_id	N/A
+M02-DB-005	regulatory	attributes	Table	Definition of attributes used in ABAC (User, Resource, Env).	M02-F003	id, name, data_type, source, description	PK: id	N/A
+M02-DB-006	regulatory	sanction_lists	Table	Loaded cache of sanctioned entities.	M02-F006	id, list_name, entity_name, algorithm, load_timestamp	PK: id	N/A
+M02-DB-007	regulatory	sanction_aliases	Table	Aliases for sanctioned entities for fuzzy matching.	M02-F007	id, sanction_list_id, alias_name, similarity_score	PK: id, FK: sanction_list_id	N/A
+M02-DB-008	regulatory	transaction_limits	Table	Limits per jurisdiction/user class.	M02-F008	id, jurisdiction_id, user_class, limit_type, amount, period	PK: id	N/A
+M02-DB-009	regulatory	vat_rates	Table	VAT/GST rates by region and product category.	M02-F009	id, jurisdiction_id, category_code, rate, effective_date	PK: id	N/A
+M02-DB-010	regulatory	tax_reports	Table	Queue and status of tax report submissions.	M02-F010	id, merchant_id, period, authority_endpoint, status, payload_hash	PK: id	N/A
+M02-DB-011	regulatory	travel_rule_logs	Table	Records of data transmitted for travel rule.	M02-F011	id, transaction_id, originator_data, beneficiary_data, timestamp	PK: id	N/A
+M02-DB-012	regulatory	data_residency_policies	Table	Mapping of data types to allowed storage regions.	M02-F013	id, data_type_regex, allowed_region, enforcement_level	PK: id	N/A
+M02-DB-013	regulatory	user_consent	Table	Records of user consent for data processing.	M02-F014	id, user_id, consent_type, granted, timestamp, ip_address	PK: id	N/A
+M02-DB-014	regulatory	deletion_requests	Table	GDPR Right to be Forgotten requests.	M02-F015	id, user_id, request_date, status, completion_date	PK: id	N/A
+M02-DB-015	regulatory	audit_logs	Table	Immutable log of all policy decisions.	M02-F020	id, transaction_id, policy_id, decision, reason, timestamp	PK: id	N/A
+M02-DB-016	regulatory	simulation_results	Table	Results of sandbox policy simulations.	M02-F017	id, policy_version_id, scenario_json, result_json, timestamp	PK: id	N/A
+M02-DB-017	regulatory	alerts	Table	Generated compliance alerts.	M02-F019	id, type, severity, message, recipient, acknowledged	PK: id	N/A
+M02-DB-018	regulatory	pep_lists	Table	Politically Exposed Persons database.	M02-F026	id, name, position, country, list_source	PK: id	N/A
+M02-DB-019	regulatory	adverse_media	Table	News and media mentions of risk entities.	M02-F027	id, entity_name, url, sentiment, published_date	PK: id	N/A
+M02-DB-020	regulatory	aml_scenarios	Table	Defined AML monitoring scenarios.	M02-F028	id, name, logic_json, threshold, active	PK: id	N/A
+M02-DB-021	regulatory	reporting_schedules	Table	Configurations for periodic reporting.	M02-F029	id, report_type, frequency, next_run, recipient	PK: id	N/A
+M02-DB-022	regulatory	risk_scores	Table	Calculated risk scores for entities.	M02-F034	id, entity_id, score, factors, calculated_at	PK: id	N/A
+M02-DB-023	regulatory	whitelist_entries	Table	Manual overrides (allow-lists).	M02-F035	id, entity_type, entity_value, reason, expiry	PK: id	N/A
+M02-DB-024	regulatory	blacklist_entries	Table	Manual overrides (block-lists).	M02-F035	id, entity_type, entity_value, reason, expiry	PK: id	N/A
+M02-DB-025	regulatory	archived_compliance_data	Table	Cold storage for old compliance records.	M02-F037	id, table_name, record_id, data_snapshot, archived_at	PK: id	N/A
+M02-DB-026	regulatory	ingestion_feeds	Table	Configuration for external regulatory feeds.	M02-F038	id, name, url, format, auth_key, last_sync	PK: id	N/A
+M02-DB-027	regulatory	legal_contracts	Table	Smart contract legal wrappers.	M02-F039	id, transaction_id, contract_hash, terms_json	PK: id	N/A
+M02-DB-028	regulatory	product_classifications	Table	Mapping of products to tax codes.	M02-F042	id, product_id, category_code, confidence	PK: id	N/A
+M02-DB-029	regulatory	breach_notifications	Table	Status of data breach notifications.	M02-F044	id, incident_id, authority, status, sent_timestamp	PK: id	N/A
+M02-DB-030	regulatory	merchant_compliance	Table	Merchant specific compliance status.	M02-F046	id, merchant_id, license_status, risk_rating, last_audit	PK: id	N/A
+M02-DB-031	regulatory	ubo_structures	Table	Ultimate Beneficial Ownership mappings.	M02-F048	id, company_id, ubo_id, ownership_percentage	PK: id	N/A
+M02-DB-032	regulatory	sar_reports	Table	Suspicious Activity Reports.	M02-F050	id, draft_content, status, submitted_to, submitted_at	PK: id	N/A
+M02-DB-033	regulatory	dual_use_goods	Table	List of controlled dual-use items.	M02-F052	id, item_name, category, control_code	PK: id	N/A
+M02-DB-034	regulatory	compliance_fees	Table	Calculated fees for regulatory bodies.	M02-F056	id, transaction_id, fee_type, amount, currency	PK: id	N/A
+M02-DB-035	regulatory	dispute_records	Table	Regulatory dispute logs.	M02-F057	id, case_id, status, stage, logs_json	PK: id	N/A
+M02-DB-036	regulatory	evidence_locker	Table	Storage of supporting documents.	M02-F059	id, case_id, file_uri, file_hash, uploaded_at	PK: id	N/A
+M02-DB-037	regulatory	complaints	Table	User regulatory complaints.	M02-F061	id, user_id, category, description, status	PK: id	N/A
+M02-DB-038	regulatory	third_party_risks	Table	Risk assessment of partners.	M02-F062	id, partner_id, risk_score, last_assessed	PK: id	N/A
+M02-DB-039	regulatory	exposure_limits	Table	Counterparty exposure limits.	M02-F063	id, counterparty_id, limit_amount, current_usage	PK: id	N/A
+M02-DB-040	regulatory	training_records	Table	Staff compliance training status.	M02-F116	id, user_id, module, completion_date, expiry_date	PK: id	N/A
+M02-DB-041	regulatory	exceptions	Table	Approved exceptions to policy.	M02-F127	id, policy_id, entity_id, reason, approver_id, expiry	PK: id	N/A
+M02-DB-042	regulatory	scorecards	Table	Compliance scorecards for BUs.	M02-F149	id, unit_id, period, score, breakdown_json	PK: id	N/A
+M02-DB-043	regulatory	ref_transaction_logs	Table	Immutable transaction logs referencing regulatory decisions.	M02-F020	id, ref_transaction_id, compliance_status, policy_ids	PK: id, FK to core.transactions	N/A
+M02-DB-044	regulatory	regulation_attributes	Table	Links attributes to regulations (metadata).	M02-F003	id, regulation_id, attribute_id, usage	PK: id, FK: regulation_id, attribute_id	N/A
+M02-DB-045	regulatory	policy_regulations	Table	Junction for Policies and Regulations (Many-to-Many).	M02-F003	policy_id, regulation_id	Composite PK	N/A
+M02-DB-046	regulatory	user_consent_attributes	Table	Specific attributes consented to by user.	M02-F014	id, consent_id, attribute_name	PK: id, FK: user_consent	N/A
+M02-DB-047	regulatory	geo_fencing_rules	Table	IP ranges for geo-blocking.	M02-F032	id, jurisdiction_id, ip_range_start, ip_range_end, action	PK: id	N/A
+M02-DB-048	regulatory	sanction_hits	Table	Log of successful sanction matches.	M02-F006	id, transaction_id, sanction_list_id, match_score	PK: id	N/A
+M02-DB-049	regulatory	policy_activation_history	Table	When specific policies were active.	M02-F001	id, policy_id, activated_at, deactivated_at	PK: id	N/A
+M02-DB-050	regulatory	iso_20022_mappings	Table	Mapping internal fields to ISO 20022 tags.	M02-F005	id, internal_field, iso_tag, namespace	PK: id	N/A
+M02-DB-051	regulatory	alert_recipients	Table	Mapping of alert types to recipients.	M02-F019	id, alert_type, user_id, channel	PK: id	N/A
+M02-DB-052	regulatory	kyc_documents	Table	Metadata of stored KYC docs.	M02-F025	id, user_id, doc_type, hash, verified	PK: id	N/A
+M02-DB-053	regulatory	threshold_watches	Table	Configured thresholds for monitoring.	M02-F085	id, metric_name, threshold_value, direction	PK: id	N/A
+M02-DB-054	regulatory	policy_conflicts	Table	Log of detected policy conflicts.	M02-F140	id, policy_a_id, policy_b_id, description, resolved	PK: id	N/A
+M02-DB-055	regulatory	deadline_events	Table	Calendar of regulatory deadlines.	M02-F141	id, name, due_date, jurisdiction_id, report_type	PK: id	N/A
+M02-DB-056	regulatory	audit_exports	Table	Log of audit trail exports.	M02-F054	id, requested_by, date_range, format, file_uri	PK: id	N/A
+M02-DB-057	regulatory	disaster_recovery_status	Table	Status of DR failover.	M02-F150	id, site, status, last_failover_test	PK: id	N/A
+M02-DB-058	regulatory	transaction_tags	Table	Tags applied to transactions for classification.	M02-F080	id, transaction_id, tag_name, applied_by	PK: id	N/A
+M02-DB-059	regulatory	esg_scores	Table	ESG ratings for entities.	M02-F091	id, entity_id, e_score, s_score, g_score, provider	PK: id	N/A
+M02-DB-060	regulatory	regulatory_licenses	Table	Operational licenses held by the platform.	M02-F087	id, license_type, jurisdiction, expiry_date	PK: id	N/A
+M02-DB-061	regulatory	insider_trading_flags	Table	Detected potential insider trades.	M02-F112	id, user_id, transaction_id, correlation_score	PK: id	N/A
+M02-DB-062	regulatory	approval_workflows	Table	State machine for policy approvals.	M02-F113	id, entity_type, entity_id, current_stage, initiated_by	PK: id	N/A
+M02-DB-063	regulatory	benchmarks	Table	Regulatory benchmarking data.	M02-F115	id, metric, industry_avg, internal_score, date	PK: id	N/A
+M02-DB-064	regulatory	pia_assessments	Table	Privacy Impact Assessments.	M02-F119	id, project_name, risk_level, mitigation_json, status	PK: id	N/A
+M02-DB-065	regulatory	test_cases	Table	Auto-generated compliance test cases.	M02-F120	id, policy_id, input_json, expected_output	PK: id	N/A
+M02-DB-066	regulatory	identity_mappings	Table	Cross-context identity hashes.	M02-F131	id, user_id, context_a, context_b, hash_a, hash_b	PK: id	N/A
+M02-DB-067	regulatory	compliance_costs	Table	Allocated compliance costs.	M02-F126	id, business_unit, period, cost_amount	PK: id	N/A
+M02-DB-068	regulatory	gamification_points	Table	Staff points for compliance culture.	M02-F135	id, user_id, action, points, timestamp	PK: id	N/A
+M02-DB-069	regulatory	chatbot_logs	Table	Logs of compliance chatbot interactions.	M02-F136	id, session_id, question, answer, feedback	PK: id	N/A
+M02-DB-070	regulatory	reconciliation_rules	Table	Rules for matching transactions.	M02-F138	id, rule_name, tolerance, match_criteria	PK: id	N/A
+M02-DB-071	regulatory	usage_analytics	Table	Analytics on policy usage.	M02-F146	id, policy_id, invocation_count, date	PK: id	N/A
+M02-DB-072	regulatory	withholding_tax	Table	Withholding tax records.	M02-F147	id, transaction_id, rate, amount, treaty_country	PK: id	N/A
+M02-DB-073	regulatory	smart_contracts_audit	Table	Audit logs of smart contracts.	M02-F130	id, contract_address, audit_date, vulnerabilities_json	PK: id	N/A
+M02-DB-074	regulatory	certificates	Table	Generated compliance certificates.	M02-F142	id, entity_id, certificate_type, file_uri, generated_at	PK: id	N/A
+M02-DB-075	regulatory	sandbox_tests	Table	Sandbox execution logs.	M02-F106	id, partner_id, test_case, result, timestamp	PK: id	N/A
+M02-DB-076	regulatory	breach_history	Table	Historical data breaches.	M02-F044	id, description, impact_level, date	PK: id	N/A
+M02-DB-077	regulatory	supply_chain_nodes	Table	Nodes in supply chain graph.	M02-F108	id, entity_id, tier, supplier_id	PK: id	N/A
+M02-DB-078	regulatory	fx_rules	Table	Foreign exchange trading rules.	M02-F110	id, currency_pair, max_volume, window_minutes	PK: id	N/A
+M02-DB-079	regulatory	keyword_filters	Table	Forbidden keywords for scanning.	M02-F111	id, keyword, category, action	PK: id	N/A
+M02-DB-080	regulatory	api_keys_regulatory	Table	API keys for regulatory external access.	M02-F093	id, authority_id, key_hash, permissions	PK: id	N/A
+M02-DB-081	regulatory	policy_dependencies	Table	Dependency graph for policies.	M02-F073	id, policy_id, depends_on_policy_id	PK: id	N/A
+M02-DB-082	regulatory	change_notifications	Table	Notifications sent on regulation change.	M02-F074	id, regulation_id, recipient, sent_at	PK: id	N/A
+M02-DB-083	regulatory	device_compliance	Table	Security status of user devices.	M02-F102	id, device_id, rooted, os_version, last_check	PK: id	N/A
+M02-DB-084	regulatory	holds	Table	Active holds on funds.	M02-F104	id, account_id, amount, reason, legal_order_id	PK: id	N/A
+M02-DB-085	regulatory	tax_residencies	Table	User tax residency certificates.	M02-F105	id, user_id, country, certificate_hash	PK: id	N/A
+M02-DB-086	regulatory	disclosures	Table	Generated legal disclosures.	M02-F118	id, product_id, template_id, content_hash	PK: id	N/A
+M02-DB-087	regulatory	training_modules	Table	Available training modules.	M02-F116	id, name, content_uri, duration_minutes	PK: id	N/A
+M02-DB-088	regulatory	event_correlations	Table	Correlated external events and transactions.	M02-F117	id, event_id, transaction_id, correlation_type	PK: id	N/A
+M02-DB-089	regulatory	distributed_nodes	Table	Nodes in the policy distribution network.	M02-F128	id, node_id, ip_address, last_sync	PK: id	N/A
+M02-DB-090	regulatory	export_formats	Table	Supported export formats for audits.	M02-F139	id, format_name, mime_type, validator	PK: id	N/A
+M02-DB-091	regulatory	translated_policies	Table	Policies translated to different execution languages.	M02-F134	id, policy_id, target_lang, code	PK: id	N/A
+M02-DB-092	regulatory	feedback_compliance	Table	User feedback on compliance processes.	M02-F136	id, user_id, rating, comment	PK: id	N/A
+M02-DB-093	regulatory	heatmap_data	Table	Data for risk heatmap visualization.	M02-F137	id, region, product, risk_score	PK: id	N/A
+M02-DB-094	regulatory	kyc_refresh_queue	Table	Queue for triggering KYC refreshes.	M02-F144	id, user_id, reason, scheduled_date	PK: id	N/A
+M02-DB-095	regulatory	limit_breach_alerts	Table	Alerts for limit breaches.	M02-F145	id, limit_id, current_value, timestamp	PK: id	N/A
+M02-DB-096	regulatory	sar_templates	Table	Templates for SAR generation.	M02-F050	id, jurisdiction, template_json	PK: id	N/A
+M02-DB-097	regulatory	audit_trail_hash_chain	Table	Hash chain for audit trail integrity.	M02-F020	id, log_entry_id, prev_hash, current_hash	PK: id	N/A
+M02-DB-098	regulatory	report_metadata	Table	Metadata for generated reports.	M02-F010	id, report_id, generation_time_ms, size_bytes	PK: id	N/A
+M02-DB-099	regulatory	regulatory_tags_taxonomy	Table	Hierarchical tags for regulations.	M02-F030	id, tag_name, parent_tag_id	PK: id	N/A
+M02-DB-100	regulatory	transaction_regulatory_tags	Table	Junction table linking transactions to tags.	M02-F080	transaction_id, tag_id	Composite PK	N/A
+M02-DB-101	regulatory	enum_policy_status	Enum	Status values for policies (Active, Draft, Retired).	M02-F003	value, label	N/A	N/A
+M02-DB-102	regulatory	enum_jurisdiction_status	Enum	Status for jurisdictions (Supported, Blocked, Coming Soon).	M02-F002	value, label	N/A	N/A
+M02-DB-103	regulatory	enum_consent_type	Enum	Types of consent (Marketing, Analytics, Essential).	M02-F014	value, label	N/A	N/A
+M02-DB-104	regulatory	enum_alert_severity	Enum	Severity levels (Low, Medium, High, Critical).	M02-F019	value, label	N/A	N/A
+M02-DB-105	regulatory	enum_decision	Enum	Policy decision outcomes (Allow, Deny, Review).	M02-F003	value, label	N/A	N/A
+M02-DB-106	regulatory	enum_report_status	Enum	Status of reports (Pending, Submitted, Failed).	M02-F010	value, label	N/A	N/A
+M02-DB-107	regulatory	enum_risk_level	Enum	Risk levels (Low, Medium, High).	M02-F034	value, label	N/A	N/A
+M02-DB-108	regulatory	v_report_summary	View	Summary of compliance reports by period.	M02-F010	period, total_reports, success_count, failed_count	Read Only	N/A
+M02-DB-109	regulatory	v_alert_summary	View	Dashboard view of recent alerts.	M02-F019	date, severity, count	Read Only	N/A
+M02-DB-110	regulatory	v_risk_heatmap	View	Materialized view for heatmap data.	M02-F137	region, product, risk_score	Refreshed Daily	N/A
+M02-DB-111	regulatory	v_user_risk_profile	View	Aggregate risk profile for a user.	M02-F034	user_id, avg_score, max_score, last_update	Read Only	N/A
+M02-DB-112	regulatory	v_policy_coverage	View	Coverage of regulations by policies.	M02-F003	regulation_id, active_policies_count	Read Only	N/A
+M02-DB-113	regulatory	v_suspicious_activity	View	List of transactions requiring review.	M02-F050	transaction_id, score, reason	Read Only	N/A
+M02-DB-114	regulatory	v_expiry_tracker	View	Tracks expiring licenses and certificates.	M02-F087	entity_type, entity_id, expiry_date	Read Only	N/A
+M02-DB-115	regulatory	v_sanction_hits_daily	View	Daily count of sanction matches.	M02-F006	date, hits_count	Read Only	N/A
+M02-DB-116	regulatory	v_jurisdictional_load	View	Transaction volume by jurisdiction.	M02-F002	jurisdiction_id, volume_today	Read Only	N/A
+M02-DB-117	regulatory	v_consent_audit	View	Audit trail of consent changes.	M02-F014	user_id, action, timestamp	Read Only	N/A
+M02-DB-118	regulatory	v_training_completion	View	Training completion stats per department.	M02-F116	dept, completion_rate	Read Only	N/A
+M02-DB-119	regulatory	v_cost_allocation	View	Breakdown of compliance costs.	M02-F126	business_unit, total_cost, period	Read Only	N/A
+M02-DB-120	regulatory	v_pending_approvals	View	List of pending policy exception approvals.	M02-F127	request_id, requestor, request_date	Read Only	N/A
+M02-DB-121	regulatory	sp_evaluate_policy	Stored Procedure	Core procedure to evaluate a transaction against active policies.	M02-F003	transaction_id, context_json	Returns: Decision	N/A
+M02-DB-122	regulatory	sp_sync_sanctions	Stored Procedure	Upserts sanction list data from staging.	M02-F006	list_source, data_json	N/A	N/A
+M02-DB-123	regulatory	sp_archive_old_data	Stored Procedure	Moves records older than 7 years to archive.	M02-F037	target_date	N/A	N/A
+M02-DB-124	regulatory	sp_generate_sar	Stored Procedure	Generates SAR draft from transaction data.	M02-F050	transaction_id	Returns: Draft Text	N/A
+M02-DB-125	regulatory	sp_submit_tax_report	Stored Procedure	POSTs data to tax authority API.	M02-F010	report_id	N/A	N/A
+M02-DB-126	regulatory	sp_calculate_vat	Stored Procedure	Calculates VAT based on product/location.	M02-F009	amount, product_category, location	Returns: Tax Amount	N/A
+M02-DB-127	regulatory	sp_check_sanctions	Stored Procedure	Fuzzy checks a name against sanctions.	M02-F007	entity_name	Returns: Match Boolean	N/A
+M02-DB-128	regulatory	sp_update_risk_score	Stored Procedure	Recalculates risk score for a user.	M02-F034	user_id	N/A	N/A
+M02-DB-129	regulatory	sp_expire_policy	Stored Procedure	Deactivates a policy based on expiry date.	M02-F081	policy_id	N/A	N/A
+M02-DB-130	regulatory	sp_rotate_audit_key	Stored Procedure	Rotates keys used for audit log signing.	M02-F020	N/A	N/A	N/A
+M02-DB-131	regulatory	sp_retrieve_pii	Stored Procedure	Retrieves PII with access check logging.	M02-F012	user_id, requestor_id	N/A	N/A
+M02-DB-132	regulatory	sp_delete_user_data	Stored Procedure	Executes user deletion (GDPR).	M02-F015	user_id	N/A	N/A
+M02-DB-133	regulatory	sp_check_geo_fence	Stored Procedure	Checks IP against geo-fencing rules.	M02-F032	ip_address	Returns: Action	N/A
+M02-DB-134	regulatory	sp_create_hold	Stored Procedure	Places a hold on an account.	M02-F104	account_id, amount	N/A	N/A
+M02-DB-135	regulatory	sp_release_hold	Stored Procedure	Releases a hold on an account.	M02-F104	hold_id	N/A	N/A
+M02-DB-136	regulatory	sp_generate_audit_trail_hash	Stored Procedure	Generates hash chain entry for a log.	M02-F020	log_id	N/A	N/A
+M02-DB-137	regulatory	sp_send_alert	Stored Procedure	Queues an alert for sending.	M02-F019	recipient, message, severity	N/A	N/A
+M02-DB-138	regulatory	sp_check_completeness	Stored Procedure	Checks if all required docs for KYC are present.	M02-F025	user_id	Returns: Boolean	N/A
+M02-DB-139	regulatory	sp_refresh_materialized_views	Stored Procedure	Refreshes dashboard views.	M02-F108	N/A	N/A	N/A
+M02-DB-140	regulatory	sp_get_user_consent	Stored Procedure	Retrieves user consent matrix.	M02-F014	user_id	Returns: JSON	N/A
+M02-DB-141	regulatory	sp_revoke_consent	Stored Procedure	Revokes specific user consent.	M02-F040	user_id, consent_type	N/A	N/A
+M02-DB-142	regulatory	sp_assign_training	Stored Procedure	Assigns training module to users.	M02-F116	module_id, group_id	N/A	N/A
+M02-DB-143	regulatory	sp_submit_breach_notification	Stored Procedure	Submits breach notification to DPA.	M02-F044	incident_id	N/A	N/A
+M02-DB-144	regulatory	sp_map_product_code	Stored Procedure	Maps text description to product code.	M02-F042	description_text	Returns: Code	N/A
+M02-DB-145	regulatory	sp_check_exposure	Stored Procedure	Checks counterparty exposure.	M02-F063	counterparty_id, amount	Returns: Boolean	N/A
+M02-DB-146	regulatory	sp_log_policy_decision	Stored Procedure	Logs outcome of policy evaluation.	M02-F020	transaction_id, policy_id, decision	N/A	N/A
+M02-DB-147	regulatory	sp_approve_exception	Stored Procedure	Approves a policy exception request.	M02-F127	exception_id, approver_id	N/A	N/A
+M02-DB-148	regulatory	sp_distribute_policy	Stored Procedure	Pushes policy to edge nodes.	M02-F128	policy_id, target_nodes	N/A	N/A
+M02-DB-149	regulatory	sp_purge_archived_data	Stored Procedure	Permanently deletes very old archived data.	M02-F037	older_than_years	N/A	N/A
+M02-DB-150	regulatory	sp_validate_iso_mapping	Stored Procedure	Validates ISO 20022 mapping integrity.	M02-F005	N/A	Returns: Report	N/A
+M02-DB-151	regulatory	sp_trigger_kyc_refresh	Stored Procedure	Adds user to KYC refresh queue.	M02-F144	user_id, reason	N/A	N/A
+M02-DB-152	regulatory	sp_check_device_risk	Stored Procedure	Checks if device is compromised.	M02-F102	device_fingerprint	Returns: Risk Level	N/A
+M02-DB-153	regulatory	sp_generate_certificate	Stored Procedure	Generates PDF compliance certificate.	M02-F142	entity_id, type	Returns: File Path	N/A
+M02-DB-154	regulatory	sp_report_compliance_metric	Stored Procedure	Reports KPI to monitoring system.	M02-F072	metric_name, value	N/A	N/A
+M02-DB-155	regulatory	sp_fetch_regulation_feed	Stored Procedure	Fetches updates from external regulatory source.	M02-F038	feed_id	N/A	N/A
+M02-DB-156	regulatory	sp_resolve_policy_conflict	Stored Procedure	Attempts to auto-resolve logic conflicts.	M02-F036	policy_a_id, policy_b_id	Returns: Resolution	N/A
+M02-DB-157	regulatory	sp_analyze_adverse_media	Stored Procedure	Parses news article for sentiment.	M02-F027	article_text	Returns: Sentiment	N/A
+M02-DB-158	regulatory	sp_check_keywords	Stored Procedure	Scans text for forbidden keywords.	M02-F111	text_content	Returns: Hits	N/A
+M02-DB-159	regulatory	sp_link_identity	Stored Procedure	Links identity hash across contexts.	M02-F131	user_id, context	N/A	N/A
+M02-DB-160	regulatory	sp_calculate_fees	Stored Procedure	Calculates compliance fees for a transaction.	M02-F056	transaction_id	Returns: Fee Amount	N/A
+M02-DB-161	regulatory	sp_export_audit_logs	Stored Procedure	Exports audit logs to file store.	M02-F054	start_date, end_date, format	N/A	N/A
+M02-DB-162	regulatory	sp_lock_evidence	Stored Procedure	Locks evidence record to prevent modification.	M02-F059	evidence_id	N/A	N/A
+M02-DB-163	regulatory	sp_assign_score	Stored Procedure	Assigns ESG/Risk score.	M02-F091	entity_id, score	N/A	N/A
+M02-DB-164	regulatory	sp_update_quota	Stored Procedure	Updates transaction quota for user.	M02-F008	user_id, amount	N/A	N/A
+M02-DB-165	regulatory	sp_check_whitelist	Stored Procedure	Checks if entity is whitelisted.	M02-F035	entity_value	Returns: Boolean	N/A
+M02-DB-166	regulatory	sp_check_blacklist	Stored Procedure	Checks if entity is blacklisted.	M02-F035	entity_value	Returns: Boolean	N/A
+M02-DB-167	regulatory	sp_translate_policy	Stored Procedure	Translates policy logic to target language.	M02-F134	policy_id, target_lang	N/A	N/A
+M02-DB-168	regulatory	sp_cleanup_expired_records	Stored Procedure	Cleans up temporary/expired records.	M02-F037	N/A	N/A	N/A
+M02-DB-169	regulatory	sp_validate_sandbox_request	Stored Procedure	Validates incoming sandbox API request.	M02-F143	request_json	Returns: Valid	N/A
+M02-DB-170	regulatory	sp_get_policy_diff	Stored Procedure	Returns diff between two policy versions.	M02-F100	version_a, version_b	Returns: Diff	N/A
+M02-DB-171	regulatory	sp_trigger_deadline_alert	Stored Procedure	Checks for upcoming deadlines and alerts.	M02-F141	N/A	N/A	N/A
+M02-DB-172	regulatory	sp_reconcile_transaction	Stored Procedure	Attempts to match transaction to bank statement.	M02-F138	transaction_id	Returns: Match ID	N/A
+M02-DB-173	regulatory	sp_add_gamification_points	Stored Procedure	Awards points to user for compliance action.	M02-F135	user_id, action	N/A	N/A
+M02-DB-174	regulatory	sp_log_chatbot_interaction	Stored Procedure	Logs Q&A for analytics.	M02-F136	session_id, question, answer	N/A	N/A
+M02-DB-175	regulatory	sp_encrypt_sensitive_data	Stored Procedure	Encrypts data column before storage.	M02-F012	record_id	N/A	N/A
+M02-DB-176	regulatory	sp_decrypt_sensitive_data	Stored Procedure	Decrypts data column for authorized view.	M02-F012	record_id	N/A	N/A
+M02-DB-177	regulatory	sp_notify_regulator	Stored Procedure	Sends immediate notification to regulator.	M02-F123	regulator_id, message	N/A	N/A
+M02-DB-178	regulatory	sp_audit_report_generation	Stored Procedure	Triggers generation of scheduled reports.	M02-F029	N/A	N/A	N/A
+M02-DB-179	regulatory	sp_update_regulatory_feed	Stored Procedure	Stages feed data for validation.	M02-F038	feed_id, raw_data	N/A	N/A
+M02-DB-180	regulatory	sp_validate_training_completion	Stored Procedure	Checks if training is complete for user.	M02-F116	user_id	Returns: Boolean	N/A
+M02-DB-181	regulatory	sp_flag_insider_trading	Stored Procedure	Flags transaction for potential insider trading.	M02-F112	transaction_id	N/A	N/A
+M02-DB-182	regulatory	sp_initiate_workflow	Stored Procedure	Starts a new approval workflow.	M02-F113	entity_type, entity_id	N/A	N/A
+M02-DB-183	regulatory	sp_advance_workflow	Stored Procedure	Moves workflow to next stage.	M02-F113	workflow_id, action	N/A	N/A
+M02-DB-184	regulatory	sp_load_policy_package	Stored Procedure	Loads JSON-LD policy package.	M02-F004	package_id	N/A	N/A
+M02-DB-185	regulatory	sp_rollback_policy	Stored Procedure	Reverts policy to previous version.	M02-F107	policy_id	N/A	N/A
+M02-DB-186	regulatory	sp_verify_integrity	Stored Procedure	Verifies hash chain of audit logs.	M02-F097	N/A	Returns: Boolean	N/A
+M02-DB-187	regulatory	sp_get_jurisdiction_config	Stored Procedure	Retrieves full config for a jurisdiction.	M02-F002	jurisdiction_id	Returns: JSON	N/A
+M02-DB-188	regulatory	sp_update_heatmap_data	Stored Procedure	Aggregates data for risk heatmap.	M02-F137	N/A	N/A	N/A
+M02-DB-189	regulatory	sp_calculate_withholding_tax	Stored Procedure	Calculates specific withholding tax.	M02-F147	transaction_id	Returns: Tax	N/A
+M02-DB-190	regulatory	sp_log_sandbox_test	Stored Procedure	Logs result of partner sandbox test.	M02-F106	partner_id, test_result	N/A	N/A
+M02-DB-191	regulatory	sp_purge_retired_data	Stored Procedure	Purges data associated with retired policies.	M02-F081	policy_id	N/A	N/A
+M02-DB-192	regulatory	sp_check_license_expiry	Stored Procedure	Checks if license is still valid.	M02-F087	license_id	Returns: Boolean	N/A
+M02-DB-193	regulatory	sp_link_supply_chain	Stored Procedure	Links supplier in supply chain graph.	M02-F108	buyer_id, supplier_id	N/A	N/A
+M02-DB-194	regulatory	sp_scan_contract	Stored Procedure	Scans smart contract for vulnerabilities.	M02-F130	contract_address	Returns: Report	N/A
+M02-DB-195	regulatory	sp_create_limit_monitor	Stored Procedure	Creates a new threshold monitor.	M02-F085	metric, threshold	N/A	N/A
+M02-DB-196	regulatory	sp_get_feedback	Stored Procedure	Retrieves feedback for a specific module.	M02-F136	module_id	Returns: Feedback	N/A
+M02-DB-197	regulatory	sp_generate_pia	Stored Procedure	Generates draft Privacy Impact Assessment.	M02-F119	project_data	Returns: Draft	N/A
+M02-DB-198	regulatory	sp_classify_product	Stored Procedure	Classifies product for tax using NLP.	M02-F042	description	Returns: Category	N/A
+M02-DB-199	regulatory	sp_check_quota	Stored Procedure	Checks remaining quota for user.	M02-F008	user_id, period	Returns: Remaining	N/A
+M02-DB-200	regulatory	sp_get_benchmark_data	Stored Procedure	Retrieves industry benchmarks.	M02-F115	metric_id	Returns: Value	N/A
+M02-DB-201	regulatory	legislative_forecasts	Table	AI predictions for future laws.	M02-F153	id, jurisdiction, topic, probability, predicted_date, source_text	PK: id	N/A
+M02-DB-202	regulatory	regulator_chat_logs	Table	Logs of interactions with the Regulator Chatbot.	M02-F154	id, session_id, user_id, query, response, satisfaction_rating	PK: id	N/A
+M02-DB-203	regulatory	synthetic_datasets	Table	Metadata for generated synthetic data sets.	M02-F152	id, name, generation_params, purpose, hash, created_at	PK: id	N/A
+M02-DB-204	regulatory	carbon_tax_records	Table	Records of carbon emissions calculated per transaction.	M02-F159	id, transaction_id, emission_amount, tax_due, currency	PK: id	N/A
+M02-DB-205	regulatory	cross_border_limits	Table	Aggregate exposure limits per entity across regions.	M02-F160	id, entity_id, limit_type, total_allowed, current_utilization	PK: id	N/A
+M02-DB-206	regulatory	policy_ab_tests	Table	Configuration for A/B testing policies.	M02-F161	id, policy_a_id, policy_b_id, traffic_split, status, start_date	PK: id	N/A
+M02-DB-207	regulatory	ab_test_results	Table	Statistical results of policy A/B tests.	M02-F161	id, test_id, variant, conversion_rate, p_value, conclusion	PK: id, FK: policy_ab_tests	N/A
+M02-DB-208	regulatory	wholesale_trades	Table	Large interbank or institutional trades for monitoring.	M02-F166	id, trade_id, instrument, volume, price, timestamp	PK: id	N/A
+M02-DB-209	regulatory	wholesale_abuse_flags	Table	Flags for market abuse (spoofing, layering).	M02-F166	id, trade_id, abuse_type, confidence, status	PK: id	N/A
+M02-DB-210	regulatory	employee_trades	Table	Records of employee personal trades.	M02-F168	id, employee_id, instrument, side, volume, timestamp	PK: id	N/A
+M02-DB-211	regulatory	blackout_periods	Table	Defined windows where employee trading is forbidden.	M02-F168	id, security, start_date, end_date, reason	PK: id	N/A
+M02-DB-212	regulatory	security_token_rules	Table	Specific compliance rules for STOs/Security Tokens.	M02-F170	id, token_id, investor_type_required, holding_period_months	PK: id	N/A
+M02-DB-213	regulatory	dao_governance_records	Table	Records of DAO votes for governance compliance.	M02-F171	id, proposal_id, vote_hash, timestamp, validated	PK: id	N/A
+M02-DB-214	regulatory	crypto_recovery_traces	Table	Forensic tracing data for lost/stolen crypto assets.	M02-F172	id, incident_id, wallet_address, tx_hash, hop_count	PK: id	N/A
+M02-DB-215	regulatory	legacy_mappings	Table	Mapping from SWIFT MT to ISO 20022.	M02-F174	id, mt_field, iso_element, transformation_logic	PK: id	N/A
+M02-DB-216	regulatory	root_cause_analysis	Table	AI-generated 5-why analysis for incidents.	M02-F175	id, incident_id, why_1, why_2, why_3, why_4, root_cause	PK: id	N/A
+M02-DB-217	regulatory	regulatory_gazette_alerts	Table	Alerts scraped from government gazettes.	M02-F176	id, jurisdiction, url, summary, relevance_score	PK: id	N/A
+M02-DB-218	regulatory	data_location_proof	Table	Cryptographic proof of data physical location.	M02-F177	id, data_block_id, region, provider_attestation, timestamp	PK: id	N/A
+M02-DB-219	regulatory	algorithmic_transparency	Table	Inputs/Outputs logs for AI decisions.	M02-F178	id, model_id, input_hash, output_hash, shap_values	PK: id	N/A
+M02-DB-220	regulatory	oracle_feeds	Table	Data pushed to external blockchain oracles.	M02-F179	id, contract_address, data_payload, timestamp, tx_hash	PK: id	N/A
+M02-DB-221	regulatory	quantum_archive	Table	Data prepared for post-quantum storage.	M02-F180	id, original_table, record_id, quantum_sig, archived_at	PK: id	N/A
+M02-DB-222	regulatory	consent_granularities	Table	Field-level consent records.	M02-F155	id, user_id, data_element, consent_status	PK: id	N/A
+M02-DB-223	regulatory	fee_disputes	Table	Records of compliance fee disputes.	M02-F164	id, merchant_id, fee_id, reason, status, resolution	PK: id	N/A
+M02-DB-224	regulatory	supply_chain_nodes	Table	Nodes in the ethical supply chain graph.	M02-F165	id, entity_id, tier, ethical_score	PK: id	N/A
+M02-DB-225	regulatory	defi_bridge_scan_logs	Table	Logs of scans performed on DeFi bridges.	M02-F167	id, bridge_address, scan_date, risk_score, findings	PK: id	N/A
+M02-DB-226	regulatory	penalty_calculations	Table	Records of estimated vs actual penalties.	M02-F157	id, violation_type, estimated_amount, actual_amount, date	PK: id	N/A
+M02-DB-227	regulatory	blockchain_evidence	Table	Records of hashes anchored to blockchains.	M02-F158	id, audit_id, blockchain, tx_hash, block_height	PK: id	N/A
+M02-DB-228	regulatory	voice_compliance_logs	Table	Logs of voice commands/queries.	M02-F163	id, user_id, audio_hash, transcript, intent	PK: id	N/A
+M02-DB-229	regulatory	instant_reversals	Table	Log of regulatory reversals executed.	M02-F156	id, transaction_id, reason, reversal_timestamp	PK: id	N/A
+M02-DB-230	regulatory	regulator_sandbox_users	Table	Accounts created for regulator testing.	M02-F151	id, authority_id, email, access_level, expiry	PK: id	N/A
+M02-DB-231	regulatory	vpat_reports	Table	Generated Voluntary Product Accessibility Templates.	M02-F162	id, component_name, report_url, standard, date	PK: id	N/A
+M02-DB-232	regulatory	homomorphic_keys	Table	Public keys used for homomorphic encryption aggregation.	M02-F173	id, key_name, public_key, valid_from, valid_to	PK: id	N/A
+M02-DB-233	regulatory	encrypted_aggregates	Table	Stores data in encrypted form for privacy-preserving analytics.	M02-F173	id, statistic_type, encrypted_value, nonce	PK: id	N/A
+M02-DB-234	regulatory	knowledge_graph_updates	Table	Log of updates to the regulatory ontology.	M02-F169	id, node_id, change_type, timestamp	PK: id	N/A
+M02-DB-235	regulatory	compliance_incidents_ai	Table	Incidents detected specifically by AI models.	M02-F175	id, model_id, anomaly_score, classification	PK: id	N/A
+M02-DB-236	regulatory	regulatory_horizon_items	Table	Filtered high-relevance items from gazette scanner.	M02-F176	id, title, impact_level, action_required	PK: id	N/A
+M02-DB-237	regulatory	employee_violations	Table	Detected violations of employee trading policies.	M02-F168	id, employee_id, trade_id, blackout_period_id	PK: id	N/A
+M02-DB-238	regulatory	investor_accreditation	Table	Proof of investor accreditation for tokens.	M02-F170	id, user_id, accreditation_doc, expiry_date	PK: id	N/A
+M02-DB-239	regulatory	quantum_migration_plan	Table	Plan and status of quantum migration.	M02-F180	id, table_name, status, migration_date	PK: id	N/A
+M02-DB-240	regulatory	ab_test_traffic	Table	Assignment of traffic to specific test variants.	M02-F161	id, test_id, user_id, variant, timestamp	PK: id	N/A
+M02-DB-241	regulatory	regulator_query_stats	Table	Statistics on regulator queries via chatbot.	M02-F154	id, query_type, success, latency_ms	PK: id	N/A
+M02-DB-242	regulatory	carbon_credit_purchases	Table	Records of carbon credits bought to offset tax.	M02-F159	id, transaction_id, credit_amount, serial_number	PK: id	N/A
+M02-DB-243	regulatory	supply_chain_links	Table	Junction for supply chain relationships.	M02-F165	buyer_id, supplier_id	Composite PK	supply_chain_nodes (x2)
+M02-DB-244	regulatory	policy_test_scenarios	Table	Input scenarios for policy testing (synthetic).	M02-F152	id, scenario_json, expected_outcome	PK: id	N/A
+M02-DB-245	regulatory	voice_enrollments	Table	Biometric voice prints for authentication.	M02-F163	id, user_id, voice_print_hash, created_at	PK: id	N/A
+M02-DB-246	regulatory	oracle_subscriptions	Table	List of smart contracts subscribed to regulatory feeds.	M02-F179	id, contract_address, feed_type, auth_token	PK: id	N/A
+M02-DB-247	regulatory	model_explanations	Table	Detailed explanations for AI decisions.	M02-F178	id, decision_id, explanation_text, confidence	PK: id	N/A
+M02-DB-248	regulatory	legacy_conversion_queue	Table	Queue for converting legacy data to new standards.	M02-F174	id, record_id, source_format, status	PK: id	N/A
+M02-DB-249	regulatory	compliance_feedback	Table	User feedback on compliance processes (UX).	M02-F154	id, process_id, rating, comment	PK: id	N/A
+M02-DB-250	regulatory	quantum_signatures	Table	Store post-quantum signatures for data integrity.	M02-F180	id, data_hash, pq_signature, algorithm	PK: id	N/A
+M02-DB-251	regulatory	v_regulatory_horizon	View	Dashboard view of upcoming legislative changes.	M02-F176	topic, probability, region, estimated_impact	Read Only	N/A
+M02-DB-252	regulatory	v_ab_test_performance	View	Comparison of policy performance in A/B tests.	M02-F161	test_name, variant_a_rate, variant_b_rate, winner	Read Only	N/A
+M02-DB-253	regulatory	v_employee_compliance	View	Status of employee trading compliance.	M02-F168	employee_name, trades_count, violations, last_trade	Read Only	N/A
+M02-DB-254	regulatory	v_carbon_footprint	View	Aggregated carbon emissions by merchant/product.	M02-F159	merchant_id, total_emissions, tax_liability	Read Only	N/A
+M02-DB-255	regulatory	v_algorithmic_audit	View	Audit trail of AI decision making.	M02-F178	model_name, decisions_count, avg_confidence, date	Read Only	N/A
+M02-DB-256	regulatory	v_regulatory_chat_stats	View	Usage statistics for the regulator chatbot.	M02-F154	date, total_queries, resolved_queries, avg_rating	Read Only	N/A
+M02-DB-257	regulatory	v_supply_chain_risk	View	Risk profile of the supply chain.	M02-F165	tier, node_count, high_risk_nodes	Read Only	N/A
+M02-DB-258	regulatory	v_quantum_readiness	View	Status of quantum migration across modules.	M02-F180	module_name, status, percent_complete	Read Only	N/A
+M02-DB-259	regulatory	v_fee_dispute_summary	View	Summary of fee disputes by merchant.	M02-F164	merchant_id, open_disputes, total_amount_disputed	Read Only	N/A
+M02-DB-260	regulatory	v_wholesale_monitoring	View	Real-time view of wholesale market trades and flags.	M02-F166	time, volume, flag_count	Read Only	N/A
+M02-DB-261	regulatory	sp_generate_synthetic_data	Stored Procedure	Executes the synthetic data generation job.	M02-F152	config_id, output_table	N/A	N/A
+M02-DB-262	regulatory	sp_predict_legislation	Stored Procedure	Runs the legislative prediction model.	M02-F153	jurisdiction, topic	Returns: Prediction JSON	N/A
+M02-DB-263	regulatory	sp_handle_regulator_query	Stored Procedure	Backend logic for Regulator Chatbot.	M02-F154	query_text, session_id	Returns: Answer	N/A
+M02-DB-264	regulatory	sp_calculate_carbon_tax	Stored Procedure	Calculates carbon tax based on transaction data.	M02-F159	transaction_id	Returns: Tax Amount	N/A
+M02-DB-265	regulatory	sp_update_cross_border_limit	Stored Procedure	Updates current utilization of cross-border limits.	M02-F160	entity_id, amount	N/A	N/A
+M02-DB-266	regulatory	sp_start_ab_test	Stored Procedure	Initializes a policy A/B test.	M02-F161	policy_a, policy_b, split_ratio	N/A	N/A
+M02-DB-267	regulatory	sp_monitor_wholesale	Stored Procedure	Scans wholesale trades for abuse patterns.	M02-F166	window_minutes	N/A	N/A
+M02-DB-268	regulatory	sp_check_employee_trade	Stored Procedure	Validates employee trade against blackout periods.	M02-F168	employee_id, trade_details	Returns: Boolean	N/A
+M02-DB-269	regulatory	sp_validate_dao_vote	Stored Procedure	Validates a DAO governance vote.	M02-F171	vote_hash, proposal_id	Returns: Valid	N/A
+M02-DB-270	regulatory	sp_trace_crypto_asset	Stored Procedure	Initiates tracing for a specific crypto address.	M02-F172	wallet_address	N/A	N/A
+M02-DB-271	regulatory	sp_convert_legacy_record	Stored Procedure	Converts a legacy format record to ISO 20022.	M02-F174	record_id	N/A	N/A
+M02-DB-272	regulatory	sp_analyze_root_cause	Stored Procedure	Runs AI root cause analysis on incident.	M02-F175	incident_id	N/A	N/A
+M02-DB-273	regulatory	sp_scan_gazettes	Stored Procedure	Scrapes government gazettes for updates.	M02-F176	N/A	N/A	N/A
+M02-DB-274	regulatory	sp_verify_data_location	Stored Procedure	Verifies physical location of a data block.	M02-F177	data_block_id	Returns: Region	N/A
+M02-DB-275	regulatory	sp_log_ai_transparency	Stored Procedure	Logs inputs/outputs for transparency.	M02-F178	model_id, input, output	N/A	N/A
+M02-DB-276	regulatory	sp_push_oracle_feed	Stored Procedure	Pushes data update to blockchain oracle.	M02-F179	feed_id, data	N/A	N/A
+M02-DB-277	regulatory	sp_migrate_to_quantum	Stored Procedure	Migrates data to quantum-safe archive.	M02-F180	table_name, batch_id	N/A	N/A
+M02-DB-278	regulatory	sp_update_granular_consent	Stored Procedure	Updates consent for a specific data field.	M02-F155	user_id, field_name, status	N/A	N/A
+M02-DB-279	regulatory	sp_execute_reversal	Stored Procedure	Executes financial reversal for compliance.	M02-F156	transaction_id	N/A	N/A
+M02-DB-280	regulatory	sp_estimate_penalty	Stored Procedure	Calculates estimated fine for a violation.	M02-F157	violation_type, severity	Returns: Amount	N/A
+M02-DB-281	regulatory	sp_anchor_to_blockchain	Stored Procedure	Anchors audit log hash to blockchain.	M02-F158	log_id	Returns: Tx Hash	N/A
+M02-DB-282	regulatory	sp_process_voice_command	Stored Procedure	Processes voice query for compliance.	M02-F163	audio_blob, user_id	Returns: Result	N/A
+M02-DB-283	regulatory	sp_create_fee_dispute	Stored Procedure	Creates a record of a fee dispute.	M02-F164	merchant_id, fee_id, reason	N/A	N/A
+M02-DB-284	regulatory	sp_scan_defi_bridge	Stored Procedure	Scans a specific DeFi bridge address.	M02-F167	bridge_address	N/A	N/A
+M02-DB-285	regulatory	sp_generate_vpat	Stored Procedure	Generates VPAT document for a component.	M02-F162	component_id	Returns: File Path	N/A
+M02-DB-286	regulatory	sp_aggregate_homomorphic	Stored Procedure	Performs encrypted aggregation on stats.	M02-F173	key_id, dataset_id	Returns: Encrypted Sum	N/A
+M02-DB-287	regulatory	sp_update_knowledge_graph	Stored Procedure	Updates ontology based on new regulation.	M02-F169	regulation_id	N/A	N/A
+M02-DB-288	regulatory	sp_check_accreditation	Stored Procedure	Validates investor accreditation status.	M02-F170	user_id, token_class	Returns: Boolean	N/A
+M02-DB-289	regulatory	sp_assign_ab_test_traffic	Stored Procedure	Assigns a user to a specific test bucket.	M02-F161	test_id, user_id	Returns: Variant	N/A
+M02-DB-290	regulatory	sp_log_regulator_query	Stored Procedure	Logs query to stats table.	M02-F154	query_type, success	N/A	N/A
+M02-DB-291	regulatory	sp_purchase_carbon_credit	Stored Procedure	Records purchase of carbon credit.	M02-F159	transaction_id, credit_amount	N/A	N/A
+M02-DB-292	regulatory	sp_enroll_voice_print	Stored Procedure	Enrolls user voice biometric.	M02-F163	user_id, audio_sample	N/A	N/A
+M02-DB-293	regulatory	sp_subscribe_oracle	Stored Procedure	Subscribes a contract to a feed.	M02-F179	contract_address, feed_type	N/A	N/A
+M02-DB-294	regulatory	sp_explain_ai_decision	Stored Procedure	Retrieves explanation for a specific AI decision.	M02-F178	decision_id	Returns: Explanation	N/A
+M02-DB-295	regulatory	sp_queue_legacy_conversion	Stored Procedure	Adds record to legacy conversion queue.	M02-F174	record_id	N/A	N/A
+M02-DB-296	regulatory	sp_submit_feedback	Stored Procedure	Submits user feedback on compliance process.	M02-F154	process_id, rating, comment	N/A	N/A
+M02-DB-297	regulatory	sp_verify_quantum_sig	Stored Procedure	Verifies a post-quantum signature.	M02-F180	data_hash, signature	Returns: Boolean	N/A
+M02-DB-298	regulatory	sp_cleanup_ab_test	Stored Procedure	Cleans up data and promotes winner of A/B test.	M02-F161	test_id, winner_variant	N/A	N/A
+M02-DB-299	regulatory	sp_sync_supply_chain	Stored Procedure	Syncs supply chain nodes from external source.	M02-F165	source_system	N/A	N/A
+M02-DB-300	regulatory	sp_audit_algorithmic_fairness	Stored Procedure	Runs fairness check on AI model outputs.	M02-F178	model_id, date_range	Returns: Fairness Score	N/A

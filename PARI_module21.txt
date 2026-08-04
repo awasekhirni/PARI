@@ -1,0 +1,461 @@
+
+
+21.	Module M21	Merchant Onboarding & KYB Automation
+a.	Summary
+In the digital economy, the speed and efficiency of merchant onboarding are directly correlated to market penetration and revenue generation. Traditional onboarding processes are notorious for their friction—characterized by endless paper forms, manual document verification, and delays that can span weeks. This latency is a primary deterrent for Small and Medium-sized Businesses (SMBs), which form the backbone of the PARI ecosystem. Module M21, the Merchant Onboarding & KYB (Know Your Business) Automation engine, reimagines this critical gateway not as a bureaucratic hurdle, but as a seamless, instant, and secure digital handshake. By leveraging advanced technologies such as Optical Character Recognition (OCR), Natural Language Processing (NLP), and eIDAS 2.0 compliant digital identities, M21 reduces the time-to-active from weeks to under ten minutes, enabling merchants to begin accepting payments immediately.
+
+At the heart of Module M21 is a sophisticated orchestration engine that manages the lifecycle of a merchant application from initial registration to full activation. It supports a "progressive verification" model, where merchants can start transacting with limited volume while additional verifications are completed in the background, balancing risk mitigation with user experience. The module is built to handle the complexity of global business structures, capable of parsing multi-jurisdictional corporate hierarchies to identify Ultimate Beneficial Owners (UBOs) with forensic precision. This is critical for complying with global Anti-Money Laundering (AML) and Counter-Terrorist Financing (CTF) regulations, which require a transparent view of ownership structures beyond the shell company.
+
+Module M21 is architected around the principle of "compliance by design." It integrates natively with European business registries (e.g., European Business Registers, national Chambers of Commerce) and tax authorities (VIES VAT validation) to auto-populate application forms and verify data in real-time. This eliminates manual data entry errors and ensures that the PARI database reflects the authoritative truth of public records. Furthermore, the module employs a risk-based tiering approach. Rather than applying a blunt "one-size-fits-all" scrutiny to every merchant, the engine assigns a risk score based on business type, location, transaction volume, and UBO profile. Low-risk entities are fast-tracked via automated algorithms, while high-risk entities are flagged for enhanced due diligence (EDD), ensuring that compliance resources are focused where they matter most.
+
+A standout feature of M21 is its deep integration with the EU Digital Identity Wallet framework (eIDAS 2.0). It allows legal representatives to authenticate themselves using government-issued digital identities, providing a high-trust verification anchor that eliminates the need for manual notarization of documents. The module also utilizes AI-powered document forensics to detect forged or manipulated documents (e.g., altered utility bills or bank statements) in real-time, preventing fraud before it enters the system.
+
+Beyond the initial setup, M21 manages the ongoing health of the merchant relationship. It continuously monitors sanctions lists (OFAC, UN, EU) and Politically Exposed Persons (PEP) databases. If a merchant's risk profile changes—due to a change in ownership or a negative news event—the module automatically triggers a re-evaluation workflow, potentially adjusting transaction limits or temporarily suspending the account. This "perpetual KYB" ensures that the PARI network remains resilient against evolving threats without requiring constant manual oversight.
+
+From a data perspective, Module M21 acts as the master record for merchant entities within the PARI platform. It standardizes merchant data (ISO 20022) and makes it available to other modules, such as the Settlement Hub (M05) and the Tax Reporting Engine (M22), ensuring that payments are routed and taxes are calculated correctly from the very first transaction. By transforming onboarding from a cost center into a competitive advantage, Module M21 fuels the growth of the PARI ecosystem while maintaining the highest standards of regulatory integrity and financial security.
+b.	Scope
+Module M21 encompasses the entire digital journey of a merchant joining the PARI network.
+
+     Pre-Onboarding: Informational landing pages, eligibility checking, and preliminary document requirements lists.
+     Application Phase: Digital forms, eIDAS authentication, document upload (OCR/Capture), and UBO declaration.
+     Verification Phase: Automated checks against business registries, VAT validation, AML/PEP screening, and document forensics.
+     Decisioning: Risk-based scoring engine, automated approval for low-risk, and workflow routing for manual review of high-risk cases.
+     Post-Onboarding: Merchant dashboard, fee schedule configuration, API key generation, and periodic event-triggered reviews.
+
+c.	Business Case
+
+The cost of acquiring a merchant (CAC) is significantly inflated by high drop-off rates during complex onboarding flows. Industry data suggests that every additional field in a form increases drop-off by up to 10%. Module M21 radically simplifies this process using pre-fill and auto-verification, directly increasing conversion rates. Furthermore, manual KYB processes are labor-intensive and expensive. By automating up to 85% of verifications, M21 reduces operational overhead for Payment Service Providers (PSPs) using PARI. Most critically, regulatory fines for non-compliant onboarding (e.g., failing to identify a UBO) can run into millions of euros. M21's rigorous, automated audit trails and built-in rules engine minimize this risk, providing a robust defense against regulatory scrutiny.
+d.	KPIs
+     Onboarding Time (<10 min): Time from start of application to "Active" status for low-risk merchants.
+     Auto-Approval Rate (>80%): Percentage of merchants approved without human intervention.
+     False Rejection Rate (<1%): Legitimate merchants incorrectly flagged as fraudulent.
+     UBO Identification Accuracy (100%): Completeness of beneficial ownership data extracted.
+     Document Verification Pass Rate: Percentage of documents passing automated forensic checks.
+
+e.	Stakeholder Insights
+Stakeholder	Concern	Implications
+Merchants (SMBs)	Lengthy setup delays preventing sales.	Every day without payment processing is lost revenue. Speed is a top priority.
+Compliance Officers	Hidden shell companies and money laundering.	Inability to verify UBOs leads to massive fines and reputational damage.
+PSPs / Acquirers	High cost of manual underwriting teams.	Manual review is not scalable. They need automated confidence to approve more merchants.
+Regulators	Transparency of the merchant base.	Require instant access to KYB documentation for audits.
+Product Managers	Drop-off rates in the signup funnel.	Complexity kills adoption. The UX must be intuitive yet comprehensive.
+
+f.	Knowledge Representation Graph (mermaid.js)
+
+graph TD
+    subgraph "External Actors"
+        MERCHANT[Merchant Applicant]
+        REGISTRY[Company House / VIES]
+        EIDAS[eIDAS 2.0 Node]
+        SANCTIONS[Global Watchlists]
+    end
+
+    subgraph "Module M21: KYB & Onboarding"
+        UI[Onboarding Portal]
+        ORCHESTRATOR[Workflow Orchestrator]
+        OCR[Document & OCR Engine]
+        DATA_VAL[Data Validation Engine]
+        RISK[Risk Scoring Engine]
+        UBO[UBO Extractor]
+        DECISION[Decisioning Logic]
+        AUDIT[Compliance Audit Log]
+    end
+
+    subgraph "Internal PARI Systems"
+        M05[Settlement Hub]
+        M22[Tax Engine]
+        CORE[Merchant Master DB]
+    end
+
+    MERCHANT --> UI
+    UI --> ORCHESTRATOR
+
+    ORCHESTRATOR --> OCR
+    OCR --> DATA_VAL
+    ORCHESTRATOR --> EIDAS
+    EIDAS --> DATA_VAL
+
+    DATA_VAL --> UBO
+    UBO --> RISK
+
+    ORCHESTRATOR --> REGISTRY
+    REGISTRY --> DATA_VAL
+
+    RISK --> SANCTIONS
+    SANCTIONS --> RISK
+
+    RISK --> DECISION
+    DECISION -->|Approve| CORE
+    DECISION -->|Review| UI
+
+    ORCHESTRATOR --> AUDIT
+
+    CORE --> M05
+    CORE --> M22
+
+g.	Comprehensive List of Features
+ID	Feature	Description	Business Case	AI/ML Algorithms	KPIs	Primary Users
+M21-F001	Progressive Onboarding Wizard	Step-by-step guided flow with save-and-resume capability.	Reduces cognitive load and drop-off rates.	N/A	Step abandonment rate <5%	Merchants
+M21-F002	eIDAS 2.0 Qualified Login	Integration with EU Digital Identity Wallet for legal rep authentication.	Provides high-trust anchor, eliminating document fraud.	Cryptographic Verification	Auth success rate >99%	Merchants
+M21-F003	Global Business Registry Lookup	Automated fetching of company data from 100+ national registries.	Auto-fills forms, reduces errors and typing time.	API Integration	Lookup latency <2s	Merchants
+M21-F004	VIES VAT Number Validation	Real-time validation of VAT numbers against EU VIES database.	Ensures tax compliance from day one.	API Integration	VAT validation accuracy 100%	Compliance
+M21-F005	AI Document Classification	Auto-categorization of uploaded docs (Passport, AoA, Utility Bill).	Streamlines routing to specific verification logic.	CNN / Vision Transformers	Classification accuracy >98%	System
+M21-F006	Optical Character Recognition (OCR)	Extract text from scanned documents and images.	Digitizes physical records for database storage.	Tesseract / Custom OCR	Text extraction accuracy 99%	System
+M21-F007	Document Tamper Detection	Forensic analysis to detect pixel-level manipulation or editing.	Prevents fraud via forged documents.	Error Level Analysis	Fraud detection recall >95%	Risk
+M21-F008	Ultimate Beneficial Owner (UBO) Extractor	Parses ownership structures to identify individuals with >25% control.	Critical for AML compliance.	NLP (Relation Extraction)	UBO recall >95%	Compliance
+M21-F009	UBO Chain Graph Visualization	Interactive tree view of company ownership hierarchy.	Visualizes complex shell company structures for reviewers.	Graph Layouting	Render time <1s	Reviewers
+M21-F010	AML/PEP Screening	Screening of UBOs and directors against global PEP and Sanctions lists.	Prevents money laundering and regulatory fines.	Fuzzy Matching (Levenshtein)	Screening latency <5s	Risk
+M21-F011	Adverse Media Monitoring	Scanning news sources for negative press regarding the merchant.	Detects reputational risks not in structured lists.	Sentiment Analysis / NLP	False positive rate <2%	Risk
+M21-F012	Risk-Based Tiering Engine	Scores merchants (Low, Medium, High) based on composite risk factors.	Optimizes resources, fast-tracking low-risk merchants.	Random Forest / XGBoost	Tiering accuracy >90%	System
+M21-F013	Automated Decision Logic	"Approve/Deny/Refer" logic based on risk score and rules.	Eliminates manual review for clear-cut cases.	Rule Engine	Auto-approval rate >80%	System
+M21-F014	Case Management Queue	UI for compliance officers to review flagged applications.	Centralizes manual review work.	N/A	Average handling time <15min	Compliance
+M21-F015	Digital Contract Signing	Integration with e-signature providers for merchant agreements.	Enables legally binding remote onboarding.	Cryptographic Hashing	Signing success rate >99%	Merchants
+M21-F016	Mobile Document Capture	SDK for smartphone camera capture with auto-crop and glare removal.	Improves document quality from mobile devices.	Computer Vision	Image quality score >8/10	Merchants
+M21-F017	NFC Passport Reading	Read NFC chip data from e-Passports for biometric verification.	Highest level of identity assurance for individuals.	N/A	Read success rate >95%	Merchants
+M21-F018	Liveness Detection	"Selfie" check with active liveness (blink, turn head) to prevent spoofs.	Prevents identity impersonation attacks.	Deep Learning (Face Mesh)	Spoof detection >99%	Merchants
+M21-F019	Merchant Fee Configuration	Setup of transaction fees, monthly fees, and settlement currency.	Defines the commercial agreement automatically.	N/A	Config accuracy 100%	Merchants
+M21-F020	API Key Generation	Instant generation of API keys and SDK tokens for approved merchants.	Allows immediate technical integration.	Cryptography	Provisioning time <1s	Merchants
+M21-F021	Webhook Configuration	Setup of webhooks for payment notifications.	Critical for merchant system integration.	N/A	Validation success 100%	Merchants
+M21-F022	Bank Account Ownership Verification	Verification that the merchant owns the provided bank account (micro-deposit/Penny drop).	Prevents funds diversion to fraudulent accounts.	N/A	Verification time <48h	System
+M21-F023	Website Domain Verification	Verify merchant owns the domain where the payment button will be.	Prevents phishing site setups.	DNS TXT Record Check	Verification time <24h	System
+M21-F024	Multi-Language Support	Full localization of the onboarding portal (ISO 639-1).	Essential for pan-European adoption.	N/A	Supported languages >20	Merchants
+M21-F025	WCAG 2.1 AA Accessibility	Compliance with accessibility standards for disabled users.	Legal requirement and ethical design.	N/A	Accessibility Score 100%	Merchants
+M21-F026	Email/SMS Verification	OTP-based verification of contact details.	Basic contact validation.	N/A	OTP delivery rate >99%	Merchants
+M21-F027	Business Category Selection	Standardized MCC (Merchant Category Code) selection.	Determines interchange rates and risk profile.	N/A	Selection accuracy	Merchants
+M21-F028	Estimated Monthly Volume Input	Input field for projected transaction volume.	Helps in initial risk assessment and limits.	N/A	Input completion >90%	Merchants
+M21-F029	Entity Type Selection	Selection of legal entity type (Sole Prop, Ltd, Corp, NGO).	Dictates required documentation and UBO rules.	N/A	Selection accuracy 100%	Merchants
+M21-F030	Joint Account Holder Addition	Ability to add multiple authorized signatories.	Flexibility for business operations.	N/A	Addition time <2min	Merchants
+M21-F031	Document Expiry Tracking	Monitoring of uploaded IDs/Passports for expiration.	Ensures ongoing compliance.	Date Logic	Notification accuracy 100%	Compliance
+M21-F032	Re-KYB Trigger Event	Workflow to re-verify merchant on specific events (e.g., change of director).	Maintains data freshness and compliance.	Event Listener	Trigger latency <24h	System
+M21-F033	Document Vault	Secure storage of all KYB documents (AES-256).	Centralized repository for audits.	Encryption	Access log 100%	Compliance
+M21-F034	Audit Trail Generation	Immutable log of every action, view, and change in the application.	Critical for regulatory audits (GDPR/AML).	Blockchain/Ledger	Log integrity 100%	Auditors
+M21-F035	Integrated Dashboard	Merchant view of onboarding status ("Pending", "Approved", "More Info Needed").	Transparency reduces support tickets.	N/A	Dashboard load time <1s	Merchants
+M21-F036	Support Chat Integration	Live chat with compliance support during onboarding.	Reduces drop-off due to confusion.	N/A	Response time <2min	Merchants
+M21-F037	Bulk Merchant Upload	Portal for PSPs to upload bulk merchant lists ( CSV/API).	Enables onboarding of large enterprise chains.	Batch Processing	Success rate >99%	PSPs
+M21-F038	Sandbox/Live Mode Toggle	Allow merchants to test in Sandbox before Live activation.	Encourages technical integration before compliance finish.	N/A	Toggle latency <100ms	Merchants
+M21-F039	Compliance Checklist	Dynamic checklist of remaining requirements for the specific merchant.	Guides user to completion.	N/A	Checklist accuracy 100%	Merchants
+M21-F040	Smart Form Pre-fill	Pre-filling forms based on eIDAS or Registry data.	Reduces typing effort significantly.	N/A	Auto-fill accuracy >95%	Merchants
+M21-F041	Sanctions List Auto-Update	Automatic ingestion of updated sanctions lists daily.	Ensures screening uses the latest data.	ETL Pipeline	Update latency <24h	System
+M21-F042	Fuzzy Logic Name Matching	Handling of name variations (transliteration, nicknames) in screening.	Reduces false positives in AML checks.	Phonetic Algorithms	False positive reduction >30%	Risk
+M21-F043	Legal Entity Identifier (LEI) Check	Validation of LEI codes for corporate entities.	Standardized identifier for financial markets.	API Integration	Validation accuracy 100%	Compliance
+M21-F044	SEC/FCA File Search	Search of public filings for listed companies.	Verifies public company data.	NLP / Search	Retrieval accuracy >95%	Reviewers
+M21-F045	Negative Keyword Detection	Flagging of keywords in business descriptions (e.g., "crypto", "gambling").	Identifies prohibited high-risk businesses.	NLP	Keyword accuracy 100%	System
+M21-F046	Biometric Template Storage	Secure storage of facial recognition templates.	Enables future ongoing authentication.	Template Protection	Storage security score 100%	System
+M21-F047	Data Retention Policy	Automatic archiving/deletion of KYB data per regulatory rules.	Compliance with GDPR Right to be Forgotten.	Cron Jobs	Deletion accuracy 100%	DPO
+M21-F048	Consent Management	Granular consent checkboxes for data processing (GDPR).	Legal basis for data processing.	N/A	Consent capture 100%	Merchants
+M21-F049	Email Domain Validation	Verification that email domain matches company website.	Basic fraud signal check.	Regex/DNS	Validation accuracy >90%	System
+M21-F050	IP Reputation Check	Check applicant IP against known proxy/Tor/VPN lists.	Detects attempts to mask location.	GeoIP DB	Flag accuracy >95%	Risk
+M21-F051	Device Fingerprinting	Fingerprinting device used for onboarding to prevent duplicate accounts.	Detects fraudulent serial applications.	Hashing Algorithm	Fingerprint stability >90%	Risk
+M21-F052	Duplicate Merchant Detection	Identify if a merchant has already applied under different details.	Prevents fraud via multiple identities.	Record Linkage	Detection recall >90%	Risk
+M21-F053	Video Identification Interview	Asynchronous video interview for high-risk applications.	Alternative to physical presence.	N/A	Video quality check	Reviewers
+M21-F054	Automated Email Notifications	Triggered emails for status changes, document rejections, etc.	Keeps merchant informed.	Email Service	Delivery rate >99%	Merchants
+M21-F055	Document Quality Check	Real-time feedback on image blur, glare, or cutoff during upload.	Ensures OCR works on first attempt.	Computer Vision	Re-upload reduction >40%	Merchants
+M21-F056	Machine Readable Zone (MRZ) Parser	Specific parser for passport MRZ data.	Fast extraction of ID data.	Regex	Parse accuracy 100%	System
+M21-F057	Selfie to ID Matching	Automatic comparison of selfie face to photo on ID document.	Verifies ID belongs to the presenter.	Face Recognition	Match accuracy >99%	System
+M21-F058	AML Risk Questionnaire	Dynamic set of questions based on business type and location.	Adds context to automated scoring.	Logic Engine	Question relevance 100%	Merchants
+M21-F059	Third Party Data Enrichment	Enriching merchant data with credit scores from bureaus.	Adds external verification layer.	API Integration	Enrichment coverage >80%	Risk
+M21-F060	Dynamic Request for Info (RFI)	System allows compliance to ask specific questions without rejecting.	Resolves minor issues quickly.	N/A	RFI response time <48h	Compliance
+M21-F061	Merchant Profile Export	Export merchant data (PDF/JSON) for offline records.	Supports legacy archiving.	N/A	Export success 100%	Merchants
+M21-F062	Role-Based Access Control (RBAC)	Control who can see/edit merchant data within the PSP.	Internal security and segregation of duties.	N/A	Access violation 0	PSP Admin
+M21-F063	Change Log History	Detailed history of changes to merchant details post-onboarding.	Auditability of merchant data.	Trigger/Audit	Log completeness 100%	Auditors
+M21-F064	API Rate Limiting	Protect onboarding APIs from abuse/DDoS.	System stability.	Token Bucket	Uptime 99.9%	Ops
+M21-F065	CAPTCHA Integration	Bot protection on public forms.	Prevents automated bulk spam applications.	ReCAPTCHA	Bot block rate 99%	System
+M21-F066	Multi-Currency Bank Account	Support for adding bank accounts in different currencies.	Essential for cross-border merchants.	N/A	Validation accuracy 100%	Merchants
+M21-F067	IBAN Validation	Validation of IBAN structure and checksum.	Prevents invalid banking details.	Mod-97 Algo	Validation accuracy 100%	System
+M21-F068	SWIFT/BIC Code Validation	Validation of SWIFT/BIC codes.	Ensures correct routing of funds.	Directory Lookup	Validation accuracy 100%	System
+M21-F069	Merchant Categorization Logic	Auto-suggest MCC based on business name/description.	Speeds up selection and ensures accuracy.	NLP Classification	Suggestion accuracy >85%	Merchants
+M21-F070	Tax Residency Declaration	Capture of tax residency for FATCA/CRS reporting.	Global tax compliance requirement.	N/A	Capture rate 100%	Merchants
+M21-F071	US Entity Determination	Logic to determine if merchant is a US Person (FATCA).	Triggers specific reporting requirements.	Rule Engine	Determination accuracy 100%	Compliance
+M21-F072	Controlled Foreign Corporation (CFC) Check	Check for CFC status for corporate tax purposes.	Advanced tax compliance.	Rule Engine	Check accuracy >95%	Compliance
+M21-F073	Source of Funds Declaration	Digital declaration of initial funding source.	AML requirement for some jurisdictions.	N/A	Capture rate 100%	Merchants
+M21-F074	Parent Company Linking	Linking subsidiary to the global parent company.	Group risk management.	Graph DB	Linkage accuracy 100%	Risk
+M21-F075	Merchant Branding Upload	Upload of logo for use on payment pages.	Improves payment experience.	Image Processing	Auto-resize success 100%	Merchants
+M21-F076	Settlement Schedule Selection	Choice of settlement frequency (T+1, T+7).	Merchant cash flow preference.	N/A	Selection accuracy 100%	Merchants
+M21-F077	Webhook Retry Logic	Automatic retry of failed webhook notifications.	Ensures merchants receive critical updates.	Exponential Backoff	Delivery success >99%	System
+M21-F078	Two-Factor Authentication (2FA)	Mandatory 2FA for compliance officers accessing the portal.	Prevents internal fraud.	TOTP/HOTP	2FA enforcement 100%	Compliance
+M21-F079	SSO Integration (SAML)	Allow PSPs to integrate onboarding with their internal IdP.	Seamless user management for enterprise clients.	SAML 2.0	Integration success >95%	PSPs
+M21-F080	Custom Field Injection	Allow addition of custom data fields for specific PSP needs.	Flexibility for bespoke workflows.	JSON Schema	Validation success 100%	PSPs
+M21-F081	Decline Reason Coding	Standardized codes for declined applications (e.g., 101-Fraud).	Analytics and reporting.	N/A	Code consistency 100%	System
+M21-F082	Appeal Process	Workflow for merchants to appeal a decision.	Fair treatment and due process.	N/A	Appeal SLA <5 days	Merchants
+M21-F083	Supervisory Review	Escalation workflow for complex AML cases to senior compliance.	Human-in-the-loop for tough calls.	N/A	Review accuracy >99%	Senior Mgmt
+M21-F084	Data Residency Control	Control over which data center region merchant data is stored.	Compliance with data sovereignty laws.	Geo-Routing	Residency compliance 100%	Ops
+M21-F085	Scheduled Reporting	Automated daily/weekly reports on new merchant stats.	Management visibility.	Cron Jobs	Report accuracy 100%	Mgmt
+M21-F086	Real-time Stats Dashboard	Live view of onboarding funnel metrics.	Operational monitoring.	WebSocket	Data latency <1s	Ops
+M21-F087	AML Transaction Threshold Setup	Set initial transaction limits based on risk tier.	Controls exposure during early stages.	Risk Engine	Limit accuracy 100%	Risk
+M21-F088	Dynamic Limit Adjustment	Automated increase/decrease of limits based on behavior.	Optimizes revenue while managing risk.	Time-Series Analysis	Adjustment fairness score >90%	System
+M21-F089	Merchant Termination Flow	Offboarding workflow including fund hold/release.	Compliant exit process.	State Machine	Termination SLA <7 days	Risk
+M21-F090	Funds Hold Release Logic	Logic to release funds after hold period expires.	Automated fund management.	Date Logic	Release accuracy 100%	Finance
+M21-F091	Debit Authority Setup	Setup of SEPA/Core Direct Debit mandates.	Enables recurring payments.	XML Parsing	Mandate validity 100%	Merchants
+M21-F092	Card Scheme Enrollment	Enrollment in Visa/Mastercard schemes via API.	Enables card processing.	API Integration	Enrollment success >95%	Ops
+M21-F093	3DS2 Setup	Configuration of 3D Secure 2.0 parameters.	Card fraud prevention.	N/A	Config accuracy 100%	Merchants
+M21-F094	Instant Payouts Eligibility	Check eligibility for instant payout features.	Value-added service qualification.	Rule Engine	Check accuracy 100%	Merchants
+M21-F095	Buy Now Pay Later (BNPL) Setup	Configuration for BNPL installment plans.	Merchants offering financing.	N/A	Plan validity 100%	Merchants
+M21-F096	Split Payment Configuration	Setup for marketplace/split payments logic.	Platform business model support.	N/A	Config accuracy 100%	Merchants
+M21-F097	Metadata Customization	Adding custom metadata to merchant profile for internal routing.	Internal operational logic.	Key-Value Store	Write success 100%	Ops
+M21-F098	Historical Data Migration	Tools to migrate legacy merchant data into M21.	PSP onboarding to PARI.	ETL	Data integrity >99%	Migration
+M21-F099	Partner Referral Tracking	Track which partner referred a merchant for commission.	Revenue sharing analytics.	Cookie/Tracking	Attribution accuracy 100%	Partners
+M21-F100	In-App Messaging	Targeted messages to merchants during onboarding.	Guidance and marketing.	Pub/Sub	Message delivery >95%	Mktg
+M21-F101	Browser Compatibility Check	Check for supported browsers/versions.	UX reliability.	User Agent	Warning accuracy 100%	Merchants
+M21-F102	Offline Mode Support	Allow form data entry offline, sync on connection.	Reliability in poor connectivity areas.	Service Worker	Sync success >99%	Merchants
+M21-F103	PDF Generation	Auto-generation of KYB summary PDFs.	Record keeping.	PDF Lib	Gen time <2s	System
+M21-F104	QR Code Login	Secure login via QR scan on mobile app.	Convenience for mobile users.	Crypto	Auth success rate >99%	Merchants
+M21-F105	Voice Biometrics	Optional voice print for identity verification.	Accessibility and alternative auth.	Voice Processing	Match accuracy >95%	Merchants
+M21-F106	Dark Mode UI	Dark theme support for the onboarding portal.	User preference/Accessibility.	CSS	No functional bugs	Merchants
+M21-F107	One-Time Link Login	Magic link login for passwordless entry.	Reduces friction.	JWT Token	Link expiration accuracy 100%	Merchants
+M21-F108	Session Timeout Management	Configurable session timeouts for security.	Data protection.	Cookie Logic	Timeout accuracy 100%	System
+M21-F109	Field Level Encryption	Encrypt sensitive fields (SSN, DOB) at rest.	Enhanced data security.	AES-256	Encryption coverage 100%	Security
+M21-F110	PCI-DSS Compliance Validation	Validate merchant environment for PCI compliance.	Requirement for card processing.	SAQ Logic	Validation accuracy 100%	Compliance
+M21-F111	GDPR Data Portability	Export all user data in machine-readable format.	Right to data portability.	JSON/CSV	Export success 100%	Merchants
+M21-F112	Cross-Device Sync	Sync application state between mobile and desktop.	Flexibility for users.	Cloud Sync	Sync latency <2s	Merchants
+M21-F113	Smart Error Messages	Contextual error messages (e.g., "VAT invalid format" vs "Error").	UX improvement.	N/A	Error clarity score >8/10	Merchants
+M21-F114	Auto-Save Draft	Automatically save form progress every 30 seconds.	Prevents data loss.	Local Storage	Save success 100%	Merchants
+M21-F115	Progressive Profiling	Ask complex questions later in the flow.	Reduces initial cognitive load.	UX Logic	Completion rate increase >10%	Merchants
+M21-F116	Merchant Lifecycle Status	Track status (Pending, Active, Suspended, Terminated).	State management.	State Machine	Transition validity 100%	System
+M21-F117	Transaction History Preview	Read-only view of transactions during pending state.	Visibility for approved merchants.	Query DB	Load time <2s	Merchants
+M21-F118	Dispute Management Link	Link to dispute module settings.	Operational setup.	N/A	Link validity 100%	Merchants
+M21-F119	Tax Configuration Wizard	Step-by-step setup of VAT rates.	Correct tax calculation.	Logic Engine	Config accuracy 100%	Merchants
+M21-F120	Currency Pair Setup	Define which currency pairs the merchant can accept.	Forex configuration.	N/A	Config accuracy 100%	Merchants
+M21-F121	Webhook Security	IP whitelisting for webhook endpoints.	Prevents payload interception.	Firewall	Rule accuracy 100%	Merchants
+M21-F122	HSM Key Generation	Generate API keys within HSM for security.	Key security best practice.	PKCS#11	Key generation success 100%	Security
+M21-F123	Rate Limit per Merchant	Set custom rate limits per merchant.	Resource protection.	Throttling	Limit accuracy 100%	Ops
+M21-F124	Merchant Logo Moderation	AI moderation of uploaded logos for inappropriate content.	Brand safety.	Image Classification	Moderation accuracy >95%	System
+M21-F125	Business Description Analysis	AI analysis of business description for risk keywords.	Automated risk assessment.	NLP	Keyword recall >90%	Risk
+M21-F126	Document Template Matching	Match uploaded docs against expected templates.	Detects format anomalies.	Computer Vision	Match accuracy >95%	System
+M21-F127	Color Drop Analysis	Check for ink color consistency on scans.	Detects cut-and-paste fraud.	Image Processing	Detection accuracy >90%	System
+M21-F128	Font Consistency Check	Check for consistent font usage across document.	Detects text editing.	OCR/Font Metrics	Detection accuracy >90%	System
+M21-F129	Background Noise Detection	Check for background artifacts indicating editing.	Image forensics.	CV Filters	Detection accuracy >85%	System
+M21-F130	Hologram Detection	Detect presence of security holograms on IDs.	Verifies physical ID authenticity.	CV (Specular highlights)	Detection accuracy >90%	System
+M21-F131	Microprint Text Verification	Verify tiny microprint text on IDs.	High-security ID check.	High-res OCR	Verification accuracy >95%	System
+M21-F132	Portrait Lighting Check	Analyze lighting conditions in selfie/ID.	Ensure quality for biometrics.	CV Histogram	Quality flag accuracy >90%	System
+M21-F133	Face Pose Estimation	Estimate head pose angles in selfie.	Ensure frontal face for matching.	Pose Regression	Pose tolerance +/- 15deg	System
+M21-F134	Eye Blink Detection	Liveness check via eye blink.	Prevents photo attacks.	Eye Landmarks	Detection accuracy >99%	System
+M21-F135	Mouth Movement Detection	Liveness check via mouth movement.	Prevents video replay attacks.	Optical Flow	Detection accuracy >98%	System
+M21-F136	3D Depth Sensing	Use depth camera (if available) for liveness.	Hardware-based liveness.	Depth Map	Detection accuracy 100%	System
+M21-F137	Screen Flash Detection	Detect if face is displayed on a screen.	Anti-spoofing.	Screen Pattern Analysis	Detection accuracy >95%	System
+M21-F138	Synthetic Voice Detection	Detect AI-generated voice in video interviews.	Anti-spoofing for high-risk apps.	Audio Spectrogram	Detection accuracy >90%	System
+M21-F139	Blockchain Anchor	Hash of KYB data anchored to blockchain for immutability.	Tamper-proof audit trail.	Smart Contract	Anchor latency <1h	System
+M21-F140	Zero Knowledge Proof of Solvency	Merchant proves funds without revealing balance (optional).	Privacy for high-net-worth merchants.	zk-SNARKs	Proof gen time <5min	Merchants
+M21-F141	Smart Contract Review	Review merchant's smart contract address (if Web3).	Risk assessment for crypto merchants.	Static Analysis	Analysis accuracy >90%	Risk
+M21-F142	Wallet Address Whitelisting	Whitelist withdrawal wallet addresses for security.	Prevents unauthorized withdrawals.	Hash Check	Validation accuracy 100%	Merchants
+M21-F143	IP Geolocation Validation	Validate IP location matches declared address.	Location fraud check.	GeoIP	Match radius <50km	Risk
+M21-F144	AS Number Check	Check ISP Autonomous System Number.	Detect hosting/VPS instead of residential.	IP DB	Flag accuracy >95%	Risk
+M21-F145	Timezone Consistency	Check browser timezone vs declared timezone.	Basic fraud signal.	JS Date	Consistency check 100%	Risk
+M21-F146	Mouse Movement Analysis	Analyze mouse dynamics for bot behavior.	Bot detection.	Heuristics	Bot detection recall >90%	Risk
+M21-F147	Typing Biometrics	Analyze keystroke dynamics for user consistency.	Continuous auth.	Statistical	Consistency score >80%	Risk
+M21-F148	Copy-Paste Detection	Detect copy-pasting in sensitive fields (e.g. IBAN).	Potential sign of data entry fatigue/fraud.	JS Events	Alert trigger >5 times	UI
+M21-F149	Field Order Anomaly	Detect if fields filled in unnatural order.	Bot detection signal.	Sequence Analysis	Anomaly score >80%	Risk
+M21-F150	Session Length Analysis	Analyze time taken to complete forms.	Too fast = bot, too slow = potential abandonment.	Stats	Threshold accuracy	Risk
+M21-F151	Referrer Check	Check HTTP referrer header.	Ensure traffic comes from legitimate source.	Header Analysis	Referrer validity 100%	Security
+M21-F152	Header Anomaly Detection	Check for missing or abnormal HTTP headers.	Proxy/Tool detection.	Heuristics	Detection accuracy >90%	Security
+M21-F153	JavaScript Execution Check	Ensure JS is executing (simple honeypot).	Basic bot filtering.	JS Event	Execution check 100%	UI
+M21-F154	Canvas Fingerprinting	Fingerprint browser using HTML Canvas.	Device linking.	Rendering	Hash stability >90%	Risk
+M21-F155	WebGL Fingerprinting	Fingerprint using WebGL parameters.	Enhanced device linking.	WebGL API	Hash stability >90%	Risk
+M21-F156	Audio Fingerprinting	Fingerprint using AudioContext.	Cross-browser device tracking.	Web Audio API	Hash stability >90%	Risk
+M21-F157	Font Enumeration	Detect installed fonts via JS/Flash.	Fingerprinting component.	Enumeration	List accuracy 100%	Risk
+M21-F158	Plugin Detection	Detect browser plugins.	Fingerprinting/Security context.	Navigator	List accuracy 100%	Risk
+M21-F159	Timezone Offset Detection	Precise timezone offset detection.	Location verification.	Date Object	Offset accuracy 100%	Risk
+M21-F160	Screen Resolution Detect	Detect screen resolution and color depth.	Fingerprinting/Context.	Window Object	Data accuracy 100%	Risk
+
+h.	Comprehensive List of Database Objects
+
+ID	schema_name	object_name	object_type	description	feature_reference	column_names	constraints / notes	junction_tables
+M21-DB001	m21_kyb	merchant_applications	Table	Core table for merchant onboarding requests.	M21-F001	id, application_uuid, status, created_at, updated_at, risk_score, risk_tier	PK: id, UQ: application_uuid	N/A
+M21-DB002	m21_kyb	merchant_entities	Table	Legal entity details of the merchant.	M21-F029	id, application_id, legal_name, trading_name, registration_number, incorporation_date, entity_type, country_code	PK: id, FK: application_id	N/A
+M21-DB003	m21_kyb	merchant_addresses	Table	Registered and trading addresses.	M21-F001	id, entity_id, address_type, line1, line2, city, state, postal_code, country, is_verified	PK: id, FK: entity_id	N/A
+M21-DB004	m21_kyb	merchant_contacts	Table	Contact details (Email, Phone).	M21-F026	id, entity_id, contact_type, value, is_verified, verification_method	PK: id, FK: entity_id	N/A
+M21-DB005	m21_kyb	merchant_representatives	Table	Directors, Secretaries, and Authorized Signatories.	M21-F030	id, application_id, role, first_name, last_name, dob, nationality, title	PK: id, FK: application_id	N/A
+M21-DB006	m21_kyb	representative_documents	Table	ID documents for representatives.	M21-F005	id, representative_id, doc_type, doc_number, issuing_country, expiry_date, front_file_id, back_file_id	PK: id, FK: representative_id	N/A
+M21-DB007	m21_kyb	ubos	Table	Ultimate Beneficial Owners with ownership %age.	M21-F008	id, application_id, name, ownership_percentage, control_type, is_pep	PK: id, FK: application_id	N/A
+M21-DB008	m21_kyb	ubo_documents	Table	Documents proving UBO status (Shareholder register).	M21-F008	id, ubo_id, file_id, description	PK: id, FK: ubo_id	N/A
+M21-DB009	m21_kyb	documents	Table	General storage for all uploaded files.	M21-F033	id, file_uuid, file_name, mime_type, size_bytes, storage_path, upload_date, hash_sha256	PK: id, UQ: file_uuid	N/A
+M21-DB010	m21_kyb	document_ocr_data	Table	Extracted text and metadata from OCR.	M21-F006	id, document_id, raw_text, json_metadata, confidence_score	PK: id, FK: documents	N/A
+M21-DB011	m21_kyb	ocr_validations	Table	Results of document forensic checks.	M21-F007	id, document_id, check_type (e.g. tamper, glare), result, details_json	PK: id, FK: documents	N/A
+M21-DB012	m21_kyb	bank_accounts	Table	Merchant settlement bank accounts.	M21-F022	id, application_id, account_holder_name, iban, bic, currency, bank_name, is_primary, verification_status	PK: id, FK: application_id	N/A
+M21-DB013	m21_kyb	penny_drops	Table	Micro-deposit verification records.	M21-F022	id, bank_account_id, amount_1, amount_2, status, verified_at	PK: id, FK: bank_accounts	N/A
+M21-DB014	m21_kyb	websites	Table	Merchant website domains.	M21-F023	id, application_id, url, verification_status, verification_token	PK: id, FK: application_id	N/A
+M21-DB015	m21_kyb	business_categories	Table	MCC (Merchant Category Codes).	M21-F027	code, description, group, risk_level	PK: code	N/A
+M21-DB016	m21_kyb	merchant_categories	Table	Linking merchants to MCCs.	M21-F027	id, application_id, mcc_code, is_primary	PK: id, FK: application_id, FK: business_categories	N/A
+M21-DB017	m21_kyb	tax_information	Table	VAT and Tax details.	M21-F004	id, application_id, tax_id_number, tax_residency_country, is_us_person, fatca_status	PK: id, FK: application_id	N/A
+M21-DB018	m21_kyb	vat_validations	Table	VIES check results.	M21-F004	id, tax_id, request_date, valid, name, address	PK: id, FK: tax_information	N/A
+M21-DB019	m21_kyb	compliance_checks	Table	Generic log of all external compliance checks.	M21-F010	id, application_id, check_type, provider, status, request_json, response_json, created_at	PK: id, FK: application_id	N/A
+M21-DB020	m21_kyb	sanctions_screenings	Table	Specific AML/PEP/Sanctions check results.	M21-F010	id, target_ref, list_name, match_score, name_on_list, list_ref_url, status	PK: id	N/A
+M21-DB021	m21_kyb	adverse_media_hits	Table	Results of adverse media searches.	M21-F011	id, application_id, url, title, snippet, sentiment_score, date_published	PK: id, FK: application_id	N/A
+M21-DB022	m21_kyb	risk_scores	Table	Detailed breakdown of risk scoring components.	M21-F012	id, application_id, component_name, score, weight, contribution, calculated_at	PK: id, FK: application_id	N/A
+M21-DB023	m21_kyb	application_decisions	Table	History of approval/review decisions.	M21-F013	id, application_id, decision_type, decision_maker_id, reason, notes, created_at	PK: id, FK: application_id	N/A
+M21-DB024	m21_kyb	manual_reviews	Table	Queued tasks for human review.	M21-F014	id, application_id, assigned_to, status, priority, due_date, created_at	PK: id, FK: application_id	N/A
+M21-DB025	m21_kyb	review_notes	Table	Notes added by reviewers during process.	M21-F060	id, review_id, author_id, note, visibility, created_at	PK: id, FK: manual_reviews	N/A
+M21-DB026	m21_kyb	contracts	Table	Digital contracts/agreements.	M21-F015	id, application_id, contract_type, contract_version, pdf_file_id, signed_at, ip_address	PK: id, FK: application_id	N/A
+M21-DB027	m21_kyb	api_credentials	Table	Generated API keys for merchants.	M21-F020	id, application_id, key_prefix, key_hash, scopes, expires_at, is_active	PK: id, FK: application_id	N/A
+M21-DB028	m21_kyb	webhooks	Table	Webhook configurations.	M21-F021	id, application_id, event_type, url, secret_hash, active	PK: id, FK: application_id	N/A
+M21-DB029	m21_kyb	webhook_logs	Table	Delivery logs for webhooks.	M21-F077	id, webhook_id, payload_id, status_code, response_body, attempt_count, next_retry_at	PK: id, FK: webhooks	N/A
+M21-DB030	m21_kyb	settlement_config	Table	Settlement preferences.	M21-F076	id, application_id, currency, schedule_type, delay_days, min_settlement_amount	PK: id, FK: application_id	N/A
+M21-DB031	m21_kyb	fee_schedules	Table	Fee structure per merchant.	M21-F019	id, application_id, fee_type (txn, monthly), rate, fixed_amount, currency	PK: id, FK: application_id	N/A
+M21-DB032	m21_kyb	audits	Table	Comprehensive audit trail of user actions.	M21-F034	id, actor_id, action, target_type, target_id, ip_address, user_agent, timestamp	PK: id	N/A
+M21-DB033	m21_kyb	consent_records	Table	GDPR consent tracking.	M21-F048	id, application_id, consent_type, version, granted_at, ip_address	PK: id, FK: application_id	N/A
+M21-DB034	m21_kyb	duplicate_flags	Table	Potential duplicate merchants.	M21-F052	id, application_id, suspected_duplicate_id, match_score, reason, status	PK: id, FK: application_id	N/A
+M21-DB035	m21_kyb	device_fingerprints	Table	Device fingerprinting data.	M21-F051	id, application_id, fingerprint_hash, components_json, first_seen	PK: id, FK: application_id	N/A
+M21-DB036	m21_kyb	ip_checks	Table	IP reputation and geo-location checks.	M21-F050	id, application_id, ip_address, is_proxy, is_tor, country, city, asn	PK: id, FK: application_id	N/A
+M21-DB037	m21_kyb	video_interviews	Table	Asynchronous video interview records.	M21-F053	id, application_id, video_file_id, status, reviewed_by, review_notes	PK: id, FK: application_id	N/A
+M21-DB038	m21_kyb	custom_fields	Table	Custom field definitions.	M21-F080	id, field_name, field_type, validation_regex, is_required	PK: id	N/A
+M21-DB039	m21_kyb	custom_field_values	Table	Values for custom fields.	M21-F080	id, application_id, field_id, value	PK: id, FK: application_id	N/A
+M21-DB040	m21_kyb	notifications	Table	Notification queue.	M21-F054	id, recipient_type, recipient_id, channel, subject, body, status, sent_at	PK: id	N/A
+M21-DB041	m21_kyb	appeals	Table	Appeals against decisions.	M21-F082	id, application_id, reason, submitted_at, status, resolution_notes	PK: id, FK: application_id	N/A
+M21-DB042	m21_kyb	parent_company_links	Table	Linkage to global parent companies.	M21-F074	id, application_id, parent_company_name, lei_code, confidence_score	PK: id, FK: application_id	N/A
+M21-DB043	m21_kyb	merchant_profiles	Table	Public profile data (Logos, descriptions).	M21-F075	id, application_id, display_name, description, logo_file_id, website_url	PK: id, FK: application_id	N/A
+M21-DB044	m21_kyb	document_expiry_alerts	Table	Alerts for expiring documents.	M21-F031	id, document_id, alert_date, status, resolved_at	PK: id, FK: documents	N/A
+M21-DB045	m21_kyb	periodic_reviews	Table	Scheduled periodic KYB reviews.	M21-F032	id, application_id, scheduled_date, triggered_by, status, completed_at	PK: id, FK: application_id	N/A
+M21-DB046	m21_kyb	transaction_limits	Table	Current transaction limits for the merchant.	M21-F087	id, application_id, limit_type (daily, monthly), amount, currency, effective_from	PK: id, FK: application_id	N/A
+M21-DB047	m21_kyb	limit_adjustments	Table	History of limit changes.	M21-F088	id, limit_id, old_amount, new_amount, reason, changed_by, changed_at	PK: id, FK: transaction_limits	N/A
+M21-DB048	m21_kyb	termination_records	Table	Merchant offboarding records.	M21-F089	id, application_id, termination_date, reason, funds_hold_status, released_at	PK: id, FK: application_id	N/A
+M21-DB049	m21_kyb	direct_debit_mandates	Table	SEPA/Core debit mandates.	M21-F091	id, application_id, mandate_reference, signature_date, debtor_iban, debtor_name	PK: id, FK: application_id	N/A
+M21-DB050	m21_kyb	card_scheme_enrollments	Table	Enrollment IDs for Visa/MC.	M21-F092	id, application_id, scheme_name, enrollment_id, status	PK: id, FK: application_id	N/A
+M21-DB051	m21_kyb	three_ds_config	Table	3DS2 configuration parameters.	M21-F093	id, application_id, authentication_preference, challenge_exemption	PK: id, FK: application_id	N/A
+M21-DB052	m21_kyb	installment_plans	Table	BNPL plan configurations.	M21-F095	id, application_id, plan_id, interest_rate, tenure_months	PK: id, FK: application_id	N/A
+M21-DB053	m21_kyb	split_payment_rules	Table	Marketplace split logic.	M21-F096	id, application_id, split_rule_id, percentage, recipient_merchant_id	PK: id, FK: application_id	N/A
+M21-DB054	m21_kyb	referral_tracking	Table	Partner referral data.	M21-F099	id, application_id, partner_id, referral_code, commission_rate	PK: id, FK: application_id	N/A
+M21-DB055	m21_kyb	application_metadata	Table	Key-value metadata for internal use.	M21-F097	id, application_id, key, value	PK: id, FK: application_id	N/A
+M21-DB056	m21_kyb	risk_questions	Table	AML questionnaire questions.	M21-F058	id, question_text, risk_weight, applicable_entity_types	PK: id	N/A
+M21-DB057	m21_kyb	risk_question_answers	Table	Answers to AML questions.	M21-F058	id, application_id, question_id, answer_value	PK: id, FK: application_id	N/A
+M21-DB058	m21_kyb	credit_bureau_reports	Table	External credit score data.	M21-F059	id, application_id, provider, score, rating, report_date	PK: id, FK: application_id	N/A
+M21-DB059	m21_kyb	state_transitions	Table	History of application status changes.	M21-F116	id, application_id, from_status, to_status, transition_reason, timestamp	PK: id, FK: application_id	N/A
+M21-DB060	m21_kyb	biometric_templates	Table	Stored facial biometric templates.	M21-F046	id, representative_id, template_data, format_version	PK: id, FK: representative_documents	N/A
+M21-DB061	m21_kyb	liveness_checks	Table	Liveness detection results.	M21-F018	id, representative_id, check_type, result_json, score	PK: id, FK: representative_documents	N/A
+M21-DB062	m21_kyb	face_comparisons	Table	Results of selfie-to-ID comparison.	M21-F057	id, representative_id, similarity_score, is_match	PK: id, FK: representative_documents	N/A
+M21-DB063	m21_kyb	mrz_data	Table	Extracted MRZ data from passports.	M21-F056	id, document_id, raw_mrz, parsed_name, parsed_dob, parsed_expiry	PK: id, FK: documents	N/A
+M21-DB064	m21_kyb	nfc_data	Table	Data read from NFC chip.	M21-F017	id, document_id, chip_auth_success, data_groups_json	PK: id, FK: documents	N/A
+M21-DB065	m21_kyb	sanctions_lists	Table	Snapshot of sanctions lists.	M21-F041	id, list_name, source_url, last_import_date, record_count	PK: id	N/A
+M21-DB066	m21_kyb	watchlist_entries	Table	Individual entries in watchlists.	M21-F041	id, list_id, full_name, date_of_birth, place_of_birth, aliases_json	PK: id, FK: sanctions_lists	N/A
+M21-DB067	m21_kyb	leis	Table	Legal Entity Identifier records.	M21-F043	id, lei_code, legal_name, registration_date, renewal_date	PK: id, UQ: lei_code	N/A
+M21-DB068	m21_kyb	public_filings	Table	Data from SEC/FCA filings.	M21-F044	id, entity_id, filing_type, filing_date, filing_url, summary	PK: id, FK: merchant_entities	N/A
+M21-DB069	m21_kyb	high_risk_keywords	Table	Keywords triggering alerts.	M21-F045	id, keyword, risk_category, severity	PK: id	N/A
+M21-DB070	m21_kyb	keyword_hits	Table	Matches on high-risk keywords.	M21-F045	id, application_id, keyword_id, context, found_in_field	PK: id, FK: application_id	N/A
+M21-DB071	m21_kyb	session_data	Table	Web session data for security analytics.	M21-F150	id, application_uuid, session_id, start_time, end_time, user_agent, ip_address	PK: id	N/A
+M21-DB072	m21_kyb	user_actions	Table	Granular user actions within session.	M21-F146	id, session_id, action_type, element_id, timestamp, value	PK: id, FK: session_data	N/A
+M21-DB073	m21_kyb	bot_signals	Table	Detected bot signals.	M21-F146	id, session_id, signal_type, severity, details	PK: id, FK: session_data	N/A
+M21-DB074	m21_kyb	drafts	Table	Auto-saved application drafts.	M21-F114	id, application_uuid, step, data_json, last_saved	PK: id	N/A
+M21-DB075	m21_kyb	email_tokens	Table	Tokens for email verification.	M21-F026	id, contact_id, token, expires_at, used_at	PK: id, FK: merchant_contacts	N/A
+M21-DB076	m21_kyb	sms_tokens	Table	Tokens for SMS verification.	M21-F026	id, contact_id, token, expires_at, used_at	PK: id, FK: merchant_contacts	N/A
+M21-DB077	m21_kyb	support_tickets	Table	Support requests.	M21-F036	id, application_id, subject, message, status, created_by, created_at	PK: id, FK: application_id	N/A
+M21-DB078	m21_kyb	ticket_messages	Table	Messages within a ticket.	M21-F036	id, ticket_id, author_id, message, created_at	PK: id, FK: support_tickets	N/A
+M21-DB079	m21_kyb	product_catalogs	Table	Products/Services offered by merchant.	M21-F019	id, application_id, product_name, description, price, currency	PK: id, FK: application_id	N/A
+M21-DB080	m21_kyb	file_upload_logs	Table	Logs of file upload attempts.	M21-F055	id, application_uuid, file_name, size, upload_duration, result	PK: id	N/A
+M21-DB081	m21_kyb	document_anomalies	Table	Forensic anomaly detections.	M21-F127	id, document_id, anomaly_type (color_drop, font), confidence_score, location_coords	PK: id, FK: documents	N/A
+M21-DB082	m21_kyb	background_noise	Table	Detected background noise in images.	M21-F129	id, document_id, noise_level, pattern_type	PK: id, FK: documents	N/A
+M21-DB083	m21_kyb	hologram_checks	Table	Hologram detection results.	M21-F130	id, document_id, detected, confidence	PK: id, FK: documents	N/A
+M21-DB084	m21_kyb	microprint_checks	Table	Microprint verification results.	M21-F131	id, document_id, verified, text_snippet	PK: id, FK: documents	N/A
+M21-DB085	m21_kyb	lighting_analysis	Table	Analysis of image lighting.	M21-F132	id, document_id, brightness, contrast, is_backlit	PK: id, FK: documents	N/A
+M21-DB086	m21_kyb	pose_estimation	Table	Head pose estimation results.	M21-F133	id, document_id, yaw, pitch, roll, is_within_tolerance	PK: id, FK: documents	N/A
+M21-DB087	m21_kyb	eye_blink_detection	Table	Eye blink liveness results.	M21-F134	id, document_id, blinked, frame_timestamps	PK: id, FK: documents	N/A
+M21-DB088	m21_kyb	mouth_movement	Table	Mouth movement liveness results.	M21-F135	id, document_id, moved, duration	PK: id, FK: documents	N/A
+M21-DB089	m21_kyb	depth_analysis	Table	Depth sensing results.	M21-F136	id, document_id, depth_map_available, is_real_face	PK: id, FK: documents	N/A
+M21-DB090	m21_kyb	synthetic_voice	Table	Synthetic voice detection results.	M21-F138	id, video_interview_id, probability_of_synth, model_version	PK: id, FK: video_interviews	N/A
+M21-DB091	m21_kyb	blockchain_anchors	Table	Blockchain hash anchors.	M21-F139	id, application_id, tx_hash, block_number, timestamp	PK: id, FK: application_id	N/A
+M21-DB092	m21_kyb	smart_contracts	Table	Web3 smart contract addresses.	M21-F141	id, application_id, chain_id, contract_address, abi_hash	PK: id, FK: application_id	N/A
+M21-DB093	m21_kyb	wallet_whitelists	Table	Whitelisted withdrawal wallets.	M21-F142	id, application_id, wallet_address, currency, added_at	PK: id, FK: application_id	N/A
+M21-DB094	m21_kyb	geolocation_validations	Table	IP vs Address geolocation checks.	M21-F143	id, application_id, ip_lat, ip_long, address_lat, address_long, distance_km	PK: id, FK: application_id	N/A
+M21-DB095	m21_kyb	as_number_checks	Table	ISP checks.	M21-F144	id, application_id, as_number, as_organization, is_hosting	PK: id, FK: application_id	N/A
+M21-DB096	m21_kyb	mouse_logs	Table	Mouse movement logs.	M21-F146	id, session_id, x, y, timestamp, type	PK: id, FK: session_data	N/A
+M21-DB097	m21_kyb	keystroke_logs	Table	Keystroke dynamics logs.	M21-F147	id, session_id, key, flight_time, press_time	PK: id, FK: session_data	N/A
+M21-DB098	m21_kyb	copy_paste_events	Table	Copy/paste event logs.	M21-F148	id, session_id, field_id, event_type, length	PK: id, FK: session_data	N/A
+M21-DB099	m21_kyb	field_order	Table	Field fill order analysis.	M21-F149	id, session_id, field_sequence_json	PK: id, FK: session_data	N/A
+M21-DB100	m21_kyb	referrers	Table	HTTP referrer tracking.	M21-F151	id, session_id, referrer_url	PK: id, FK: session_data	N/A
+M21-DB101	m21_kyb	header_anomalies	Table	HTTP header anomaly logs.	M21-F152	id, session_id, header_name, anomaly_type	PK: id, FK: session_data	N/A
+M21-DB102	m21_kyb	js_checks	Table	JavaScript execution checks.	M21-F153	id, session_id, check_passed, timestamp	PK: id, FK: session_data	N/A
+M21-DB103	m21_kyb	canvas_fingerprints	Table	Canvas fingerprint data.	M21-F154	id, session_id, hash	PK: id, FK: session_data	N/A
+M21-DB104	m21_kyb	webgl_fingerprints	Table	WebGL fingerprint data.	M21-F155	id, session_id, hash	PK: id, FK: session_data	N/A
+M21-DB105	m21_kyb	audio_fingerprints	Table	Audio fingerprint data.	M21-F156	id, session_id, hash	PK: id, FK: session_data	N/A
+M21-DB106	m21_kyb	font_enums	Table	Enumerated fonts detected.	M21-F157	id, session_id, font_name	PK: id, FK: session_data	N/A
+M21-DB107	m21_kyb	plugin_enums	Table	Enumerated plugins detected.	M21-F158	id, session_id, plugin_name	PK: id, FK: session_data	N/A
+M21-DB108	m21_kyb	timezone_offsets	Table	Timezone offset data.	M21-F159	id, session_id, offset_minutes	PK: id, FK: session_data	N/A
+M21-DB109	m21_kyb	screen_resolutions	Table	Screen resolution data.	M21-F160	id, session_id, width, height, color_depth	PK: id, FK: session_data	N/A
+M21-DB110	m21_kyb	magic_links	Table	Magic link tokens for login.	M21-F107	id, user_email, token_hash, expires_at, used_at	PK: id	N/A
+M21-DB111	m21_kyb	sso_configurations	Table	SAML SSO configurations.	M21-F079	id, entity_id, idp_metadata, sso_url	PK: id, FK: merchant_entities	N/A
+M21-DB112	m21_kyb	decline_reasons	Table	Standard decline reason codes.	M21-F081	code, description, severity	PK: code	N/A
+M21-DB113	m21_kyb	pci_status	Table	PCI-DSS validation status.	M21-F110	id, application_id, saq_type, validation_date, status	PK: id, FK: application_id	N/A
+M21-DB114	m21_kyb	data_portability_requests	Table	GDPR data export requests.	M21-F111	id, user_id, request_date, status, export_link, expires_at	PK: id	N/A
+M21-DB115	m21_kyb	cross_device_syncs	Table	Sync tokens for cross-device.	M21-F112	id, user_id, sync_token, devices_json	PK: id	N/A
+M21-DB116	m21_kyb	error_messages	Table	Configured error messages.	M21-F113	id, error_code, message_key, content_json	PK: id	N/A
+M21-DB117	m21_kyb	transaction_history_view	View	Read-only view of merchant transactions.	M21-F117	Derived from payments module	N/A	N/A
+M21-DB118	m21_kyb	tax_configs	Table	Detailed tax rate configs.	M21-F119	id, application_id, jurisdiction_code, tax_rate, is_default	PK: id, FK: application_id	N/A
+M21-DB119	m21_kyb	currency_pairs	Table	Allowed trading currency pairs.	M21-F120	id, application_id, source_currency, target_currency	PK: id, FK: application_id	N/A
+M21-DB120	m21_kyb	webhook_whitelists	Table	Allowed IPs for webhooks.	M21-F121	id, webhook_id, ip_address_range	PK: id, FK: webhooks	N/A
+M21-DB121	m21_kyb	rate_limits	Table	Rate limit configurations.	M21-F123	id, application_id, limit_per_minute, limit_per_hour	PK: id, FK: application_id	N/A
+M21-DB122	m21_kyb	logo_moderations	Table	Logo moderation results.	M21-F124	id, profile_id, moderation_label, confidence, status	PK: id, FK: merchant_profiles	N/A
+M21-DB123	m21_kyb	business_descriptions	Table	AI analysis of business descriptions.	M21-F125	id, application_id, keywords_extracted, sentiment, risk_category	PK: id, FK: application_id	N/A
+M21-DB124	m21_kyb	template_matches	Table	Document template matching.	M21-F126	id, document_id, expected_template_id, match_score	PK: id, FK: documents	N/A
+M21-DB125	m21_kyb	color_drop_analysis	Table	Ink color consistency analysis.	M21-F127	id, document_id, color_histogram_json	PK: id, FK: documents	N/A
+M21-DB126	m21_kyb	font_consistency	Table	Font consistency analysis.	M21-F128	id, document_id, fonts_used_json, inconsistency_score	PK: id, FK: documents	N/A
+M21-DB127	m21_kyb	background_artifacts	Table	Background artifact detection.	M21-F129	id, document_id, artifact_type, count	PK: id, FK: documents	N/A
+M21-DB128	m21_kyb	hologram_data	Table	Hologram detection data.	M21-F130	id, document_id, specular_highlights, detection_confidence	PK: id, FK: documents	N/A
+M21-DB129	m21_kyb	microprint_text	Table	Microprint text verification data.	M21-F131	id, document_id, expected_text, verified_text	PK: id, FK: documents	N/A
+M21-DB130	m21_kyb	lighting_data	Table	Lighting analysis data.	M21-F132	id, document_id, exposure_level, uniformity_score	PK: id, FK: documents	N/A
+M21-DB131	m21_kyb	pose_data	Table	Pose estimation data.	M21-F133	id, document_id, rotation_vector, is_frontal	PK: id, FK: documents	N/A
+M21-DB132	m21_kyb	blink_data	Table	Eye blink data.	M21-F134	id, document_id, blink_count, eye_openness_timeline	PK: id, FK: documents	N/A
+M21-DB133	m21_kyb	mouth_data	Table	Mouth movement data.	M21-F135	id, document_id, lip_distance_variance	PK: id, FK: documents	N/A
+M21-DB134	m21_kyb	depth_map_data	Table	Depth map data.	M21-F136	id, document_id, depth_quality_score	PK: id, FK: documents	N/A
+M21-DB135	m21_kyb	audio_analysis	Table	Audio analysis data.	M21-F138	id, video_interview_id, spectrogram_features	PK: id, FK: video_interviews	N/A
+M21-DB136	m21_kyb	solvency_proofs	Table	Zero knowledge solvency proofs.	M21-F140	id, application_id, proof_hash, verified	PK: id, FK: application_id	N/A
+M21-DB137	m21_kyb	smart_contract_analysis	Table	Smart contract static analysis.	M21-F141	id, application_id, vulnerabilities_found, security_score	PK: id, FK: application_id	N/A
+M21-DB138	m21_kyb	wallet_whitelist_audit	Table	Audit of whitelist changes.	M21-F142	id, wallet_id, action, actor, timestamp	PK: id, FK: wallet_whitelists	N/A
+M21-DB139	m21_kyb	geo_history	Table	Historical geolocation data.	M21-F143	id, application_id, timestamp, ip_location	PK: id, FK: application_id	N/A
+M21-DB140	m21_kyb	asn_history	Table	Historical ASN data.	M21-F144	id, application_id, timestamp, asn_number	PK: id, FK: application_id	N/A
+M21-DB141	m21_kyb	session_analytics	Table	Aggregated session analytics.	M21-F150	id, application_id, avg_duration, abandonment_step	PK: id, FK: application_id	N/A
+M21-DB142	m21_kyb	mouse_aggregates	Table	Aggregated mouse metrics.	M21-F146	id, session_id, total_distance, speed_variance	PK: id, FK: session_data	N/A
+M21-DB143	m21_kyb	keystroke_aggregates	Table	Aggregated keystroke metrics.	M21-F147	id, session_id, avg_flight_time, typing_speed	PK: id, FK: session_data	N/A
+M21-DB144	m21_kyb	field_order_anomalies	Table	Anomalies in field order.	M21-F149	id, session_id, anomaly_score	PK: id, FK: session_data	N/A
+M21-DB145	m21_kyb	header_anomalies_agg	Table	Aggregated header anomalies.	M21-F152	id, session_id, anomaly_count	PK: id, FK: session_data	N/A
+M21-DB146	m21_kyb	canvas_hash_history	Table	History of canvas hashes for device tracking.	M21-F154	id, hash, first_seen, last_seen	PK: id	N/A
+M21-DB147	m21_kyb	webgl_hash_history	Table	History of WebGL hashes.	M21-F155	id, hash, first_seen, last_seen	PK: id	N/A
+M21-DB148	m21_kyb	audio_hash_history	Table	History of audio hashes.	M21-F156	id, hash, first_seen, last_seen	PK: id	N/A
+M21-DB149	m21_kyb	font_usage_stats	Table	Statistics on font usage.	M21-F157	id, font_name, frequency	PK: id	N/A
+M21-DB150	m21_kyb	plugin_usage_stats	Table	Statistics on plugin usage.	M21-F158	id, plugin_name, frequency	PK: id	N/A
+M21-DB151	m21_kyb	timezone_anomalies	Table	Timezone anomaly detection.	M21-F159	id, session_id, is_anomaly	PK: id, FK: session_data	N/A
+M21-DB152	m21_kyb	resolution_stats	Table	Statistics on screen resolutions.	M21-F160	id, width, height, frequency	PK: id	N/A
+M21-DB153	m21_kyb	magic_link_audit	Table	Magic link usage audit.	M21-F107	id, token_hash, used, ip_address, timestamp	PK: id	N/A
+M21-DB154	m21_kyb	sso_audit	Table	SSO login audit.	M21-F079	id, entity_id, saml_id, timestamp	PK: id	N/A
+M21-DB155	m21_kyb	decline_stats	Table	Statistics on decline reasons.	M21-F081	id, code, count, last_used	PK: id	N/A
+M21-DB156	m21_kyb	pci_audit	Table	PCI audit log.	M21-F110	id, application_id, action, timestamp	PK: id	N/A
+M21-DB157	m21_kyb	portability_audit	Table	Data portability audit.	M21-F111	id, user_id, requested_at, exported_at	PK: id	N/A
+M21-DB158	m21_kyb	sync_audit	Table	Cross-device sync audit.	M21-F112	id, sync_token, device_count, last_sync	PK: id	N/A
+M21-DB159	m21_kyb	webhook_retry_queue	Table	Queue for failed webhooks.	M21-F077	id, webhook_log_id, next_attempt_at, retry_count	PK: id, FK: webhook_logs	N/A
+M21-DB160	m21_kyb	rate_limit_audit	Table	Rate limit breach log.	M21-F123	id, application_id, breached_limit, timestamp	PK: id	N/A
+M21-DB161	m21_kyb	logo_moderation_history	Table	History of logo moderation.	M21-F124	id, profile_id, previous_status, new_status, moderator	PK: id	N/A
+M21-DB162	m21_kyb	business_desc_history	Table	History of business description analysis.	M21-F125	id, application_id, description_version, keywords_json	PK: id	N/A
+M21-DB163	m21_kyb	template_history	Table	History of document templates used.	M21-F126	id, document_id, matched_template_id, date	PK: id	N/A
+M21-DB164	m21_kyb	ink_color_history	Table	History of ink color checks.	M21-F127	id, document_id, check_date, result	PK: id	N/A
+M21-DB165	m21_kyb	font_check_history	Table	History of font consistency checks.	M21-F128	id, document_id, check_date, result	PK: id	N/A
+M21-DB166	m21_kyb	artifact_history	Table	History of artifact detection.	M21-F129	id, document_id, artifact_count, check_date	PK: id	N/A
+M21-DB167	m21_kyb	hologram_history	Table	History of hologram checks.	M21-F130	id, document_id, check_date, result	PK: id	N/A
+M21-DB168	m21_kyb	microprint_history	Table	History of microprint checks.	M21-F131	id, document_id, check_date, result	PK: id	N/A
+M21-DB169	m21_kyb	lighting_history	Table	History of lighting checks.	M21-F132	id, document_id, check_date, result	PK: id	N/A
+M21-DB170	m21_kyb	pose_history	Table	History of pose estimation.	M21-F133	id, document_id, check_date, result	PK: id	N/A
+M21-DB171	m21_kyb	blink_history	Table	History of blink detection.	M21-F134	id, document_id, check_date, result	PK: id	N/A
+M21-DB172	m21_kyb	mouth_history	Table	History of mouth movement detection.	M21-F135	id, document_id, check_date, result	PK: id	N/A
+M21-DB173	m21_kyb	depth_history	Table	History of depth sensing.	M21-F136	id, document_id, check_date, result	PK: id	N/A
+M21-DB174	m21_kyb	audio_history	Table	History of audio analysis.	M21-F138	id, video_interview_id, check_date, result	PK: id	N/A
+M21-DB175	m21_kyb	proof_history	Table	History of solvency proofs.	M21-F140	id, application_id, proof_hash, verified_date	PK: id	N/A
+M21-DB176	m21_kyb	contract_history	Table	History of smart contract analysis.	M21-F141	id, application_id, analysis_date, score	PK: id	N/A
+M21-DB177	m21_kyb	wallet_audit	Table	Audit of wallet activity.	M21-F142	id, wallet_id, action, amount, timestamp	PK: id	N/A
+M21-DB178	m21_kyb	geo_audit	Table	Audit of geolocation checks.	M21-F143	id, application_id, check_date, distance_km	PK: id	N/A
+M21-DB179	m21_kyb	asn_audit	Table	Audit of ASN checks.	M21-F144	id, application_id, check_date, asn_number	PK: id	N/A
+M21-DB180	m21_kyb	session_summary	Table	Summary of session data for analytics.	M21-F150	id, session_id, start_time, end_time, total_actions	PK: id	N/A
+M21-DB181	m21_kyb	mouse_summary	Table	Summary of mouse data.	M21-F146	id, session_id, total_movement, avg_speed	PK: id	N/A
+M21-DB182	m21_kyb	keystroke_summary	Table	Summary of keystroke data.	M21-F147	id, session_id, total_keystrokes, avg_speed	PK: id	N/A
+M21-DB183	m21_kyb	copy_paste_summary	Table	Summary of copy/paste events.	M21-F148	id, session_id, total_copies, total_pastes	PK: id	N/A
+M21-DB184	m21_kyb	order_summary	Table	Summary of field order.	M21-F149	id, session_id, is_sequential	PK: id	N/A
+M21-DB185	m21_kyb	referrer_summary	Table	Summary of referrers.	M21-F151	id, referrer_url, count	PK: id	N/A
+M21-DB186	m21_kyb	header_summary	Table	Summary of header anomalies.	M21-F152	id, session_id, anomaly_count	PK: id	N/A
+M21-DB187	m21_kyb	js_summary	Table	Summary of JS checks.	M21-F153	id, session_id, checks_passed, checks_failed	PK: id	N/A
+M21-DB188	m21_kyb	canvas_summary	Table	Summary of canvas fingerprints.	M21-F154	id, hash, device_count	PK: id	N/A
+M21-DB189	m21_kyb	webgl_summary	Table	Summary of WebGL fingerprints.	M21-F155	id, hash, device_count	PK: id	N/A
+M21-DB190	m21_kyb	audio_summary	Table	Summary of audio fingerprints.	M21-F156	id, hash, device_count	PK: id	N/A
+M21-DB191	m21_kyb	font_summary	Table	Summary of fonts.	M21-F157	id, font_name, usage_count	PK: id	N/A
+M21-DB192	m21_kyb	plugin_summary	Table	Summary of plugins.	M21-F158	id, plugin_name, usage_count	PK: id	N/A
+M21-DB193	m21_kyb	timezone_summary	Table	Summary of timezone data.	M21-F159	id, timezone_offset, count	PK: id	N/A
+M21-DB194	m21_kyb	resolution_summary	Table	Summary of screen resolutions.	M21-F160	id, resolution, count	PK: id	N/A
+M21-DB195	m21_kyb	magic_link_usage	Table	Magic link usage stats.	M21-F107	id, date, total_links, used_links	PK: id	N/A
+M21-DB196	m21_kyb	sso_usage	Table	SSO usage stats.	M21-F079	id, entity_id, login_count, last_login	PK: id	N/A
+M21-DB197	m21_kyb	decline_trends	Table	Decline reason trends.	M21-F081	id, date, code, count	PK: id	N/A
+M21-DB198	m21_kyb	pci_trends	Table	PCI compliance trends.	M21-F110	id, date, total_valid, total_invalid	PK: id	N/A
+M21-DB199	m21_kyb	portability_trends	Table	Data portability request trends.	M21-F111	id, date, request_count	PK: id	N/A
+M21-DB200	m21_kyb	sync_trends	Table	Cross-device sync trends.	M21-F112	id, date, sync_count	PK: id	N/A

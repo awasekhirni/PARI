@@ -1,0 +1,590 @@
+
+8.	Module M08	Real-Time Operational Analytics
+a.	Summary
+the Real-Time Operational Analytics engine, serves as the central nervous system of the PARI infrastructure, transforming raw transactional noise into actionable, high-fidelity intelligence. In a high-frequency, privacy-preserving payment ecosystem capable of supporting millions of concurrent users, the ability to observe, analyze, and react to system behavior in real-time is not merely operational—it is existential. This module is architected to bridge the gap between the high-throughput, event-driven core (Apache Kafka) and the structured, query-heavy needs of business intelligence and operational monitoring (PostgreSQL), while leveraging Redis for ultra-low-latency data serving.
+
+The fundamental challenge addressed by M08 is the "Reactive vs. Proactive" dichotomy prevalent in legacy financial infrastructure. Traditional systems often rely on batch processing (e.g., end-of-day reconciliation), creating a dangerous blind spot where failures, security breaches, or performance degradations persist for hours before detection. M08 eliminates this latency by implementing a continuous streaming pipeline. As transactions flow through the system—encrypted, blinded, and signed—M08 ingests these events in real-time, decrypting only the necessary metadata required for operational oversight while strictly adhering to PARI’s privacy-by-design mandate. This ensures that while payer identity remains confidential, the health and performance of the payment rail are fully transparent.
+
+Architecturally, the module employs a sophisticated Lambda/Kappa hybrid architecture. Apache Kafka acts as the immutable backbone, buffering events to ensure durability and replay capability. Stream processors consume these events to compute sliding window statistics—calculating P99 latencies, throughput per region, and error rates—updating materialized views in PostgreSQL that serve as the "source of truth" for historical reporting. Simultaneously, hot-path data (current active users, live transaction volume) is aggressively cached in Redis to power dashboard widgets that require sub-second refresh rates.
+
+Crucially, M08 is built upon CMMI Level 5 principles, meaning that the analytics engine is also used to measure and improve the software development lifecycle itself. By correlating deployment events with system stability metrics, the platform enables quantitative process management. Furthermore, the module integrates advanced privacy-preserving analytics techniques, such as differential privacy and k-anonymity, to generate insights about user behavior and regional trends without exposing individual transaction trails. This capability is vital for detecting system-wide anomalies (e.g., a DDoS attack or a coordinated fraud attempt) without violating the civil liberties of the user base.
+
+Ultimately, M08 empowers stakeholders—SREs, Product Managers, and Executives—with predictive capabilities. By utilizing machine learning models trained on the historical data stored in PostgreSQL, the system can forecast traffic spikes and auto-scale the Kubernetes infrastructure before performance degrades. This shift from "monitoring of failures" to "prediction of load" ensures that the PARI platform maintains its rigorous SLAs (Service Level Agreements), guaranteeing sub-500ms transaction latencies and 99.999% availability, thereby solidifying trust in the next-generation public digital utility.
+b.	Scope
+
+The scope of Module M08 encompasses the end-to-end pipeline of operational data generation, ingestion, processing, storage, and visualization. Specifically, it includes:
+
+     Ingestion Layer: Consumption of telemetry data from all other PARI modules (Wallet, Exchange, Merchant, etc.) via Kafka topics.
+     Stream Processing: Real-time aggregation, windowing, and transformation of data streams (using Kafka Streams or Flink).
+     Storage Layer: Management of PostgreSQL time-series/partitioned tables and Redis cache structures.
+     Analytics Engine: Calculation of Key Performance Indicators (KPIs), SPC (Statistical Process Control) metrics, and anomaly detection scores.
+     Privacy Layer: Application of noise injection and data masking techniques to ensure operational logs do not leak PII (Personally Identifiable Information).
+     API & Visualization: Exposure of metrics via REST/GraphQL APIs for consumption by internal dashboards (Grafana/Tableau) and external monitoring tools (Prometheus).
+     Alerting Logic: Definition and execution of threshold-based and anomaly-based alert triggers.
+
+
+c.	Business Case
+In the digital payments sector, trust is the primary currency. A single outage or a prolonged degradation in service speed can result in massive financial losses, reputational damage, and regulatory censure. Legacy systems often struggle to provide visibility into the "live" state of the ledger, forcing teams to rely on lagging indicators.
+
+     Cost of Downtime: By enabling predictive scaling and immediate anomaly detection, M08 reduces the risk of outages. Preventing just one hour of downtime during a peak shopping season can save millions in transaction fees.
+     Operational Efficiency: Automated anomaly detection reduces the "Mean Time to Detection" (MTTD) and "Mean Time to Resolution" (MTTR). Instead of engineers manually sifting through logs, M08 pinpoints the failing service or degrading database query.
+     Infrastructure Optimization: Real-time usage analytics allow for precise auto-scaling policies. This prevents over-provisioning (wasting cloud resources) and under-provisioning (causing latency spikes), optimizing the total cost of ownership (TCO) of the PARI infrastructure.
+     Regulatory Compliance: Many jurisdictions require real-time reporting on transaction availability and fraud detection rates. M08 provides the immutable audit trails and live dashboards required to satisfy these regulatory audits instantly.
+     Privacy Assurance: By proving that the system can be monitored effectively without accessing payer identity data, M08 validates the business case for privacy-preserving payments, demonstrating that compliance and privacy are not mutually exclusive.
+
+
+d.	KPIs
+     Pipeline Latency: Time from event generation to availability in dashboard (Target: <1s).
+     Query Performance: P95 latency for analytical queries (Target: <2s).
+     Data Freshness: Age of the oldest record in the real-time view (Target: <1s).
+     System Availability: Uptime of the analytics module itself (Target: 99.99%).
+     Forecast Accuracy: Accuracy of predictive scaling models (Target: >95%).
+     Alert Precision: Percentage of alerts that correspond to genuine actionable issues vs. noise (Target: <5% false positive rate).
+
+
+
+e.	Stakeholder Insights
+Stakeholder	Concern	Implications
+SREs (Site Reliability Engineers)	System Health & Fault Isolation	Need immediate visibility into latency spikes, error rates, and database connection pool saturation to prevent outages.
+Product Managers	Feature Adoption & User Experience	Require data on how new features (e.g., blinded refunds) are performing in the wild and where user drop-offs occur.
+Executives / C-Suite	Strategic Growth & SLA Compliance	Need high-level dashboards showing transaction volume growth, regional expansion success, and adherence to SLA contracts.
+Compliance Officers	Auditability & Data Privacy	Must ensure that operational logs do not capture PII and that audit trails are tamper-proof for regulatory review.
+Fraud Analysts	Real-time Threat Detection	Require live feeds of suspicious patterns (e.g., velocity of coin withdrawals) to trigger instant freezes or reviews.
+DevOps Engineers	Capacity Planning	Need predictive usage data to schedule infrastructure scaling and cost budgeting.
+
+
+f.	Knowledge Representation Graph (mermaid.js)
+
+graph TD
+    subgraph "PARI Ecosystem Inputs"
+        M01[Module M01: Crypto Core]
+        M03[Module M03: Fraud Engine]
+        M05[Module M05: Exchange Hub]
+    end
+
+    subgraph "M08: Real-Time Operational Analytics"
+        Kafka[Apache Kafka Cluster]
+        StreamProc[Stream Processor<br/>(Windowing/Aggregation)]
+        Redis[Redis Cache<br/>(Hot Path)]
+        Postgres[PostgreSQL DB<br/>(Cold Path/History)]
+        MLModel[ML Inference Engine<br/>(Predictive Scaling)]
+    end
+
+    subgraph "Consumers"
+        Dashboards[Operational Dashboards]
+        Alerts[Alerting System]
+        AutoScaler[Kubernetes Auto-Scaler]
+    end
+
+    M01 -->|Telemetry Events| Kafka
+    M03 -->|Fraud Signals| Kafka
+    M05 -->|Settlement Data| Kafka
+
+    Kafka -->|Consume| StreamProc
+    StreamProc -->|Write-Through| Redis
+    StreamProc -->|Batch Write| Postgres
+    StreamProc -->|Live Metrics| MLModel
+
+    MLModel -->|Scale Predictions| AutoScaler
+
+    Redis -->|Sub-Second Query| Dashboards
+    Postgres -->|Historical Trends| Dashboards
+    StreamProc -->|Threshold Breach| Alerts
+
+g.	Comprehensive List of Features
+id	Feature	Description & Business Case	AI/ML Algorithms	KPIs	Primary Users
+F001	Kafka Topic Schema Management	Enforces Avro/JSON schemas for telemetry topics to prevent bad data ingestion.	N/A	Data Validation Success Rate	Data Engineers
+F002	Exactly-Once Processing Guarantees	Ensures telemetry events are processed once despite retries, preventing metric inflation.	Idempotency Keys	Message Duplication Rate (0%)	Backend Devs
+F003	Real-Time Latency Histogram	Tracks distribution of transaction latencies (P50, P90, P99) in real-time.	HDR Histograms	P99 Latency (<500ms)	SREs
+F004	Geo-Spatial Transaction Mapping	Visualizes transaction volume and speed overlaid on a world map.	Geohashing	Map Render Latency	Product Managers
+F005	Time-Series Data Partitioning	Automatic partitioning of Postgres tables by day/week to maintain query performance.	N/A	Query Scan Time	DBAs
+F006	Redis Hot-Data Caching	Caches current active users and TPS for dashboard sub-second loading.	LRU Eviction	Cache Hit Ratio (>95%)	Frontend Devs
+F007	Automated Materialized View Refresh	Refreshes aggregated stats (hourly/daily) without blocking reads.	Concurrent Refreshes	View Freshness Lag	Data Engineers
+F008	Anomaly Detection on Throughput	Identifies sudden drops or spikes in traffic indicative of DDoS or service failure.	Isolation Forest / ARIMA	Anomaly Detection Recall	Security Ops
+F009	Database Connection Pool Monitoring	Tracks usage of DB connection pools to prevent exhaustion.	N/A	Pool Utilization %	SREs
+F010	Error Rate Aggregation	Aggregates HTTP 5xx and 4xx errors by service endpoint.	Simple Moving Average	Error Rate (<0.1%)	SREs
+F011	Fraud Signal Visualization	Live dashboard of fraud scores emitted by Module M03.	N/A	Alert Latency	Fraud Analysts
+F012	Predictive Auto-Scaling Input	Feeds predicted load data to Kubernetes Horizontal Pod Autoscaler.	LSTM / Prophet	Scale-up Prediction Accuracy	DevOps
+F013	SLA Breach Prediction	Estimates probability of missing SLA targets in the next hour based on current trends.	Logistic Regression	Prediction F1 Score	Engineering Managers
+F014	Wallet Version Adoption	Tracks which versions of the wallet app are currently active.	N/A	Version Distribution %	Product Managers
+F015	Currency Volume Analytics	Breaks down transaction volume by specific currency (EUR, CHF, USD).	N/A	Reporting Accuracy	Finance
+F016	Merchant Category Heatmap	Aggregates transaction success rates by merchant category code (MCC).	Clustering (K-Means)	Category Health Score	Sales
+F017	API Endpoint Latency Ranking	Ranks slowest API endpoints to guide optimization efforts.	N/A	Ranking Latency	Backend Devs
+F018	Garbage Collection Impact Analysis	Correlates JVM Go/Java GC pauses with API latency spikes.	Correlation Coefficients	Pause Time Impact	Backend Devs
+F019	Failed Transaction Root Cause	Categorizes failures (crypto error, network timeout, DB lock).	Decision Tree	Classification Accuracy	Support
+F020	Redis Eviction Policy Monitor	Tracks which keys are being evicted to optimize memory usage.	N/A	Eviction Rate	SREs
+F021	Kafka Consumer Lag Monitoring	Measures lag between producers and consumers to detect bottlenecks.	N/A	Consumer Lag Offset	SREs
+F022	Network Topology Health	Monitors latency between microservices (service mesh).	N/A	Inter-service RTT	Network Engineers
+F023	User Session Duration	Tracks average time users spend connected to the payment rail.	N/A	Avg Session Time	Product Managers
+F024	P2P Payment Frequency	Analyzes volume of Peer-to-Peer vs Merchant transactions.	N/A	P2P Ratio	Product Managers
+F025	Differential Privacy Noise Injection	Adds noise to query results to prevent reverse-engineering of user data.	Laplace Mechanism	Privacy Loss (Epsilon)	Privacy Officers
+F026	K-Anonymity Enforcement	Ensures query results return aggregates only for groups > k users.	N/A	Anonymity Compliance	Privacy Officers
+F027	Regional Compliance Tracking	Monitors if transactions in specific regions (e.g., EU) meet local latency laws.	N/A	Compliance %	Legal
+F028	Disk Usage Forecasting	Predicts when database storage will run out based on growth rate.	Linear Regression	Prediction Error (MAE)	DBAs
+F029	Active User Count (DAU/MAU)	Calculates Daily/Monthly Active Users from login events.	N/A	DAU Count	Marketing
+F030	Cache Stampede Protection	Detects and mitigates cache stampede events (thundering herd).	Request Coalescing	Request Error Rate	SREs
+F031	Dead Letter Queue Analysis	Analyzes messages that failed processing to identify systematic bugs.	N/A	DLQ Size	Backend Devs
+F032	Microservice Dependency Graph	Visualizes dependencies and detects circular dependencies.	Graph Algorithms	Graph Depth	Architects
+F033	Container Resource Utilization	Tracks CPU/Memory/Network usage per pod.	N/A	Resource Efficiency	DevOps
+F034	Slow SQL Query Detector	Identifies queries taking longer than 100ms to execute.	N/A	Query Count	DBAs
+F035	Index Usage Statistics	Tracks which indexes are used and which are unused (bloat).	N/A	Index Efficiency	DBAs
+F036	Customer Satisfaction (CSAT) Pulse	Aggregates user feedback ratings from the wallet app.	Sentiment Analysis	CSAT Score	Support
+F037	Refund Processing Time	Tracks latency of refund workflows initiated via blinded coins.	N/A	Refund Duration	Support
+F038	Exchange Liquidity Monitor	Monitors the liquidity levels of the Exchange Module (M05).	N/A	Liquidity Ratio	Treasurers
+F039	Regulatory Audit Trail Export	Exports specific time-range logs for auditors in immutable format.	N/A	Export Success Rate	Compliance
+F040	Multi-Tenant Isolation Check	Verifies that Tenant A's analytics cannot leak Tenant B's data.	N/A	Isolation Violations	Security
+F041	WebSocket Metric Streaming	Streams live metrics to browser dashboards via WebSockets.	N/A	Socket Latency	Frontend Devs
+F042	Historical Data Archival	Moves data older than 1 year to cold storage (S3) to save costs.	N/A	Archive Cost Savings	DevOps
+F043	Dynamic Sampling Rate Adjustment	Adjusts sampling of tracing data (Jaeger/Zipkin) based on load.	PID Controller	Tracing Coverage	SREs
+F044	5-Why Root Cause Integration	Triggers automated analysis when KPIs drop below threshold.	NLP / Knowledge Graph	RCA Trigger Speed	Engineering
+F045	Feature Flag Usage Metrics	Tracks which feature flags are active and their traffic split.	N/A	Flag Consistency	Release Managers
+F046	A/B Test Result Calculation	Computes statistical significance of A/B tests on payment flows.	T-Test / Chi-Square	P-Value Accuracy	Product Managers
+F047	Cost Per Transaction Analytics	Calculates infrastructure cost divided by transaction count.	N/A	CPT Value	Finance
+F048	Mobile Device Performance	Breaks down latency by mobile device model (Android/iOS).	N/A	Device Performance	Mobile Devs
+F049	API Rate Limit Utilization	Tracks how often users/services hit rate limits.	N/A	Limit Breach %	SREs
+F050	Certificate Expiry Monitoring	Monitors TLS/Mutual TLS certificate expiry across services.	N/A	Days to Expiry	Security
+F051	Third-Party API Latency	Monitors latency of external dependencies (e.g., Bank APIs, KYC).	N/A	External Dependency Health	Integration Leads
+F052	Data Replication Lag	Monitors lag between PostgreSQL primary and standby replicas.	N/A	Replication Lag Bytes	DBAs
+F053	Lock Contention Monitoring	Detects database table row locks that block transactions.	N/A	Lock Wait Time	DBAs
+F054	Memory Leak Detection	Monitors heap usage trends for unbounded growth.	Linear Regression	Leak Detection Time	Backend Devs
+F055	Thread Pool Saturation	Tracks active vs idle threads in application servers.	N/A	Pool Usage %	Backend Devs
+F056	Request Payload Size Analysis	Tracks size of incoming JSON payloads to detect anomalies.	Z-Score Analysis	Payload Size Avg	SREs
+F057	Response Payload Size Analysis	Tracks size of outgoing responses to optimize bandwidth.	N/A	Bandwidth Usage	SREs
+F058	Protocol Upgrade Analytics	Tracks migration from HTTP/1.1 to HTTP/2 or HTTP/3.	N/A	Protocol Adoption %	Network Engineers
+F059	Geofencing Performance	Analyzes latency spikes when crossing regulatory geofences.	N/A	Geofence Latency	Compliance
+F060	Timestamp Drift Detection	Monitors clock skew between distributed nodes.	N/A	Clock Drift ms	SREs
+F061	Log Volume Velocity	Monitors the rate of log generation to detect log storms.	N/A	Logs/sec	SREs
+F062	Alert Fatigue Tracker	Tracks alert frequency and noise to reduce false positives.	N/A	Alerts/Week	SRE Managers
+F063	Dashboard Load Time Analytics	Tracks how long it takes for analytics dashboards to render.	RUM (Real User Monitoring)	Page Load Time	BI Analysts
+F064	Query Optimization Suggestions	Suggests index additions or query rewrites based on patterns.	Query Plan Analysis	Suggestion Accuracy	DBAs
+F065	Data Skew Detection	Detects uneven data distribution across partitions/shards.	Entropy Calculation	Skew Factor	Data Engineers
+F066	Fan-out/Fan-in Latency	Measures latency of parallel execution patterns.	N/A	Parallelism Efficiency	Architects
+F067	Circuit Breaker State Tracking	Monitors the state (Open/Closed) of circuit breakers in the system.	N/A	Breaker Trip Count	SREs
+F068	Retry Storm Detection	Detects excessive retry attempts causing thundering herds.	N/A	Retry Rate	SREs
+F069	Idempotency Key Collision Rate	Tracks how often clients reuse idempotency keys incorrectly.	N/A	Collision Rate	Backend Devs
+F070	Blind Signature Verification Load	Measures CPU load specifically for cryptographic verification.	N/A	Sig Verify Time	Security
+F071	Zero-Knowledge Proof Generation Time	Tracks time taken to generate ZK-Proofs for transactions.	N/A	ZK-Gen Time	Cryptographers
+F072	Merkle Tree Root Calculation	Tracks time to calculate Merkle roots for audit trails.	N/A	Merkle Calc Time	Backend Devs
+F073	Regulatory Metadata Filter Performance	Tracks performance of filtering transactions by jurisdiction.	N/A	Filter Latency	Compliance
+F074	Token Bucket Rate Limiting	Monitors token bucket depletion rates.	N/A	Token Refill Rate	SREs
+F075	Service Mesh Sidecar Latency	Measures overhead added by Envoy/Istio sidecars.	N/A	Sidecar Overhead	Network Engineers
+F076	Cold Start Frequency	Tracks frequency of serverless function cold starts (if used).	N/A	Cold Start Duration	DevOps
+F077	Database Vacuum Analysis	Tracks performance of Postgres VACUUM operations.	N/A	Vacuum Duration	DBAs
+F078	Write Amplification Factor	Measures ratio of data written to disk vs logical writes.	N/A	WA Factor	Storage Engineers
+F079	Read Amplification Factor	Measures extra reads caused by storage layers (e.g., LSM trees).	N/A	RA Factor	Storage Engineers
+F080	Compression Ratio Analytics	Tracks effectiveness of data compression (Snappy/Zstd).	N/A	Compression Ratio	Data Engineers
+F081	Tenant-Specific Throughput	Isolates throughput metrics per specific bank/tenant.	N/A	Tenant TPS	Account Managers
+F082	Jurisdictional Data Localization Check	Verifies that data for Region X stays in Region X storage.	Geo-IP Check	Localization Violation	Compliance
+F083	SPC Chart Generation	Automatically generates Statistical Process Control charts for quality.	Control Limits (3-sigma)	Process Capability	QA Leads
+F084	Deployment Success Correlation	Correlates deployments with error rate spikes.	Granger Causality	Correlation Coefficient	Release Managers
+F085	Rollback Frequency Tracking	Tracks how often deployments are rolled back.	N/A	Rollback Rate	Engineering
+F086	Test Coverage vs Defect Density	Analyzes relationship between code coverage and bug rates.	Regression Analysis	Correlation Strength	QA
+F087	Lead Time for Changes	Measures time from commit to production deployment.	N/A	Lead Time Days	Engineering Managers
+F088	Change Failure Rate	Percentage of deployments causing a failure in production.	N/A	CFR %	Engineering Managers
+F089	Mean Time to Recovery (MTTR)	Calculates average time to restore service after incident.	N/A	MTTR Minutes	SREs
+F090	Incident Volume Trending	Tracks number of incidents per week/month.	Time Series Decomposition	Incident Count	SRE Managers
+F091	Runbook Execution Tracker	Tracks which runbooks are triggered and their success.	N/A	Runbook Success	SREs
+F092	On-Call Load Analysis	Tracks volume and timing of pages sent to on-call engineers.	N/A	Pages/Week	SRE Managers
+F093	Customer Support Ticket Volume	Integrates with Zendesk/Jira to correlate bugs with metrics.	N/A	Ticket Volume	Support
+F094	Churn Prediction	Predicts merchant churn based on declining transaction volume.	Churn Models (XGBoost)	Churn Probability	Sales
+F095	Lifetime Value (LTV) Calculation	Calculates LTV based on merchant transaction history.	N/A	LTV Score	Finance
+F096	Wallet Installation Funnel	Tracks steps from App Store download to first payment.	Funnel Analysis	Drop-off %	Marketing
+F097	KYC Completion Time	Tracks time taken for users to complete KYC process.	N/A	KYC Duration	Compliance
+F098	Biometric Authentication Success Rate	Tracks success of FaceID/Fingerprint login.	N/A	Bio-Auth Success %	UX Designers
+F099	Offline Mode Sync Latency	Tracks how long it takes for offline transactions to sync.	N/A	Sync Duration	Mobile Devs
+F100	Push Notification Delivery Rate	Tracks success of transaction alerts to users.	N/A	Push Delivery %	Mobile Devs
+F101	Deep Link Routing Success	Tracks success of routing users from links to the app.	N/A	Deep Link Rate	Marketing
+F102	Dark Mode Usage Statistics	Tracks user preference for UI themes.	N/A	Dark Mode %	Designers
+F103	Accessibility Tool Usage	Tracks usage of screen readers or font scaling.	N/A	A11y Usage %	Accessibility
+F104	Browser Fingerprint Stability	Analyzes stability of browser fingerprints for fraud detection.	Hash Comparison	Fingerprint Stability	Fraud
+F105	Bot Traffic Classification	Classifies API traffic as bot or human.	Heuristics / ML	Bot Detection Rate	Security
+F106	Webhook Delivery Analytics	Tracks success rate of webhooks sent to merchants.	N/A	Webhook Success %	Integration
+F107	Batch Job Performance	Monitors duration of scheduled nightly jobs (e.g., reconciliation).	N/A	Job Duration	Data Engineers
+F108	ETL Pipeline Health	Monitors Extract-Transform-Load pipeline statuses.	N/A	Pipeline Status	Data Engineers
+F109	Data Lineage Visualization	Visualizes the flow of data from source to dashboard.	Graph Viz	Lineage Coverage	Data Engineers
+F110	Data Quality Score	Automatically scores data quality based on completeness/accuracy.	Rule Engine	DQ Score	Data Engineers
+F111	Schema Drift Detection	Detects changes in database schema not approved by governance.	Schema Diff	Drift Incidents	DBAs
+F112	API Deprecation Usage	Tracks usage of deprecated API endpoints.	N/A	Deprecated Call Vol	API Managers
+F113	SDK Version Distribution	Tracks which versions of PARI SDKs merchants are using.	N/A	SDK Version %	DevRel
+F114	Documentation Page Views	Correlates doc views with integration success.	N/A	Page Views	DevRel
+F115	Community Forum Sentiment	Analyzes sentiment on GitHub Discussions or Discourse.	Sentiment Analysis	Sentiment Score	Community
+F116	Contribution Velocity	Tracks rate of community PRs merged.	N/A	PRs/Week	Community
+F117	Bug Bounty Resolution Time	Tracks time to fix vulnerabilities reported by researchers.	N/A	Resolution Days	Security
+F118	Vulnerability Scan Results	Aggregates results from SAST/DAST scans.	N/A	Vulnerability Count	Security
+F119	Cryptographic Key Rotation Status	Monitors status of automatic key rotation events.	N/A	Rotation Success	Security
+F120	Hardware Security Module (HSM) Latency	Tracks latency of signing operations from HSM.	N/A	HSM Latency	Security
+F121	Cross-Region Replication Cost	Tracks cost of replicating data across geo-zones.	N/A	Replication Cost	Finance
+F122	Spot Instance Interruption Rate	Tracks frequency of spot instance preemptions.	N/A	Interruption Rate	DevOps
+F123	Reserved Instance Utilization	Tracks whether purchased reserved instances are being used.	N/A	RI Utilization %	Finance
+F124	Idle Resource Detection	Identifies resources (Load Balancers, IPs) that are idle.	N/A	Idle Resource Count	DevOps
+F125	Carbon Footprint Estimation	Estimates energy consumption of the infrastructure.	Energy Conversion Models	kgCO2e	Sustainability
+F126	Watermark Lag Tracking	Tracks processing lag in streaming windowing logic.	N/A	Watermark Delay	Data Engineers
+F127	State Store Size Monitoring	Monitors size of state in Kafka Streams/Flink.	N/A	State Size GB	Data Engineers
+F128	RocksDB Metrics	Monitors underlying RocksDB stats (memtable, block cache).	N/A	RocksDB Compactions	Data Engineers
+F129	Consumer Group Rebalancing	Tracks frequency and duration of consumer rebalances.	N/A	Rebalance Duration	SREs
+F130	Producer Retry Queue Depth	Monitors backlog of messages waiting to be produced to Kafka.	N/A	Queue Depth	Backend Devs
+F131	DNS Lookup Latency	Monitors time spent resolving DNS records.	N/A	DNS Latency	Network
+F132	TLS Handshake Duration	Monitors time spent negotiating TLS connections.	N/A	TLS Duration	Security
+F133	TCP Connection Reuse	Measures efficiency of HTTP keep-alive connections.	N/A	Connection Reuse %	Network
+F134	Bandwidth Saturation	Monitors network interface saturation per node.	N/A	Bandwidth Util %	SREs
+F135	Packet Loss Rate	Measures packet loss between services.	N/A	Packet Loss %	Network
+F136	Jitter (Network Latency Variance)	Measures variance in network latency.	N/A	Jitter ms	Network
+F137	Disk IOPS Utilization	Monitors Input/Output Operations Per Second.	N/A	IOPS %	Storage
+F138	Disk Throughput Utilization	Monitors MB/s read/write rates.	N/A	Throughput MB/s	Storage
+F139	Inode Usage	Monitors consumption of file system inodes.	N/A	Inode Usage %	Storage
+F140	File Descriptor Usage	Monitors open file descriptors per process.	N/A	FD Count	SREs
+F141	Process Count per Node	Monitors total running processes.	N/A	Process Count	SREs
+F142	Context Switch Rate	Measures rate of context switches by OS.	N/A	Context Switches/sec	SREs
+F143	System Load Average	Tracks 1m, 5m, 15m load averages.	N/A	Load Avg	SREs
+F144	Interrupt Rate	Measures hardware interrupts per second.	N/A	Interrupts/sec	SREs
+F145	System Uptime	Tracks uptime of individual nodes.	N/A	Uptime Days	SREs
+F146	Kubernetes Pod Restart Count	Tracks frequency of pod crashes/restarts.	N/A	Restart Count	SREs
+F147	Pending Pod Count	Tracks pods waiting to be scheduled.	N/A	Pending Pods	SREs
+F148	Node Resource Availability	Tracks available CPU/Memory on cluster nodes.	N/A	Available Resources	SREs
+F149	Cluster Autoscaling Events	Logs when cluster scales up or down.	N/A	Scaling Event Count	DevOps
+F150	Pod Security Policy Violations	Logs violations of PSPs (or Pod Security Standards).	N/A	Violation Count	Security
+F151	Network Policy Drops	Logs dropped packets due to network policies.	N/A	Drop Count	Network
+F152	Ingress Controller Latency	Tracks latency of the ingress/API gateway.	N/A	Gateway Latency	SREs
+F153	Load Balancer Response Codes	Aggregates 5xx/4xx from the load balancer level.	N/A	LB Error Rate	SREs
+F154	Service Discovery Latency	Tracks time to resolve service addresses (Consul/Etcd).	N/A	Discovery Latency	SREs
+F155	Configuration Drift Detection	Detects running config vs declared config (GitOps).	Diff Check	Drift Count	DevOps
+F156	Secret Rotation Status	Tracks status of TLS cert/KMS key rotation.	N/A	Rotation Status	Security
+F157	Audit Log Volume	Tracks volume of audit logs generated.	N/A	Logs GB/day	Compliance
+F158	Privileged Access Attempts	Tracks attempts to use privileged accounts.	N/A	Sudo Attempts	Security
+F159	Failed Login Attempts	Tracks failed logins to admin consoles.	N/A	Failed Logins	Security
+F160	Database Query Cancelations	Tracks queries cancelled by admin or timeout.	N/A	Cancel Count	DBAs
+
+
+h.	Comprehensive List of Database Objects
+
+id	schema_name	object_name	object_type	description	feature_reference	column_names	constraints / notes	junction_tables
+T001	analytics	fact_transaction_metric	TABLE	Raw aggregated metrics per time window.	F003	metric_id, window_start, window_end, p50_latency, p90_latency, p99_latency, total_count, error_count	PK (metric_id), FK (window_start)	N/A
+T002	analytics	dim_time	TABLE	Dimension table for time attributes (calendar).	F005	time_id, date, hour, day_of_week, month, quarter, year, is_holiday	PK (time_id)	N/A
+T003	analytics	dim_region	TABLE	Dimension table for geographical regions.	F004	region_id, country_code, continent, city, latitude, longitude	PK (region_id)	N/A
+T004	analytics	dim_service	TABLE	Dimension table for microservices.	F010	service_id, service_name, version, environment, repo_url	PK (service_id)	N/A
+T005	analytics	dim_merchant	TABLE	Dimension table for analytics regarding merchants.	F016	merchant_id, legal_name, category_code, tier, registration_date	PK (merchant_id)	N/A
+T006	analytics	fact_throughput	TABLE	Tracks transaction volume over time.	F013	throughput_id, time_id, region_id, tps, currency_code	PK (throughput_id), FKs (time_id, region_id)	N/A
+T007	analytics	fact_error_log	TABLE	Aggregated error logs.	F010	error_id, time_id, service_id, error_code, error_message_hash, count	PK (error_id), FKs (time_id, service_id)	N/A
+T008	analytics	mat_view_latency_hourly	MATERIALIZED VIEW	Pre-computed hourly latency averages.	F007	hour_timestamp, avg_latency, max_latency, service_id	UNIQUE (hour_timestamp, service_id)	Refreshes on COMMIT
+T009	analytics	fact_fraud_signal	TABLE	Stores fraud signals for real-time dashboards.	F011	signal_id, event_id, fraud_score, rule_triggered, timestamp	PK (signal_id)	FK (event_id) -> M01 tables
+T010	analytics	fact_resource_usage	TABLE	CPU/Memory metrics per pod.	F033	resource_id, timestamp, pod_name, cpu_percent, memory_mb, network_rx_bytes, network_tx_bytes	PK (resource_id)	Partitioned by timestamp
+T011	analytics	dim_currency	TABLE	ISO 4217 Currency codes.	F015	currency_code, name, symbol, is_crypto	PK (currency_code)	N/A
+T012	analytics	fact_prediction_log	TABLE	Logs of AI predictions for scaling.	F012	prediction_id, model_version, timestamp_input, predicted_load, actual_load, error_rate	PK (prediction_id)	N/A
+T013	analytics	fact_geo_transaction	TABLE	Geospatial transaction data.	F004	geo_txn_id, time_id, region_id, amount, currency_code	PK (geo_txn_id)	PostGIS types (geometry)
+T014	analytics	cache_stats	TABLE	Redis cache performance stats.	F020	stat_id, timestamp, hit_rate, miss_rate, evictions, memory_used	PK (stat_id)	N/A
+T015	analytics	kafka_lag	TABLE	Consumer lag metrics.	F021	lag_id, consumer_group, topic, partition, lag_offset, timestamp	PK (lag_id)	FK (consumer_group)
+T016	analytics	fact_kpi_history	TABLE	Historical KPI values for trend analysis.	F003	kpi_history_id, kpi_name, timestamp, value, threshold_breach	PK (kpi_history_id)	N/A
+T017	analytics	vw_current_slas	VIEW	Real-time view of current SLA compliance.	F027	service_name, current_latency, sla_target, status (OK/BREACH)	N/A	Join on fact_transaction_metric
+T018	analytics	fact_alert_history	TABLE	History of triggered alerts.	F062	alert_id, rule_name, severity, triggered_at, resolved_at, assigned_to	PK (alert_id)	N/A
+T019	analytics	dim_alert_rule	TABLE	Definitions of alert rules.	F062	rule_id, name, metric_name, condition, threshold, severity	PK (rule_id)	N/A
+T020	analytics	fact_db_performance	TABLE	Database query performance stats.	F034	query_id, query_hash, execution_count, avg_time, calls_per_min	PK (query_id)	N/A
+T021	analytics	fact_index_usage	TABLE	Index scan statistics.	F035	index_id, table_name, index_name, idx_scan, idx_tup_read, idx_tup_fetch	PK (index_id)	N/A
+T022	analytics	fact_lock_waits	TABLE	Database lock contention stats.	F053	lock_id, timestamp, pid, relation, mode, granted, duration_ms	PK (lock_id)	N/A
+T023	analytics	fact_replication_lag	TABLE	Replication lag metrics.	F052	lag_id, standby_name, lag_bytes, timestamp	PK (lag_id)	N/A
+T024	analytics	dim_user_agent	TABLE	Parsed user agent strings.	F048	ua_id, os_family, os_major, browser_family, browser_major, device_type	PK (ua_id)	N/A
+T025	analytics	fact_web_traffic	TABLE	HTTP request metrics.	F034	traffic_id, timestamp, path, method, status_code, response_time, user_agent_id	PK (traffic_id)	Partitioned by date
+T026	analytics	fact_refund_metrics	TABLE	Metrics on refund processing.	F037	refund_metric_id, day, total_refunds, avg_processing_time, success_rate	PK (refund_metric_id)	N/A
+T027	analytics	fact_liquidity	TABLE	Exchange liquidity monitoring.	F038	liquidity_id, currency_code, available_amount, reserved_amount, timestamp	PK (liquidity_id)	N/A
+T028	analytics	fact_archival_log	TABLE	Log of data archival operations.	F042	archival_id, table_name, rows_archived, s3_path, timestamp	PK (archival_id)	N/A
+T029	analytics	fact_deployment	TABLE	Deployment records.	F084	deployment_id, service_id, version, environment, started_at, finished_at, status	PK (deployment_id)	FK (service_id)
+T030	analytics	fact_incident	TABLE	Incident records.	F090	incident_id, title, severity, created_at, resolved_at, root_cause_summary	PK (incident_id)	N/A
+T031	analytics	dim_runbook	TABLE	List of operational runbooks.	F091	runbook_id, name, url, category, owner	PK (runbook_id)	N/A
+T032	analytics	fact_runbook_execution	TABLE	Execution logs of runbooks.	F091	exec_id, runbook_id, triggered_by_incident, status, execution_time_ms	PK (exec_id)	FK (runbook_id)
+T033	analytics	fact_on_call_load	TABLE	On-call paging metrics.	F092	page_id, engineer_id, channel, sent_at, acknowledged_at	PK (page_id)	N/A
+T034	analytics	dim_engineer	TABLE	List of engineers for on-call.	F092	engineer_id, name, email, team, timezone	PK (engineer_id)	N/A
+T035	analytics	fact_support_ticket	TABLE	Integrated support ticket metrics.	F093	ticket_id, source_system, severity, created_at, resolved_at, linked_txn_id	PK (ticket_id)	N/A
+T036	analytics	fact_churn_prediction	TABLE	ML predictions for merchant churn.	F094	prediction_id, merchant_id, prediction_date, churn_probability, risk_level	PK (prediction_id)	FK (merchant_id)
+T037	analytics	fact_ltv	TABLE	Lifetime value calculations.	F095	ltv_id, merchant_id, calculation_date, ltv_amount	PK (ltv_id)	FK (merchant_id)
+T038	analytics	fact_funnel_step	TABLE	Wallet installation funnel steps.	F096	step_id, user_segment, step_name, date, unique_users	PK (step_id)	N/A
+T039	analytics	fact_kyc_metrics	TABLE	KYC process performance.	F097	kyc_metric_id, date, provider_name, avg_processing_seconds, approval_rate	PK (kyc_metric_id)	N/A
+T040	analytics	fact_biometric_auth	TABLE	Biometric auth success/failure.	F098	bio_id, timestamp, device_type, auth_type, success	PK (bio_id)	N/A
+T041	analytics	fact_offline_sync	TABLE	Offline transaction sync metrics.	F099	sync_id, timestamp, device_id, pending_tx_count, sync_duration_ms	PK (sync_id)	N/A
+T042	analytics	fact_push_notification	TABLE	Push notification delivery.	F100	push_id, timestamp, platform, target_count, sent_count, failed_count	PK (push_id)	N/A
+T043	analytics	fact_deep_link	TABLE	Deep link routing stats.	F101	link_id, timestamp, source_app, target_os, success	PK (link_id)	N/A
+T044	analytics	fact_a11y_usage	TABLE	Accessibility tool usage.	F103	a11y_id, timestamp, setting_type, user_count	PK (a11y_id)	N/A
+T045	analytics	fact_bot_traffic	TABLE	Bot detection logs.	F105	bot_id, timestamp, ip_address, user_agent, bot_score	PK (bot_id)	N/A
+T046	analytics	fact_webhook_delivery	TABLE	Webhook delivery attempts.	F106	webhook_log_id, merchant_id, url, http_status, latency_ms, timestamp	PK (webhook_log_id)	FK (merchant_id)
+T047	analytics	fact_batch_job	TABLE	Batch job execution stats.	F107	job_id, job_name, start_time, end_time, status, rows_processed	PK (job_id)	N/A
+T048	analytics	fact_etl_pipeline	TABLE	ETL pipeline health.	F108	pipeline_id, pipeline_name, run_id, status, data_volume_mb	PK (pipeline_id)	N/A
+T049	analytics	dim_data_lineage	TABLE	Graph edges for data lineage.	F109	edge_id, source_object, target_object, transformation_type	PK (edge_id)	N/A
+T050	analytics	fact_data_quality	TABLE	Data quality check results.	F110	dq_id, table_name, check_name, timestamp, result (PASS/FAIL), score	PK (dq_id)	N/A
+T051	analytics	fact_schema_drift	TABLE	Schema drift incidents.	F111	drift_id, table_name, detected_at, expected_hash, actual_hash	PK (drift_id)	N/A
+T052	analytics	fact_deprecated_api	TABLE	Usage of deprecated API endpoints.	F112	api_id, endpoint_name, version, call_count, timestamp	PK (api_id)	N/A
+T053	analytics	dim_sdk_version	TABLE	SDK version tracking.	F113	sdk_id, platform, version_string, release_date	PK (sdk_id)	N/A
+T054	analytics	fact_doc_views	TABLE	Documentation page views.	F114	view_id, page_path, date, unique_visitors	PK (view_id)	N/A
+T055	analytics	fact_community_sentiment	TABLE	Sentiment analysis of community posts.	F115	sentiment_id, source, post_id, timestamp, sentiment_score	PK (sentiment_id)	N/A
+T056	analytics	fact_contrib_velocity	TABLE	Velocity of community contributions.	F116	contribution_id, week_start, pr_count, issue_count	PK (contribution_id)	N/A
+T057	analytics	fact_vuln_scan	TABLE	Vulnerability scan results.	F118	scan_id, scanner_name, timestamp, severity, count	PK (scan_id)	N/A
+T058	analytics	fact_key_rotation	TABLE	Cryptographic key rotation logs.	F119	rotation_id, key_id, previous_version, new_version, rotated_at	PK (rotation_id)	N/A
+T059	analytics	fact_hsm_performance	TABLE	HSM operation latency.	F120	hsm_id, operation_type, latency_ms, timestamp	PK (hsm_id)	N/A
+T060	analytics	fact_cloud_cost	TABLE	Cloud infrastructure cost breakdown.	F121	cost_id, service_type, region, date, cost_usd	PK (cost_id)	Partitioned by month
+T061	analytics	fact_spot_interruption	TABLE	Spot instance interruption events.	F122	interruption_id, node_name, timestamp	PK (interruption_id)	N/A
+T062	analytics	fact_ri_utilization	TABLE	Reserved Instance utilization.	F123	ri_id, instance_type, utilization_pct, date	PK (ri_id)	N/A
+T063	analytics	fact_idle_resources	TABLE	Idle resource findings.	F124	resource_id, resource_type, resource_id_str, idle_days, cost_impact	PK (resource_id)	N/A
+T064	analytics	fact_carbon_footprint	TABLE	Estimated carbon footprint.	F125	carbon_id, timestamp, energy_kwh, co2_kg	PK (carbon_id)	N/A
+T065	analytics	fact_state_store_size	TABLE	Kafka Streams state size.	F127	state_id, app_id, partition, topic, size_bytes, timestamp	PK (state_id)	N/A
+T066	analytics	fact_rocksdb_stats	TABLE	RocksDB performance metrics.	F128	rocks_id, task_id, memtable_size, block_cache_usage, compaction_pending	PK (rocks_id)	N/A
+T067	analytics	fact_consumer_rebalance	TABLE	Consumer group rebalance events.	F129	rebalance_id, group_id, duration_ms, timestamp	PK (rebalance_id)	FK (group_id)
+T068	analytics	fact_producer_retry	TABLE	Producer retry queue depth.	F130	retry_id, topic, queue_depth, timestamp	PK (retry_id)	N/A
+T069	analytics	fact_dns_latency	TABLE	DNS lookup latency.	F131	dns_id, hostname, resolve_time_ms, timestamp	PK (dns_id)	N/A
+T070	analytics	fact_tls_handshake	TABLE	TLS handshake duration.	F132	tls_id, peer_ip, handshake_time_ms, cipher_suite, timestamp	PK (tls_id)	N/A
+T071	analytics	fact_tcp_reuse	TABLE	TCP connection reuse statistics.	F133	tcp_id, host, new_connections, reused_connections, timestamp	PK (tcp_id)	N/A
+T072	analytics	fact_network_interface	TABLE	Network interface stats.	F134	net_id, interface_name, rx_bytes, tx_bytes, rx_errors, tx_errors	PK (net_id)	N/A
+T073	analytics	fact_packet_loss	TABLE	Packet loss metrics.	F135	loss_id, source, destination, loss_percent, timestamp	PK (loss_id)	N/A
+T074	analytics	fact_disk_io	TABLE	Disk IOPS metrics.	F137	io_id, device_name, reads_per_sec, writes_per_sec, timestamp	PK (io_id)	N/A
+T075	analytics	fact_disk_throughput	TABLE	Disk throughput metrics.	F138	throughput_id, device_name, read_mb_sec, write_mb_sec	PK (throughput_id)	N/A
+T076	analytics	fact_inode_usage	TABLE	Inode consumption.	F139	inode_id, mount_point, total, used, free, percent_used	PK (inode_id)	N/A
+T077	analytics	fact_fd_usage	TABLE	File descriptor usage.	F140	fd_id, pid, process_name, fd_count, max_fd	PK (fd_id)	N/A
+T078	analytics	fact_process_count	TABLE	Process count per node.	F141	proc_id, hostname, process_count, timestamp	PK (proc_id)	N/A
+T079	analytics	fact_system_load	TABLE	System load averages.	F143	load_id, hostname, load_1m, load_5m, load_15m, timestamp	PK (load_id)	N/A
+T080	analytics	fact_interrupts	TABLE	Hardware interrupt rate.	F144	int_id, hostname, interrupts_per_sec, timestamp	PK (int_id)	N/A
+T081	analytics	fact_pod_restart	TABLE	Kubernetes pod restart counts.	F146	restart_id, pod_name, namespace, restart_count, timestamp	PK (restart_id)	N/A
+T082	analytics	fact_pending_pods	TABLE	Kubernetes pending pod count.	F147	pending_id, cluster_name, count, timestamp	PK (pending_id)	N/A
+T083	analytics	fact_node_resources	TABLE	K8s node resource availability.	F148	node_id, node_name, cpu_allocatable, mem_allocatable, pod_capacity	PK (node_id)	N/A
+T084	analytics	fact_cluster_scaling	TABLE	Cluster autoscaling events.	F149	scale_id, cluster_name, action (SCALE_UP/DOWN), reason, timestamp	PK (scale_id)	N/A
+T085	analytics	fact_psp_violations	TABLE	Pod Security Policy violations.	F150	violation_id, pod_name, namespace, violation_type, timestamp	PK (violation_id)	N/A
+T086	analytics	fact_network_policy_drops	TABLE	Network policy packet drops.	F151	drop_id, src_namespace, dst_namespace, port, protocol, count	PK (drop_id)	N/A
+T087	analytics	fact_ingress_latency	TABLE	Ingress controller latency.	F152	ingress_id, host, path, service_latency, response_latency	PK (ingress_id)	N/A
+T088	analytics	fact_lb_response	TABLE	Load balancer response codes.	F153	lb_id, lb_name, status_code_class (2xx,4xx,5xx), count	PK (lb_id)	N/A
+T089	analytics	fact_service_discovery	TABLE	Service discovery latency.	F154	disc_id, service_name, resolve_time_ms, timestamp	PK (disc_id)	N/A
+T090	analytics	fact_config_drift	TABLE	Configuration drift detection.	F155	drift_id, component_name, git_commit_hash, running_hash	PK (drift_id)	N/A
+T091	analytics	fact_audit_volume	TABLE	Audit log volume.	F157	audit_id, day, volume_gb, source	PK (audit_id)	N/A
+T092	analytics	fact_privileged_access	TABLE	Privileged access attempts.	F158	access_id, user_id, command, timestamp, success	PK (access_id)	N/A
+T093	analytics	fact_failed_login	TABLE	Failed login attempts.	F159	login_id, username, source_ip, timestamp	PK (login_id)	N/A
+T094	analytics	fact_query_cancel	TABLE	Cancelled database queries.	T160	cancel_id, pid, query_start, cancel_time, reason	PK (cancel_id)	N/A
+T095	analytics	enum_metric_type	ENUM	Types of metrics (LATENCY, THROUGHPUT, ERROR).	N/A	LATENCY, THROUGHPUT, ERROR_COUNT, RESOURCE_USAGE	N/A
+T096	analytics	enum_severity	ENUM	Severity levels (INFO, WARN, CRITICAL).	N/A	INFO, WARNING, CRITICAL, EMERGENCY	N/A
+T097	analytics	enum_scale_action	ENUM	Scaling actions.	N/A	SCALE_UP, SCALE_DOWN, NONE	N/A
+T098	analytics	sp_aggregate_metrics	PROCEDURE	Stored proc to roll up raw metrics to hourly.	F007	IN window_start timestamp	N/A
+T099	analytics	sp_refresh_mv_latency	PROCEDURE	Refresh strategy for materialized views.	F007	N/A	CONCURRENTLY	N/A
+T100	analytics	sp_partition_table	PROCEDURE	Create partitions for time-series tables.	F005	IN table_name text, IN start_date date	N/A
+T101	analytics	sp_archive_old_data	PROCEDURE	Move data older than 1 year to S3.	F042	IN table_name text, IN cutoff_date date	N/A
+T102	analytics	sp_cleanup_mat_view	PROCEDURE	Cleanup unused materialized views.	N/A	IN view_name text	N/A
+T103	analytics	vw_system_health	VIEW	Overall system health dashboard view.	N/A	cpu_avg, mem_avg, error_rate, p99_latency	N/A
+T104	analytics	vw_recent_errors	VIEW	List of recent errors grouped by code.	N/A	error_code, count, last_seen	N/A
+T105	analytics	vw_top_slow_queries	VIEW	Top 10 slowest queries in last hour.	N/A	query_hash, avg_time, calls	N/A
+T106	analytics	idx_fact_metric_time	INDEX	Index on fact_transaction_metric for time lookups.	F003	window_start	BRIN index for time-series
+T107	analytics	idx_fact_error_service	INDEX	Index on fact_error_log for service filtering.	F010	service_id, window_start	B-Tree
+T108	analytics	idx_resource_pod	INDEX	Index on fact_resource_usage for pod filtering.	F033	pod_name, timestamp	B-Tree
+T109	analytics	idx_geo_region	INDEX	Spatial index for geo queries.	F004	location	GIST
+T110	analytics	vw_fraud_heatmap	VIEW	Fraud signals aggregated by region.	F011	region_id, count, avg_score	N/A
+T111	analytics	sp_purge_old_dlq	PROCEDURE	Purge old dead letter queue messages.	F031	IN retention_days int	N/A
+T112	analytics	tbl_ml_model_version	TABLE	Versioning of ML models used in predictions.	F012	model_id, model_name, version, deployed_at, active	PK (model_id)	N/A
+T113	analytics	sp_record_prediction	PROCEDURE	Record a prediction and actual outcome.	F012	IN model_id int, IN prediction float, IN actual float	N/A
+T114	analytics	tbl_feature_flag	TABLE	Feature flag definitions.	F045	flag_id, flag_name, enabled, rollout_percentage	PK (flag_id)	N/A
+T115	analytics	tbl_feature_flag_usage	TABLE	Usage of feature flags.	F045	usage_id, flag_id, timestamp, user_segment, count	PK (usage_id)	FK (flag_id)
+T116	analytics	sp_update_feature_flag	PROCEDURE	Update flag status safely.	F045	IN flag_id int, IN enabled boolean	N/A
+T117	analytics	vw_active_flags	VIEW	Currently active feature flags.	F045	flag_name, enabled, rollout_percentage	N/A
+T118	analytics	tbl_ab_test	TABLE	A/B Test configurations.	F046	test_id, test_name, start_date, end_date	PK (test_id)	N/A
+T119	analytics	tbl_ab_test_variant	TABLE	Variants for A/B tests.	F046	variant_id, test_id, name, traffic_split	PK (variant_id)	FK (test_id)
+T120	analytics	tbl_ab_test_result	TABLE	Results of A/B tests (conversion rates).	F046	result_id, variant_id, date, conversion_rate	PK (result_id)	FK (variant_id)
+T121	analytics	sp_calculate_ab_significance	FUNCTION	Calculate statistical significance of A/B test.	F046	IN test_id int RETURNS float	Uses chi-square
+T122	analytics	vw_ab_test_summary	VIEW	Summary of running A/B tests.	F046	test_name, control_rate, variant_rate, significance	N/A
+T123	analytics	tbl_cost_center	TABLE	Organizational cost centers.	F121	center_id, code, name, budget_owner	PK (center_id)	N/A
+T124	analytics	vw_cost_by_service	VIEW	Cloud cost breakdown by microservice.	F121	service_name, cost_usd, trend	N/A
+T125	analytics	tbl_incident_timeline	TABLE	Timeline events for an incident.	F030	event_id, incident_id, timestamp, description, author	PK (event_id)	FK (incident_id)
+T126	analytics	sp_create_incident	PROCEDURE	Create a new incident record.	F030	IN title varchar, IN severity enum	N/A
+T127	analytics	tbl_on_call_schedule	TABLE	On-call rotation schedule.	F092	schedule_id, engineer_id, start_time, end_time	PK (schedule_id)	FK (engineer_id)
+T128	analytics	vw_current_on_call	VIEW	Who is currently on-call.	F092	engineer_name, team, contact_method	N/A
+T129	analytics	tbl_maintenance_window	TABLE	Planned maintenance windows.	F022	window_id, start_time, end_time, affected_services	PK (window_id)	N/A
+T130	analytics	sp_is_maintenance_active	FUNCTION	Check if system is in maintenance mode.	F022	RETURNS boolean	N/A
+T131	analytics	tbl_data_retention_policy	TABLE	Configurable retention policies per table.	F042	policy_id, table_name, retention_days	PK (policy_id)	N/A
+T132	analytics	sp_enforce_retention	PROCEDURE	Enforce data deletion based on policy.	F042	IN policy_id int	N/A
+T133	analytics	tbl_api_spec	TABLE	Versions of API specs stored for analytics.	F112	spec_id, version, storage_path, upload_date	PK (spec_id)	N/A
+T134	analytics	tbl_deprecation_plan	TABLE	Plans for deprecating features/APIs.	F112	plan_id, target_id, target_type, deprecation_date, sunset_date	PK (plan_id)	N/A
+T135	analytics	vw_deprecation_report	VIEW	Upcoming deprecations.	F112	target_name, days_until_sunset, usage_count	N/A
+T136	analytics	tbl_community_pr	TABLE	Community Pull Request metrics.	F116	pr_id, number, author, created_at, merged_at, time_to_merge_hours	PK (pr_id)	N/A
+T137	analytics	vw_contributor_leaderboard	VIEW	Top contributors by PR count.	F116	author, pr_count, avg_review_time	N/A
+T138	analytics	tbl_security_scan_config	TABLE	Config for automated security scans.	F118	config_id, scanner_type, schedule, target_repo	PK (config_id)	N/A
+T139	analytics	tbl_vulnerability	TABLE	Individual vulnerabilities found.	F118	vuln_id, scan_id, cve_id, severity, status	PK (vuln_id)	FK (scan_id)
+T140	analytics	vw_open_critical_vulns	VIEW	List of open critical vulnerabilities.	F118	cve_id, component, days_open	N/A
+T141	analytics	tbl_certificate	TABLE	TLS certificates inventory.	F050	cert_id, domain, issuer, expiry_date, auto_renew_enabled	PK (cert_id)	N/A
+T142	analytics	vw_cert_expiry_warning	VIEW	Certificates expiring in 30 days.	F050	domain, expiry_date, days_left	N/A
+T143	analytics	tbl_capacity_plan	TABLE	Capacity planning forecasts.	F012	plan_id, quarter, predicted_tps, required_nodes	PK (plan_id)	N/A
+T144	analytics	sp_generate_capacity_plan	PROCEDURE	Generate capacity plan based on trends.	F012	IN horizon_months int	Uses ML model
+T145	analytics	tbl_dashboard_config	TABLE	Dashboard layout configurations.	F063	dashboard_id, name, owner, layout_json	PK (dashboard_id)	N/A
+T146	analytics	tbl_widget	TABLE	Individual widget definitions.	F063	widget_id, dashboard_id, type, query, position	PK (widget_id)	FK (dashboard_id)
+T147	analytics	vw_dashboard_data	VIEW	Union of all data sources for dashboards.	F063	Generic structure	Materialized
+T148	analytics	tbl_service_dependency	TABLE	Dependency graph of services.	F032	dependency_id, upstream_service, downstream_service	PK (dependency_id)	N/A
+T149	analytics	vw_dependency_tree	VIEW	Recursive tree of service dependencies.	F032	level, service_name, dependency_path	N/A
+T150	analytics	tbl_sla_definition	TABLE	SLA targets defined per service.	F027	sla_id, service_id, max_latency, uptime_target	PK (sla_id)	FK (service_id)
+T151	analytics	tbl_sla_breach	TABLE	Recorded SLA breaches.	F027	breach_id, sla_id, breach_time, actual_value, impact	PK (breach_id)	FK (sla_id)
+T152	analytics	vw_sla_compliance_report	VIEW	Monthly SLA compliance report.	F027	service_name, uptime_pct, avg_latency, breaches	N/A
+T153	analytics	tbl_anomaly_feedback	TABLE	Feedback on anomaly detection accuracy.	F008	feedback_id, anomaly_id, is_false_positive, timestamp	PK (feedback_id)	N/A
+T154	analytics	sp_retrain_anomaly_model	PROCEDURE	Trigger retraining of anomaly model with new data.	F008	N/A	Asynchronous job
+T155	analytics	tbl_data_quality_rule	TABLE	Definitions of DQ checks.	F110	rule_id, table_name, column_name, rule_type (NOT_NULL, REGEX)	PK (rule_id)	N/A
+T156	analytics	tbl_etl_run_history	TABLE	Detailed history of ETL runs.	F108	run_id, pipeline_id, start_ts, end_ts, status, rows_in, rows_out	PK (run_id)	FK (pipeline_id)
+T157	analytics	vw_etl_latency	VIEW	Latency of ETL pipelines (data freshness).	F108	pipeline_name, max_lag_minutes	N/A
+T158	analytics	tbl_cloud_region	TABLE	Cloud regions in use.	F014	region_id, provider, region_code, geo_location	PK (region_id)	N/A
+T159	analytics	tbl_resource_quota	TABLE	Quotas imposed on namespaces/projects.	F122	quota_id, namespace, resource_type, limit	PK (quota_id)	N/A
+T160	analytics	vw_quota_usage	VIEW	Current usage vs quotas.	F122	namespace, cpu_usage/limit, mem_usage/limit	N/A
+T161	analytics	tbl_alert_notification	TABLE	Alert notification delivery logs.	F062	notification_id, alert_id, channel (email/slack), status, sent_at	PK (notification_id)	FK (alert_id)
+T162	analytics	tbl_user_preference	TABLE	User preferences for alerts/dashboards.	F063	user_id, timezone, language, notification_settings	PK (user_id)	N/A
+T163	analytics	tbl_session_record	TABLE	Web session records for funnel analysis.	F096	session_id, user_id, start_ts, end_ts, pages_visited	PK (session_id)	N/A
+T164	analytics	tbl_experiment_assignment	TABLE	Assignment of users to experiments (A/B tests).	F046	assignment_id, user_id, experiment_id, variant_id	PK (assignment_id)	FKs
+T165	analytics	tbl_conversion_event	TABLE	Conversion events (e.g., "Purchase Complete").	F096	event_id, session_id, event_type, timestamp, value	PK (event_id)	FK (session_id)
+T166	analytics	sp_calculate_conversion_rate	FUNCTION	Calculate conversion rate for a funnel step.	F096	IN step_id int RETURNS float	N/A
+T167	analytics	tbl_infrastructure_change	TABLE	Log of infra changes (Terraform runs).	F155	change_id, run_id, plan_only, added_resources, changed_resources	PK (change_id)	N/A
+T168	analytics	tbl_cost_anomaly	TABLE	Detected cost anomalies (spike in bill).	F121	anomaly_id, date, expected_cost, actual_cost, variance	PK (anomaly_id)	N/A
+T169	analytics	sp_notify_cost_anomaly	PROCEDURE	Send notification if cost anomaly > threshold.	F121	IN anomaly_id int	N/A
+T170	analytics	tbl_backup_status	TABLE	Database backup status and verification.	F023	backup_id, database_name, start_time, end_time, size_gb, status	PK (backup_id)	N/A
+T171	analytics	vw_backup_health	VIEW	Status of latest backups per DB.	F023	database_name, last_backup_age, status	N/A
+T172	analytics	tbl_performance_baseline	TABLE	Baselines for performance metrics.	F003	baseline_id, metric_name, threshold_warning, threshold_critical	PK (baseline_id)	N/A
+T173	analytics	sp_update_baseline	PROCEDURE	Update baseline using historical data (e.g., 30d avg).	F003	IN metric_id int	N/A
+T174	analytics	tbl_synthetic_check	TABLE	Config for synthetic uptime checks.	F022	check_id, name, url, frequency, expected_status	PK (check_id)	N/A
+T175	analytics	tbl_synthetic_result	TABLE	Results of synthetic checks.	F022	result_id, check_id, timestamp, response_time, status	PK (result_id)	FK (check_id)
+T176	analytics	vw_synthetic_uptime	VIEW	Uptime % calculated from synthetic checks.	F022	check_name, uptime_24h, avg_response_time	N/A
+T177	analytics	tbl_log_anomaly	TABLE	Anomalies detected in log streams (e.g., new error string).	F008	anomaly_id, timestamp, log_signature, count, baseline	PK (anomaly_id)	N/A
+T178	analytics	tbl_kubernetes_event	TABLE	K8s events (e.g., OOMKilled, FailedMount).	F146	event_id, namespace, object_kind, object_name, reason, message	PK (event_id)	N/A
+T179	analytics	vw_cluster_events	VIEW	Recent critical K8s events.	F146	timestamp, reason, message, involved_object	N/A
+T180	analytics	tbl_network_topology	TABLE	Current network topology links.	F022	link_id, source_node, dest_node, bandwidth	PK (link_id)	N/A
+T181	analytics	tbl_traffic_matrix	TABLE	Traffic volume between services.	F022	matrix_id, source, destination, bytes_per_sec	PK (matrix_id)	FKs
+T182	analytics	sp_map_traffic_matrix	PROCEDURE	Map traffic from metrics to matrix.	F022	N/A	Runs every 5 min
+T183	analytics	tbl_database_size	TABLE	Database object sizes.	F023	size_id, table_name, schema_name, size_bytes, index_size_bytes	PK (size_id)	N/A
+T184	analytics	vw_table_bloat	VIEW	Tables with high bloat (wasted space).	F023	table_name, bloat_mb, bloat_pct	N/A
+T185	analytics	tbl_lock_blocker	TABLE	Current blockers of locks.	F053	blocker_pid, blocked_pid, relation, lock_type, duration	PK (blocker_pid, blocked_pid)	N/A
+T186	analytics	vw_active_locks	VIEW	Currently held locks.	F053	pid, relation, mode, granted	N/A
+T187	analytics	tbl_feature_usage	TABLE	Usage of specific features in app.	F042	feature_id, feature_name, date, unique_users, total_calls	PK (feature_id)	N/A
+T188	analytics	sp_calculate_adoption_rate	FUNCTION	Adoption rate of a specific feature.	F042	IN feature_name text RETURNS float	N/A
+T189	analytics	tbl_test_execution	TABLE	Automated test execution results.	F086	test_id, suite_name, test_name, status, duration_ms	PK (test_id)	N/A
+T190	analytics	vw_test_flakiness	VIEW	Most flaky tests (frequent passes/fails).	F086	test_name, runs, failures, flakiness_score	N/A
+T191	analytics	tbl_incident_tag	TABLE	Tags for categorizing incidents.	F030	tag_id, incident_id, tag_name	PK (tag_id)	FK (incident_id)
+T192	analytics	tbl_retro_action_item	TABLE	Action items from post-mortem retrospectives.	F088	item_id, incident_id, description, assignee, status, due_date	PK (item_id)	FK (incident_id)
+T193	analytics	vw_open_retro_actions	VIEW	Overdue or open action items.	F088	incident_title, description, assignee, days_overdue	N/A
+T194	analytics	tbl_vendor_sla	TABLE	SLAs with external vendors (e.g., Cloud Provider).	F027	vendor_sla_id, vendor_name, credit_target, uptime_actual	PK (vendor_sla_id)	N/A
+T195	analytics	sp_calculate_vendor_credit	FUNCTION	Calculate potential service credits.	F027	IN vendor_sla_id int RETURNS money	N/A
+T196	analytics	tbl_geo_fence	TABLE	Definitions of geofences for regulatory logic.	F059	fence_id, name, polygon, jurisdiction_code	PK (fence_id)	PostGIS polygon
+T197	analytics	tbl_geo_fence_violation	TABLE	Logs of geofence violations (if any).	F059	violation_id, fence_id, ip_address, timestamp	PK (violation_id)	FK (fence_id)
+T198	analytics	tbl_compliance_report	TABLE	Generated compliance reports.	F039	report_id, report_type, period_start, period_end, storage_path	PK (report_id)	N/A
+T199	analytics	tbl_user_segment	TABLE	User segments for analytics.	F163	segment_id, name, criteria_json	PK (segment_id)	N/A
+T200	analytics	tbl_segment_membership	TABLE	Mapping users to segments (materialized).	F163	user_id, segment_id, valid_from, valid_to	PK (user_id, segment_id)	FKs
+T201	analytics	fact_metric_1min	TABLE	High-resolution (1-minute) raw metrics for immediate alerting.	F003	metric_ts, service_id, metric_type, value, unit	PK (metric_ts, service_id, metric_type)	Partitioned by day
+T202	analytics	fact_metric_5min	TABLE	Standard roll-up metrics for trend analysis.	F007	metric_ts_start, service_id, metric_type, avg_val, max_val, min_val, p99_val	PK (metric_ts_start, service_id)	Partitioned by month
+T203	analytics	dim_metric_unit	TABLE	Units of measurement for metrics (ms, bytes, count).	F003	unit_id, unit_name, description, scaling_factor	PK (unit_id)	N/A
+T204	analytics	kafka_topic_metadata	TABLE	Metadata about Kafka topics (partitions, replication factor).	F021	topic_name, partitions, replication_factor, retention_ms	PK (topic_name)	N/A
+T205	analytics	kafka_partition_lag	TABLE	Lag metrics specific to individual partitions.	F021	lag_ts, consumer_group, topic, partition, lag_offset, end_offset	PK (lag_ts, consumer_group, topic, partition)	N/A
+T206	analytics	fact_stream_job	TABLE	Status of streaming jobs (Kafka Streams/Flink).	F126	job_id, job_name, status, uptime_sec, last_restart_ts	PK (job_id)	FK (job_name)
+T207	analytics	fact_stream_task	TABLE	Metrics for individual tasks within a streaming job.	F126	task_id, job_id, task_name, records_in, records_out, lag_ms	PK (task_id)	FK (job_id)
+T208	analytics	fact_stream_operator	TABLE	Performance of operators (map, filter, aggregate) in stream.	F126	op_id, task_id, op_name, num_records_in, num_records_out, latency_ms	PK (op_id)	FK (task_id)
+T209	analytics	checkpoint_stats	TABLE	Streaming framework checkpointing duration and size.	F126	checkpoint_id, job_id, duration_ms, size_bytes, status	PK (checkpoint_id)	FK (job_id)
+T210	analytics	backpressure_metrics	TABLE	Metrics indicating if the streaming pipeline is overwhelmed.	F126	metric_ts, operator_id, backpressure_ratio (0.0-1.0)	PK (metric_ts, operator_id)	N/A
+T211	analytics	ml_model_registry	TABLE	Registry of ML models deployed within analytics.	F012	model_uuid, model_name, version, framework, storage_path, deployed_at	PK (model_uuid)	N/A
+T212	analytics	ml_feature_definition	TABLE	Definitions of features used for training/inference.	F008	feature_id, feature_name, data_type, source_table, description	PK (feature_id)	N/A
+T213	analytics	ml_training_run	TABLE	Metadata of model training runs.	F012	run_id, model_uuid, start_ts, end_ts, training_rows, final_accuracy	PK (run_id)	FK (model_uuid)
+T214	analytics	ml_model_evaluation	TABLE	Evaluation metrics (Precision, Recall, F1) for models.	F012	eval_id, run_id, metric_name, metric_value	PK (eval_id)	FK (run_id)
+T215	analytics	sli_raw	TABLE	Raw Service Level Indicator data points.	F027	sli_id, slo_definition_id, timestamp, value (e.g., 0 or 1 for success)	PK (sli_id)	FK (slo_definition_id)
+T216	analytics	slo_burn_rate	TABLE	Calculated burn rate of error budgets.	F027	burn_rate_id, slo_id, window_minutes, burn_rate_value, status (OK/FAST)	PK (burn_rate_id)	FK (slo_id)
+T217	analytics	slo_alert_policy	TABLE	Alerting policies mapped to SLO burn rates.	F027	policy_id, slo_id, burn_rate_threshold, alert_severity	PK (policy_id)	FK (slo_id)
+T218	analytics	fact_session_analytics	TABLE	Aggregated session data (duration, page depth).	F163	session_id, user_segment_id, start_ts, duration_sec, page_count	PK (session_id)	FK (user_segment_id)
+T219	analytics	dim_page_view	TABLE	Dimension for URL/Page views.	F114	page_id, url_path, page_title, category	PK (page_id)	N/A
+T220	analytics	fact_clickstream	TABLE	Aggregated clickstream data for heatmap generation.	F163	click_id, page_id, x_coord, y_coord, element_id, count	PK (click_id)	FK (page_id)
+T221	analytics	fact_conversion_funnel	TABLE	Pre-calculated funnel conversion rates.	F096	funnel_id, step_order, unique_users, drop_off_count, conversion_rate	PK (funnel_id, step_order)	N/A
+T222	analytics	fact_retention_cohort	TABLE	Cohort analysis table (Month 0, Month 1, etc.).	F094	cohort_id, cohort_month, period_number, retained_user_count	PK (cohort_id, period_number)	N/A
+T223	analytics	ext_service_dependency	TABLE	External service dependencies (Banks, KYC, SMS).	F051	dependency_id, name, type, owner_contact, criticality	PK (dependency_id)	N/A
+T224	analytics	fact_ext_service_latency	TABLE	Latency measured for external service calls.	F051	metric_ts, dependency_id, latency_ms, timeout_flag	PK (metric_ts, dependency_id)	FK (dependency_id)
+T225	analytics	fact_ext_service_availability	TABLE	Availability uptime of external services.	F051	availability_id, dependency_id, success_count, total_count	PK (availability_id)	FK (dependency_id)
+T226	analytics	fact_cloud_resource_efficiency	TABLE	Efficiency metrics (waste) of allocated resources.	F124	efficiency_id, resource_type, allocated_qty, used_qty, waste_qty	PK (efficiency_id)	N/A
+T227	analytics	fact_right_sizing_recommendation	TABLE	ML-generated recommendations for resizing.	F124	rec_id, resource_id, current_cpu, rec_cpu, current_mem, rec_mem, savings_est_usd	PK (rec_id)	N/A
+T228	analytics	reservation_utilization	TABLE	Utilization of reserved instances vs on-demand.	F123	utilization_id, ri_id, hours_covered, total_hours	PK (utilization_id)	FK (ri_id)
+T229	analytics	spot_instance_history	TABLE	History of spot instance usage and interruptions.	F122	history_id, instance_type, availability_zone, uptime_sec, interruption_reason	PK (history_id)	N/A
+T230	analytics	carbon_intensity_data	TABLE	Grid carbon intensity data over time.	F125	intensity_id, region_code, timestamp, g_co2eq_kwh	PK (intensity_id)	N/A
+T231	analytics	fact_sustainability_score	TABLE	Calculated environmental score for the platform.	F125	score_id, timestamp, energy_kwh, carbon_kg, score (0-100)	PK (score_id)	N/A
+T232	analytics	log_anomaly_threshold	TABLE	Dynamic thresholds for log anomaly detection.	F008	threshold_id, log_pattern, baseline_count, std_dev, alert_multiplier	PK (threshold_id)	N/A
+T233	analytics	log_signature_dictionary	TABLE	Dictionary of known log patterns/signatures.	F177	signature_id, pattern_hash, sample_message, first_seen, last_seen	PK (signature_id)	N/A
+T234	analytics	fact_log_volume	TABLE	Volume of logs generated per service.	F061	volume_id, service_id, timestamp, log_bytes, log_lines	PK (volume_id)	FK (service_id)
+T235	analytics	fact_log_error_ratio	TABLE	Ratio of error logs to info logs per service.	F061	ratio_id, service_id, timestamp, error_count, total_count, ratio	PK (ratio_id)	FK (service_id)
+T236	analytics	k8s_hpa_status	TABLE	Horizontal Pod Autoscaler status and metrics.	F012	hpa_id, hpa_name, namespace, target_ref, min_replicas, max_replicas, current_replicas	PK (hpa_id)	N/A
+T237	analytics	k8s_vpa_status	TABLE	Vertical Pod Autoscaler recommendations.	F124	vpa_id, vpa_name, target_ref, container_name, recommended_cpu, recommended_mem	PK (vpa_id)	N/A
+T238	analytics	k8s_resource_request	TABLE	Actual resource requests defined in manifests.	F033	request_id, pod_name, container_name, request_cpu, request_mem	PK (request_id)	N/A
+T239	analytics	k8s_resource_limit	TABLE	Actual resource limits defined in manifests.	F033	limit_id, pod_name, container_name, limit_cpu, limit_mem	PK (limit_id)	N/A
+T240	analytics	k8s_pod_phase_history	TABLE	Historical phases of pods (Pending, Running, Failed).	F146	history_id, pod_name, namespace, phase, timestamp	PK (history_id)	N/A
+T241	analytics	network_latency_matrix	TABLE	Matrix of latency between nodes/zones.	F135	matrix_ts, source_zone, dest_zone, latency_ms, jitter_ms	PK (matrix_ts, source_zone, dest_zone)	N/A
+T242	analytics	dns_cache_performance	TABLE	DNS resolver cache hit/miss performance.	F131	dns_id, resolver_ip, domain, cache_hits, cache_misses, hit_rate	PK (dns_id)	N/A
+T243	analytics	tls_termination_metrics	TABLE	Metrics at the edge/ingress TLS termination.	F132	tls_id, ingress_name, protocol_version, cipher_suite, handshake_time_p99	PK (tls_id)	N/A
+T244	analytics	waf_event_log	TABLE	Aggregated Web Application Firewall events.	F105	waf_id, timestamp, source_ip, action (BLOCK/ALLOW), rule_id, attack_type	PK (waf_id)	N/A
+T245	analytics	rate_limit_rule	TABLE	Active rate limit rules configuration.	F049	rule_id, name, scope (global/service), limit, window_sec	PK (rule_id)	N/A
+T246	analytics	fact_rate_limit_breach	TABLE	Count of rate limit breaches.	F049	breach_id, rule_id, timestamp, offender_identifier, request_count	PK (breach_id)	FK (rule_id)
+T247	analytics	api_gateway_route	TABLE	API Gateway route definitions.	F152	route_id, path_prefix, target_service, methods, auth_required	PK (route_id)	N/A
+T248	analytics	fact_api_gateway_latency	TABLE	Latency breakdown at the API gateway layer.	F152	gw_latency_id, route_id, timestamp, latency_ms, upstream_latency_ms	PK (gw_latency_id)	FK (route_id)
+T249	analytics	fact_api_auth_failure	TABLE	Authentication/Authorization failures at gateway.	F152	auth_fail_id, route_id, timestamp, failure_reason (invalid_token, permission_denied)	PK (auth_fail_id)	FK (route_id)
+T250	analytics	config_map_version	TABLE	Version tracking for Kubernetes ConfigMaps.	F155	cm_id, name, namespace, version_hash, last_applied_ts	PK (cm_id)	N/A
+T251	analytics	secret_version	TABLE	Version tracking for Kubernetes Secrets.	F156	secret_id, name, namespace, version_hash, rotation_ts	PK (secret_id)	N/A
+T252	analytics	fact_deployment_strategy	TABLE	Strategy used for deployment (Rolling, Blue/Green, Canary).	F084	strategy_id, deployment_id, strategy_name, canary_traffic_pct	PK (strategy_id)	FK (deployment_id)
+T253	analytics	fact_canary_analysis	TABLE	Metrics analysis during canary deployments.	F084	analysis_id, deployment_id, metric_name, baseline_value, canary_value, diff_pct	PK (analysis_id)	FK (deployment_id)
+T254	analytics	rollback_log	TABLE	History of rollback events.	F085	rollback_id, deployment_id, triggered_by, trigger_reason, rollback_ts	PK (rollback_id)	FK (deployment_id)
+T255	analytics	change_freeze_period	TABLE	Scheduled change freeze windows (e.g., Black Friday).	F022	freeze_id, name, start_time, end_time, scope	PK (freeze_id)	N/A
+T256	analytics	sp_check_change_freeze	FUNCTION	Checks if current time is within a change freeze.	F022	RETURNS boolean	N/A
+T257	analytics	fact_database_connection_pool	TABLE	Connection pool stats (active, idle).	F009	pool_id, pool_name, active_count, idle_count, max_count, timestamp	PK (pool_id)	N/A
+T258	analytics	fact_statement_timeout	TABLE	Queries terminated due to timeout.	T160	timeout_id, pid, query_hash, duration_ms, threshold_ms	PK (timeout_id)	N/A
+T259	analytics	dead_tuple_ratio	TABLE	Ratio of dead tuples (bloat) to live tuples.	F184	bloat_id, table_name, dead_tuples, live_tuples, ratio	PK (bloat_id)	N/A
+T260	analytics	index_bloat_ratio	TABLE	Bloat ratio specific to indexes.	F021	idx_bloat_id, index_name, idx_size, waste_size, ratio	PK (idx_bloat_id)	N/A
+T261	analytics	fact_wal_size	TABLE	Write-Ahead Log (WAL) size and generation rate.	F023	wal_id, timestamp, wal_size_mb, wal_rotate_rate_mb_hr	PK (wal_id)	N/A
+T262	analytics	fact_checkpoint_activity	TABLE	Database checkpoint activity stats.	F023	checkpoint_id, timestamp, buffers_written, sync_time_ms	PK (checkpoint_id)	N/A
+T263	analytics	autovacuum_stats	TABLE	Autovacuum worker statistics.	F023	avac_id, table_name, autovacuum_count, manual_vacuum_count, last_autovacuum_ts	PK (avac_id)	N/A
+T264	analytics	fact_cache_hit_ratio	TABLE	Buffer cache hit ratio (critical for performance).	F023	cache_id, timestamp, heap_blks_read, heap_blks_hit, hit_ratio	PK (cache_id)	N/A
+T265	analytics	fact_temp_file_size	TABLE	Size of temporary files generated during queries.	F034	temp_id, timestamp, temp_files_count, temp_files_size_mb	PK (temp_id)	N/A
+T266	analytics	fact_workfile_io	TABLE	I/O operations on workfiles.	F034	workfile_id, timestamp, read_count, write_count	PK (workfile_id)	N/A
+T267	analytics	fact_replication_slot_lag	TABLE	Lag specific to logical replication slots.	F052	slot_id, slot_name, active_pid, confirmed_flush_lsn, current_lsn	PK (slot_id)	N/A
+T268	analytics	identity_provider_stats	TABLE	Statistics on Identity Providers (e.g., eIDAS, Google).	F002	idp_id, idp_name, timestamp, login_attempts, success_count	PK (idp_id)	N/A
+T269	analytics	fact_authorization_latency	TABLE	Latency of OPA/Authorization checks.	F009	authz_id, service_id, timestamp, check_time_ms	PK (authz_id)	FK (service_id)
+T270	analytics	fact_permission_denied	TABLE	Aggregation of Permission Denied errors.	F009	deny_id, role_id, resource_id, action, timestamp	PK (deny_id)	N/A
+T271	analytics	vault_audit_log	TABLE	Audit logs for Vault/KMS accesses.	F119	vault_id, user_id, operation, path, timestamp	PK (vault_id)	N/A
+T272	analytics	encryption_key_usage	TABLE	Frequency of key usage (for rotation planning).	F119	key_id, usage_count, last_used_ts	PK (key_id)	FK (rotation_id)
+T273	analytics	fact_hardware_attestation	TABLE	Logs of hardware attestation checks (Nitro/SGX).	F017	attestation_id, instance_id, pass, failure_reason, timestamp	PK (attestation_id)	N/A
+T274	analytics	supply_chain_sbom	TABLE	Stored Software Bill of Materials metadata.	F118	sbom_id, component_name, version, license, supplier	PK (sbom_id)	N/A
+T275	analytics	sbom_vulnerability_scan	TABLE	Link between SBOM and vulnerability scans.	F118	scan_sbom_id, sbom_id, scan_id, vulnerability_count	PK (scan_sbom_id)	FKs
+T276	analytics	fact_build_time	TABLE	Time taken for CI/CD builds.	F087	build_id, project_name, git_sha, start_ts, end_ts, duration_sec	PK (build_id)	N/A
+T277	analytics	fact_test_coverage	TABLE	Code coverage metrics from test runs.	F086	coverage_id, build_id, line_coverage_pct, branch_coverage_pct	PK (coverage_id)	FK (build_id)
+T278	analytics	fact_lint_violations	TABLE	Linting violations (SonarQube etc).	F018	lint_id, build_id, severity, category, count	PK (lint_id)	FK (build_id)
+T279	analytics	fact_code_churn	TABLE	Code churn metrics (lines added/removed).	F018	churn_id, week_start, author, lines_added, lines_removed	PK (churn_id)	N/A
+T280	analytics	developer_productivity_index	TABLE	Composite index of developer productivity.	F087	prod_id, author_id, week_start, commits, pr_reviews, index_score	PK (prod_id)	N/A
+T281	analytics	incident_comms_log	TABLE	Log of incident communications sent to users/status page.	F030	comm_id, incident_id, channel, message, sent_at	PK (comm_id)	FK (incident_id)
+T282	analytics	status_page_incident	TABLE	State of incidents on public status page.	F030	status_id, incident_id, status (Investigating/Identified/Monitoring/Resolved)	PK (status_id)	FK (incident_id)
+T283	analytics	fact_user_feedback	TABLE	Aggregated user feedback ratings (1-5 stars).	F036	feedback_id, feature_id, rating, timestamp	PK (feedback_id)	FK (feature_id)
+T284	analytics	feedback_sentiment_trend	TABLE	Trend of sentiment over time.	F036	trend_id, feature_id, day, avg_sentiment, volume	PK (trend_id)	N/A
+T285	analytics	support_ticket_keyword	TABLE	Extracted keywords from support tickets.	F093	keyword_id, keyword, ticket_count, trend	PK (keyword_id)	N/A
+T286	analytics	merchant_support_health	TABLE	Health score of merchants based on issues.	F016	health_id, merchant_id, date, open_tickets, unresolved_hours, health_score	PK (health_id)	FK (merchant_id)
+T287	analytics	fact_geo_ip_lookup	TABLE	Metrics on GeoIP lookup performance.	F131	geo_id, timestamp, latency_ms, cache_hit, provider	PK (geo_id)	N/A
+T288	analytics	fraud_rule_performance	TABLE	Performance metrics of specific fraud rules.	F011	rule_perf_id, rule_id, day, triggers, true_positives, false_positives	PK (rule_perf_id)	FK (rule_id)
+T289	analytics	fraud_model_drift	TABLE	Monitoring for model drift over time.	F012	drift_id, model_id, day, distribution_distance, alert_flag	PK (drift_id)	FK (model_id)
+T290	analytics	fact_chargeback_ratio	TABLE	Ratio of disputes/chargebacks to total volume.	F003	cb_ratio_id, merchant_id, month, chargeback_count, total_txn_count, ratio	PK (cb_ratio_id)	FK (merchant_id)
+T291	analytics	fact_refund_ratio	TABLE	Ratio of refunds to total sales.	F037	refund_ratio_id, merchant_id, month, refund_amount, sales_amount, ratio	PK (refund_ratio_id)	FK (merchant_id)
+T292	analytics	payment_method_mix	TABLE	Mix of payment methods used (Blind, Card, etc).	F001	mix_id, merchant_id, day, method_type, transaction_count	PK (mix_id)	FK (merchant_id)
+T293	analytics	fact_settlement_latency	TABLE	Latency between transaction and settlement.	F013	settle_lat_id, day, avg_settle_hours, percentile_95	PK (settle_lat_id)	N/A
+T294	analytics	liquidity_stress_test	TABLE	Logs of simulated liquidity stress tests.	F038	stress_id, test_date, scenario, min_liquidity, passed	PK (stress_id)	N/A
+T295	analytics	fact_correlation_matrix	TABLE	Pre-calculated correlation matrix for metrics.	F084	metric_a, metric_b, correlation_coefficient	PK (metric_a, metric_b)	N/A
+T296	analytics	forecast_accuracy_history	TABLE	History of forecast accuracy to improve models.	F012	forecast_id, model_id, forecast_date, actual_value, predicted_value, error_pct	PK (forecast_id)	FK (model_id)
+T297	analytics	tenant_isolation_breach	TABLE	Logs of potential multi-tenant data leaks (metadata only).	F040	breach_id, tenant_a, tenant_b, resource_type, detected_at	PK (breach_id)	N/A
+T298	analytics	data_classification_tag	TABLE	Tags for data classification (Public, Internal, Confidential).	F040	tag_id, tag_name, description, retention_policy	PK (tag_id)	N/A
+T299	analytics	resource_classification	TABLE	Mapping of resources to classification tags.	F040	rc_id, resource_name, resource_type, tag_id	PK (rc_id)	FK (tag_id)
+T300	analytics	dp_noise_level	TABLE	Configuration of Differential Privacy noise levels.	F025	noise_id, table_name, epsilon, delta, algorithm	PK (noise_id)	N/A
+T301	analytics	vw_realtime_dashboard_json	VIEW	JSON output for real-time dashboard consumption.	F063	N/A	Returns single JSON blob	Materialized via Trigger
+T302	analytics	sp_trigger_snooze	PROCEDURE	Snooze an alert for a specific duration.	F062	IN alert_id int, IN duration_minutes int	N/A
+T303	analytics	tbl_alert_acknowledgement	TABLE	User acknowledgements of alerts.	F062	ack_id, alert_id, acknowledged_by, acknowledged_at, comment	PK (ack_id)	FK (alert_id)
+T304	analytics	tbl_on_call_shift	TABLE	Shift schedule for on-call engineers.	F092	shift_id, engineer_id, start_ts, end_ts, handover_notes	PK (shift_id)	FK (engineer_id)
+T305	analytics	sp_calculate_mtttr	FUNCTION	Calculate Mean Time To Resolution for an incident.	F089	IN incident_id int RETURNS interval	N/A
+T306	analytics	fact_error_budget	TABLE	Remaining error budget per SLO.	F027	budget_id, slo_id, period_start, period_end, budget_remaining_pct	PK (budget_id)	FK (slo_id)
+T307	analytics	fact_api_deprecation_timeline	TABLE	Timeline of deprecated API sunset.	F112	timeline_id, api_id, stage (announce/disable/remove), target_date	PK (timeline_id)	FK (api_id)
+T308	analytics	fact_service_dependency_health	TABLE	Health score of the dependency graph.	F032	health_id, upstream, downstream, availability_score	PK (health_id)	N/A
+T309	analytics	tbl_capacity_scenario	TABLE	"What-if" capacity planning scenarios.	F143	scenario_id, name, description, created_by	PK (scenario_id)	N/A
+T310	analytics	tbl_capacity_scenario_input	TABLE	Inputs for a capacity scenario (e.g., +50% traffic).	F143	input_id, scenario_id, metric_name, change_factor	PK (input_id)	FK (scenario_id)
+T311	analytics	vw_capacity_forecast	VIEW	Forecast of capacity needs.	F143	date, predicted_cpu, predicted_mem, recommendation	N/A
+T312	analytics	fact_billing_metric	TABLE	Metrics used for internal chargeback/billing.	F121	bill_id, tenant_id, metric_name, usage_qty, unit_cost, total_cost	PK (bill_id)	FK (tenant_id)
+T313	analytics	tbl_quarterly_business_review	TABLE	Data snapshots for QBRs.	F014	qbr_id, quarter_start, quarter_end, revenue, growth_pct, top_risk	PK (qbr_id)	N/A
+T314	analytics	fact_okr_progress	TABLE	Objectives and Key Results progress.	F014	okr_id, objective_name, key_result, current_value, target_value, progress_pct	PK (okr_id)	N/A
+T315	analytics	sp_generate_qbr_report	PROCEDURE	Generate data for Quarterly Business Review.	F014	IN quarter_start date	Generates temporary table
+T316	analytics	fact_feature_interaction	TABLE	Co-occurrence of features in user sessions.	F187	feature_a, feature_b, interaction_count, lift	PK (feature_a, feature_b)	N/A
+T317	analytics	fact_search_term	TABLE	Analytics on internal/external search terms.	F163	term_id, term, count, result_click_rate	PK (term_id)	N/A
+T318	analytics	tbl_performance_budget	TABLE	Defined performance budgets for teams.	F003	budget_id, team_name, metric_type, threshold	PK (budget_id)	N/A
+T319	analytics	fact_performance_budget_breach	TABLE	Breaches of the performance budget.	F003	breach_id, budget_id, timestamp, actual_value	PK (breach_id)	FK (budget_id)
+T320	analytics	sp_notify_budget_breach	PROCEDURE	Notify team leads of budget breach.	F003	IN breach_id int	N/A
+T321	analytics	vw_real_time_map	VIEW	Data source for real-time transaction map.	F004	lat, lng, amount, timestamp	Materialized view refreshed every 10s
+T322	analytics	tbl_custom_dashboard_preset	TABLE	Pre-built dashboard templates.	F145	preset_id, name, category, definition_json	PK (preset_id)	N/A
+T323	analytics	tbl_favorite_dashboard	TABLE	User's favorite dashboards.	F145	user_id, dashboard_id	PK (user_id, dashboard_id)	FK (dashboard_id)
+T324	analytics	fact_api_version_usage	TABLE	Usage stats for specific API versions (v1, v2).	F112	version_id, version_string, date, request_count	PK (version_id)	N/A
+T325	analytics	fact_data_freshness_per_source	TABLE	Latency of data arrival from source to warehouse.	F108	freshness_id, source_name, target_table, lag_seconds	PK (freshness_id)	N/A
+T326	analytics	tbl_data_freshness_sla	TABLE	SLA for data freshness.	F108	sla_id, source_name, max_lag_seconds	PK (sla_id)	N/A
+T327	analytics	sp_check_data_freshness	PROCEDURE	Check if data freshness meets SLA.	F108	N/A	Runs periodically
+T328	analytics	vw_data_quality_dashboard	VIEW	High-level data quality scores.	F110	table_name, completeness, uniqueness, validity, overall_score	N/A
+T329	analytics	fact_access_token_usage	TABLE	Usage of API access tokens.	F049	token_id, scope, last_used_ts, usage_count	PK (token_id)	N/A
+T330	analytics	fact_oauth_flow	TABLE	Metrics on OAuth2 authorization flows.	F002	flow_id, client_id, grant_type, success, duration_ms	PK (flow_id)	N/A

@@ -1,0 +1,635 @@
+1.	Module M01	Cryptographic Transaction Core
+a.	Summary
+the Cryptographic Transaction Core, serves as the foundational trust layer and mathematical engine of the PARI ecosystem. It is the critical component that resolves the "Privacy Compliance Paradox" by operationalizing a Chaum-style blind signature protocol enhanced with post-quantum cryptography (PQC) and zero-knowledge proofs (ZKPs). Unlike traditional blockchain systems that broadcast transaction details to a public ledger or legacy banking systems that expose payer data to intermediaries, M01 ensures that financial interactions remain fundamentally unlinkable at the source while providing irrefutable proof of fiscal validity.
+
+At its heart, M01 facilitates a three-party flow: the Customer (Payer), the Exchange (Regulated Financial Institution), and the Merchant (Payee). When a customer withdraws digital coins, the Exchange issues a blind signature. Because the coin is "blinded" at the point of signing, the Exchange cannot link the withdrawn coin to the specific user or track its subsequent movement. When the customer spends the coin at a Merchant, the Merchant deposits it at the Exchange. The Exchange verifies its own signature on the coin, ensuring authenticity, but cannot determine which customer originally withdrew it, thereby guaranteeing payer anonymity.
+
+However, M01 transcends simple anonymity by embedding regulatory compliance into the cryptographic primitives. While the payer remains anonymous, the payee (Merchant) is cryptographically bound to the transaction. This ensures that while the source of funds is private, the destination and amount are transparent for taxation and audit purposes. This architecture eliminates chargebacks; once a coin is spent, the digital signature proves ownership transfer, making the transaction irrevocable and final.
+
+Recognizing the looming threat of quantum computing, M01 is engineered with "crypto-agility" as a first principle. It utilizes a hybrid approach, combining classical elliptic-curve cryptography with NIST-standardized post-quantum algorithms (e.g., CRYSTALS-Dilithium for signatures and Kyber for key exchange). This ensures that the digital signatures securing today’s transactions remain secure against future adversaries possessing quantum capabilities.
+
+Furthermore, M01 integrates Zero-Knowledge Proofs (ZKPs) to validate complex conditions without revealing underlying data. For instance, ZKPs allow the system to verify that a user has sufficient balance (range proofs) or belongs to a specific age demographic (credential proofs) without exposing their total wealth or identity. The module also manages the lifecycle of digital coins, including expiration dates and deposit deadlines, which are crucial for preventing double-spending and managing the monetary base.
+
+Security in M01 is enforced through rigorous implementation standards. All operations rely on SHA-3 hashing for data integrity and utilize Hardware Security Modules (HSMs) for key generation and storage. The core is designed as a stateless, deterministic microservice, allowing it to scale horizontally under load while maintaining the strict consistency required for financial ledgers. By decoupling the cryptographic proof of payment from the identity of the payer, M01 delivers the world’s first payment infrastructure that offers the privacy of cash with the accountability and auditability of digital finance.
+b.	Scope
+The scope of Module M01 encompasses all mathematical operations, cryptographic key management, and protocol logic required to issue, validate, and settle electronic coins within the PARI ecosystem.
+
+In-Scope:
+
+     Blind Signature Protocols: Execution of Chaumian blinding and unblinding operations for coin withdrawal and spending.
+     Post-Quantum Cryptography (PQC): Implementation and hybridization of classical and PQC algorithms (Dilithium, Kyber, SPHINCS+).
+     Zero-Knowledge Proofs (ZKP): Generation and verification of zk-SNARKs/zk-STARKs for balance proofs, ownership, and attribute verification.
+     Hashing & Integrity: SHA-3 implementation for transaction fingerprinting and Merkle tree construction.
+     Key Management: Lifecycle management of denomination keys, master keys, and merchant public keys (integration with HSMs/KMS).
+     Coin Lifecycle: Logic for coin minting, expiration, refresh (anonymity renewal), and destruction.
+     Double-Spending Prevention: Database and logic layer to detect and prevent reuse of serial numbers.
+     Refund Logic: Cryptographic handling of partial/total refunds using blinded refund permissions.
+     Cryptographic Auditing: Creation of immutable cryptographic receipts for regulators.
+
+
+Out-of-Scope:
+
+     User Interface (UI): The frontend wallet experience is handled by Module M04.
+     Bank Connectivity: Fiat transfer initiation is handled by Module M05 (Exchange).
+     Tax Calculation: VAT rates and tax logic are determined by Module M02 and M22, though M01 provides the immutable proof of the transaction amount.
+     Merchant Onboarding: KYB processes are handled by Module M21.
+
+c.	Business Case
+The primary business case for Module M01 is the elimination of the trade-off between financial privacy and regulatory compliance. In the current market, businesses and consumers face a binary choice: use opaque cash or cryptocurrencies (which facilitate tax evasion and money laundering) or use surveillance-heavy digital payments (which erode civil liberties and expose sensitive data to breaches).
+
+Operational Efficiency:
+By implementing irrevocable cryptographic signatures, M01 completely removes the overhead of chargebacks. Chargebacks cost merchants billions annually in fees, administrative overhead, and lost inventory. M01’s "no chargeback" architecture shifts the liability back to the payer (where it belongs with cash-like instruments) while using ZKPs to allow merchants to issue refunds voluntarily without re-identifying the customer.
+
+Risk Mitigation:
+The integration of Post-Quantum Cryptography future-proofs the enterprise. Financial institutions cannot afford the "harvest now, decrypt later" threat posed by state-level actors. M01 provides immediate protection against this existential risk, ensuring long-term asset viability and compliance with emerging cryptographic standards (e.g., FIPS 203).
+
+Market Expansion:
+Many users currently excluded from the digital economy due to privacy concerns (e.g., whistleblowers, journalists, privacy-conscious citizens) can be onboarded. Conversely, tax authorities gain unprecedented real-time visibility into the volume and destination of commerce without violating human rights laws, effectively narrowing the VAT gap (estimated at €100B in the EU).
+
+Cost Reduction:
+The modular, open-source nature of M01 reduces dependency on expensive proprietary payment networks (Visa/Mastercard) and legacy banking infrastructure. By utilizing efficient, software-defined cryptography, the transaction cost per payment can be reduced to fractions of a cent, enabling viable micropayment economies previously impossible due to high fixed fees.
+d.	KPIs
+    Anonymity Set Size: Average number of active coins in a mixing pool or validation window (Target: > 1,000,000).
+    Transaction Unlinkability Score: Entropy metric measuring the difficulty of linking two transactions to the same user (Target: > 0.95 on standardized scale).
+    Refund Success Rate: Percentage of automated refunds processed successfully without manual intervention (Target: 99.9%).
+    Cryptographic Operation Latency: Time taken to generate/verify a signature or ZKP (Target: < 200ms for P99).
+    Double-Spend Detection Latency: Time to identify and reject a replayed coin (Target: < 50ms).
+    Key Rotation Coverage: Percentage of keys rotated before expiration or compromise (Target: 100%).
+    PQC Migration Readiness: Percentage of operations using hybrid classical/PQC stacks (Target: 100% by 2027).
+e.	Stakeholder Insights
+Stakeholder	Concern	Implications
+Citizens (Payers)	Surveillance & Data Monetization	Fear of profiling by corporations or governments leads to financial exclusion. M01 guarantees that spending habits cannot be traced back to the individual identity.
+Merchants (Payees)	Chargebacks & Fraud	High fees and revenue loss from friendly fraud. M01 makes transactions final (like cash), eliminating chargebacks while still allowing optional, merchant-initiated refunds.
+Tax Authorities	Tax Evasion & The "Black Economy"	Need visibility into the economy to enforce VAT/GST. M01 provides transparent merchant receipts and transaction volumes for auditing while respecting privacy laws.
+Regulators (Central Banks)	Systemic Stability & Money Laundering	Fear of untraceable flows funding crime. M01 ensures the Exchange (regulated entity) performs KYC/AML at the "on-ramp" (withdrawal) while monitoring merchant outflows.
+Cryptographers/Security Auditors	Quantum Vulnerability	Reliance on RSA/ECC is a long-term risk. M01's implementation of NIST PQC standards mitigates the risk of future decryption of historical archives.
+
+f.	Knowledge Representation Graph (mermaid.js)
+graph TD
+    subgraph "Module M01: Cryptographic Transaction Core"
+        CC[Cryptographic Core Engine]
+        KMS[Key Management Service]
+        BS[Blind Signature Protocol]
+        ZKP[Zero Knowledge Proof Engine]
+        PQC[Post Quantum Crypto Layer]
+    end
+
+    subgraph "External Entities"
+        User[Payer Wallet]
+        Exch[Exchange Bank]
+        Merch[Merchant Backend]
+        Audit[Auditor Node]
+    end
+
+    %% Key Management
+    KMS -- Generates/Master Keys --> BS
+    KMS -- Publishes/Denomination Keys --> User
+    KMS -- Signs/With PQC --> BS
+
+    %% Withdrawal Flow
+    User -- Blinds/Coin Request --> BS
+    BS -- Returns/Blind Signature --> User
+    User -- Unblinds/Creates Coin --> CC
+
+    %% Payment Flow
+    CC -- Constructs/Contract --> ZKP
+    ZKP -- Generates/Ownership Proof --> CC
+    User -- Sends/Coin + Proof --> Merch
+
+    %% Deposit Flow
+    Merch -- Submits/Coin for Deposit --> BS
+    BS -- Verifies/Signature & Double Spend --> KMS
+    BS -- Confirms/Settlement --> Merch
+
+    %% Audit Flow
+    CC -- Emits/Anonymized Logs --> Audit
+
+    %% PQC Integration
+    CC -- Uses/Hybrid Signatures --> PQC
+    PQC -- Ensures/Forward Secrecy --> Audit
+
+    style CC fill:#f9f,stroke:#333,stroke-width:4px
+    style BS fill:#ccf,stroke:#333,stroke-width:2px
+    style ZKP fill:#cfc,stroke:#333,stroke-width:2px
+    style PQC fill:#fcc,stroke:#333,stroke-width:2px
+
+g.	Comprehensive List of Features
+
+id	Feature	Description	Business Case	AI/ML Algorithms	KPIs	Primary Users
+F001	Blind Signature Issuance	Core logic for Exchange to sign a blinded coin request without seeing the coin value.	Enables unlinkability between withdrawal and spending.	N/A	Sig Verify Latency	Exchange
+F002	Coin Blinding Utility	Client-side logic to randomize the coin serial number before signing.	Guarantees payer anonymity against the Exchange.	N/A	Blinding Time (ms)	Wallet
+F003	Coin Unblinding	Client-side logic to remove the randomization factor after receiving the signature.	Makes the coin spendable while retaining the Exchange's signature.	N/A	Unblinding Time (ms)	Wallet
+F004	SHA-3 Hashing Engine	Calculates SHA-3 hashes for all transaction metadata and coin structures.	Ensures data integrity and collision resistance.	N/A	Hash/Throughput	Core System
+F005	Double-Spend Prevention (DB)	Checks the spent coin database to prevent reuse of a serial number.	Prevents inflation and fraud; critical for asset integrity.	Anomaly Detection	False Positive Rate	Exchange
+F006	Denomination Key Management	Generation and lifecycle management of keys for different coin values (e.g., $1, $10, $100).	Enables efficient payment flows and limits liability exposure.	Predictive Modeling	Key Rotation Uptime	Exchange
+F007	Merchant Public Key Verification	Validates the Merchant's public key embedded in the contract.	Ensures funds are sent to the correct legal entity.	N/A	Verification Time	Exchange
+F008	Contract Signing (Payer)	Payer signs the contract terms (amount, refund deadline) with the coin.	Binds the payer to the specific transaction irrevocably.	N/A	Sig Success Rate	Wallet
+F009	Deposit Verification	Exchange verifies the deposit request, coin signature, and merchant signature.	Confirms validity of funds transfer to the merchant.	N/A	Settlement Latency	Exchange
+F010	Refresh Protocol (Merging)	Allows users to merge old coins into new coins to restore anonymity.	Prevents long-term tracking of coin usage patterns.	N/A	Anonymity Set Size	Wallet
+F011	Partial Refund Processing	Logic to handle merchant-issued refunds for partial amounts.	Enhances consumer protection and trust without revealing identity.	N/A	Refund Rate	Merchant
+F012	Refund Permission Blinding	Payer generates a blinded permission for refunds during payment.	Allows merchant to sign a refund without knowing who receives it.	N/A	Permission Validity	Wallet
+F013	Coin Expiration Logic	Enforces legal deposit deadlines on coins (e.g., deposit within 1 year).	Encourages timely settlement and manages monetary velocity.	N/A	Expired Coin Rate	Exchange
+F014	Link Encryption	Encrypts the communication link between Wallet and Exchange using TLS 1.3.	Prevents MITM attacks and traffic analysis.	N/A	Encryption Strength	All Users
+F015	RSA Support (Legacy)	Support for RSA blind signatures for backward compatibility.	Facilitates integration with older systems during transition.	N/A	Compatibility Score	Exchange
+F016	EdDSA Support	High-performance Edwards-curve signatures for standard operations.	Offers better performance than RSA for mobile devices.	N/A	Ops/Second	Wallet
+F017	CRYSTALS-Dilithium Integration	NIST-standard PQC signing algorithm integration.	Future-proofs the system against quantum attacks.	N/A	Dilithium Verify Time	Exchange
+F018	Hybrid Signature Scheme	Combines classical and PQC signatures in a single transaction payload.	Ensures security is not compromised if one algorithm fails.	N/A	Combined Payload Size	Exchange
+F019	Zero-Knowledge Balance Proof	Proves that the sum of inputs equals the sum of outputs plus fees.	Prevents hidden inflation or "magic money" creation.	zk-SNARKs	Proof Generation Time	Wallet
+F020	Zero-Knowledge Range Proof	Proves that a payment amount is within a valid range (e.g., > 0).	Prevents negative numbers or overflow attacks.	Bulletproofs	Proof Size (bytes)	Wallet
+F021	Age Restriction Credential	ZKP proving the user is over a certain age without revealing DOB.	Complies with age-gated sales laws (alcohol, tobacco) anonymously.	zk-ID	Verify Time	Merchant
+F022	Income/Wealth Proof	ZKP proving user funds are below a certain threshold (for means-testing).	Enables anonymous access to subsidized services.	Merkle Trees	Proof Accuracy	Wallet
+F023	Coin Aggregation	Combines multiple smaller coins into one larger coin.	Reduces database bloat and improves storage efficiency.	N/A	Aggregation Ratio	Wallet
+F024	Coin Splitting	Splits one large coin into multiple smaller coins.	Enables exact change payments.	N/A	Split Success Rate	Wallet
+F025	Replay Attack Protection	Adds a timestamp or nonce to every ZK and signature.	Prevents valid transactions from being resent maliciously.	N/A	Replay Reject Rate	Exchange
+F026	HSM Integration (Key Gen)	Offloads master key generation to Hardware Security Module.	Meets regulatory requirements for key custody.	N/A	HSM Availability	Exchange
+F027	HSM Integration (Signing)	Performs high-value denomination signing inside HSM.	Prevents private key exfiltration from the server memory.	N/A	HSM Ops/Sec	Exchange
+F028	Master Key Derivation	Derives denomination keys from a single master seed.	Simplifies backup and recovery processes.	N/A	Derivation Time	Exchange
+F029	Key Revocation List	Maintains a list of compromised or expired public keys.	Ensures system rejects weak keys.	N/A	Revocation Propagation	Exchange
+F030	Auditable Receipt Generation	Creates a cryptographic receipt for the merchant and auditor.	Provides legal proof of transaction for tax authorities.	N/A	Receipt Generation Rate	Exchange
+F031	Transaction Serialization	Converts transaction objects to canonical binary format (CBOR/Protobuf).	Ensures consistent hashing across different platforms.	N/A	Parse Success Rate	Core System
+F032	Nonce Management	Manages random nonces for ZKPs to prevent uniqueness attacks.	Critical for security of zero-knowledge protocols.	N/A	Nonce Collision Rate	Wallet
+F033	Wallet Synchronization	Syncs pending refreshes and refunds across devices.	Provides seamless user experience.	N/A	Sync Latency	Wallet
+F034	Offline Payment Queue	Queues transactions signed offline for broadcast when online.	Enables reliable payments in poor connectivity areas.	N/A	Queue Success Rate	Wallet
+F035	Fee Calculation Logic	Calculates dynamic network fees based on coin size and current load.	Covers operational costs of the infrastructure.	Regression Analysis	Fee Accuracy	Wallet
+F036	Multi-Signature Support	Requires signatures from multiple authorized devices for large spends.	Enhances security for corporate or high-value accounts.	N/A	Sig Time	Wallet
+F037	Session Key Establishment	Ephemeral key exchange for single transaction session encryption.	Adds a layer of forward secrecy.	ECDH	Key Setup Time	Wallet
+F038	Merchant Deposit Batching	Batches multiple deposit requests into a single API call.	Reduces load on the Exchange and increases throughput.	N/A	Batch Efficiency	Merchant
+F039	Coin Status Tracking	Tracks state of coins (fresh, spent, refreshed, expired).	Enables accurate ledger accounting.	N/A	State Accuracy	Exchange
+F040	Global Denomination Sync	Ensures all nodes agree on current valid denomination keys.	Prevents forging of coins with invalid keys.	N/A	Sync Latency	Exchange
+F041	CSPRNG Integration	Cryptographically Secure Pseudo-Random Number Generator for blinding.	Ensures unpredictability of blind factors.	N/A	Entropy Score	Wallet
+F042	Transaction Merkle Root	Calculates root hash of a block of transactions for auditing.	Enables compact verification of large datasets.	N/A	Tree Depth	Exchange
+F043	Compact Proof Format	Uses efficient serialization for ZKPs to minimize bandwidth.	Reduces data costs for mobile users.	N/A	Proof Size	Wallet
+F044	Invalid Coin Rejection	Logic to reject coins signed with revoked or invalid keys.	Protects the network from counterfeit coins.	N/A	Rejection Latency	Exchange
+F045	Reserve Deposit Logic	Handles funds held in escrow for dispute periods.	Provides liquidity assurance during specific contract types.	N/A	Reserve Ratio	Exchange
+F046	Sweep Function	Moves all coins from a backup wallet to a primary wallet.	Recovers funds securely from a cold storage backup.	N/A	Sweep Success Rate	Wallet
+F047	Budgeting SDK	API to check wallet balance without spending coins.	Helps users manage finances.	N/A	Query Latency	Wallet
+F048	Push Payment Encryption	Encrypts the payment payload so only the merchant can read it.	Protects sensitive metadata in transit.	AES-GCM	Decrypt Time	Merchant
+F049	Refund Deadline Enforcement	Rejects refund requests submitted after the contract deadline.	Enforces contract finality and accounting stability.	N/A	Reject Accuracy	Exchange
+F050	Currency Conversion Proof	ZKP proving fair currency exchange rates were applied.	Essential for cross-border privacy payments.	zk-SNARKs	Proof Validity	Exchange
+F051	Anti-Money Laundering (AML) Flag	Flags coins derived from high-risk KYC withdrawals.	Allows selective monitoring without breaking global privacy.	Heuristic Analysis	Flag Precision	Exchange
+F052	Small Value Anonymity	Sets no KYC threshold for micro-transactions (e.g., < €150).	Encourages adoption for small daily purchases.	N/A	Anonymity Threshold	Exchange
+F053	Large Value Surveillance	Requires stricter tracing for high-value denominations.	Mitigates high-end financial crime risk.	N/A	Compliance Score	Exchange
+F054	CryptographicNonce Cache	Caches nonces to prevent reuse in high-frequency scenarios.	Performance optimization for high-throughput environments.	N/A	Cache Hit Ratio	Exchange
+F055	Denomination Key overlap	Ensures overlap periods between old and new keys for smooth transition.	Prevents service interruption during rotation.	N/A	Overlap Duration	Exchange
+F056	Deterministic Random Bit Generator	DRBG for creating predictable test vectors in dev environments.	Ensures reproducible testing for CMMI standards.	N/A	Reproducibility	DevOps
+F057	Blind Factor Persistence	Securely stores blind factors for future refunds/refreshes.	Ensures user can reclaim value if needed.	N/A	Persistence Success	Wallet
+F058	SPHINCS+ One-Time Signatures	Support for stateless hash-based signatures for long-term archives.	Ultimate security for non-repudiation logs.	N/A	Sig Size	Auditor
+F059	Side-Channel Resistance	Implementation of constant-time crypto algorithms.	Defends against timing attacks on hardware.	N/A	Timing Variance	Core System
+F060	Fuzzing Interface	Allows automated fuzzing tools to test crypto parser robustness.	Identifies edge cases and memory corruption bugs.	N/A	Bugs Found	QA
+F061	Secure Enclave Bridging	Interfaces with Apple Secure Enclave / Android TEE.	Offloads key storage from main OS memory.	N/A	Op Success	Wallet
+F062	Web Crypto API Adapter	Polyfills/Adapters for browser-based wallet implementations.	Enables web-based payments without plugins.	N/A	Browser Support	Web Dev
+F063	Transaction Linkability Scoring	Measures how easily a set of transactions could be linked.	Metric for internal privacy quality assurance.	Statistical Analysis	Linkability Score	Auditor
+F064	Coin Reconstruction	Rebuilds a coin object from its raw binary format.	Essential for database recovery and debugging.	N/A	Reconstruction Success	DB Admin
+F065	Hot-Cold Key Bridging	Secure mechanism to move keys from cold storage to hot HSM.	Enables secure key activation ceremonies.	N/A	Bridge Security	Exchange
+F066	Granular Fee Logic	Variable fees based on complexity of ZKP used.	Aligns cost with computational resource usage.	N/A	Fee Accuracy	Exchange
+F067	Peer-to-Peer (P2P) Escrow	Holds coins in a 2-of-2 multisig for direct P2P transfers.	Enables non-merchant payments while preventing double-spend.	N/A	Escrow Release Time	Wallet
+F068	PayTo Protocol	Parsing and validating the payto:// URI standard.	Standardizes payment initiation across apps.	N/A	Parse Rate	Wallet
+F069	Contract Termination	Logic to terminate a contract early by mutual consent.	Provides flexibility in complex commercial dealings.	N/A	Termination Rate	Exchange
+F070	Lost Device Recovery	Protocol to revoke wallet keys and transfer funds to new device.	Critical for user retention and asset protection.	Risk Scoring	Recovery Success	Wallet
+F071	Dynamic Coin Selection	Algorithm to select optimal coins for a payment (change avoidance).	Improves privacy by reducing wallet fingerprinting.	Knapsack Algo	Selection Speed	Wallet
+F072	Wallet Age Proof	ZKP proving the age of the wallet (customer loyalty duration).	Enables anonymous loyalty rewards.	zk-ID	Verify Time	Merchant
+F073	Tax Exemption Proof	Cryptographic proof of tax-exempt status.	Automates VAT split payments.	zk-SNARKs	Proof Validity	Merchant
+F074	Multi-Currency Support	Handles cryptographic logic for different currency namespaces.	Enables seamless cross-border payments.	N/A	Currency Count	Exchange
+F075	Instant Withdrawal	Optimized flow for immediate withdrawal after KYC approval.	Improves user experience.	N/A	Withdrawal Latency	Wallet
+F076	Batch Refresh	Refreshes multiple coins in a single zero-knowledge transaction.	Saves bandwidth and increases anonymity set.	N/A	Batch Size	Wallet
+F077	Transparent Mode Switch	Allows user to voluntarily disclose identity for a transaction.	Facilitates situations requiring explicit identification (e.g., buying a car).	N/A	Switch Time	Wallet
+F078	Honeypot Token Detection	Identifies coins marked as "bait" by law enforcement.	Prevents users from inadvertently handling tainted funds.	Pattern Matching	Detection Rate	Wallet
+F079	Proof Caching	Caches verification results for expensive ZKPs.	Reduces load on Exchange verifiers.	N/A	Cache Hit Rate	Exchange
+F080	Proof Expiry	Sets a time limit on the validity of a ZKP.	Prevents replay of old proofs.	N/A	Expiry Accuracy	Exchange
+F081	Recursive ZKP Composition	Combines multiple proofs into a single recursive proof.	Drastically reduces verification overhead.	Halo2	Recursive Depth	Wallet
+F082	Universal Circuit Generator	Generates generic ZK circuits for arbitrary business logic.	Allows customization of payment conditions.	Circom	Gen Time	Developer
+F083	Gas Optimization (ZKP)	Minimizes the computational cost of proof generation.	Improves battery life on mobile devices.	N/A	Energy Consumption	Wallet
+F084	Proof Stream Compression	Compresses the stream of ZKP data during transmission.	Reduces data usage.	Zstd	Compression Ratio	Network
+F085	Random Oracle Simulation	Simulation of random oracle model for security proofs.	Used for internal cryptographic validation.	N/A	Sim Speed	Crypto Team
+F086	BLS Signature Aggregation	Aggregates many signatures into one for batch verification.	Increases throughput for bulk processing.	N/A	Aggregation Factor	Exchange
+F087	Threshold Decryption	Requires a threshold of parties to decrypt a payload.	Used for high-stakes audit investigations.	Shamir's Secret Sharing	Decrypt Time	Auditor
+F088	Zero-Knowledge Identity (zk-ID)	Core logic for handling anonymous identity credentials.	Foundation for all privacy-preserving attribute proofs.	Idemix	Credential Verify Time	Wallet
+F089	Revocation Accumulator	Cryptographic structure to efficiently prove non-revocation.	Handles revocation of privacy credentials without revealing list.	RSA Accumulator	Proof Size	Wallet
+F090	Atomic Swap Protocol	Logic to atomic swap coins between different blockchain/ledgers.	Bridges PARI ecosystem with other crypto assets.	HTLC	Swap Success	Exchange
+F091	Time-Locked Coins	Coins that cannot be spent until a specific future block time.	Enables savings contracts or vesting schedules.	N/A	Unlock Success	Wallet
+F092	Crypto-Audit Trail	Immutable log of all cryptographic operations performed.	Essential for forensic analysis and debugging.	N/A	Log Integrity	DevOps
+F093	Algorithm Versioning	Tags every transaction with the specific crypto algo version used.	Ensures future compatibility during upgrades.	N/A	Version Coverage	Exchange
+F094	Fallback Mechanism	Switches to classical crypto if PQC verification fails.	Ensures system availability during migration periods.	N/A	Fallback Rate	Exchange
+F095	Transaction Malleability Fix	Ensures transaction ID cannot be changed without invalidating signature.	Prevents confusion in ledger tracking.	N/A	Malleability Count	Exchange
+F096	Blind Proof of Reserves	Exchange proves it holds reserves backing the digital coins.	Prevents "fractional reserve" risk in the digital system.	Pedersen Commitment	Proof Accuracy	Exchange
+F097	Coin Dust Management	Logic to handle (merge or destroy) coins below minimum value.	Prevents database bloat from unusable dust.	N/A	Dust Removal Rate	Exchange
+F098	Hash-to-Curve Algorithm	Maps arbitrary data to a point on an elliptic curve.	Used in advanced signature schemes and DAA.	N/A	Map Success	Core System
+F099	Oblivious Transfer	Protocol where user receives a message without sender knowing which.	Advanced privacy feature for private data retrieval.	N/A	OT Success	Wallet
+F100	Secure Multi-Party Computation (MPC)	Computation on private data from multiple parties without revealing it.	Used for aggregated statistics without exposing individual users.	SPDZ	Compute Time	Analyst
+F101	Ring Signature Integration	Hides spender among a set of possible signers (optional mode).	Provides higher anonymity for specific use cases.	N/A	Ring Size	Wallet
+F102	Stealth Addresses	Generates one-time addresses for every transaction.	Prevents public address linking.	N/A	Address Gen Time	Wallet
+F103	Homomorphic Encryption	Allows computations on encrypted transaction amounts.	Enables privacy-preserving revenue analysis for merchants.	Paillier	Encrypt/Decrypt Time	Exchange
+F104	Verifiable Delay Function (VDF)	Function that takes a minimum time to compute, is easily verifiable.	Prevents front-running or spamming in transaction ordering.	N/A	VDF Compute Time	Exchange
+F105	Memory-Hard Function	Key derivation function requiring high RAM usage.	Thwarts brute-force attacks on user PINs/Passwords.	Argon2	Hash Duration	Wallet
+F106	Key Blending	Blends user key with system entropy for randomness.	Enhances key generation security.	N/A	Entropy Score	Wallet
+F107	Post-Quantum KEM	Key Encapsulation Mechanism for secure key exchange.	Replaces ECDH in quantum-resistant environments.	Kyber	Encap Success	Exchange
+F108	Lattice-Based Crypto	Implementation of lattice-based signature schemes (Dilithium).	Core of the PQC strategy.	N/A	Sig Size	Exchange
+F109	Code-Based Crypto	Implementation of code-based signatures (McEliece).	Alternative PQC backup algorithm.	N/A	Sig Size	Exchange
+F110	Isogeny-Based Crypto	Exploration of SIKE/CSIDH algorithms (research phase).	Future-proofing research.	N/A	Benchmark Time	Research
+F111	Signature Aggregation (BLS)	Aggregates 1000s of signatures into one 32-byte proof.	Reduces storage requirements for global state.	N/A	Storage Saved	Exchange
+F112	Vector Commitments	Commits to a vector of values with ability to prove inclusion.	Efficient stateless client implementations.	KZG	Proof Size	Wallet
+F113	Polynomial IOPs	Interactive Oracle Proofs for scalable ZKPs.	Basis for modern ZK-Rollups.	N/A	Round Complexity	Exchange
+F114	Lookup Arguments	Efficient ZK technique for table lookups.	Optimizes complex circuit logic.	Plookup	Proof Size	Wallet
+F115	Custom Gate Design	Specialized arithmetic gates for specific operations.	Optimizes ZK circuit performance.	N/A	Gate Count	Developer
+F116	Witness Generation	Creates the witness (secret input) for ZKPs.	Most computationally intensive step.	N/A	Witness Size	Wallet
+F117	Prover Key Management	Handles the large prover keys for ZK systems.	Securely stores parameters needed for proof generation.	N/A	Key Size	Wallet
+F118	Verifier Key Management	Handles the small verifier keys.	Enables fast verification by anyone.	N/A	Key Size	Exchange
+F119	Trusted Setup Ceremony	(Optional) Phase to generate common reference strings.	Coordinate security initialization for specific ZK systems.	N/A	Participation Rate	Governance
+F120	Transparent Setup (ZK-STARK)	Uses ZK-STARKs that require no trusted setup.	Enhances trust model by removing setup phase risks.	N/A	Setup Time	Exchange
+F121	Fiat-Shamir Heuristic	Converts interactive proofs to non-interactive.	Essential for blockchain/asynchronous verification.	N/A	Randomness Quality	Core System
+F122	Sponge Function	Core cryptographic primitive used in SHA-3 and STARKs.	Absorbs and squeezes data for hashing.	N/A	Throughput	Core System
+F123	Permutation Network	Mixes data thoroughly in crypto algorithms.	Critical for diffusion in Keccak/SHA-3.	N/A	Layer Count	Core System
+F124	Constant-Time Encoding	Encodes data (Base64, Hex) in constant time.	Prevents side-channel leaks via string processing.	N/A	Timing Variance	Wallet
+F125	Cryptographic Salt Injection	Adds random salt to hashed data structures.	Prevents rainbow table attacks on leaked hashes.	N/A	Salt Uniqueness	Wallet
+F126	Key Stretching	Expands a short password into a long cryptographic key.	Converts user passwords to secure wallet keys.	N/A	Stretch Iterations	Wallet
+F127	Secure Erasure	Zeros out memory buffers containing private keys immediately after use.	Prevents memory dump attacks.	N/A	Erasure Speed	Wallet
+F128	API Rate Limiting (Crypto)	Limits expensive verification requests per IP.	Prevents DoS attacks on heavy crypto operations.	Token Bucket	Limit Accuracy	Exchange
+F129	Circuit Optimization	Minimizes the number of constraints in ZK circuits.	Reduces proof generation time and cost.	Compiler	Constraint Count	Developer
+F130	Batch Verification	Verifies multiple signatures/proofs in a single mathematical operation.	Massive throughput gain for the Exchange.	N/A	Batch Size	Exchange
+F131	Merkle Proof Generation	Generates proof that a leaf is in a Merkle tree.	Used for lightweight wallet verification.	N/A	Proof Depth	Wallet
+F132	Sparse Merkle Tree	Uses a tree with empty leaves for efficient state updates.	Reduces proof sizes for dynamic datasets.	N/A	Tree Height	Exchange
+F133	Verkle Tree	Vector commitment based Merkle tree alternative.	Drastically reduces proof size for large accounts.	N/A	Proof Size	Exchange
+F134	Account Abstraction	Separates signing logic from account logic.	Allows smart contract wallets in the PARI ecosystem.	N/A	Abstraction Level	Wallet
+F135	Social Recovery Mechanism	Allows wallet recovery by friends without centralized KYC.	Increases user autonomy.	Sharding	Recovery Success	Wallet
+F136	Metadata Encryption	Encrypts non-financial transaction data (memo, reference).	Ensures total privacy even for transaction notes.	AES-GCM	Decrypt Time	Wallet
+F137	Quantum Random Number Generator	Uses a hardware QRNG for true randomness.	Highest quality entropy for key generation.	N/A	Entropy Quality	Exchange
+F138	Algorithm Agility Config	Feature flags to toggle crypto algorithms instantly.	Rapid response to vulnerabilities (e.g., a break in RSA).	N/A	Toggle Latency	DevOps
+F139	Cryptographic Benchmarking	Automated performance testing of all primitives.	Ensures hardware upgrades yield performance gains.	N/A	Ops/Sec Benchmark	QA
+F140	Proof of Stake Simulation (Internal)	Simulates economic incentives for honest behavior.	Used for internal consensus research (if applicable).	Game Theory	Node Honesty	Research
+F141	Cross-Shard Communication	Protocol for secure payments across different database shards.	Maintains consistency in a sharded database.	ZK-Relay	Message Latency	Exchange
+F142	State Channel Closure	Cryptographic finalization of an off-chain payment channel.	Enables high-frequency micropayments.	N/A	Closure Time	Wallet
+F143	Watchtower Monitoring	Third-party service to watch for channel cheating attempts.	Secures users who are offline.	N/A	Penalty Success	Watchtower
+F144	Challenge Period	Window to contest a channel closure transaction.	Ensures fairness in off-chain interactions.	N/A	Challenge Success	Wallet
+F145	Gossip Protocol Encryption	Encrypted propagation of transaction info across nodes.	Prevents network observers from tracing traffic.	TLS 1.3	Propagation Speed	P2P Node
+F146	Epidemic Broadcast	Rapid propagation of key updates across the network.	Ensures fast revocation of compromised keys.	N/A	Propagation Time	Exchange
+F147	Node Sybil Resistance	Mechanism to prevent Sybil attacks on the P2P layer.	Ensures network integrity.	PoW/PoX	Node Validity	Network
+F148	Light Client Verification	Allows devices to verify chain state with minimal data.	Mobile-friendly security model.	N/A	Data Usage	Wallet
+F149	Fraud Proof Generation	Generates a compact proof that a transaction is invalid.	Enables light clients to reject bad blocks.	N/A	Proof Size	Exchange
+F150	Data Availability Sampling	Checks availability of block data without downloading it.	Scalability solution for large state.	N/A	Sampling Rate	Exchange
+F151	Ceiling Function (Math)	Math logic for ZK circuits handling integer division.	Ensures deterministic rounding in financial math.	N/A	Calc Accuracy	Core System
+F152	Modular Arithmetic (Field Ops)	Core math for all elliptic curve and ZK operations.	The bedrock of the crypto engine.	N/A	Op Latency	Core System
+F153	Field Extension	Extension fields (Fp^2, Fp^12) for pairing-based crypto.	Required for BLS signatures and some ZKPs.	N/A	Mul Latency	Core System
+F154	Pairing Operation	Bilinear map operation used in advanced signatures.	Heavy computation for BLS aggregation.	N/A	Pairing Time	Core System
+F155	Point Compression	Compressing elliptic curve points to 33 bytes.	Saves bandwidth and storage.	N/A	Compression Ratio	Core System
+F156	Point Decompression	Expanding compressed points back to full coordinates.	Required for verification.	N/A	Decomp Time	Core System
+F157	Group Order Validation	Checks if a point is on the curve and in the right subgroup.	Prevents small-subgroup confinement attacks.	N/A	Validation Time	Core System
+F158	Invalid Curve Attack Check	Specific validation to thwart invalid curve attacks.	Security hardening for EC operations.	N/A	Check Coverage	Core System
+F159	Twist Security	Security against attacks using the twist of the curve.	Relevant for specific curves (e.g., Ed25519).	N/A	Security Level	Crypto Team
+F160	Safe Prime Generation	Generates large safe primes for DH-based operations.	Legacy support for specific protocols.	N/A	Prime Bit-Length	Exchange
+F161	Elligator2 Mapping	Maps elliptic curve points to uniform random strings.	Hides public keys as random noise.	N/A	Indistinguishability	Wallet
+F162	Commitment Opening	Reveals the value inside a Pedersen commitment.	Allows settlement of hidden amounts.	N/A	Open Time	Exchange
+F163	Range Proof (Borromean)	Efficient range proof technique.	Legacy/constraint specific range proving.	N/A	Proof Size	Wallet
+F164	Schnorr Signature	Multi-signature friendly signature scheme.	Allows MuSig (aggregated signatures) for wallets.	N/A	Aggregation Speed	Wallet
+F165	adaptor Signature	Signature that reveals a secret only when published on-chain.	Enables atomic swaps and cross-chain contracts.	N/A	Secret Size	Exchange
+F166	Scriptless Scripts	Logic embedded purely in signatures without explicit scripting language.	Enhances privacy and scalability.	N/A	Script Size	Wallet
+F167	Taproot Adaptation	Logic for Taproot-like output structures.	Improves privacy of complex transactions (M-of-N).	N/A	Taproot Usage	Exchange
+F168	Signature Replay Detection	Local check to ensure a signature hasn't been seen before.	Defense layer against replay.	N/A	Detection Time	Wallet
+
+
+h.	Comprehensive List of Database Objects
+id	schema_name	object_name	object_type	description	feature_reference	column_names	constraints / notes	junction_tables
+T001	crypto_core	denomination_keys	Table	Stores the public keys for different coin denominations issued by the Exchange.	F006	denom_id, master_pub_key, value, currency, start_time, expire_time, key_algorithm, public_key_blob	PRIMARY KEY (denom_id), CHECK (value > 0)	N/A
+T002	crypto_core	coin_requests	Table	Logs withdrawal requests where the user asks for a blind signature.	F001	request_id, user_h_pub, blinded_msg, amount, denom_id, timestamp, status	PRIMARY KEY (request_id), FOREIGN KEY (denom_id)	N/A
+T003	crypto_core	blind_signatures	Table	Stores the Exchange's signature on the blinded coin.	F001	sig_id, request_id, denom_id, signature_blob, created_at	PRIMARY KEY (sig_id), FOREIGN KEY (request_id)	N/A
+T004	crypto_core	active_coins	Table	Represents coins in customer wallets that have not been spent.	F009	coin_pub, denom_id, remaining_value, wallet_sig, coin_start_date	PRIMARY KEY (coin_pub), FOREIGN KEY (denom_id)	N/A
+T005	crypto_core	spent_coins	Table	Immutable ledger of coins that have been deposited (spent).	F005	coin_pub, denom_id, amount_spent, merchant_pub, transaction_hash, deposit_timestamp	PRIMARY KEY (coin_pub), UNIQUE (transaction_hash)	N/A
+T006	crypto_core	refresh_commitments	Table	Tracks coins that are being "melted" (refreshed) for new coins.	F010	melt_id, old_coin_pub, old_denom_id, session_hash, status	PRIMARY KEY (melt_id)	N/A
+T007	crypto_core	refresh_reveals	Table	Stores the data revealed during the refresh protocol to prove validity.	F010	reveal_id, melt_id, new_coin_pub, transfer_pub, link_secret	PRIMARY KEY (reveal_id), FOREIGN KEY (melt_id)	N/A
+T008	crypto_core	refund_permissions	Table	Stores blinded permissions generated by the customer for refunds.	F012	permission_id, coin_pub, merchant_pub, contract_hash, refund_deadline	PRIMARY KEY (permission_id)	N/A
+T009	crypto_core	refund_signatures	Table	Stores the merchant's signature on the refund permission.	F011	refund_sig_id, permission_id, merchant_sig, amount_with_fee	PRIMARY KEY (refund_sig_id), FOREIGN KEY (permission_id)	N/A
+T010	crypto_core	contracts	Table	Stores the contract terms (amount, timestamp) hashed and signed.	F008	contract_hash, merchant_pub, h_contract_terms, validation_time	PRIMARY KEY (contract_hash)	N/A
+T011	crypto_core	deposit_requests	Table	Logs the merchant's request to deposit a coin.	F009	deposit_id, coin_pub, merchant_pub, contract_hash, coin_sig, wire_details_hash	PRIMARY KEY (deposit_id)	N/A
+T012	crypto_core	wire_fees	Table	Stores fees for wire transfers out of the Exchange.	F035	wire_method, start_date, end_date, fee_fraction, fee_floor	PRIMARY KEY (wire_method, start_date)	N/A
+T013	crypto_core	global_fee_state	Table	Tracks the current global fee configuration.	F035	fee_version, history_fee, account_fee, purse_fee	PRIMARY KEY (fee_version)	N/A
+T014	crypto_core	master_public_key	Table	Stores the offline master public key of the Exchange.	F028	master_pub_key, version, start_date	PRIMARY KEY (master_pub_key)	N/A
+T015	crypto_core	payto_uris	Table	Validates and stores supported payto URI formats.	F068	payto_hash, payto_uri, is_active	PRIMARY KEY (payto_hash)	N/A
+T016	crypto_core	age_restriction_keys	Table	Public keys for age restriction verification (ZK).	F021	age_group_id, public_key, valid_from	PRIMARY KEY (age_group_id)	N/A
+T017	crypto_core	zkp_proofs	Table	Stores generated Zero-Knowledge Proofs for auditing.	F019	proof_id, proof_type, transaction_hash, proof_blob, verification_status	PRIMARY KEY (proof_id), CHECK (verification_status IN ('pending', 'valid', 'invalid'))	N/A
+T018	crypto_core	proof_batch	Table	Groups proofs for batch verification efficiency.	F130	batch_id, proof_count, total_size, created_at	PRIMARY KEY (batch_id)	N/A
+T019	crypto_core	proof_batch_mapping	Table	Junction table linking proofs to batches.	F130	batch_id, proof_id	FOREIGN KEY (batch_id), FOREIGN KEY (proof_id)	proof_batch_mapping
+T020	crypto_core	revoked_keys	Table	List of compromised keys that must be rejected.	F029	key_hash, revocation_date, reason	PRIMARY KEY (key_hash)	N/A
+T021	crypto_core	hsm_keys	Table	Metadata for keys stored inside the HSM.	F026	key_id, key_type, hsm_slot_id, creation_date, last_rotate_date	PRIMARY KEY (key_id)	N/A
+T022	crypto_core	key_signing_queue	Table	Queue for requests requiring HSM signature.	F027	task_id, payload, request_time, status, attempts	PRIMARY KEY (task_id)	N/A
+T023	crypto_core	auditors	Table	List of authorized auditors and their public keys.	F030	auditor_pub, auditor_url, auditor_name, is_active	PRIMARY KEY (auditor_pub)	N/A
+T024	crypto_core	auditor_denomination_sigs	Table	Signatures by auditors confirming validity of denomination keys.	F030	auditor_pub, denom_id, auditor_sig	PRIMARY KEY (auditor_pub, denom_id)	N/A
+T025	crypto_core	wire_out	Table	Records of wire transfers executed by the Exchange.	F009	wire_out_id, wtid, execution_date, amount_raw, account_details	PRIMARY KEY (wire_out_id)	N/A
+T026	crypto_core	reserve_in	Table	Records incoming funds that increase a reserve balance.	F075	reserve_pub, wire_reference, credit_amount, execution_date	PRIMARY KEY (reserve_pub, wire_reference)	N/A
+T027	crypto_core	reserve_out	Table	Records withdrawals that decrease a reserve balance.	F001	reserve_pub, h_blind_ev, denom_sig, reserve_sig	PRIMARY KEY (reserve_pub, h_blind_ev)	N/A
+T028	crypto_core	reserves	Table	Current balances of customer reserves.	F075	reserve_pub, account_balance, expiration_date	PRIMARY KEY (reserve_pub), CHECK (account_balance >= 0)	N/A
+T029	crypto_core	close_requests	Table	Requests to close a reserve and wire funds back.	F070	reserve_pub, account_details, close_timestamp, close_sig	PRIMARY KEY (reserve_pub, close_timestamp)	N/A
+T030	crypto_core	history_requests	Table	Requests for account history statements.	F042	account_pub, history_sig, start_date, end_date	PRIMARY KEY (account_pub, history_sig)	N/A
+T031	crypto_core	pay_back	Table	Records of paying back coins to a reserve (rare case).	F096	coin_pub, coin_sig, amount, reserve_pub	PRIMARY KEY (coin_pub)	N/A
+T032	crypto_core	recoup	Table	Records of coins recouped due to denomination key revocation.	F029	coin_pub, coin_blind, old_denom_pub, recoup_timestamp	PRIMARY KEY (coin_pub)	N/A
+T033	crypto_core	recoup_refresh	Table	Records of recouped coins that are immediately refreshed.	F010	recoup_refresh_id, old_coin_pub, new_coin_pub	PRIMARY KEY (recoup_refresh_id)	N/A
+T034	crypto_core	extensions	Table	Configuration for protocol extensions.	F133	extension_name, extension_config, is_active	PRIMARY KEY (extension_name)	N/A
+T035	crypto_core	partner_accounts	Table	Accounts of peer Exchanges for跨 currency swaps.	F090	payto_uri, partner_master_pub, last_update	PRIMARY KEY (payto_uri)	N/A
+T036	crypto_core	contract_terms	Table	Detailed JSON storage of contract terms.	F008	contract_hash, terms_json, version	PRIMARY KEY (contract_hash)	N/A
+T037	crypto_core	merchant_accounts	Table	Validated bank accounts for merchants.	F007	merchant_pub, h_wire, salt	PRIMARY KEY (merchant_pub, h_wire)	N/A
+T038	crypto_core	transfers	Table	Aggregated transfers for bank execution.	F009	transfer_id, wtid, merchant_pub, credit_amount, account_url	PRIMARY KEY (transfer_id)	N/A
+T039	crypto_core	aggregation_tracking	Table	Links individual deposits to aggregation transfers.	F038	deposit_id, transfer_id	PRIMARY KEY (deposit_id, transfer_id)	N/A
+T040	crypto_core	prewire	Table	Transfers prepared for execution but not yet sent.	F009	prewire_uuid, account_url, amount, execution_time	PRIMARY KEY (prewire_uuid)	N/A
+T041	crypto_core	cs_nonce	Table	Client-side nonces to prevent replay of deposit confirmations.	F025	nonce, counter	PRIMARY KEY (nonce)	N/A
+T042	crypto_core	purse_deposits	Table	Deposits into a purse (for payment channels/p2p).	F142	purse_pub, coin_pub, amount_sig	PRIMARY KEY (purse_pub, coin_pub)	N/A
+T043	crypto_core	purse_merges	Table	Merging of purses.	F142	purse_pub, target_purse_pub, merge_sig	PRIMARY KEY (purse_pub)	N/A
+T044	crypto_core	purse_refunds	Table	Refunds from a purse that did not merge.	F142	purse_pub, coin_pub, refund_sig	PRIMARY KEY (purse_pub, coin_pub)	N/A
+T045	crypto_core	account_merges	Table	Merging of purses into an account reserve.	F142	reserve_pub, purse_pub, merge_sig	PRIMARY KEY (reserve_pub, purse_pub)	N/A
+T046	crypto_core	history_events	Table	Generic table for wallet history.	F042	event_id, wallet_pub, type, amount, timestamp	PRIMARY KEY (event_id)	N/A
+T047	crypto_core	deposit_confirmations	Table	Confirmation sent to merchant after successful deposit.	F009	deposit_id, exchange_timestamp, exchange_sig	PRIMARY KEY (deposit_id)	N/A
+T048	crypto_core	zombie_credit	Table	Credits for coins that were "zombies" (in limbo).	F096	zombie_coin_pub, amount, reserve_pub	PRIMARY KEY (zombie_coin_pub)	N/A
+T049	crypto_core	work_shards	Table	Sharding of work for massive database operations.	F141	shard_id, start_row, end_row, last_completed	PRIMARY KEY (shard_id)	N/A
+T050	crypto_core	partner_transfers	Table	Inbound transfers from partner exchanges.	F090	partner_url, wtid, amount, execution_time	PRIMARY KEY (partner_url, wtid)	N/A
+T051	crypto_core	policy_fees	Table	Extra fees for specific policy violations (e.g., expired coins).	F013	policy_type, fee_value, effective_date	PRIMARY KEY (policy_type, effective_date)	N/A
+T052	crypto_core	webhooks	Table	URLs for merchant webhooks.	F009	merchant_pub, webhook_url, event_type	PRIMARY KEY (merchant_pub, event_type)	N/A
+T053	crypto_core	webhook_events	Table	Log of triggered webhook events.	F009	event_id, webhook_url, payload, status, retry_count	PRIMARY KEY (event_id)	N/A
+T054	crypto_core	credential_templates	Table	Templates for anonymous credentials.	F088	template_id, attributes_list, issuer_pub	PRIMARY KEY (template_id)	N/A
+T055	crypto_core	user_credentials	Table	Issued credentials for users.	F088	credential_id, user_pub, template_id, values_json, signature	PRIMARY KEY (credential_id)	N/A
+T056	crypto_core	credential_revocations	Table	List of revoked credential indices.	F089	template_id, index, revocation_time	PRIMARY KEY (template_id, index)	N/A
+T057	crypto_core	exchange_keys	Table	Cached JSON response of all current keys.	F040	keyset_hash, keys_json, valid_from, expire	PRIMARY KEY (keyset_hash)	N/A
+T058	crypto_core	denom_key_statements	Table	Statements about denominations signed by master key.	F006	denom_id, master_sig, validity_start	PRIMARY KEY (denom_id)	N/A
+T059	crypto_core	ssl_certificates	Table	Manages SSL/TLS certs for the API.	F014	cert_id, public_key, expiry_date, status	PRIMARY KEY (cert_id)	N/A
+T060	crypto_core	signing_keys	Table	Current online signing keys of the Exchange.	F001	exchange_pub, master_sig, start_time, expire_time	PRIMARY KEY (exchange_pub)	N/A
+T061	crypto_core	wire_auditor_account	Table	Accounts used for wire auditing.	F030	auditor_pub, payto_uri	PRIMARY KEY (auditor_pub)	N/A
+T062	crypto_core	reserve_summary	Table	Materialized view of reserve balances.	F075	reserve_pub, current_balance, last_activity	PRIMARY KEY (reserve_pub)	N/A
+T063	crypto_core	coin_summary	Table	Summary of coins by denomination.	F039	denom_id, active_count, spent_count, total_value	PRIMARY KEY (denom_id)	N/A
+T064	crypto_core	risk_score	Table	Calculated risk scores for coins/reserves.	F051	entity_pub, risk_score, last_updated, reason	PRIMARY KEY (entity_pub)	N/A
+T065	crypto_core	anomaly_reports	Table	Reports generated by AI/ML anomaly detection.	F005	report_id, entity_id, anomaly_type, confidence, timestamp	PRIMARY KEY (report_id)	N/A
+T066	crypto_core	config	Table	Global configuration for the crypto module.	F138	config_key, config_value, description	PRIMARY KEY (config_key)	N/A
+T067	crypto_core	patches	Table	Database patches/migrations applied.	F004	patch_name, applied_at, hash	PRIMARY KEY (patch_name)	N/A
+T068	crypto_core	lock	Table	Advisory locks for concurrent processes.	N/A	lock_table, lock_row, locked_by, lock_time	PRIMARY KEY (lock_table, lock_row)	N/A
+T069	crypto_core	drain	Table	Records of drained profits.	F009	drain_uuid, amount, wtid, account_url, timestamp	PRIMARY KEY (drain_uuid)	N/A
+T070	crypto_core	profit_drains	Table	Historical summary of profits drained.	F009	year, month, total_amount, report_id	PRIMARY KEY (year, month)	N/A
+T071	crypto_core	income_report	Table	Aggregated income for tax reporting.	F022	report_id, start_date, end_date, total_income, total_fees	PRIMARY KEY (report_id)	N/A
+T072	crypto_core	circuit_registry	Table	Registry of supported ZK circuits.	F082	circuit_id, circuit_hash, description, verification_key_hash	PRIMARY KEY (circuit_id)	N/A
+T073	crypto_core	verification_keys	Table	Public verification keys for ZK circuits.	F117	circuit_id, key_data	PRIMARY KEY (circuit_id)	N/A
+T074	crypto_core	proving_keys	Table	Secure storage handles for proving keys (reference only).	F117	key_ref, hsm_slot, circuit_id	PRIMARY KEY (key_ref)	N/A
+T075	crypto_core	zkp_batch_jobs	Table	Batch jobs for proof generation.	F130	job_id, status, inputs_hash, created_at, completed_at	PRIMARY KEY (job_id)	N/A
+T076	crypto_core	nonce_store	Table	Stores used nonces for ZKPs to prevent replay.	F032	nonce_hash, used_at	PRIMARY KEY (nonce_hash)	N/A
+T077	crypto_core	pqc_parameters	Table	Parameters for PQC algorithms (Kyber/Dilithium).	F017	alg_id, parameter_set_id, security_level	PRIMARY KEY (alg_id, parameter_set_id)	N/A
+T078	crypto_core	hybrid_key_pairs	Table	Stores the public combination of Classical + PQC keys.	F018	key_id, classical_pub, pqc_pub, combined_hash	PRIMARY KEY (key_id)	N/A
+T079	crypto_core	salt_table	Table	Random salts for user wallet keys (if wallet server-side).	F125	salt_id, user_pub, salt_value	PRIMARY KEY (salt_id)	N/A
+T080	crypto_core	kdf_iterations	Table	Config for Key Derivation Function iterations.	F126	config_version, iteration_count, memory_limit	PRIMARY KEY (config_version)	N/A
+T081	crypto_core	watchtower_jobs	Table	Jobs submitted to watchtowers.	F143	job_id, channel_id, contest_deadline, status	PRIMARY KEY (job_id)	N/A
+T082	crypto_core	watchtower_signatures	Table	Signatures received from watchtowers.	F143	job_id, tower_pub, response_sig	PRIMARY KEY (job_id, tower_pub)	N/A
+T083	crypto_core	channel_state	Table	State of payment channels.	F142	channel_id, balance_a, balance_b, state_hash	PRIMARY KEY (channel_id)	N/A
+T084	crypto_core	channel_commits	Table	Commitment transactions for channels.	F144	commit_num, channel_id, tx_blob	PRIMARY KEY (channel_id, commit_num)	N/A
+T085	crypto_core	revoked_state	Table	Revoked channel states (for penalty transactions).	F143	revocation_hash, channel_id	PRIMARY KEY (revocation_hash)	N/A
+T086	crypto_core	social_recovery_shares	Table	Secret shares for social recovery.	F135	recovery_id, holder_pub, share_encrypted, threshold	PRIMARY KEY (recovery_id, holder_pub)	N/A
+T087	crypto_core	recovery_requests	Table	Initiated recovery requests.	F135	request_id, wallet_pub, timestamp, status	PRIMARY KEY (request_id)	N/A
+T088	crypto_core	backup_chunks	Table	Encrypted backup chunks of wallet data.	F046	chunk_id, wallet_pub, chunk_seq, encrypted_data	PRIMARY KEY (chunk_id, wallet_pub, chunk_seq)	N/A
+T089	crypto_core	device_binding	Table	Binds wallet to a specific device Secure Enclave.	F061	wallet_pub, device_cert, binding_sig	PRIMARY KEY (wallet_pub)	N/A
+T090	crypto_core	push_notification_subs	Table	Subscriptions for transaction alerts.	F048	sub_id, device_token, wallet_pub	PRIMARY KEY (sub_id)	N/A
+T091	crypto_core	exchange_tos	Table	Terms of Service versions and hashes.	N/A	tos_version, tos_hash, content_json	PRIMARY KEY (tos_version)	N/A
+T092	crypto_core	user_tos_acceptance	Table	Records of user TOS acceptance.	N/A	wallet_pub, tos_version, accepted_date	PRIMARY KEY (wallet_pub, tos_version)	N/A
+T093	crypto_core	aml_records	Table	High-level AML decisions made on accounts.	F051	record_id, account_pub, decision, justification, officer_id	PRIMARY KEY (record_id)	N/A
+T094	crypto_core	aml_kyc_attributes	Table	Pseudonymized attributes used for AML ZKPs.	F051	attr_hash, account_pub, attr_type	PRIMARY KEY (attr_hash)	N/A
+T095	crypto_core	fee_refunds	Table	Refunds of fees due to aggregation or errors.	F011	refund_id, deposit_id, amount_refunded	PRIMARY KEY (refund_id)	N/A
+T096	crypto_core	global_incoming	Table	Total incoming money tracking.	F096	year, month, total_incoming	PRIMARY KEY (year, month)	N/A
+T097	crypto_core	active_auditors	Table	Currently active auditors for the exchange.	F030	auditor_pub, auditor_name, base_url	PRIMARY KEY (auditor_pub)	N/A
+T098	crypto_core	plausibility_checks	Table	Results of internal consistency checks.	F096	check_id, check_name, result, timestamp	PRIMARY KEY (check_id)	N/A
+T099	crypto_core	sanitization	Table	Data sanitization logs for deleted accounts.	F011	account_pub, sanitized_at, method	PRIMARY KEY (account_pub)	N/A
+T100	crypto_core	close_requests_lag	Table	Lagged closing requests (not yet executed).	F070	close_request_id, reserve_pub, timestamp	PRIMARY KEY (close_request_id)	N/A
+E001	crypto_core	coin_status	Enum	States of a coin: fresh, spent, dissolved, expired.	F039	N/A	N/A	N/A
+E002	crypto_core	sig_algorithm	Enum	Signature algorithms: RSA, EdDSA, Dilithium, SPHINCS+.	F017	N/A	N/A	N/A
+E003	crypto_core	key_state	Enum	States of a denomination key: active, expired, revoked.	F006	N/A	N/A	N/A
+E004	crypto_core	operation_type	Enum	Operations: withdrawal, deposit, refresh, refund.	F001	N/A	N/A	N/A
+E005	crypto_core	transaction_phase	Enum	Phases: initialization, proof_generation, verification, settlement.	F009	N/A	N/A	N/A
+E006	crypto_core	risk_level	Enum	Risk levels: low, medium, high, critical.	F051	N/A	N/A	N/A
+E007	crypto_core	zkp_system	Enum	ZK systems: Groth16, PLONK, Bulletproofs, STARK.	F019	N/A	N/A	N/A
+E008	crypto_core	wire_method	Enum	Methods: IBAN, SEPA, SWIFT, NATIVE.	F009	N/A	N/A	N/A
+V001	crypto_core	v_active_denominations	View	List of currently active denomination keys.	F006	denom_id, value, expire, public_key	N/A	N/A
+V002	crypto_core	v_wallet_balance	View	Aggregated balance per wallet.	F075	wallet_pub, total_amount	N/A	N/A
+V003	crypto_core	v_pending_refreshes	View	Refresh sessions that are not yet completed.	F010	melt_id, timestamp	N/A	N/A
+V004	crypto_core	v_risk_report	View	Daily risk summary.	F051	date, high_risk_count, total_tx	N/A	N/A
+V005	crypto_core	v_fee_structure	View	Current applicable fees.	F035	denom_id, withdrawal_fee, deposit_fee, refund_fee	N/A	N/A
+P001	crypto_core	p_verify_blind_sig	Procedure	Verifies a blind signature from the Exchange.	F001	IN blinded_msg, IN signature, OUT result	N/A	N/A
+P002	crypto_core	p_check_double_spend	Procedure	Checks if a coin serial number exists in spent_coins.	F005	IN coin_pub, OUT is_spent	N/A	N/A
+P003	crypto_core	p_deposit_coin	Procedure	Atomic procedure to credit merchant and mark coin spent.	F009	IN deposit_details	N/A	N/A
+P004	crypto_core	p_refresh_melt	Procedure	Initiate the melt of a coin.	F010	IN melt_details	N/A	N/A
+P005	crypto_core	p_refresh_reveal	Procedure	Reveal new coins after melting.	F010	IN reveal_details	N/A	N/A
+P006	crypto_core	p_rotate_denom_key	Procedure	Triggers rotation of denomination keys.	F006	IN denom_id	N/A	N/A
+P007	crypto_core	p_verify_zkp	Procedure	Verifies a Zero-Knowledge Proof.	F019	IN proof_blob, IN public_inputs, OUT result	N/A	N/A
+P008	crypto_core	p_batch_verify	Procedure	Verifies a batch of signatures.	F130	IN batch_id	N/A	N/A
+P009	crypto_core	p_revoke_key	Procedure	Adds a key to the revoked_keys table.	F029	IN key_hash	N/A	N/A
+P010	crypto_core	p_aggregate_deposits	Procedure	Aggregates merchant deposits for wire transfer.	F038	IN merchant_pub	N/A	N/A
+P011	crypto_core	p_expire_coins	Procedure	Updates status of coins past their expiration date.	F013	N/A	N/A	N/A
+P012	crypto_core	p_cleanup_old_data	Procedure	Archives data older than retention period.	F011	IN cutoff_date	N/A	N/A
+P013	crypto_core	p_calculate_risk	Procedure	Calculates risk score for an entity.	F051	IN entity_pub, OUT score	N/A	N/A
+P014	crypto_core	p_issue_refund	Procedure	Processes a merchant refund.	F011	IN refund_details	N/A	N/A
+P015	crypto_core	p_create_contract	Procedure	Creates a contract hash and record.	F008	IN terms, OUT contract_hash	N/A	N/A
+P016	crypto_core	p_wire_transfer	Procedure	Records an outgoing wire transfer.	F009	IN transfer_details	N/A	N/A
+P017	crypto_core	p_close_reserve	Procedure	Closes a reserve and wires funds.	F070	IN reserve_pub	N/A	N/A
+P018	crypto_core	p_history_insert	Procedure	Inserts an event into wallet history.	F042	IN wallet_pub, IN event_details	N/A	N/A
+P019	crypto_core	p_insert_proof	Procedure	Inserts a new ZKP into the database.	F019	IN proof_data	N/A	N/A
+P020	crypto_core	p_sign_with_hsm	Procedure	Wrapper to sign data using HSM.	F027	IN data_to_sign, OUT signature	N/A	N/A
+T101	crypto_core	partner_deposits	Table	Deposits into a partner exchange (for P2P swap).	F090	partner_url, amount, purse_pub	PRIMARY KEY (purse_pub)	N/A
+T102	crypto_core	sync_lock	Table	Advisory locks for wallet synchronization.	F033	wallet_pub, lock_counter	PRIMARY KEY (wallet_pub)	N/A
+T103	crypto_core	offline_queue	Table	Queue for operations to sync when online.	F034	queue_id, wallet_pub, operation_blob, timestamp	PRIMARY KEY (queue_id)	N/A
+T104	crypto_core	budget_limits	Table	User-defined budget limits.	F047	wallet_pub, category_id, limit_amount, period	PRIMARY KEY (wallet_pub, category_id)	N/A
+T105	crypto_core	spending_categories	Table	Categories for budgeting.	F047	category_id, name, parent_id	PRIMARY KEY (category_id)	N/A
+T106	crypto_core	category_mapping	Table	Maps merchants to categories.	F047	merchant_pub, category_id	PRIMARY KEY (merchant_pub, category_id)	N/A
+T107	crypto_core	recurring_payments	Table	Definition of recurring payments.	F008	recurrence_id, wallet_pub, contract_hash, frequency, next_run	PRIMARY KEY (recurrence_id)	N/A
+T108	crypto_core	contact_book	Table	User contacts (mapped to public keys if P2P).	F067	contact_id, wallet_pub, contact_name, contact_pub	PRIMARY KEY (contact_id)	N/A
+T109	crypto_core	auto_refill_config	Table	Configuration for auto-refilling wallet.	F075	config_id, wallet_pub, threshold, refill_amount	PRIMARY KEY (config_id)	N/A
+T110	crypto_core	merchant_metadata	Table	Public metadata about merchants.	F007	merchant_pub, name, logo_url, location	PRIMARY KEY (merchant_pub)	N/A
+T111	crypto_core	merchant_categories	Table	Business categories of merchants.	F007	merchant_pub, category_code (MCC)	PRIMARY KEY (merchant_pub)	N/A
+T112	crypto_core	tax_id_mapping	Table	Maps merchant public keys to Tax IDs.	F022	merchant_pub, tax_id, jurisdiction	PRIMARY KEY (merchant_pub, jurisdiction)	N/A
+T113	crypto_core	vat_splits	Table	VAT split details for a transaction.	F022	split_id, contract_hash, amount_gross, amount_vat, amount_net	PRIMARY KEY (split_id)	N/A
+T114	crypto_core	exchange_officers	Table	Accounts of exchange compliance officers.	F093	officer_id, officer_pub, permissions	PRIMARY KEY (officer_id)	N/A
+T115	crypto_core	compliance_events	Table	High-level compliance events triggered.	F093	event_id, officer_id, event_type, target_entity, result	PRIMARY KEY (event_id)	N/A
+T116	crypto_core	frozen_accounts	Table	Accounts frozen by court order or AML.	F093	account_pub, freeze_start, freeze_end, reason	PRIMARY KEY (account_pub)	N/A
+T117	crypto_core	blacklist_merchants	Table	Merchants blacklisted by the user or system.	F078	merchant_pub, wallet_pub, reason	PRIMARY KEY (merchant_pub, wallet_pub)	N/A
+T118	crypto_core	kyc_data	Table	Reference to KYC data blobs (encrypted).	F052	kyc_id, account_pub, data_hash, provider	PRIMARY KEY (kyc_id)	N/A
+T119	crypto_core	kyc_proofs	Table	ZKPs proving KYC status without revealing data.	F052	proof_id, account_pub, kyc_level, proof_blob	PRIMARY KEY (proof_id)	N/A
+T120	crypto_core	account_kyc_status	Table	Current KYC status of an account.	F052	account_pub, kyc_level, last_verified	PRIMARY KEY (account_pub)	N/A
+T121	crypto_core	age_proof_cache	Table	Cache of generated age proofs.	F021	proof_id, wallet_pub, age_group, proof_blob	PRIMARY KEY (proof_id)	N/A
+T122	crypto_core	custom_fields	Table	Custom fields for contract extensions.	F034	field_id, contract_hash, key, value	PRIMARY KEY (field_id)	N/A
+T123	crypto_core	tip_authorizations	Table	Authorizations for tipping (merchant authorizes tipper).	F007	tip_id, merchant_pub, tip_amount, expiration	PRIMARY KEY (tip_id)	N/A
+T124	crypto_core	tip_pickups	Table	Records of tips being picked up by users.	F007	pickup_id, tip_id, wallet_pub	PRIMARY KEY (pickup_id)	N/A
+T125	crypto_core	refunds_pending	Table	Refunds waiting to be picked up by user.	F011	refund_id, wallet_pub, amount	PRIMARY KEY (refund_id)	N/A
+T126	crypto_core	refunds_executed	Table	Refunds successfully executed.	F011	exec_id, refund_id, new_coin_pub	PRIMARY KEY (exec_id)	N/A
+T127	crypto_core	analytics_events	Table	Privacy-preserving aggregated analytics events.	F016	event_id, event_type, count_bucket, timestamp_bucket	PRIMARY KEY (event_id)	N/A
+T128	crypto_core	analytics_dimensions	Table	Dimensions for analytics (e.g., region, device).	F016	dimension_id, key, value	PRIMARY KEY (dimension_id)	N/A
+T129	crypto_core	analytics_facts	Table	Fact table linking events and dimensions.	F016	event_id, dimension_id	PRIMARY KEY (event_id, dimension_id)	N/A
+T130	crypto_core	prometheus_metrics	Table	Materialized view of metrics for Prometheus scraping.	F008	metric_name, labels, value, timestamp	N/A	N/A
+T131	crypto_core	alert_rules	Table	Definitions of alerting rules.	F008	rule_id, name, expression, severity	PRIMARY KEY (rule_id)	N/A
+T132	crypto_core	alert_history	Table	History of triggered alerts.	F008	alert_id, rule_id, timestamp, payload	PRIMARY KEY (alert_id)	N/A
+T133	crypto_core	circuit_statistics	Table	Stats on ZK circuit performance.	F139	circuit_id, gen_time_p50, gen_time_p99, verify_time	PRIMARY KEY (circuit_id)	N/A
+T134	crypto_core	fee_statistics	Table	Statistics on fee collection.	F035	date, fee_type, total_collected	PRIMARY KEY (date, fee_type)	N/A
+T135	crypto_core	liquidity_status	Table	Liquidity status of the exchange.	F096	currency_id, available_balance, reserve_balance	PRIMARY KEY (currency_id)	N/A
+T136	crypto_core	peer_exchange_status	Table	Status of peer exchanges for P2P swaps.	F090	partner_url, last_ping, latency, is_online	PRIMARY KEY (partner_url)	N/A
+T137	crypto_core	swap_quotes	Table	Quotes for cross-currency swaps.	F050	quote_id, amount_in, amount_out, expiry, partner_url	PRIMARY KEY (quote_id)	N/A
+T138	crypto_core	swap_executions	Table	Executed swaps.	F050	swap_id, quote_id, status, completion_time	PRIMARY KEY (swap_id)	N/A
+T139	crypto_core	test_vectors	Table	Test vectors for cryptographic algorithm validation.	F056	vector_id, algorithm, input, expected_output	PRIMARY KEY (vector_id)	N/A
+T140	crypto_core	fuzzing_crashes	Table	Logs of crashes found during fuzzing.	F060	crash_id, input_blob, stack_trace	PRIMARY KEY (crash_id)	N/A
+T141	crypto_core	dependency_versions	Table	SBOM data for dependencies.	F020	package_id, name, version, license, hash	PRIMARY KEY (package_id)	N/A
+T142	crypto_core	vulnerability_scans	Table	Results of security scans.	F020	scan_id, tool_name, timestamp, vulnerabilities_json	PRIMARY KEY (scan_id)	N/A
+T143	crypto_core	pen_test_results	Table	Results of penetration tests.	F020	test_id, tester, date, findings	PRIMARY KEY (test_id)	N/A
+T144	crypto_core	change_management	Table	Logs of changes to configuration.	F138	change_id, config_key, old_val, new_val, actor	PRIMARY KEY (change_id)	N/A
+T145	crypto_core	feature_flags	Table	Feature flag toggles.	F138	flag_name, is_enabled, rollout_percentage	PRIMARY KEY (flag_name)	N/A
+T146	crypto_core	session_tokens	Table	Tokens for session management (JWT etc).	N/A	token_id, user_id, expiry, scope	PRIMARY KEY (token_id)	N/A
+T147	crypto_core	rate_limits	Table	Rate limit counters per user/IP.	F128	limit_id, client_id, endpoint, count, window_start	PRIMARY KEY (limit_id, client_id, window_start)	N/A
+T148	crypto_core	audit_log	Table	Comprehensive audit log.	F092	log_id, timestamp, actor, action, resource, details	PRIMARY KEY (log_id)	N/A
+T149	crypto_core	data_retention_policy	Table	Rules for how long data is kept.	F011	data_type, retention_years, archive_location	PRIMARY KEY (data_type)	N/A
+T150	crypto_core	archive_jobs	Table	Jobs for archiving old data.	F011	job_id, start_date, end_date, status	PRIMARY KEY (job_id)	N/A
+T151	crypto_core	purge_logs	Table	Logs of data purging operations.	F011	purge_id, table_name, rows_deleted, timestamp	PRIMARY KEY (purge_id)	N/A
+T152	crypto_core	disaster_recovery_snapshots	Table	Metadata of database snapshots for DR.	F019	snapshot_id, timestamp, size, location	PRIMARY KEY (snapshot_id)	N/A
+T153	crypto_core	failover_events	Table	Log of failover events.	F019	event_id, from_node, to_node, timestamp	PRIMARY KEY (event_id)	N/A
+T154	crypto_core	health_checks	Table	Last known status of health checks.	N/A	check_name, status, last_checked, output	PRIMARY KEY (check_name)	N/A
+T155	crypto_core	backup_manifest	Table	Manifest of backup contents.	N/A	backup_id, file_list, checksums	PRIMARY KEY (backup_id)	N/A
+T156	crypto_core	replication_lag	Table	Current replication lag metrics.	N/A	source_db, replica_db, lag_seconds	PRIMARY KEY (source_db, replica_db)	N/A
+T157	crypto_core	index_usage_stats	Table	Statistics on index usage.	N/A	index_name, scans, tuples_read, tuples_fetched	PRIMARY KEY (index_name)	N/A
+T158	crypto_core	table_sizes	Table	Current sizes of tables.	N/A	table_name, size_bytes, row_count	PRIMARY KEY (table_name)	N/A
+T159	crypto_core	query_performance	Table	Logs of slow queries.	N/A	query_id, query_text, duration, timestamp	PRIMARY KEY (query_id)	N/A
+T160	crypto_core	connection_pool_stats	Table	Statistics on connection pool usage.	N/A	pool_name, active_count, idle_count	PRIMARY KEY (pool_name)	N/A
+T161	crypto_core	lock_stats	Table	Statistics on database locks.	N/A	lock_type, wait_count, wait_time	PRIMARY KEY (lock_type)	N/A
+T162	crypto_core	cache_hit_rates	Table	Statistics on cache hit rates (Redis integration).	F013	cache_key, hits, misses, ratio	PRIMARY KEY (cache_key)	N/A
+T163	crypto_core	background_workers	Table	Status of background worker processes.	N/A	worker_id, worker_type, status, last_activity	PRIMARY KEY (worker_id)	N/A
+T164	crypto_core	scheduled_tasks	Table	Definition of scheduled tasks.	N/A	task_id, name, cron_expression, last_run, next_run	PRIMARY KEY (task_id)	N/A
+T165	crypto_core	task_executions	Table	History of task executions.	N/A	execution_id, task_id, start_time, end_time, status, output	PRIMARY KEY (execution_id)	N/A
+T166	crypto_core	error_codes	Table	Registry of application error codes.	N/A	code, message, description, http_status	PRIMARY KEY (code)	N/A
+T167	crypto_core	error_log	Table	Application error logs.	N/A	error_id, timestamp, code, stack_trace, user_id	PRIMARY KEY (error_id)	N/A
+T168	crypto_core	access_denied_log	Table	Log of access denied events.	N/A	event_id, user_id, resource, reason, timestamp	PRIMARY KEY (event_id)	N/A
+T169	crypto_core	user_sessions	Table	Active user sessions.	N/A	session_id, wallet_pub, ip_address, user_agent, created_at	PRIMARY KEY (session_id)	N/A
+T170	crypto_core	geolocation	Table	Geolocation data (pseudonymized) for analytics.	F016	ip_hash, country_code, city_code	PRIMARY KEY (ip_hash)	N/A
+T171	crypto_core	device_fingerprints	Table	Hashed device fingerprints for fraud detection.	F005	fingerprint_id, device_hash, risk_score	PRIMARY KEY (fingerprint_id)	N/A
+T172	crypto_core	known_malicious_ips	Table	List of known malicious IPs.	F078	ip_address, source, added_at	PRIMARY KEY (ip_address)	N/A
+T173	crypto_core	rate_limit_exceedances	Table	Log of rate limit exceedance events.	F128	event_id, client_id, endpoint, timestamp	PRIMARY KEY (event_id)	N/A
+T174	crypto_core	api_keys	Table	API keys for external integration.	M07	api_key_hash, owner_id, scopes, expiry	PRIMARY KEY (api_key_hash)	N/A
+T175	crypto_core	webhook_deliveries	Table	Log of webhook delivery attempts.	F009	delivery_id, webhook_url, payload, status_code, attempt_count	PRIMARY KEY (delivery_id)	N/A
+T176	crypto_core	email_logs	Table	Logs of emails sent (e.g., notifications).	N/A	email_id, recipient, subject, sent_at, status	PRIMARY KEY (email_id)	N/A
+T177	crypto_core	sms_logs	Table	Logs of SMS sent (e.g., 2FA).	N/A	sms_id, phone_number, message, sent_at, status	PRIMARY KEY (sms_id)	N/A
+T178	crypto_core	notification_preferences	Table	User notification preferences.	F048	wallet_pub, channel, enabled, frequency	PRIMARY KEY (wallet_pub, channel)	N/A
+T179	crypto_core	support_tickets	Table	Support tickets raised by users.	N/A	ticket_id, wallet_pub, subject, status, created_at	PRIMARY KEY (ticket_id)	N/A
+T180	crypto_core	support_messages	Table	Messages within a support ticket.	N/A	message_id, ticket_id, sender, content, timestamp	PRIMARY KEY (message_id)	N/A
+T181	crypto_core	feedback	Table	User feedback.	N/A	feedback_id, wallet_pub, rating, comment, timestamp	PRIMARY KEY (feedback_id)	N/A
+T182	crypto_core	surveys	Table	Survey definitions.	N/A	survey_id, name, questions_json	PRIMARY KEY (survey_id)	N/A
+T183	crypto_core	survey_responses	Table	Responses to surveys.	N/A	response_id, survey_id, wallet_pub, answers_json	PRIMARY KEY (response_id)	N/A
+T184	crypto_core	announcements	Table	System announcements.	N/A	announcement_id, title, content, start_date, end_date	PRIMARY KEY (announcement_id)	N/A
+T185	crypto_core	announcement_reads	Table	Track which users have read announcements.	N/A	announcement_id, wallet_pub, read_at	PRIMARY KEY (announcement_id, wallet_pub)	N/A
+T186	crypto_core	a_b_tests	Table	A/B test configurations.	N/A	test_id, name, variant_a, variant_b, traffic_split	PRIMARY KEY (test_id)	N/A
+T187	crypto_core	a_b_test_assignments	Table	Assignment of users to A/B test variants.	N/A	assignment_id, test_id, wallet_pub, variant, assigned_at	PRIMARY KEY (assignment_id)	N/A
+T188	crypto_core	feature_rollouts	Table	Status of feature rollouts.	F138	rollout_id, feature_name, stage, percentage	PRIMARY KEY (rollout_id)	N/A
+T189	crypto_core	dark_mode_metrics	Table	Metrics on dark mode usage (just an example of granular tracking).	F016	wallet_pub, is_dark_mode	PRIMARY KEY (wallet_pub)	N/A
+T190	crypto_core	wallet_version_stats	Table	Statistics on wallet versions in use.	N/A	version_hash, version_name, user_count	PRIMARY KEY (version_hash)	N/A
+T191	crypto_core	os_version_stats	Table	Statistics on operating systems.	N/A	os_name, os_version, user_count	PRIMARY KEY (os_name, os_version)	N/A
+T192	crypto_core	network_type_stats	Table	Stats on connection types (wifi, cellular).	F016	network_type, user_count	PRIMARY KEY (network_type)	N/A
+T193	crypto_core	crash_reports	Table	Application crash reports.	F060	crash_id, device_info, stack_trace, timestamp	PRIMARY KEY (crash_id)	N/A
+T194	crypto_core	performance_samples	Table	Client-side performance samples.	F008	sample_id, wallet_pub, metric_name, value, timestamp	PRIMARY KEY (sample_id)	N/A
+T195	crypto_core	custom_events	Table	Custom analytics events.	F016	event_name, event_properties, user_id, timestamp	N/A	N/A
+T196	crypto_core	funnels	Table	Funnel definitions for analytics.	N/A	funnel_id, name, steps_json	PRIMARY KEY (funnel_id)	N/A
+T197	crypto_core	funnel_conversions	Table	Conversion data for funnels.	N/A	funnel_id, wallet_pub, step_number, timestamp	PRIMARY KEY (funnel_id, wallet_pub, step_number)	N/A
+T198	crypto_core	cohorts	Table	Cohort definitions.	N/A	cohort_id, name, definition_sql	PRIMARY KEY (cohort_id)	N/A
+T199	crypto_core	cohort_retention	Table	Retention data for cohorts.	N/A	cohort_id, period_start, retention_rate	PRIMARY KEY (cohort_id, period_start)	N/A
+T200	crypto_core	reports	Table	Generated reports (PDF, CSV).	F022	report_id, type, file_url, generated_by, created_at	PRIMARY KEY (report_id)	N/A
+T201	crypto_core	global_fee_balance	Table	Tracks accumulated fees that need to be drained to the exchange's bank account.	F035	fee_balance_id, currency, accumulated_amount, last_drained_at	PRIMARY KEY (currency)	N/A
+T202	crypto_core	fee_drain_pending	Table	Queue of fee drain operations waiting for execution.	F035	drain_uuid, amount, wtid, account_url, requested_at	PRIMARY KEY (drain_uuid)	N/A
+T203	crypto_core	denomination_key_stats	Table	Tracks usage statistics for each denomination key (volume, frequency).	F006	denom_id, issued_count, spent_count, melted_count, last_updated	PRIMARY KEY (denom_id)	N/A
+T204	crypto_core	exchange_profitability	Table	Materialized daily summary of exchange profits (fees - refunds - operation costs).	F035	profit_date, gross_fees, refunds_paid, net_profit, currency	PRIMARY KEY (profit_date, currency)	N/A
+T205	crypto_core	wallet_version_compatibility	Table	Matrix defining which wallet versions support which protocol extensions.	F034	wallet_version, protocol_version, features_supported_json	PRIMARY KEY (wallet_version)	N/A
+T206	crypto_core	wire_gateway_targets	Table	Bank accounts authorized to receive funds from the exchange.	F009	payto_uri, valid_from, valid_until, restriction_json	PRIMARY KEY (payto_uri)	N/A
+T207	crypto_core	account_merges_pending	Table	Tracks merges that are pending confirmation from the other party.	F142	merge_request_id, reserve_pub, purse_pub, merge_sig, created_at	PRIMARY KEY (merge_request_id)	N/A
+T208	crypto_core	purse_deletion_queue	Table	Queue of purses marked for deletion (GDPR/privacy cleanup).	F099	purse_pub, deletion_scheduled_at, status	PRIMARY KEY (purse_pub)	N/A
+T209	crypto_core	exchange_signatures_audit	Table	High-security log of every signature generated by the Exchange (tamper-evident).	F030	audit_id, sig_type, input_hash, output_sig, timestamp	PRIMARY KEY (audit_id)	N/A
+T210	crypto_core	merkle_tree_leaves	Table	Leaves of the transaction Merkle tree for compact proofs.	F042	leaf_id, transaction_hash, tree_id, leaf_index	PRIMARY KEY (leaf_id)	N/A
+T211	crypto_core	merkle_tree_states	Table	Snapshots of the Merkle tree root at specific blocks.	F042	tree_id, root_hash, block_height, timestamp	PRIMARY KEY (tree_id)	N/A
+T212	crypto_core	circuit_breaker_state	Table	State of the circuit breaker for halting trading on anomalies.	F128	breaker_name, is_open, last_triggered, triggered_by	PRIMARY KEY (breaker_name)	N/A
+T213	crypto_core	dead_letter_queue	Table	Failed cryptographic operations that require manual inspection/retry.	F060	dlq_id, payload_blob, error_message, failed_at, retry_count	PRIMARY KEY (dlq_id)	N/A
+T214	crypto_core	shard_routing_table	Table	Maps entity hashes (wallet/coin) to specific database shards.	F141	shard_key_prefix, shard_id, node_location	PRIMARY KEY (shard_key_prefix)	N/A
+T215	crypto_core	consensus_events	Table	Log of consensus events for the geo-redundancy layer.	F019	consensus_round, leader_id, decision_hash, commit_timestamp	PRIMARY KEY (consensus_round)	N/A
+T216	crypto_core	crypto_primitive_versions	Table	Historical record of which crypto primitive versions were active when.	F017	primitive_name, version_id, active_from, active_until	PRIMARY KEY (primitive_name, version_id)	N/A
+T217	crypto_core	side_channel_keys	Table	Keys used for side-channel verification (e.g., encrypted hints).	F099	channel_id, key_blob, expiration	PRIMARY KEY (channel_id)	N/A
+T218	crypto_core	merchant_inventory	Table	Virtual inventory mapping product SKUs to contract templates.	F007	merchant_pub, sku_id, template_id, price	PRIMARY KEY (merchant_pub, sku_id)	N/A
+T219	crypto_core	coupon_records	Table	Records of redeemed coupons/discounts.	F007	coupon_id, merchant_pub, contract_hash, discount_amount	PRIMARY KEY (coupon_id)	N/A
+T220	crypto_core	loyalty_points	Table	Loyalty points earned/paid via ZK proofs.	F072	wallet_pub, merchant_pub, points_balance, last_updated	PRIMARY KEY (wallet_pub, merchant_pub)	N/A
+T221	crypto_core	split_merge_instructions	Table	Instructions for complex coin merges/splits not covered by standard refresh.	F023	operation_id, input_coins_json, output_coins_json	PRIMARY KEY (operation_id)	N/A
+T222	crypto_core	escrow_accounts	Table	Funds held in escrow for specific contract conditions.	F045	escrow_id, contract_hash, amount, release_condition_hash	PRIMARY KEY (escrow_id)	N/A
+T223	crypto_core	escrow_releases	Table	Log of funds released from escrow.	F045	release_id, escrow_id, amount, release_time	PRIMARY KEY (release_id)	N/A
+T224	crypto_core	time_locked_transactions	Table	Transactions that are valid only after a certain timestamp.	F091	tx_id, unlock_time, contract_hash	PRIMARY KEY (tx_id)	N/A
+T225	crypto_core	hash_time_locked_contracts	Table	HTLC data for atomic swaps (cross-chain or cross-exchange).	F090	htlc_id, hash_image, preimage_revealed, expiration	PRIMARY KEY (htlc_id)	N/A
+T226	crypto_core	preimage_store	Table	Store for revealed preimages to claim HTLCs.	F090	preimage_hash, preimage_value, revealed_at	PRIMARY KEY (preimage_hash)	N/A
+T227	crypto_core	exchange_rates	Table	Reference exchange rates for cross-currency operations.	F050	currency_pair, rate, valid_from, source	PRIMARY KEY (currency_pair, valid_from)	N/A
+T228	crypto_core	currency_config	Table	Configuration parameters for specific currencies (decimal places, etc.).	F074	currency_code, fraction_digits, rounding_method	PRIMARY KEY (currency_code)	N/A
+T229	crypto_core	region_config	Table	Regional settings (holidays, maintenance windows).	F141	region_code, config_json	PRIMARY KEY (region_code)	N/A
+T230	crypto_core	system_maintenance_windows	Table	Scheduled maintenance windows affecting crypto operations.	F019	window_id, start_time, end_time, impact_level	PRIMARY KEY (window_id)	N/A
+T231	crypto_core	stress_test_results	Table	Results of cryptographic load testing.	F139	test_id, tps_achieved, avg_latency, p99_latency, timestamp	PRIMARY KEY (test_id)	N/A
+T232	crypto_core	capacity_planning	Table	Metrics for capacity planning (CPU/IO per op).	F139	metric_date, operation_type, avg_cpu_ms, avg_io_reads	PRIMARY KEY (metric_date, operation_type)	N/A
+T233	crypto_core	schema_migrations_history	Table	History of applied schema changes.	F004	migration_id, script_name, checksum, applied_at	PRIMARY KEY (migration_id)	N/A
+T234	crypto_core	rollback_scripts	Table	References to rollback scripts for migrations.	F004	migration_id, rollback_script_name	PRIMARY KEY (migration_id)	N/A
+T235	crypto_core	data_encryption_keys	Table	Keys used for encrypting sensitive columns at rest (TDE/ADE).	F099	key_id, encrypted_value, key_version, created_at	PRIMARY KEY (key_id)	N/A
+T236	crypto_core	key_rotation_history	Table	History of column encryption key rotations.	F099	rotation_id, old_key_id, new_key_id, rotated_table, rotated_at	PRIMARY KEY (rotation_id)	N/A
+T237	crypto_core	audit_export_logs	Table	Logs of data exports for auditors.	F030	export_id, auditor_id, file_hash, record_count, exported_at	PRIMARY KEY (export_id)	N/A
+T238	crypto_core	auditor_access	Table	Time-bounded access tokens for auditors.	F030	token_id, auditor_pub, permissions_json, expiry	PRIMARY KEY (token_id)	N/A
+T239	crypto_core	anomaly_detection_rules	Table	Configurable rules for the ML fraud engine.	F005	rule_id, pattern_description, threshold, weight	PRIMARY KEY (rule_id)	N/A
+T240	crypto_core	fraud_alerts	Table	High-priority fraud alerts generated by the engine.	F005	alert_id, entity_pub, rule_triggered, risk_score, timestamp	PRIMARY KEY (alert_id)	N/A
+T241	crypto_core	manual_reviews	Table	Records of manual review of flagged transactions.	F005	review_id, alert_id, reviewer_id, decision (approve/reject), notes	PRIMARY KEY (review_id)	N/A
+T242	crypto_core	watchlist_entities	Table	List of entities (wallets/merchants) on watchlists.	F078	entity_pub, list_type, added_by, reason	PRIMARY KEY (entity_pub)	N/A
+T243	crypto_core	sanctions_screening	Table	Results of automated sanctions screening (OFAC/UN).	F093	screen_id, account_pub, match_score, reference_id, timestamp	PRIMARY KEY (screen_id)	N/A
+T244	crypto_core	travel_rule_records	Table	Records of info shared for Travel Rule compliance (large transfers).	F053	record_id, transaction_hash, originator_info, beneficiary_info, tx_date	PRIMARY KEY (record_id)	N/A
+T245	crypto_core	threshold_exemptions	Table	Exemptions granted for specific high-value accounts (bypassing auto-rules).	F093	exemption_id, account_pub, exempted_rule, expiry, authorizer	PRIMARY KEY (exemption_id)	N/A
+T246	crypto_core	compliance_officer_notes	Table	Private notes attached to accounts by compliance officers.	F093	note_id, account_pub, officer_id, note_text, created_at	PRIMARY KEY (note_id)	N/A
+T247	crypto_core	regulatory_reports_queue	Table	Queue of reports to be sent to tax authorities/regulators.	F022	report_queue_id, jurisdiction, report_type, payload_hash, status	PRIMARY KEY (report_queue_id)	N/A
+T248	crypto_core	report_delivery_logs	Table	Status of submitted regulatory reports.	F022	delivery_id, report_queue_id, authority_url, response_code, sent_at	PRIMARY KEY (delivery_id)	N/A
+T249	crypto_core	tax_attributes	Table	Extracted tax-relevant attributes from transactions.	F022	attr_id, transaction_hash, vat_amount, tax_category, jurisdiction_code	PRIMARY KEY (attr_id)	N/A
+T250	crypto_core	e_invoice_correlation	Table	Links PARI transactions to external e-invoice IDs (e.g., SDI).	F022	invoice_id, contract_hash, external_invoice_id, supplier_id	PRIMARY KEY (invoice_id)	N/A
+T251	crypto_core	backup_manifest_signatures	Table	Signatures over backup manifests to ensure integrity of backups.	F096	manifest_id, backup_id, signature_blob, signing_key_id	PRIMARY KEY (manifest_id)	N/A
+T252	crypto_core	disaster_recovery_test_results	Table	Results of periodic DR drills.	F019	drill_id, drill_date, rpo_achieved, rto_achieved, success	PRIMARY KEY (drill_id)	N/A
+T253	crypto_core	failover_vote_log	Table	Votes cast by nodes during a failover event.	F019	vote_id, failover_event_id, node_id, vote_timestamp	PRIMARY KEY (vote_id)	N/A
+T254	crypto_core	cluster_membership	Table	Current active members of the database cluster.	F019	node_id, node_address, last_heartbeat, role (leader/follower)	PRIMARY KEY (node_id)	N/A
+T255	crypto_core	partition_prune_config	Table	Config for table partitioning logic (time/range).	F004	table_name, partition_key, retention_interval	PRIMARY KEY (table_name)	N/A
+T256	crypto_core	index_usage_recommendations	Table	Recommendations from the query optimizer for new indexes.	F157	recommendation_id, table_name, column_names, potential_benefit	PRIMARY KEY (recommendation_id)	N/A
+T257	crypto_core	query_plan_cache	Table	Cache of recent query execution plans.	F159	plan_id, query_hash, plan_json, last_used	PRIMARY KEY (plan_id)	N/A
+T258	crypto_core	table_bloat_stats	Table	Statistics on table and index bloat for maintenance.	F158	object_name, object_type, bloat_bytes, wasted_percentage	PRIMARY KEY (object_name)	N/A
+T259	crypto_core	vacuum_history	Table	Log of VACUUM and ANALYZE operations.	F012	op_id, table_name, operation_type, duration, timestamp	PRIMARY KEY (op_id)	N/A
+T260	crypto_core	reindex_history	Table	Log of REINDEX operations.	F012	reindex_id, index_name, duration, timestamp	PRIMARY KEY (reindex_id)	N/A
+V006	crypto_core	v_realtime_liability	View	Calculates total outstanding liability (active coins + reserves).	F096	currency, total_liability	N/A	N/A
+V007	crypto_core	v_denomination_expiry_schedule	View	Lists denomination keys sorted by upcoming expiration.	F013	denom_id, expire_time, remaining_active_coins	N/A	N/A
+V008	crypto_core	v_merchant_revenue_summary	View	Daily revenue summary per merchant.	F007	merchant_pub, date, total_revenue, transaction_count	N/A	N/A
+V009	crypto_core	v_suspicious_activity	View	Aggregates data for fraud review (high value, unusual frequency).	F005	wallet_pub, score, reason_flag	N/A	N/A
+V010	crypto_core	v_system_health_metrics	View	Current health status (replication lag, active connections, lock counts).	F019	metric_name, metric_value, status	N/A	N/A
+V011	crypto_core	v_unspent_coin_inventory	View	Inventory of unspent coins grouped by denomination.	F004	denom_id, count, total_value	N/A	N/A
+V012	crypto_core	v_expired_unclaimed_coins	View	Coins that have expired but were never deposited (value recaptured by exchange).	F013	denom_id, count, total_value	N/A	N/A
+V013	crypto_core	v_wire_transfer_reconciliation	View	Matches internal wire_out records with bank statements (simulated).	F009	wire_out_id, amount, matched_status, bank_ref_id	N/A	N/A
+V014	crypto_core	v_fee_projection	View	Projects future fee income based on active rates and historical volume.	F035	projection_date, projected_income, currency	N/A	N/A
+V015	crypto_core	v_zkp_verification_load	View	Monitors the load and queue depth of the ZKP verification service.	F019	service_name, queue_depth, avg_wait_time	N/A	N/A
+V016	crypto_core	v_hsm_key_status	View	Status of keys stored in HSM (rotation needed, etc).	F026	key_id, type, days_until_expiry, status	N/A	N/A
+V017	crypto_core	v_data_retention_compliance	View	Reports tables approaching data retention limits.	F011	table_name, oldest_record_date, retention_deadline	N/A	N/A
+V018	crypto_core	v_wallet_session_activity	View	Tracks active wallet sessions and IP addresses for security.	F048	wallet_pub, last_seen, ip_address, session_age	N/A	N/A
+V019	crypto_core	v_kyc_status_summary	View	Summary of KYC statuses across the user base.	F052	kyc_level, user_count	N/A	N/A
+V020	crypto_core	v_partner_exchange_liquidity	View	Liquidity status of partner exchanges for P2P swaps.	F090	partner_url, available_liquidity, currency	N/A	N/A
+P021	crypto_core	p_reconcile_bank_transfers	Procedure	Matches incoming bank transfers to reserve_in entries.	F075	IN bank_statement_blob	N/A	N/A
+P022	crypto_core	p_purge_expired_reserves	Procedure	Closes reserves that have been inactive too long and sends funds back.	F070	IN cutoff_date	N/A	N/A
+P023	crypto_core	p_trigger_drain_fees	Procedure	Creates entries in fee_drain_pending and initiates wire transfers.	F035	IN currency_code	N/A	N/A
+P024	crypto_core	p_refresh_denomination_keys	Procedure	Generates new keys for a denomination and schedules the old ones for expiry.	F006	IN denom_id	N/A	N/A
+P025	crypto_core	p_execute_aggregation	Procedure	Groups pending deposits for a merchant into a single wire transfer.	F038	IN merchant_pub	N/A	N/A
+P026	crypto_core	p_process_dead_letter_queue	Procedure	Retries failed operations or marks them for manual review.	F060	IN max_retries	N/A	N/A
+P027	crypto_core	p_daily_analytics_computation	Procedure	Populates analytics tables for dashboard reporting.	F016	IN report_date	N/A	N/A
+P028	crypto_core	p_generate_regulatory_report	Procedure	Generates a VAT report and inserts into the submission queue.	F022	IN jurisdiction_code, IN start_date, IN end_date	N/A	N/A
+P029	crypto_core	p_rotate_encryption_keys	Procedure	Re-encrypts sensitive data with a new key.	F099	IN old_key_id, IN new_key_id	N/A	N/A
+P030	crypto_core	p_cleanup_dead_snapshots	Procedure	Removes old database snapshots that are no longer needed.	F011	IN retention_days	N/A	N/A
+FC001	crypto_core	fn_is_coin_spent	Function	Returns TRUE if a coin public key exists in the spent_coins table.	F005	IN coin_pub (UUID) -> BOOLEAN	N/A	N/A
+FC002	crypto_core	fn_calculate_deposit_fee	Function	Calculates the deposit fee based on config, denomination, and age.	F035	IN denom_id, IN timestamp -> NUMERIC	N/A	N/A
+FC003	crypto_core	fn_verify_coin_signature	Function	Internal function to verify EdDSA/Dilithium signature on a coin.	F017	IN coin_pub, IN denom_pub, IN signature -> BOOLEAN	N/A	N/A
+FC004	crypto_core	fn_get_denomination_hash	Function	Returns the hash of a denomination key (used in ZKPs).	F006	IN denom_id -> BYTEA	N/A	N/A
+FC005	crypto_core	fn_check_reserve_expiry	Function	Checks if a reserve is expired and needs closing.	F070	IN reserve_pub -> BOOLEAN	N/A	N/A
+FC006	crypto_core	fn_derive_wire_salt	Function	Derives the salt for hashing merchant bank details.	F007	IN payto_uri -> BYTEA	N/A	N/A
+FC007	crypto_core	fn_amount_normalize	Function	Normalizes amounts to integer based on currency fraction digits.	F074	IN amount, IN currency_code -> BIGINT	N/A	N/A
+FC008	crypto_core	fn_format_amount	Function	Formats integer amounts back to decimal string.	F074	IN amount_int, IN currency_code -> TEXT	N/A	N/A
+FC009	crypto_core	fn_get_current_age_restrictions	Function	Returns current age group public keys.	F021	RETURNS TABLE(age_group, pub_key)	N/A	N/A
+FC010	crypto_core	fn_validate_contract_terms	Function	Validates JSON schema of contract terms.	F008	IN terms_json -> BOOLEAN	N/A	N/A
+TR001	crypto_core	trg_audit_log_insert	Trigger	Fires on INSERT to sensitive tables to log the change.	F092	AFTER INSERT	N/A	N/A
+TR002	crypto_core	trg_audit_log_update	Trigger	Fires on UPDATE to sensitive tables to log old/new values.	F092	AFTER UPDATE	N/A	N/A
+TR003	crypto_core	trg_update_timestamp	Trigger	Automatically sets updated_at column on row modification.	F004	BEFORE UPDATE	N/A	N/A
+TR004	crypto_core	trg_prevent_denom_modification	Trigger	Prevents modification of signed denomination keys (immutable).	F006	BEFORE UPDATE	N/A	N/A
+TR005	crypto_core	trg_balance_check	Trigger	Ensures reserve balance never goes negative.	F075	BEFORE INSERT/UPDATE	N/A	N/A
+TR006	crypto_core	trg_notify_new_deposit	Trigger	Sends a notification (LISTEN/NOTIFY) when a deposit occurs.	F009	AFTER INSERT	N/A	N/A
+TR007	crypto_core	trg_maintain_merkle_tree	Trigger	Updates Merkle tree state when a new transaction is added.	F042	AFTER INSERT	N/A	N/A
+TR008	crypto_core	trg_cleanup_old_nonce	Trigger	Deletes used nonces after a short period.	F032	AFTER INSERT	N/A	N/A
+TR009	crypto_core	trg_block_spent_coin_reuse	Trigger	Prevents a spent coin hash from being inserted into active tables.	F005	BEFORE INSERT	N/A	N/A
+TR010	crypto_core	trg_log_slow_query	Trigger	Logs queries that exceed a certain execution time (via pg_stat_statements).	F159	N/A	N/A	N/A
+E009	crypto_core	zkp_status	Enum	Status of ZKP verification: pending, verified, failed, invalid_inputs.	F019	N/A	N/A	N/A
+E010	crypto_core	aggregation_state	Enum	States: pending, executed, wire_submitted, completed.	F038	N/A	N/A	N/A
+E011	crypto_core	kyc_level	Enum	KYC Levels: anonymous, kyc_light, kyc_full, corporate.	F052	N/A	N/A	N/A
+E012	crypto_core	aml_decision	Enum	AML Decisions: pass, fail, manual_review.	F093	N/A	N/A	N/A
+E013	crypto_core	purge_status	Enum	Data deletion status: queued, processing, done, failed.	F011	N/A	N/A	N/A
+E014	crypto_core	watchlist_type	Enum	Types: sanctions, pep, internal_fraud, suspicious_ip.	F078	N/A	N/A	N/A
+E015	crypto_core	fee_type	Enum	Types: withdraw, deposit, refresh, refund, wire.	F035	N/A	N/A	N/A
